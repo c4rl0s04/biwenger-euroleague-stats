@@ -1,8 +1,10 @@
 'use client';
 
+import { ModalDialog } from '@/components/ui/foundation';
+
 import { X } from 'lucide-react';
 import { createPortal } from 'react-dom';
-import { useEffect, useId, useRef, type ReactNode } from 'react';
+import { useId, useRef, type ReactNode, type RefObject } from 'react';
 
 interface MobileBottomSheetProps {
   open: boolean;
@@ -10,6 +12,7 @@ interface MobileBottomSheetProps {
   title: string;
   description?: string;
   children: ReactNode;
+  returnFocusRef?: RefObject<HTMLElement | null>;
 }
 
 export default function MobileBottomSheet({
@@ -18,53 +21,11 @@ export default function MobileBottomSheet({
   title,
   description,
   children,
+  returnFocusRef,
 }: MobileBottomSheetProps) {
   const titleId = useId();
   const descriptionId = useId();
-  const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
-  const previousFocusRef = useRef<HTMLElement | null>(null);
-
-  useEffect(() => {
-    if (!open) return;
-
-    previousFocusRef.current = document.activeElement as HTMLElement | null;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    closeRef.current?.focus();
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        onClose();
-        return;
-      }
-
-      if (event.key !== 'Tab' || !dialogRef.current) return;
-      const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
-        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-      );
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (!first || !last) return;
-
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
-    };
-
-    document.addEventListener('keydown', onKeyDown);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      document.removeEventListener('keydown', onKeyDown);
-      previousFocusRef.current?.focus();
-    };
-  }, [onClose, open]);
-
   if (!open || typeof document === 'undefined') return null;
 
   return createPortal(
@@ -75,10 +36,10 @@ export default function MobileBottomSheet({
         onClick={onClose}
         aria-label="Cerrar"
       />
-      <div
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
+      <ModalDialog
+        onClose={onClose}
+        initialFocusRef={closeRef}
+        returnFocusRef={returnFocusRef}
         aria-labelledby={titleId}
         aria-describedby={description ? descriptionId : undefined}
         className="mobile-native-sheet"
@@ -100,7 +61,7 @@ export default function MobileBottomSheet({
           </button>
         </div>
         <div className="mobile-native-sheet-body">{children}</div>
-      </div>
+      </ModalDialog>
     </div>,
     document.body
   );

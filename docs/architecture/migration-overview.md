@@ -127,7 +127,8 @@ Residual Team detail orchestration/shared Player form work from the preserved ca
 Existing code references: [legacy queries](../../src/lib/db/queries),
 [application pages](../../src/app), and
 [domain features](../../src/features). Some old modules are thin compatibility exports;
-others still own substantial logic. File counts alone would overstate remaining duplication.
+others still own substantial logic. Global service adapters were retired during Task 25 ownership
+closure. File counts alone would overstate remaining duplication.
 
 ## Adjacent database and security foundation
 

@@ -492,10 +492,10 @@ DESIGN DIRECTION CHECKPOINT                             this specification
 UI-01T theme-ready token/runtime work                  implemented foundation capability
 UI-01B core primitives                                 implemented foundation capability
 UI-01H rollout hardening                               dark compatibility default for legacy UI
-UI-SHELL application shell/chrome migration            Task 23 / PR #49; first production adoption
-UI-01C shared compositions                             extract from demonstrated shell/page needs
-UI-02  interactive controls                            selectors, overlays and related behavior
-UI-03  Season Predictions pilot                       first new-page design validation
+UI-SHELL application shell/chrome migration            integrated at 9cfb84e5 via PR #49
+UI-01C shared compositions                             bounded: EmptyState in both shell searches
+UI-02  interactive controls                            bounded: ModalDialog in three existing overlays
+UI-03  Season Predictions pilot                       next; unimplemented
 UI-04  foundation/design review                       refine before broad adoption
 
 Later:
