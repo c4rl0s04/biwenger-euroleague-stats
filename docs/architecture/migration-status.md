@@ -949,3 +949,15 @@ Exact internal dependency enforcement replaces 216 per-entrypoint exceptions and
 the NextAuth handler among 125 protected entrypoints. The change is implemented on
 `refactor/auth-ownership`; integration and broad acceptance are not implied. UI-owned
 compatibility remains with the parallel UI migration and keeps full Task 25 closure open.
+
+## Task 26 regression acceptance
+
+[Draft PR #53](https://github.com/c4rl0s04/biwenger-euroleague-stats/pull/53) corrects stale
+Task 25 boundary tests and adds populated-Market CI coverage plus full browser sharding.
+Code candidate `9ae1b9fd` passes standard CI (2,872 tests, eight skips) and Linux browsers
+(261 default passes, 27 skips; nine populated-Market passes). macOS reports 12 default
+screenshot failures and one populated-Market phone screenshot failure; the two Rounds/
+Standings phone differences reproduce. Original screenshots and strict comparisons remain
+unchanged. The [acceptance receipt](../migration/reports/task-26-regression-acceptance.md)
+records evidence and decisions still required; Task 26 is not complete and Task 27 is
+not authorized by this validation result.

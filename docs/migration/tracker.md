@@ -299,21 +299,21 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 25 — Exhaustive ownership closure
 
-- **State:** 25A and bounded 25B integrated through PR #50 at `c0c91dd4`. Deferred authentication ownership is implemented on `refactor/auth-ownership`; UI-owned compatibility remains pending.
+- **State:** 25A and bounded 25B integrated through PR #50 at `c0c91dd4`. Deferred authentication ownership integrated through PR #52 at `ebc4da6d`; UI-owned compatibility remains pending.
 - **Dependencies / approval:** 25A can proceed after Task 22; 25B and final closure depend on Tasks 23–24.
 - **Scope:** Enumerate all runtime entrypoints/modules; resolve Team/Player leftovers and remove obsolete adapters/exceptions.
 - **Completion check:** Zero unassigned migration work; no temporary debt; retained infrastructure/protocol URLs justified.
 - **Evidence:** [Task 25 plan](task-25-plan.md), [25B reconciliation plan](task-25b-plan.md), [25A closure receipt](reports/task-25a-ownership-closure.md), and [25B reconciliation receipt](reports/task-25b-ui-ownership.md), grounded in main `1be12d61`.
-- **Next action:** Review the [authentication ownership receipt](reports/task-25-auth-ownership.md) and its verification. Integrate that bounded change, then reconcile Section/theme/capability compatibility after the separate UI owner integrates adoption work. Full closure still requires retirement or explicit permanent-boundary acceptance.
+- **Next action:** Authentication ownership is integrated; see the [receipt](reports/task-25-auth-ownership.md). Reconcile Section/theme/capability compatibility after the separate UI owner integrates adoption work. Full closure still requires retirement or explicit permanent-boundary acceptance.
 
 ### Task 26 — Full regression acceptance
 
-- **State:** Planned.
+- **State:** Regression run performed on `chore/regression-acceptance` (draft PR #53); standard CI and Linux matrices pass, but 13 macOS screenshot failures and scoped acceptance decisions keep Task 26 open.
 - **Dependencies / approval:** 25 and exact combined candidate.
 - **Scope:** Run full checks and complete affected API/security/desktop/mobile/Linux matrices.
 - **Completion check:** Required checks pass; missing coverage and known defect decisions resolved; no masked regressions.
-- **Evidence:** Historical receipts are inputs, not new acceptance.
-- **Next action:** Include opt-in Market fixture; preserve original screenshot provenance.
+- **Evidence:** [Task 26 acceptance receipt](reports/task-26-regression-acceptance.md); historical receipts are inputs, not new acceptance.
+- **Next action:** Review the recorded macOS visual differences with the UI owner; resolve the Market phone-bids decision and Linux reference-coverage acceptance. Populated Market now has its own passing CI job; original screenshots remain unchanged.
 
 ### Task 27 — Release / final reconciliation
 
