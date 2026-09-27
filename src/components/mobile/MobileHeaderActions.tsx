@@ -4,18 +4,13 @@ import { LogIn, LogOut, Search, Settings, UserCircle2, X } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 import { useState, type ComponentType } from 'react';
 
-import SearchDropdown from '@/components/layout/SearchDropdown';
-import { NavigationLink } from '@/components/layout/NavigationFeedback';
+// Temporary page-composition → shell capability boundary; see Task 23 compatibility receipt.
+import { GlobalSearch } from '@/components/shell/integrations/GlobalSearch';
+import { NavigationLink } from '@/components/shell/shared/NavigationFeedback';
 import { UserAvatar } from '@/components/ui';
 import { useClientUser } from '@/lib/hooks/useClientUser';
 
 import MobileBottomSheet from './MobileBottomSheet';
-
-interface MobileHeaderUser {
-  id: string | number;
-  name: string;
-  icon?: string | null;
-}
 
 const MobileUserAvatar = UserAvatar as unknown as ComponentType<{
   src?: string | null;
@@ -25,11 +20,7 @@ const MobileUserAvatar = UserAvatar as unknown as ComponentType<{
 
 export default function MobileHeaderActions() {
   const [activeSheet, setActiveSheet] = useState<'search' | 'profile' | null>(null);
-  const { currentUser, isAuthenticated, isClient } = useClientUser() as unknown as {
-    currentUser: MobileHeaderUser | null;
-    isAuthenticated: boolean;
-    isClient: boolean;
-  };
+  const { currentUser, isAuthenticated, isClient } = useClientUser();
 
   const closeSheet = () => setActiveSheet(null);
   const activeUser = isClient ? currentUser : null;
@@ -69,7 +60,7 @@ export default function MobileHeaderActions() {
         description="Jugadores, equipos y mánagers"
       >
         <div className="mobile-search-sheet-content">
-          <SearchDropdown onClose={closeSheet} />
+          <GlobalSearch onClose={closeSheet} />
           <button type="button" className="mobile-sheet-secondary-action" onClick={closeSheet}>
             <X size={18} aria-hidden="true" /> Cerrar búsqueda
           </button>

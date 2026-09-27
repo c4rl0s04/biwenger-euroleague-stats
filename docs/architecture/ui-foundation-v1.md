@@ -1340,7 +1340,7 @@ UI-01 establishes the foundational token, theming and primitive layers:
    Supports React Server Components without `'use client'` and exports exclusively through
    `@/components/ui/foundation`.
 4. **UI-01H — Foundation rollout hardening (this milestone):** protect unmigrated legacy UI: `system` remains the target default preference once migrated, while missing/invalid preferences resolve to the dark compatibility baseline during rollout; remove automatic no-JS light fallback; make `ThemeContext` enforce its provider boundary; and verify hydration safety across SSR and client stores. Light mode infrastructure is preserved for explicit opt-in.
-5. **First production adoption — Application shell / chrome migration:** migrate the global chrome (`AppShell`, `Sidebar`, `TopHeader`, `MobileNavigation`, footer, safe areas) onto the new foundation.
+5. **UI-SHELL — Application shell / chrome migration (Task 23, PR #49):** first production adoption; migrate the global chrome (`AppShell`, `Sidebar`, `TopHeader`, `MobileNavigation`, footer, safe areas) onto the new foundation.
 6. **UI-01C — shared compositions (demand-driven):** extract reusable identity (`EntityIdentity`), `EmptyState`, and header patterns (`PageHeader`, `SectionHeader`) from demonstrated shell and page reuse, rather than speculative creation.
 7. **UI-02 — Interactive controls & overlays:** selectors, searchable select, overlays, and dialogs where needed.
 

@@ -15,9 +15,23 @@ import {
   Trophy,
   User,
   Users,
+  type LucideIcon,
 } from 'lucide-react';
 
-export const NAV_ITEMS = [
+export interface NavItem {
+  name: string;
+  shortName?: string;
+  href: string;
+  icon: LucideIcon;
+}
+
+export interface NavCategory {
+  name: string;
+  hrefs: readonly string[];
+  items?: NavItem[];
+}
+
+export const NAV_ITEMS: readonly NavItem[] = [
   { name: 'Inicio', shortName: 'Inicio', href: '/', icon: Home },
   { name: 'Dashboard', shortName: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Asistente IA', href: '/assistant', icon: Bot },
@@ -34,15 +48,22 @@ export const NAV_ITEMS = [
   { name: 'Hoopgrid', href: '/hoopgrid', icon: LayoutGrid },
   { name: 'Comparativa', href: '/compare', icon: Scale },
   { name: 'Análisis 25/26', href: '/season-review', icon: FlaskConical },
-];
+] as const;
 
-const MOBILE_PRIMARY_HREFS = ['/', '/schedule', '/dashboard', '/standings'];
+export const MOBILE_PRIMARY_HREFS = ['/', '/schedule', '/dashboard', '/standings'] as const;
 
-export const MOBILE_PRIMARY_ITEMS = MOBILE_PRIMARY_HREFS.map((href) =>
+export const MOBILE_PRIMARY_ITEMS: readonly NavItem[] = MOBILE_PRIMARY_HREFS.map((href) =>
   NAV_ITEMS.find((item) => item.href === href)
-).filter((item) => item !== undefined);
+).filter((item): item is NavItem => item !== undefined);
 
-export function isNavigationItemActive(pathname, href) {
+export const MOBILE_NAV_CATEGORIES = [
+  { name: 'Equipo', hrefs: ['/players', '/market', '/lineup'] },
+  { name: 'Liga', hrefs: ['/matches', '/rounds', '/compare'] },
+  { name: 'Competición', hrefs: ['/tournaments', '/predictions', '/playoffs'] },
+  { name: 'Herramientas', hrefs: ['/assistant', '/hoopgrid', '/season-review'] },
+] as const;
+
+export function isNavigationItemActive(pathname: string, href: string): boolean {
   if (href === '/') return pathname === '/';
   if (href === '/players') return pathname === href || pathname.startsWith('/player/');
   return pathname === href || pathname.startsWith(`${href}/`);

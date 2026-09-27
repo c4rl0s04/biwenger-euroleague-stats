@@ -18,7 +18,9 @@ export const HoopgridDateQuerySchema = z.object({
 });
 
 export const SubmitGuessInputSchema = z.object({
-  challengeId: z.string({ message: 'challengeId is required' }).min(1, { message: 'challengeId is required' }),
+  challengeId: z
+    .string({ message: 'challengeId is required' })
+    .min(1, { message: 'challengeId is required' }),
   cellIndex: z
     .number({ message: 'cellIndex must be a number' })
     .int({ message: 'cellIndex must be an integer' })
@@ -32,7 +34,9 @@ export const SubmitGuessInputSchema = z.object({
 });
 
 export const SubmitBatchGuessesInputSchema = z.object({
-  challengeId: z.string({ message: 'challengeId is required' }).min(1, { message: 'challengeId is required' }),
+  challengeId: z
+    .string({ message: 'challengeId is required' })
+    .min(1, { message: 'challengeId is required' }),
   action: z.literal('submitBatch'),
   guesses: z.record(
     z.string(),

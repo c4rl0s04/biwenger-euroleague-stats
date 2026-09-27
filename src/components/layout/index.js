@@ -1,14 +1,9 @@
 /**
  * Layout Components Barrel Export
- * Import layout components from this file for cleaner imports:
+ * Retained for backward compatibility with unmigrated feature pages.
  *
  * @example
- * import { Sidebar, ClientWrapper, Section } from '@/components/layout';
+ * import { Section } from '@/components/layout';
  */
 
-export { default as Navbar } from './Navbar';
-export { default as Sidebar } from './Sidebar';
-export { default as TopHeader } from './TopHeader';
-export { default as SearchDropdown } from './SearchDropdown';
-export { default as ClientWrapper } from './ClientWrapper';
 export { default as Section } from './Section';

@@ -15,10 +15,7 @@ export {
   AccountStorageError,
 } from './server/services/account-command.service';
 
-export {
-  AccountReadService,
-  accountReadService,
-} from './server/services/account-read.service';
+export { AccountReadService, accountReadService } from './server/services/account-read.service';
 
 export {
   AccountValidationError,

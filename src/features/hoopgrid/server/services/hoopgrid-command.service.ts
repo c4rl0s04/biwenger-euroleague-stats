@@ -502,7 +502,12 @@ export class HoopgridCommandService {
     }
 
     const input = validateSubmitBatchGuessesInput(rawInput);
-    const results: Array<{ cellIndex: number; isCorrect: boolean; rarity: number | null; guess?: any }> = [];
+    const results: Array<{
+      cellIndex: number;
+      isCorrect: boolean;
+      rarity: number | null;
+      guess?: any;
+    }> = [];
 
     for (const [cellIdxStr, p] of Object.entries(input.guesses)) {
       if (!p.isCorrect) continue;

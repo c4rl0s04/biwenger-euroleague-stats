@@ -231,7 +231,9 @@ export class HoopgridReadService {
         const age =
           todayDate.getFullYear() -
           birth.getFullYear() -
-          (todayDate < new Date(todayDate.getFullYear(), birth.getMonth(), birth.getDate()) ? 1 : 0);
+          (todayDate < new Date(todayDate.getFullYear(), birth.getMonth(), birth.getDate())
+            ? 1
+            : 0);
         if (criteria.type === 'age_min') return age >= criteria.value;
         return age <= criteria.value;
       }

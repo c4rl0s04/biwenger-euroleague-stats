@@ -1,23 +1,57 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Search, User, Users, Trophy, X, Loader2 } from 'lucide-react';
+import { Search, User, Users, Trophy, X, Loader2, type LucideIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api-client';
-import { useNavigationFeedback } from './NavigationFeedback';
+import { useNavigationFeedback } from '../shared/NavigationFeedback';
 
-/**
- * SearchDropdown - Global search with dropdown results
- * Updated: Consistent structure but with type-specific color coding
- */
-export default function SearchDropdown({ onClose }) {
+export interface GlobalSearchProps {
+  onClose?: () => void;
+  className?: string;
+  autoFocus?: boolean;
+}
+
+interface PlayerItem {
+  id: string | number;
+  name: string;
+  team?: string;
+  position?: string;
+}
+
+interface TeamItem {
+  id: string | number;
+  name: string;
+}
+
+interface UserItem {
+  id: string | number;
+  name: string;
+}
+
+interface SearchApiResponse {
+  players?: PlayerItem[];
+  teams?: TeamItem[];
+  users?: UserItem[];
+}
+
+type SearchResultItem =
+  | ({ type: 'player' } & PlayerItem)
+  | ({ type: 'team' } & TeamItem)
+  | ({ type: 'user' } & UserItem);
+
+export function GlobalSearch({ onClose, className = '', autoFocus = false }: GlobalSearchProps) {
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState({ players: [], teams: [], users: [] });
+  const [results, setResults] = useState<{
+    players: PlayerItem[];
+    teams: TeamItem[];
+    users: UserItem[];
+  }>({ players: [], teams: [], users: [] });
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
-  const inputRef = useRef(null);
-  const dropdownRef = useRef(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { beginNavigation } = useNavigationFeedback();
 
@@ -32,8 +66,14 @@ export default function SearchDropdown({ onClose }) {
     const timer = setTimeout(async () => {
       setLoading(true);
       try {
-        const data = await apiClient.get(`/api/search?q=${encodeURIComponent(query)}`);
-        setResults(data.data || { players: [], teams: [], users: [] });
+        const res = (await apiClient.get(`/api/search?q=${encodeURIComponent(query)}`)) as {
+          data?: SearchApiResponse;
+        };
+        setResults({
+          players: res.data?.players || [],
+          teams: res.data?.teams || [],
+          users: res.data?.users || [],
+        });
         setIsOpen(true);
         setActiveIndex(-1);
       } catch (error) {
@@ -48,8 +88,8 @@ export default function SearchDropdown({ onClose }) {
 
   // Close on click outside
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setIsOpen(false);
       }
     };
@@ -58,18 +98,17 @@ export default function SearchDropdown({ onClose }) {
   }, []);
 
   // Build flat list for keyboard navigation
-  const allResults = useMemo(
+  const allResults = useMemo<SearchResultItem[]>(
     () => [
-      ...results.players.map((p) => ({ type: 'player', ...p })),
-      ...results.teams.map((t) => ({ type: 'team', ...t })),
-      ...results.users.map((u) => ({ type: 'user', ...u })),
+      ...results.players.map((p) => ({ type: 'player' as const, ...p })),
+      ...results.teams.map((t) => ({ type: 'team' as const, ...t })),
+      ...results.users.map((u) => ({ type: 'user' as const, ...u })),
     ],
     [results]
   );
 
-  // Keyboard navigation
   const handleSelect = useCallback(
-    (item) => {
+    (item: SearchResultItem) => {
       setIsOpen(false);
       setQuery('');
       if (item.type === 'player') {
@@ -88,7 +127,7 @@ export default function SearchDropdown({ onClose }) {
   );
 
   const handleKeyDown = useCallback(
-    (e) => {
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (!isOpen) return;
 
       if (e.key === 'ArrowDown') {
@@ -100,7 +139,7 @@ export default function SearchDropdown({ onClose }) {
       } else if (e.key === 'Enter' && activeIndex >= 0) {
         e.preventDefault();
         const item = allResults[activeIndex];
-        handleSelect(item);
+        if (item) handleSelect(item);
       } else if (e.key === 'Escape') {
         setIsOpen(false);
         onClose?.();
@@ -111,8 +150,7 @@ export default function SearchDropdown({ onClose }) {
 
   const hasResults = allResults.length > 0;
 
-  // Helper to get color styles based on result type
-  const getTypeStyles = (type) => {
+  const getTypeStyles = (type: string) => {
     switch (type) {
       case 'player':
         return {
@@ -141,7 +179,12 @@ export default function SearchDropdown({ onClose }) {
     }
   };
 
-  const renderItem = (item, index, icon, subtitle, rightContent = null) => {
+  const renderItem = (
+    item: SearchResultItem,
+    index: number,
+    icon: LucideIcon,
+    subtitle: string | null
+  ) => {
     const isActive = activeIndex === index;
     const Icon = icon;
     const styles = getTypeStyles(item.type);
@@ -149,6 +192,7 @@ export default function SearchDropdown({ onClose }) {
     return (
       <button
         key={`${item.type}-${item.id || item.name}`}
+        type="button"
         onClick={() => handleSelect(item)}
         onMouseEnter={() => setActiveIndex(index)}
         className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer text-sm transition-colors ${
@@ -170,43 +214,48 @@ export default function SearchDropdown({ onClose }) {
             </span>
           )}
         </div>
-        {rightContent && <div className="text-xs opacity-70 shrink-0">{rightContent}</div>}
       </button>
     );
   };
 
   return (
-    <div ref={dropdownRef} className="relative w-full">
+    <div ref={dropdownRef} className={`relative w-full ${className}`}>
       {/* Search Input */}
       <div className="relative group">
         <Search
           size={18}
           className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors"
+          aria-hidden="true"
         />
         <input
           ref={inputRef}
           type="text"
+          autoFocus={autoFocus}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Buscar..."
+          aria-label="Buscar jugadores, equipos y mánagers"
           className="w-full pl-10 pr-10 py-2 rounded-xl bg-secondary border border-border/50 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
         />
         {loading && (
           <Loader2
             size={16}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground animate-spin"
+            aria-hidden="true"
           />
         )}
         {!loading && query && (
           <button
+            type="button"
             onClick={() => {
               setQuery('');
               setResults({ players: [], teams: [], users: [] });
             }}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            aria-label="Limpiar búsqueda"
           >
-            <X size={16} />
+            <X size={16} aria-hidden="true" />
           </button>
         )}
       </div>
@@ -223,25 +272,26 @@ export default function SearchDropdown({ onClose }) {
           {/* Players */}
           {results.players.length > 0 && (
             <div className="p-2">
-              <div className="px-2 py-1.5 text-xs font-semibold text-blue-400/70 uppercase tracking-wider mb-1">
+              <div className="px-2 py-1.5 text-xs font-semibold text-blue-400/80 uppercase tracking-wider mb-1">
                 Jugadores
               </div>
-              {results.players.map((player, idx) => {
-                const globalIdx = idx;
-                return renderItem(
+              {results.players.map((player, idx) =>
+                renderItem(
                   { type: 'player', ...player },
-                  globalIdx,
+                  idx,
                   User,
-                  `${player.team} · ${player.position}`
-                );
-              })}
+                  player.team && player.position
+                    ? `${player.team} · ${player.position}`
+                    : player.team || null
+                )
+              )}
             </div>
           )}
 
           {/* Teams */}
           {results.teams.length > 0 && (
             <div className="p-2 border-t border-border/30">
-              <div className="px-2 py-1.5 text-xs font-semibold text-amber-400/70 uppercase tracking-wider mb-1">
+              <div className="px-2 py-1.5 text-xs font-semibold text-amber-400/80 uppercase tracking-wider mb-1">
                 Equipos
               </div>
               {results.teams.map((team, idx) => {
@@ -254,7 +304,7 @@ export default function SearchDropdown({ onClose }) {
           {/* Users */}
           {results.users.length > 0 && (
             <div className="p-2 border-t border-border/30">
-              <div className="px-2 py-1.5 text-xs font-semibold text-emerald-400/70 uppercase tracking-wider mb-1">
+              <div className="px-2 py-1.5 text-xs font-semibold text-emerald-400/80 uppercase tracking-wider mb-1">
                 Usuarios
               </div>
               {results.users.map((user, idx) => {
@@ -268,3 +318,5 @@ export default function SearchDropdown({ onClose }) {
     </div>
   );
 }
+
+export default GlobalSearch;

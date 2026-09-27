@@ -25,13 +25,18 @@ Authentication mechanics and route boundaries are documented in
 
 - Pages: [`login`](<../../src/app/(auth)/login>), [`user/[id]`](<../../src/app/(app)/user/[id]>), and
   [`settings`](<../../src/app/(app)/settings>).
-- UI: [`src/components/user`](../../src/components/user) plus settings-local components.
+- UI: [`AccountMenu`](../../src/components/shell/integrations/AccountMenu.tsx),
+  [`DesktopSettingsScreen`](../../src/features/accounts/screens/DesktopSettingsScreen.js),
+  [`MobileSettingsScreen`](../../src/features/accounts/screens/MobileSettingsScreen.tsx), and
+  [`MobileSettingsDetail`](../../src/features/accounts/screens/MobileSettingsDetail.tsx).
 - Services: [Accounts](../../src/features/accounts/server.ts) owns account operations;
   [Managers](../../src/features/managers/server.ts) owns manager profiles and squad reads.
 - HTTP: `/api/auth/*`, `/api/user/change-password`, `/api/user/link-biwenger`, and `/api/users/*`.
-- Data: user queries and mutations under [`src/lib/db`](../../src/lib/db).
-- Tests: [`user-routes.test.ts`](../../src/app/api/user/__tests__/user-routes.test.ts) plus Auth.js
-  behavior exercised through the application build and route-level tests.
+- Data: [`accountRepository`](../../src/features/accounts/server/repositories/account.repository.ts)
+  backed by Drizzle user queries and encrypted credential storage.
+- Tests: [`account-command.service.test.ts`](../../src/features/accounts/__tests__/account-command.service.test.ts),
+  [`user-routes.test.ts`](../../src/app/api/user/__tests__/user-routes.test.ts), and Auth.js session
+  verification.
 
 ## Security constraints
 
