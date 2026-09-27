@@ -58,9 +58,10 @@ for graph enforcement; its scope and explicit legacy exceptions are described in
 
 ## Legacy compatibility
 
-Unmigrated consumers continue to use [global services](../../src/lib/services),
-[queries](../../src/lib/db/queries), and shared [mutations](../../src/lib/db/mutations). Some old
-modules are thin compatibility adapters for migrated domains; others still own substantial logic.
+Application services now live under their [feature owners](../../src/features); the global service
+adapters were retired during Task 25 ownership closure. Remaining legacy
+[queries](../../src/lib/db/queries) and shared [mutations](../../src/lib/db/mutations) retain
+explicit compatibility or infrastructure responsibilities.
 Do not infer ownership or deletion readiness from file location alone.
 
 Existing browser consumers may use [useApiData](../../src/lib/hooks/useApiData.js) and

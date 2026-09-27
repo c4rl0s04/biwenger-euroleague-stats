@@ -50,7 +50,7 @@ for (const match of Array.from(source.matchAll(/^import (\w+) from '(\.[^']+)';/
 }
 vi.doMock('@/components/ui/card-variants/ElegantCard', () => ({ default: leaf('ElegantCard') }));
 vi.doMock('@/components/ui/Subheading', () => ({ default: leaf('Subheading') }));
-vi.doMock('@/components/layout', () => ({ Section: leaf('Section') }));
+vi.doMock('@/components/layout/Section', () => ({ default: leaf('Section') }));
 let MarketPageClient: typeof import('./MarketPageClient').default;
 beforeAll(async () => {
   MarketPageClient = (await import('./MarketPageClient')).default;
