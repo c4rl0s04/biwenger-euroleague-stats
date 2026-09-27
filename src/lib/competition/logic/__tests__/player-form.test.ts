@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { computePlayerFormScores } from '../playerForm';
+import { computePlayerFormScores } from '../player-form';
 
 describe('computePlayerFormScores', () => {
   it('handles standard mixed scores with observed points, 0, and DNP', () => {

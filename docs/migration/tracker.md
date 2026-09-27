@@ -315,10 +315,17 @@ real provider mutations and changes to credentials/authorization unless separate
 - **Evidence:** [Task 26 acceptance receipt](reports/task-26-regression-acceptance.md); historical receipts are inputs, not new acceptance.
 - **Next action:** PR #53 restored main CI and production deployment. Integrate the verified PR #54 closure and confirm its final main CI, production alias and smoke check under Task 27.
 
+### Domain ownership follow-up — before Task 27
+
+- **State:** Implemented on `refactor/domain-ownership`, based on main `4d9b2ba3`; build/browser acceptance open after resource-constrained local attempts; not merged.
+- **Scope:** Feature-owned Lineup rules, Market bidding and Accounts password persistence; explicit shared competition contracts and enforcement.
+- **Evidence:** [Domain ownership receipt](reports/domain-ownership-closure.md).
+- **Completion check:** Required local verification passes, no retired helper consumers or new dependency cycles, then integrate the approved candidate before final release reconciliation.
+
 ### Task 27 — Release / final reconciliation
 
 - **State:** Release reconciliation accompanying PR #54. Main recovery at `0736b96d` is deployed and smoke-tested; confirm the final closure merge separately.
-- **Dependencies / approval:** 26; explicit push/deploy approval.
+- **Dependencies / approval:** 26 and the domain ownership follow-up; explicit push/deploy approval.
 - **Scope:** Integrate approved history, verify CI/deployment and preservation; no unapproved production writes.
 - **Completion check:** Main/origin/deployed SHA agree, smoke/log checks pass and final receipt closes every task.
 - **Evidence:** Not inferred from prior PR merges.

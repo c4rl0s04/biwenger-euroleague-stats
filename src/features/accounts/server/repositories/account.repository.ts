@@ -4,8 +4,6 @@ import { db, pgClient } from '@/lib/db';
 import { users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { biwengerCredentials } from '@/lib/credentials/server';
-import { getUserWithPassword as legacyGetUserWithPassword } from '@/lib/db/queries/core/users';
-import { prepareUserMutations } from '@/lib/db/mutations/users';
 
 export interface UserAccountRecord {
   id: string;
@@ -28,13 +26,16 @@ export class AccountRepository {
   }
 
   async getUserWithPassword(userId: string): Promise<UserWithPasswordRecord | null> {
-    const user = await legacyGetUserWithPassword(userId);
+    const result = await pgClient.query<UserWithPasswordRecord>(
+      'SELECT id, password FROM users WHERE id = $1',
+      [userId]
+    );
+    const user = result.rows[0];
     return user ?? null;
   }
 
   async updateUserPassword(userId: string, passwordHash: string): Promise<void> {
-    const mutations = prepareUserMutations(pgClient);
-    await mutations.updateUserPassword(passwordHash, userId);
+    await pgClient.query('UPDATE users SET password = $1 WHERE id = $2', [passwordHash, userId]);
   }
 
   async storeBiwengerCredential(userId: string, token: string, email?: string): Promise<void> {

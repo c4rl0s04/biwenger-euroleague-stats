@@ -1,6 +1,5 @@
 import 'server-only';
-import { getPlayerFormMap } from '@/lib/db/queries/core/playerForm';
+import { getPlayerFormMap } from '@/lib/competition/server';
 
-// The shared legacy form query remains the single implementation until its
-// remaining analytics consumers migrate. No second form calculation is added.
+// Shared season-scoped competition projection; no additional caching.
 export const readPlayerForm = getPlayerFormMap;

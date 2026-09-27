@@ -36,14 +36,6 @@ vi.mock('@/lib/credentials/server', () => ({
   },
 }));
 
-vi.mock('@/lib/db/queries/core/users', () => ({
-  getUserWithPassword: vi.fn(),
-}));
-
-vi.mock('@/lib/db/mutations/users', () => ({
-  prepareUserMutations: vi.fn(),
-}));
-
 vi.mock('@/lib/db', () => {
   const updateChain = {
     set: vi.fn(() => ({
@@ -52,7 +44,7 @@ vi.mock('@/lib/db', () => {
   };
 
   return {
-    pgClient: {},
+    pgClient: { query: vi.fn() },
     db: {
       query: {
         users: {
@@ -71,11 +63,14 @@ vi.mock('bcryptjs', () => ({
   },
 }));
 
-import { getUserWithPassword } from '@/lib/db/queries/core/users';
-import { prepareUserMutations } from '@/lib/db/mutations/users';
-import { db } from '@/lib/db';
+import { db, pgClient } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import { biwengerCredentials } from '@/lib/credentials/server';
+
+import * as usersRoute from '@/app/api/users/route';
+import * as lineupRoute from '@/app/api/users/lineup/route';
+import * as passwordRoute from '@/app/api/user/change-password/route';
+import * as linkRoute from '@/app/api/user/link-biwenger/route';
 
 function makeRequest(path: string, params: Record<string, string> = {}): NextRequest {
   const url = new URL(path);
@@ -105,7 +100,7 @@ describe('user and lineup route contracts', () => {
   it('covers GET /api/users success and error envelopes', async () => {
     managerMocks.getManagerDirectory.mockResolvedValue([{ id: '1', name: 'User' }] as any);
 
-    const { GET } = await import('@/app/api/users/route');
+    const { GET } = usersRoute;
     const response = await GET();
     const json = await response.json();
 
@@ -127,7 +122,7 @@ describe('user and lineup route contracts', () => {
       privateProviderPayload: { authorization: 'Bearer lineup-provider-canary-token' },
     } as any);
 
-    const { GET, POST } = await import('@/app/api/users/lineup/route');
+    const { GET, POST } = lineupRoute;
     const getResponse = await GET(makeRequest('http://localhost/api/users/lineup'));
     expect(getResponse.status).toBe(200);
     expect((await getResponse.json()).success).toBe(true);
@@ -162,7 +157,7 @@ describe('user and lineup route contracts', () => {
   it('rejects unauthenticated lineup reads and writes', async () => {
     vi.mocked(auth).mockResolvedValue(null as any);
 
-    const { GET, POST } = await import('@/app/api/users/lineup/route');
+    const { GET, POST } = lineupRoute;
     const getResponse = await GET(makeRequest('http://localhost/api/users/lineup'));
     const postResponse = await POST(
       jsonRequest('http://localhost/api/users/lineup', {
@@ -177,13 +172,13 @@ describe('user and lineup route contracts', () => {
   });
 
   it('covers /api/user/change-password auth and success contracts', async () => {
-    vi.mocked(getUserWithPassword).mockResolvedValue({ id: '42', password: 'old-hash' } as any);
+    vi.mocked(pgClient.query).mockResolvedValue({
+      rows: [{ id: '42', password: 'old-hash' }],
+    } as never);
     vi.mocked(bcrypt.compare).mockResolvedValue(true as never);
     vi.mocked(bcrypt.hash).mockResolvedValue('new-hash' as never);
-    const updateUserPassword = vi.fn(async () => undefined);
-    vi.mocked(prepareUserMutations).mockReturnValue({ updateUserPassword } as any);
 
-    const { POST } = await import('@/app/api/user/change-password/route');
+    const { POST } = passwordRoute;
     const response = await POST(
       jsonRequest('http://localhost/api/user/change-password', {
         currentPassword: 'old',
@@ -195,7 +190,10 @@ describe('user and lineup route contracts', () => {
     expect(await response.json()).toEqual({ message: 'Contraseña actualizada correctamente' });
     expect(response.headers.get('cache-control')).toContain('private');
     expect(response.headers.get('cache-control')).toContain('no-store');
-    expect(updateUserPassword).toHaveBeenCalledWith('new-hash', '42');
+    expect(pgClient.query).toHaveBeenCalledWith('UPDATE users SET password = $1 WHERE id = $2', [
+      'new-hash',
+      '42',
+    ]);
 
     vi.mocked(auth).mockResolvedValue(null as any);
     const unauthorized = await POST(
@@ -225,7 +223,7 @@ describe('user and lineup route contracts', () => {
       }))
     );
 
-    const { POST } = await import('@/app/api/user/link-biwenger/route');
+    const { POST } = linkRoute;
     const response = await POST(
       jsonRequest('http://localhost/api/user/link-biwenger', { password: 'secret' }) as any
     );
@@ -271,7 +269,7 @@ describe('user and lineup route contracts', () => {
       }))
     );
 
-    const { POST } = await import('@/app/api/user/link-biwenger/route');
+    const { POST } = linkRoute;
     const response = await POST(
       jsonRequest('http://localhost/api/user/link-biwenger', {
         password: 'synthetic-secret',
@@ -305,7 +303,7 @@ describe('user and lineup route contracts', () => {
       }))
     );
 
-    const { POST } = await import('@/app/api/user/link-biwenger/route');
+    const { POST } = linkRoute;
     const response = await POST(
       jsonRequest('http://localhost/api/user/link-biwenger', {
         password: 'synthetic-secret',

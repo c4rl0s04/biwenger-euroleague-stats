@@ -49,13 +49,21 @@ export function classifyModule(file) {
       verification: `src/features/${feature}`,
       blocker: null,
     };
-  if (file.startsWith('src/lib/logic/') || file === 'src/lib/utils/fantasy-scoring.ts')
+  if (file.startsWith('src/lib/competition/'))
     return {
-      owner: 'shared competition calculations',
-      disposition: 'retained shared infrastructure',
+      owner: 'shared competition domain',
+      disposition: 'shared domain logic',
       contract:
-        'pure competition calculations; fantasy-scoring is a test-covered reference with no current runtime callers',
-      verification: 'logic and consuming feature suites',
+        'public pure calculations; server-only season-scoped projections; no feature dependencies or cycle',
+      verification: 'competition, consuming feature and architecture suites',
+      blocker: null,
+    };
+  if (file === 'src/lib/utils/fantasy-scoring.ts')
+    return {
+      owner: 'competition reference formula',
+      disposition: 'reference only',
+      contract: 'test-covered reference formula with no runtime consumers',
+      verification: 'fantasy-scoring tests',
       blocker: null,
     };
   if (file === 'src/lib/seasons/server.ts')
@@ -66,29 +74,11 @@ export function classifyModule(file) {
       verification: 'season context and architecture contracts',
       blocker: null,
     };
-  if (file === 'src/lib/db/queries/core/playerForm.ts')
-    return {
-      owner: 'shared competition reads',
-      disposition: 'retained shared infrastructure',
-      contract:
-        'typed season-scoped PlayerFormEntry map; finished matches; zero/DNP/unknown semantics',
-      verification: 'playerForm, player-form-ranking, captain and Team contracts',
-      blocker: null,
-    };
-  if (file === 'src/lib/db/queries/core/manager-directory.ts')
-    return {
-      owner: 'shared competition reads',
-      disposition: 'retained shared infrastructure',
-      contract: 'active-season id/name/icon/color projection; avoids feature dependency cycle',
-      verification: 'manager-directory contracts',
-      blocker: null,
-    };
   if (
     file === 'src/auth.js' ||
     file === 'src/auth.config.js' ||
     file.startsWith('src/lib/auth/') ||
-    file.startsWith('src/lib/credentials/') ||
-    file === 'src/lib/db/queries/core/users.ts'
+    file.startsWith('src/lib/credentials/')
   )
     return {
       owner: 'authentication/credentials',

@@ -20,7 +20,7 @@ import {
   normalizeLineupConfig,
   deriveRotation,
   performSwap,
-} from '@/lib/utils/lineup-logic';
+} from '@/features/lineup/public';
 
 // ─── Component ───────────────────────────────────────────────────────────────
 

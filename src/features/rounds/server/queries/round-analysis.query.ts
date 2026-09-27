@@ -8,8 +8,8 @@ import {
   calculateWeightedSum,
   selectOptimalSquad,
 } from '../round-analysis.logic';
-import { calcEfficiency } from '@/lib/utils/efficiency';
-import { selectIdealLineup } from '@/lib/logic/ideal-lineup';
+import { calcEfficiency } from '@/lib/competition/public';
+import { selectIdealLineup } from '@/lib/competition/public';
 import type {
   RoundOptionRow,
   LineupRow,

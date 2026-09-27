@@ -32,7 +32,7 @@ The global search endpoint also links users into player, team, and manager desti
   [`team-profile.service.ts`](../../src/features/teams/server/services/team-profile.service.ts), and
   [Search server contract](../../src/features/search/server.ts).
 - Data: feature-owned Player/Team queries and the retained shared
-  [player-form projection](../../src/lib/db/queries/core/playerForm.ts).
+  [player-form projection](../../src/lib/competition/server/queries/player-form.ts).
 - HTTP: `/api/player/*`, `/api/players/[id]/stats`, `/api/team/[id]`, `/api/search`, and
   `/api/stats/leaders`.
 

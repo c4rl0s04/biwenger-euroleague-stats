@@ -1,10 +1,11 @@
-import { pool as pgClient } from '../../client';
-import { resolveReadSeasonId } from '../../season-context';
+import 'server-only';
+import { pool as pgClient } from '@/lib/db/client';
+import { resolveReadSeasonId } from '@/lib/db/season-context';
 
 /** Shared fantasy-manager directory projection, never account/credential records.
- * Rounds and legacy directory consumers share this single query. Keeping this
+ * Rounds and directory consumers share this single query. Keeping this
  * small projection below features avoids Managers -> Players -> Teams -> Matches
- * -> Rounds -> Managers; it does not migrate the unrelated directory screen.
+ * -> Rounds -> Managers.
  */
 export interface ManagerDirectoryRow {
   id: string;

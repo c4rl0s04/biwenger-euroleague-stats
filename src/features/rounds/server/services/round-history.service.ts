@@ -1,5 +1,5 @@
 import 'server-only';
-import { calcEfficiency } from '@/lib/utils/efficiency';
+import { calcEfficiency } from '@/lib/competition/public';
 import { calculateStats } from '../../logic/performance';
 import type {
   UserPerformanceHistory,

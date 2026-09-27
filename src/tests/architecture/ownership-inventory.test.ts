@@ -71,11 +71,11 @@ it('does not allow a newly protected route to hide domain persistence behind a h
 });
 
 it('distinguishes retained shared projections, authentication gates and UI adapters', () => {
-  expect(classifyModule('src/lib/db/queries/core/playerForm.ts').blocker).toBeNull();
-  expect(classifyModule('src/lib/db/queries/core/manager-directory.ts').contract).toContain(
-    'cycle'
-  );
-  expect(classifyModule('src/lib/db/queries/core/users.ts').blocker).toBeNull();
+  expect(classifyModule('src/lib/competition/server/queries/player-form.ts').blocker).toBeNull();
+  expect(
+    classifyModule('src/lib/competition/server/queries/manager-directory.ts').contract
+  ).toContain('cycle');
+  expect(classifyModule('src/lib/auth/repository.ts').blocker).toBeNull();
   expect(classifyModule('src/components/layout/Section.js').blocker).toContain('25B');
   expect(classifyModule('src/lib/seasons/server.ts').blocker).toBeNull();
 });

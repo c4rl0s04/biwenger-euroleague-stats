@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calcEfficiency } from '@/lib/utils/efficiency';
+import { calcEfficiency } from '@/lib/competition/public';
 
 describe('calcEfficiency', () => {
   it('returns 0 when both actual and ideal are 0', () => {

@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { getTeamColor } from '@/lib/constants/teamColors';
-import { calculateTargetPrice } from '@/lib/utils/player-finance';
+import { calculateTargetPrice } from '../lib/player-finance';
 import type {
   MarketListingPresentation,
   UseMarketPlayerDetails,

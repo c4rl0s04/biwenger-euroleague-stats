@@ -18,7 +18,7 @@ vi.mock('@/lib/db/season-context', () => ({
   resolveReadSeasonId: dbMocks.seasonId,
 }));
 
-vi.mock('@/lib/db/queries/core/playerForm', () => ({
+vi.mock('@/lib/competition/server/queries/player-form', () => ({
   getPlayerFormMap: dbMocks.formMap,
 }));
 

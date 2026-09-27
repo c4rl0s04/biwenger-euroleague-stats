@@ -6,6 +6,10 @@ import { isSecurityContract, checkSecurityBoundaries } from './security-boundari
 
 const normalize = (value) => value.split(path.sep).join('/');
 const featureOf = (file) => /^src\/features\/([^/]+)\//.exec(file)?.[1];
+const isCompetition = (file) => file.startsWith('src/lib/competition/');
+const isCompetitionContract = (file) => /^src\/lib\/competition\/(public|server)\.ts$/.test(file);
+const retiredDomainPaths =
+  /^(src\/lib\/logic\/(standings|match-scores|ideal-lineup)|src\/lib\/utils\/(lineup-logic|player-finance|efficiency)|src\/lib\/db\/queries\/core\/(users|playerForm|manager-directory))(?:\.[cm]?[jt]sx?)?$/;
 const isSeasonContract = (file) => file === 'src/lib/seasons/server.ts';
 const isSharedPresentation = (file) => /^src\/components\/(shell|ui)\//.test(file);
 const isContract = (file) => /^src\/features\/[^/]+\/(public|server)\.ts$/.test(file);
@@ -129,6 +133,15 @@ export function checkGraph(graph, policy) {
   }
   for (const [file, node] of graph) {
     const owner = featureOf(file);
+    if (isCompetition(file)) {
+      if (node.computedImports)
+        report('competition-computed-import', file, 'nonliteral module target');
+      if (
+        file === 'src/lib/competition/server.ts' &&
+        !node.imports.some((edge) => edge.specifier === 'server-only' && !edge.typeOnly)
+      )
+        errors.add(`Missing server-only: ${file}`);
+    }
     if (isSeasonContract(file)) {
       if (!node.imports.some((edge) => edge.specifier === 'server-only' && !edge.typeOnly))
         errors.add(`Missing server-only: ${file}`);
@@ -151,6 +164,31 @@ export function checkGraph(graph, policy) {
       report('computed-import', file, 'nonliteral module target');
     for (const edge of node.imports) {
       const target = edge.target;
+      const importPath =
+        target ??
+        (edge.specifier.startsWith('@/')
+          ? `src/${edge.specifier.slice(2)}`
+          : edge.specifier.startsWith('.')
+            ? path.posix.normalize(path.posix.join(path.posix.dirname(file), edge.specifier))
+            : edge.specifier);
+      if (retiredDomainPaths.test(importPath)) report('retired-domain-import', file, importPath);
+      if (target && isCompetition(target) && !isCompetition(file) && !isCompetitionContract(target))
+        report('competition-deep-import', file, target);
+      if (isCompetition(file)) {
+        if ((file.includes('/logic/') || file.endsWith('/public.ts')) && target && isServer(target))
+          report('competition-pure-server', file, target);
+        const query = file.startsWith('src/lib/competition/server/queries/');
+        const permittedInfrastructure =
+          query &&
+          target &&
+          ['src/lib/db/client.ts', 'src/lib/db/season-context.ts'].includes(target);
+        if (
+          !(target && isCompetition(target)) &&
+          !permittedInfrastructure &&
+          !(edge.specifier === 'server-only' && (query || file.endsWith('/server.ts')))
+        )
+          report('competition-dependency', file, target ?? edge.specifier);
+      }
       if (!target) {
         const protectedSource =
           policy.entrypoints.includes(file) ||
@@ -242,6 +280,7 @@ export function checkGraph(graph, policy) {
     if (
       !node.client &&
       !isSharedPresentation(start) &&
+      start !== 'src/lib/competition/public.ts' &&
       (!featureOf(start) ||
         !(node.client || start.endsWith('/public.ts') || start.includes('/components/')))
     )
