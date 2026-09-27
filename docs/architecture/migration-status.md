@@ -939,3 +939,13 @@ request contract. Architecture coverage now includes 124 protected entrypoints. 
 tests, production build and browser acceptance were deferred by explicit user request;
 CI verification remains pending. Section/theme/capability adoption and the 216 exact
 authentication/credential exceptions still prevent full Task 25 closure.
+
+## Task 25 deferred authentication ownership
+
+The [authentication ownership receipt](../migration/reports/task-25-auth-ownership.md)
+records the follow-up to merged PR #50. Login and JWT refresh queries move into an
+authentication repository; application credential consumers use a server-only contract.
+Exact internal dependency enforcement replaces 216 per-entrypoint exceptions and includes
+the NextAuth handler among 125 protected entrypoints. The change is implemented on
+`refactor/auth-ownership`; integration and broad acceptance are not implied. UI-owned
+compatibility remains with the parallel UI migration and keeps full Task 25 closure open.

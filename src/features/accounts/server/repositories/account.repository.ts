@@ -3,7 +3,7 @@ import 'server-only';
 import { db, pgClient } from '@/lib/db';
 import { users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
-import { biwengerCredentials } from '@/lib/credentials/service';
+import { biwengerCredentials } from '@/lib/credentials/server';
 import { getUserWithPassword as legacyGetUserWithPassword } from '@/lib/db/queries/core/users';
 import { prepareUserMutations } from '@/lib/db/mutations/users';
 

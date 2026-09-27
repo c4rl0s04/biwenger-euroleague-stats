@@ -1,8 +1,8 @@
+import 'server-only';
+
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
-import { db } from '@/lib/db';
-import { users } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { findLoginAccount, findSessionAccount } from '@/lib/auth/repository';
 import bcrypt from 'bcryptjs';
 import authConfig from './auth.config';
 import {
@@ -11,7 +11,7 @@ import {
   createSafeBrowserSession,
   sanitizeAuthToken,
 } from '@/lib/auth/session-safety';
-import { biwengerCredentials } from '@/lib/credentials/service';
+import { biwengerCredentials } from '@/lib/credentials/server';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
@@ -26,15 +26,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
 
         // Find user by name
-        const user = await db.query.users.findFirst({
-          where: eq(users.name, credentials.name),
-          columns: {
-            id: true,
-            name: true,
-            email: true,
-            password: true,
-          },
-        });
+        const user = await findLoginAccount(credentials.name);
 
         if (!user) {
           console.log('LOGIN FAILED: User not found:', credentials.name);
@@ -81,10 +73,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           safeToken.email === undefined)
       ) {
         try {
-          const dbUser = await db.query.users.findFirst({
-            where: eq(users.id, safeToken.id),
-            columns: { email: true },
-          });
+          const dbUser = await findSessionAccount(safeToken.id);
           safeToken = applyAccountStateToAuthToken(safeToken, {
             email: dbUser?.email,
             biwengerLinked: await biwengerCredentials.hasCredential(safeToken.id),

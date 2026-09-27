@@ -36,8 +36,8 @@ or eligibility changes therefore require tests and a documentation update in the
   [`matches`](<../../src/app/(app)/matches>), [`standings`](<../../src/app/(app)/standings>), and
   [`compare`](<../../src/app/(app)/compare>).
 - UI: matching domain folders under [`src/components`](../../src/components).
-- Services: `roundsService`, `scheduleService`, `matchesService`, `standingsService`, and
-  `compareService` under [`src/lib/services`](../../src/lib/services).
+- Services: Rounds, Schedule, Matches, Standings and Compare expose their contracts
+  from the respective domains under [`src/features`](../../src/features).
 - Data: competition and analytics queries under
   [`src/lib/db/queries`](../../src/lib/db/queries).
 - HTTP: `/api/rounds/*`, `/api/standings/*`, `/api/compare/*`, and `/api/league-average`.

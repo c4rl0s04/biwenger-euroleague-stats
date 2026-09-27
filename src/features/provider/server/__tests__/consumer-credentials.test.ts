@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('server-only', () => ({}));
 
-vi.mock('@/lib/credentials/service', () => ({
+vi.mock('@/lib/credentials/server', () => ({
   biwengerCredentials: {
     withCredential: vi.fn(),
   },
@@ -18,7 +18,7 @@ vi.mock('@/lib/db', () => ({
   },
 }));
 
-import { biwengerCredentials } from '@/lib/credentials/service';
+import { biwengerCredentials } from '@/lib/credentials/server';
 import { biwengerProviderClient } from '../client';
 import { marketCommandService } from '@/features/market/server';
 import { lineupCommandService, lineupReadService } from '@/features/lineup/server';

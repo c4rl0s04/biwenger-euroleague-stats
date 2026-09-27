@@ -93,9 +93,10 @@ export function classifyModule(file) {
     return {
       owner: 'authentication/credentials',
       disposition: 'retained shared infrastructure',
-      contract: 'existing credential and authentication behavior frozen',
+      contract:
+        'reviewed authentication contract and server-only credential gateway; repository ownership enforced',
       verification: 'accounts, provider, credentials and auth tests',
-      blocker: 'separate authentication/security gate',
+      blocker: null,
     };
   if (file.startsWith('scripts/') || file.startsWith('src/lib/sync/'))
     return {
@@ -182,7 +183,7 @@ export function createInventory(root) {
       rationale: policy.entrypoints.includes(file)
         ? 'application feature boundary enforced'
         : file.includes('/api/auth/') || file === 'src/auth.js'
-          ? 'authentication protocol; separate security gate'
+          ? 'authentication protocol; checked shared infrastructure contract'
           : file.includes('/api/health/')
             ? 'operational health endpoint intentionally accesses database health infrastructure'
             : file.startsWith('scripts/')
