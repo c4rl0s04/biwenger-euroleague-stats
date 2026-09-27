@@ -61,3 +61,31 @@ cannot prove that inline domain rules are absent.
 
 Integration, exact-merge CI and deployment acceptance remain subsequent steps. No claim of
 Task 27 or production acceptance is made by this receipt.
+
+## Review follow-up: date contract and offer projections
+
+The review of `3cadaeb5` identified two bounded remaining items. Automatic lineup inputs now
+accept Schedule's nullable dates; an explicit null-to-epoch conversion retains the previous
+JavaScript ordering, and a compile-time test checks the actual Schedule public contract.
+
+Lineup now owns the typed offer projection used by confirmation, cards, compact indicators,
+tables and financial sorting. Existing purchase-price fallbacks, losses, one-decimal percentages
+and the card/table distinction for missing market values are preserved. In particular, existing
+NaN/Infinity percentage output is not normalized as part of this structural change.
+
+Baseline focused tests: 29 passed. Updated focused tests: 42 passed. A deterministic comparison
+of 729 price combinations against the pre-extraction card and table code matched exactly.
+The desktop browser scenario uses synthetic offers and opens/cancels the confirmation without
+submitting a provider command. Final verification results for this follow-up are recorded below.
+
+Follow-up verification:
+
+- `RAYON_NUM_THREADS=2 npm run verify`: passed, including 2,936 unit tests (eight existing skips),
+  typecheck, architecture (1,071 modules / 125 protected entrypoints), documentation, lint
+  (zero errors / 24 warnings), production build, offline schema checks and diff checks.
+- `npm run test:e2e:local -- tests/e2e/schedule.spec.ts tests/e2e/lineup-ownership.spec.ts --project=iphone-13 --project=desktop-1440`:
+  four passed and two expected viewport skips. The new desktop offer table/confirmation case
+  passed; existing Schedule screenshots matched without updates. Disposable PostgreSQL
+  integrity checks passed and the fixture cluster was stopped.
+- The two review findings are addressed. Existing form-score and missing-price conventions
+  remain behavior-preserving choices; integration and production acceptance remain separate.

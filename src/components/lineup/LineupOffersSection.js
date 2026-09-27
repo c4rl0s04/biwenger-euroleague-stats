@@ -1,5 +1,7 @@
 'use client';
 
+import { projectLineupOffer } from '@/features/lineup/public';
+
 import Link from 'next/link';
 import { useState, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -85,12 +87,8 @@ export default function LineupOffersSection({
       .filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
     filtered.sort((a, b) => {
-      const offerA = a.offers[0].amount;
-      const offerB = b.offers[0].amount;
-      const purchasePriceA = a.owner?.price || 0;
-      const purchasePriceB = b.owner?.price || 0;
-      const currentPriceA = a.price || 0;
-      const currentPriceB = b.price || 0;
+      const metricsA = projectLineupOffer(a, a.offers[0]);
+      const metricsB = projectLineupOffer(b, b.offers[0]);
 
       let valA, valB;
       switch (sortConfig.key) {
@@ -99,32 +97,32 @@ export default function LineupOffersSection({
           valB = b.name;
           break;
         case 'investment':
-          valA = purchasePriceA;
-          valB = purchasePriceB;
+          valA = metricsA.purchasePrice;
+          valB = metricsB.purchasePrice;
           break;
         case 'price':
-          valA = currentPriceA;
-          valB = currentPriceB;
+          valA = metricsA.currentPrice;
+          valB = metricsB.currentPrice;
           break;
         case 'offer':
-          valA = offerA;
-          valB = offerB;
+          valA = metricsA.offerAmount;
+          valB = metricsB.offerAmount;
           break;
         case 'profitActual':
-          valA = offerA - currentPriceA;
-          valB = offerB - currentPriceB;
+          valA = metricsA.profitActual;
+          valB = metricsB.profitActual;
           break;
         case 'profit':
-          valA = offerA - purchasePriceA;
-          valB = offerB - purchasePriceB;
+          valA = metricsA.totalProfit;
+          valB = metricsB.totalProfit;
           break;
         case 'expires':
           valA = a.offers[0].until;
           valB = b.offers[0].until;
           break;
         default:
-          valA = offerA - purchasePriceA;
-          valB = offerB - purchasePriceB;
+          valA = metricsA.totalProfit;
+          valB = metricsB.totalProfit;
       }
 
       if (typeof valA === 'string') {
@@ -263,7 +261,7 @@ export default function LineupOffersSection({
                   player.img ||
                   `https://biwenger.as.com/resources/images/players/full/${player.id}.png`;
                 const offer = player.offers[0];
-                const profit = offer.amount - (player.owner?.price || 0);
+                const { totalProfit: profit } = projectLineupOffer(player, offer);
                 const isPositive = profit >= 0;
 
                 return (
@@ -432,10 +430,12 @@ function OffersTable({ players, onAccept, onReject, loading, sortConfig, onSort 
         <tbody className="divide-y divide-white/5">
           {players.map((player) => {
             const offer = player.offers[0];
-            const purchasePrice = player.owner?.price || 0;
-            const currentPrice = player.price || 0;
-            const profit = offer.amount - purchasePrice;
-            const profitActual = offer.amount - currentPrice;
+            const {
+              purchasePrice,
+              currentPrice,
+              totalProfit: profit,
+              profitActual,
+            } = projectLineupOffer(player, offer);
             const playerImage =
               player.img ||
               `https://biwenger.as.com/resources/images/players/full/${player.id}.png`;
@@ -527,17 +527,16 @@ function OffersTable({ players, onAccept, onReject, loading, sortConfig, onSort 
 function OfferCard({ player, onAccept, onReject, loading }) {
   const [imgError, setImgError] = useState(false);
 
-  // Financial Logic
   const offer = player.offers[0];
-  const offerAmount = offer.amount;
-  const purchasePrice = player.owner?.price || 0;
-  const marketValue = player.price;
-
-  // Calculated Stats
-  const totalProfit = offerAmount - purchasePrice;
-  const marketDiff = offerAmount - marketValue;
-  const profitPercent = purchasePrice > 0 ? ((totalProfit / purchasePrice) * 100).toFixed(1) : 0;
-  const marketDiffPercent = ((marketDiff / marketValue) * 100).toFixed(1);
+  const {
+    offerAmount,
+    purchasePrice,
+    marketValue,
+    totalProfit,
+    marketDiff,
+    profitPercent,
+    marketDiffPercent,
+  } = projectLineupOffer(player, offer);
 
   // Time Logic
   const { hoursLeft, timeLeft } = useMemo(() => {

@@ -1,5 +1,7 @@
 'use client';
 
+import { projectLineupOffer } from '@/features/lineup/public';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, TrendingUp, TrendingDown } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils/format';
@@ -18,11 +20,10 @@ export default function LineupOfferModal({
 
   const isAccept = actionType === 'accept';
 
-  // Calculations
-  const purchasePrice = player.owner?.price || 0;
-  const offerAmount = offer.amount;
-  const totalProfit = offerAmount - purchasePrice;
-  const profitPercent = purchasePrice > 0 ? ((totalProfit / purchasePrice) * 100).toFixed(1) : 0;
+  const { purchasePrice, offerAmount, totalProfit, profitPercent } = projectLineupOffer(
+    player,
+    offer
+  );
 
   return (
     <AnimatePresence>

@@ -998,3 +998,7 @@ and direct Hoopgrid CLI persistence that import-only checks did not identify. Th
 follow-up on `refactor/ownership-residue`. Presentation migration and production acceptance
 remain separate. Earlier milestone reports above are historical evidence, not an exhaustive
 assertion that legacy components contain no domain rules.
+
+Review of ownership candidate `3cadaeb5` additionally identified the nullable Schedule date
+contract and duplicated offer financial projections. The same branch closes these through
+Lineup's public contract; see the receipt's review follow-up for preserved behavior and checks.
