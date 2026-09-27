@@ -10,7 +10,7 @@ const query = vi.hoisted(() => ({
 }));
 vi.mock('./queries/all-play-all.query', () => query);
 import { cached, clearCache } from '@/lib/utils/cache';
-import { getAllPlayAllStats } from '@/lib/db/queries/analytics/advanced_stats';
+import { getAllPlayAllStats } from './queries/advanced.query';
 import { fetchAllPlayAllStats } from '@/features/standings/server';
 import type { AllPlayAllComputedRecord } from './queries/all-play-all.records';
 

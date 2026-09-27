@@ -72,11 +72,9 @@ An unexpected handler or ownership ambiguity requires a report, not automatic sc
   [section page](<../../../src/app/(app)/standings/[section]/page.tsx>).
 - [Existing feature](../../../src/features/standings) and
   [foundation decisions](../../architecture/standings-read-foundation.md).
-- [Legacy service](../../../src/lib/services/app/standingsService.ts).
-- [Competition queries](../../../src/lib/db/queries/competition/standings.ts).
-- [Performance queries](../../../src/lib/db/queries/analytics/performance.ts),
-  [advanced queries](../../../src/lib/db/queries/analytics/advanced_stats.ts), and
-  [initial-squad queries](../../../src/lib/db/queries/analytics/initial_squads.ts).
+- The historical global service and query adapters were retired by Task 25A. Current
+  [Standings contract](../../../src/features/standings/server.ts) and
+  [owned queries](../../../src/features/standings/server/queries) replace those entry points.
 - [Desktop components (now feature-owned)](../../../src/features/standings/components),
   [phone overview (now feature-owned)](../../../src/features/standings/components/MobileStandingsScreen.tsx),
   [mobile route registry](../../../src/lib/mobile/routes.ts) and

@@ -7,8 +7,6 @@ vi.mock('@/lib/db/client', () => ({ pgClient: { query: mocks.query } }));
 vi.mock('@/lib/db/season-context', () => ({ resolveReadSeasonId: mocks.season }));
 
 import { GET } from '@/app/api/search/route';
-import { globalSearch } from '@/lib/db/queries/features/search';
-import { performGlobalSearch as legacySearch } from '@/lib/services/features/searchService';
 import { performGlobalSearch } from '../server';
 
 const empty = { players: [], teams: [], users: [] };
@@ -130,10 +128,8 @@ describe('real Search HTTP/service/query contract', () => {
     }
   );
 
-  it('retains legacy adapters to the single implementation', async () => {
-    expect(globalSearch).toBe(performGlobalSearch);
-    expect(legacySearch).toBe(performGlobalSearch);
-    expect(await globalSearch('ab', 3)).toEqual(empty);
+  it('supports an explicit result limit at the feature contract', async () => {
+    expect(await performGlobalSearch('ab', 3)).toEqual(empty);
     expect(mocks.query.mock.calls[0][1]).toEqual(['%ab%', '2026-27', 3]);
   });
 });

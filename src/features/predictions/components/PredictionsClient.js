@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Title } from '@/components/ui';
-import { Section } from '@/components/layout';
+import Section from '@/components/layout/Section';
 import {
   Perfect10Card,
   BlankedCard,

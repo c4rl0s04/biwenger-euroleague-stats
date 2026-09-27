@@ -12,10 +12,6 @@ vi.mock('@/features/managers/server', () => ({
   getManagerDirectory: managerMocks.getManagerDirectory,
 }));
 
-vi.mock('@/lib/services', () => ({
-  fetchAllUsers: vi.fn(),
-}));
-
 const lineupMocks = vi.hoisted(() => ({
   getLineup: vi.fn(),
   updateLineup: vi.fn(),
@@ -33,13 +29,6 @@ vi.mock('@/features/lineup/server', async (importOriginal) => {
     },
   };
 });
-
-vi.mock('@/lib/services/lineupService', () => ({
-  lineupService: {
-    getLineup: lineupMocks.getLineup,
-    updateLineup: lineupMocks.updateLineup,
-  },
-}));
 
 vi.mock('@/lib/credentials/service', () => ({
   biwengerCredentials: {
@@ -82,8 +71,6 @@ vi.mock('bcryptjs', () => ({
   },
 }));
 
-import * as services from '@/lib/services';
-import { lineupService } from '@/lib/services/lineupService';
 import { getUserWithPassword } from '@/lib/db/queries/core/users';
 import { prepareUserMutations } from '@/lib/db/mutations/users';
 import { db } from '@/lib/db';

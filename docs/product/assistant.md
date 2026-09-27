@@ -21,7 +21,7 @@ user.
 - Page and UI: [`src/app/(app)/assistant`](<../../src/app/(app)/assistant>) and
   [`src/components/assistant`](../../src/components/assistant).
 - Services: assistant generation, context, and player-context modules under
-  [`src/lib/services/features`](../../src/lib/services/features).
+  [`src/features/assistant/server/services`](../../src/features/assistant/server/services).
 - HTTP: `/api/assistant` and `/api/assistant/conversations/*`.
 - Data: assistant conversation tables in [`schema.ts`](../../src/lib/db/schema.ts) plus the queries
   used to assemble analytics context.

@@ -8,7 +8,7 @@ import {
   MobileSectionHeading,
 } from '@/components/mobile/MobileScreen';
 import { requireMobileRoute } from '@/lib/mobile/route-server';
-import { fetchUserSquadDetails } from '@/lib/services';
+import { getManagerSquadData as fetchUserSquadDetails } from '@/features/managers/server';
 
 type PageProps = { params: Promise<{ section: string }> };
 type RecordValue = Record<string, any>;

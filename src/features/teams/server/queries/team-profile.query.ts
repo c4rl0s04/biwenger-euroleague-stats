@@ -2,7 +2,10 @@ import 'server-only';
 
 import { pool as pgClient } from '@/lib/db/client';
 import { getPlayerFormMap } from '@/lib/db/queries/core/playerForm';
-import { getTeamMatchesCount, getTeamPlayoffProbability } from '@/lib/db/queries/core/teams';
+import {
+  getTeamMatchesCount,
+  getTeamPlayoffProbability,
+} from '../services/team-competition.service';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
 
 export interface TeamProfileDetailsRow {

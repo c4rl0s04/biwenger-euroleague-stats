@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, it } from 'vitest';
 
@@ -23,10 +23,8 @@ it('routes and the base page share the owning service contract', () => {
     expect(source).toContain("dynamic = 'force-dynamic'");
   }
 });
-it('retains one implementation behind the legacy query adapter without a barrel cycle', () => {
-  expect(read('src/lib/db/queries/competition/standings.ts')).toContain(
-    "from '@/features/standings/server'"
-  );
+it('owns the implementation and retires its legacy query adapter', () => {
+  expect(existsSync('src/lib/db/queries/competition/standings.ts')).toBe(false);
   expect(read('src/features/standings/server/queries/base-standings.query.ts')).toContain(
     "from '@/lib/db/client'"
   );

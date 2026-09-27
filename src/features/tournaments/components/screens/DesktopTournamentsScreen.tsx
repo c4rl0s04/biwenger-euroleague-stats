@@ -1,4 +1,4 @@
-import { Section } from '@/components/layout';
+import Section from '@/components/layout/Section';
 import { PageHeader } from '@/components/ui';
 import {
   ActiveTournamentsSection,

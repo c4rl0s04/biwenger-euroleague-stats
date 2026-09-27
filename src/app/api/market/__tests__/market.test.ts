@@ -7,7 +7,7 @@ import { NextRequest } from 'next/server';
 // Prevent server-only from throwing in test environment
 vi.mock('server-only', () => ({}));
 
-vi.mock('@/lib/services', () => ({
+const services = vi.hoisted(() => ({
   getMarketPageData: vi.fn(),
   fetchMarketStats: vi.fn(),
   fetchAllTransfers: vi.fn(),
@@ -17,16 +17,14 @@ vi.mock('@/lib/services', () => ({
   fetchBiddingDuelDetails: vi.fn(),
 }));
 
-import * as services from '@/lib/services';
-
 vi.mock('@/features/market/server', async () => ({
-  fetchMarketStats: (await import('@/lib/services')).fetchMarketStats,
-  getMarketPageData: (await import('@/lib/services')).getMarketPageData,
-  getLiveMarketTransfers: (await import('@/lib/services')).fetchLiveMarketTransfers,
-  getBestValueDetails: (await import('@/lib/services')).fetchBestValueDetails,
-  getBiddingDuelDetails: (await import('@/lib/services')).fetchBiddingDuelDetails,
+  fetchMarketStats: services.fetchMarketStats,
+  getMarketPageData: services.getMarketPageData,
+  getLiveMarketTransfers: services.fetchLiveMarketTransfers,
+  getBestValueDetails: services.fetchBestValueDetails,
+  getBiddingDuelDetails: services.fetchBiddingDuelDetails,
   ...(await import('@/features/market/trends/validation/market-transfers')),
-  getMarketTrendsAnalysis: (await import('@/lib/services')).fetchMarketTrendsAnalysis,
+  getMarketTrendsAnalysis: services.fetchMarketTrendsAnalysis,
   ...(await import('@/features/market/trends/validation/market-trends')),
 }));
 

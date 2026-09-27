@@ -1,6 +1,6 @@
 import nextDynamic from 'next/dynamic';
 import { CardSkeleton, PageHeader } from '@/components/ui';
-import { Section } from '@/components/layout';
+import Section from '@/components/layout/Section';
 import {
   MySeasonCard,
   SquadValueCard,

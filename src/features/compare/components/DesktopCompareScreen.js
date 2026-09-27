@@ -4,7 +4,7 @@ import { useApiData } from '@/lib/hooks/useApiData';
 import { useClientUser } from '@/lib/hooks/useClientUser';
 import HeadToHeadCard from './HeadToHeadCard';
 import { selectDesktopManager } from '../validation/selection';
-import { Section } from '@/components/layout';
+import Section from '@/components/layout/Section';
 import { PageHeader } from '@/components/ui';
 
 export default function DesktopCompareScreen() {

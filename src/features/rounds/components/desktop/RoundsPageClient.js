@@ -39,7 +39,7 @@ import ConsistencyRanking from './stats/history/ConsistencyRanking';
 import PerfectRoundsCard from './stats/history/PerfectRoundsCard';
 import RecordsGrid from './stats/history/RecordsGrid';
 import LineupStatsCard from './stats/general/LineupStatsCard';
-import { Section } from '@/components/layout';
+import Section from '@/components/layout/Section';
 import { usePerformanceStats } from '../../hooks/usePerformanceStats';
 import { Activity, BarChart3, Grid, Ruler, Layout } from 'lucide-react';
 

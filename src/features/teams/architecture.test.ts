@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 function source(relativePath: string) {
@@ -32,11 +32,10 @@ describe('teams feature boundaries', () => {
   it('uses only the Matches public/server contracts and removes legacy Team Profile paths', () => {
     const modelSource = source('./models/team-profile.ts');
     const serviceSource = source('./server/services/team-profile.service.ts');
-    const primaryServiceBarrel = source('../../lib/services/index.ts');
 
     expect(modelSource).toContain("from '@/features/matches/public'");
     expect(serviceSource).toContain("from '@/features/matches/server'");
     expect(serviceSource).not.toMatch(/features\/matches\/(server|components|models)\//);
-    expect(primaryServiceBarrel).not.toContain('fetchTeamProfile');
+    expect(existsSync(new URL('../../lib/services/index.ts', import.meta.url))).toBe(false);
   });
 });

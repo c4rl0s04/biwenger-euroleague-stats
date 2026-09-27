@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { MatchCard } from './MatchCard';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Section } from '@/components/layout';
+import Section from '@/components/layout/Section';
 import MatchVenueMap from '../map/MatchVenueMap';
 
 import { RoundSelector } from './RoundSelector';

@@ -3,7 +3,7 @@ import ScheduleControls from './ScheduleControls';
 import MatchCard from './MatchCard';
 import RoundSummary from './RoundSummary';
 import AutoAlignButton from './ScheduleLineupAction';
-import { Section } from '@/components/layout';
+import Section from '@/components/layout/Section';
 import { PageHeader } from '@/components/ui';
 /** @param {{model: import('../models/schedule').ScheduleScreenModel}} props */
 export default function DesktopScheduleScreen({ model: { schedule, users, rounds, userId } }) {

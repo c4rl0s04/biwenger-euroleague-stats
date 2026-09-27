@@ -25,7 +25,7 @@ import {
   UserAvatar as UserAvatarAny,
   StatsTable as StatsTableAny,
 } from '@/components/ui';
-import { Section as SectionAny } from '@/components/layout';
+import SectionAny from '@/components/layout/Section';
 
 const ElegantCard = ElegantCardAny as any;
 const FadeIn = FadeInAny as any;

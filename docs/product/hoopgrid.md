@@ -26,8 +26,8 @@ cell. Correct-guess frequency across users contributes to rarity scoring.
 
 - UI: [`src/components/hoopgrid`](../../src/components/hoopgrid) and
   [`src/hooks/hoopgrid`](../../src/hooks/hoopgrid).
-- Service: [`hoopgridService.ts`](../../src/lib/services/features/hoopgridService.ts).
-- Criteria: [`hoopgridCriteria.ts`](../../src/lib/constants/hoopgridCriteria.ts).
+- Service: [Hoopgrid server contract](../../src/features/hoopgrid/server.ts).
+- Criteria: [Hoopgrid criteria contract](../../src/features/hoopgrid/public.ts).
 - HTTP: `/api/hoopgrid/today`, `/api/hoopgrid/guess`, and `/api/hoopgrid/list`.
 - Data: challenges and guesses in [`schema.ts`](../../src/lib/db/schema.ts).
 

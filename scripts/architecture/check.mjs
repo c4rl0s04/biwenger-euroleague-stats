@@ -1,14 +1,17 @@
-import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 
 const normalize = (value) => value.split(path.sep).join('/');
 const featureOf = (file) => /^src\/features\/([^/]+)\//.exec(file)?.[1];
+const isSeasonContract = (file) => file === 'src/lib/seasons/server.ts';
+const isSharedPresentation = (file) => /^src\/components\/(shell|ui)\//.test(file);
 const isContract = (file) => /^src\/features\/[^/]+\/(public|server)\.ts$/.test(file);
 const isPersistence = (file) =>
   /^src\/lib\/db\//.test(file) || /\/server\/(queries|repositories)\//.test(file);
 const isServer = (file) =>
+  isSeasonContract(file) ||
   isPersistence(file) ||
   /^src\/lib\/(services|credentials)\//.test(file) ||
   /\/server(?:\/|\.ts$)/.test(file) ||
@@ -19,7 +22,7 @@ const externalServer = (name) =>
     name
   );
 
-export function readGraph(root) {
+export function readGraph(root, sourceRoots = ['src']) {
   const files = [];
   function walk(directory) {
     for (const entry of readdirSync(directory, { withFileTypes: true })) {
@@ -29,7 +32,12 @@ export function readGraph(root) {
         files.push(full);
     }
   }
-  walk(path.join(root, 'src'));
+  for (const entry of sourceRoots) {
+    const full = path.join(root, entry);
+    if (statSync(full).isDirectory()) walk(full);
+    else if (/\.[cm]?[jt]sx?$/.test(full) && !full.endsWith('.d.ts') && !isTest(full))
+      files.push(full);
+  }
   const configFile = ts.readConfigFile(path.join(root, 'tsconfig.json'), ts.sys.readFile);
   if (configFile.error) throw new Error('Cannot read tsconfig.json');
   const config = ts.parseJsonConfigFileContent(configFile.config, ts.sys, root);
@@ -119,7 +127,25 @@ export function checkGraph(graph, policy) {
   }
   for (const [file, node] of graph) {
     const owner = featureOf(file);
-    if ((owner || policy.entrypoints.includes(file)) && node.computedImports)
+    if (isSeasonContract(file)) {
+      if (!node.imports.some((edge) => edge.specifier === 'server-only' && !edge.typeOnly))
+        errors.add(`Missing server-only: ${file}`);
+      for (const edge of node.imports) {
+        if (
+          !['server-only', 'react', '@/lib/seasons', '@/lib/db/season-context'].includes(
+            edge.specifier
+          )
+        )
+          report('season-contract', file, edge.target ?? edge.specifier);
+      }
+    }
+    if (
+      (owner ||
+        isSharedPresentation(file) ||
+        isSeasonContract(file) ||
+        policy.entrypoints.includes(file)) &&
+      node.computedImports
+    )
       report('computed-import', file, 'nonliteral module target');
     for (const edge of node.imports) {
       const target = edge.target;
@@ -130,7 +156,10 @@ export function checkGraph(graph, policy) {
         if (protectedSource && /^(pg$|postgres$|drizzle-orm(?:\/|$))/.test(edge.specifier))
           report('persistence-owner', file, edge.specifier);
         if (
-          (owner || policy.entrypoints.includes(file)) &&
+          (owner ||
+            isSharedPresentation(file) ||
+            isSeasonContract(file) ||
+            policy.entrypoints.includes(file)) &&
           (edge.specifier.startsWith('@/') || edge.specifier.startsWith('.'))
         ) {
           if (!/\.(css|json|svg|png|jpe?g|webp)$/.test(edge.specifier))
@@ -146,8 +175,16 @@ export function checkGraph(graph, policy) {
       }
       const protectedEntry = policy.entrypoints.includes(file);
       const presentation =
-        owner &&
-        (file.includes('/components/') || file.endsWith('/public.ts') || file.includes('/models/'));
+        isSharedPresentation(file) ||
+        (owner &&
+          (file.includes('/components/') ||
+            file.endsWith('/public.ts') ||
+            file.includes('/models/')));
+      if (
+        file.startsWith('src/components/ui/') &&
+        (other || target.startsWith('src/components/shell/'))
+      )
+        report('primitive-ownership', file, target);
       if (
         protectedEntry &&
         (isPersistence(target) ||
@@ -162,7 +199,8 @@ export function checkGraph(graph, policy) {
         target.startsWith('src/lib/db/')
       )
         report('persistence-owner', file, target);
-      if (owner && target.startsWith('src/lib/services/')) report('legacy-service', file, target);
+      if ((owner || isSharedPresentation(file)) && target.startsWith('src/lib/services/'))
+        report('legacy-service', file, target);
     }
     if (
       owner &&
@@ -185,7 +223,12 @@ export function checkGraph(graph, policy) {
           (target && isPersistence(target))
         ) {
           report('entrypoint-persistence', start, `${file} -> ${target ?? edge.specifier}`);
-        } else if (target && !/^src\/features\/[^/]+\/server\.ts$/.test(target)) inspect(target);
+        } else if (
+          target &&
+          !isSeasonContract(target) &&
+          !/^src\/features\/[^/]+\/server\.ts$/.test(target)
+        )
+          inspect(target);
       }
     }
     inspect(start);
@@ -194,8 +237,9 @@ export function checkGraph(graph, policy) {
   // Type-only edges participate in ownership/cycles, but cannot leak runtime server code.
   for (const [start, node] of graph) {
     if (
-      !featureOf(start) ||
-      !(node.client || start.endsWith('/public.ts') || start.includes('/components/'))
+      !isSharedPresentation(start) &&
+      (!featureOf(start) ||
+        !(node.client || start.endsWith('/public.ts') || start.includes('/components/')))
     )
       continue;
     const visited = new Set();

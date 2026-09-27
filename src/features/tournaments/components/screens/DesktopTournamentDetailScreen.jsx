@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { PageHeader, BackButton } from '@/components/ui';
-import { Section } from '@/components/layout';
+import Section from '@/components/layout/Section';
 import { StandingsTable, TournamentFixtures, TournamentBracket } from '../index';
 import { Trophy } from 'lucide-react';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';

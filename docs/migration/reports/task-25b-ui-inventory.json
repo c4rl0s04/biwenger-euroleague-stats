@@ -1,0 +1,922 @@
+{
+  "scope": "Static runtime callers and CSS custom-property definitions/references. Tailwind-generated utilities, computed class names and external assets require manual review; zero direct references is not deletion proof. No token values changed.",
+  "modules": [
+    {
+      "file": "src/components/layout/Section.js",
+      "callers": [
+        "src/components/lineup/LineupClient.js",
+        "src/features/accounts/screens/DesktopSettingsScreen.js",
+        "src/features/assistant/screens/DesktopAssistantScreen.tsx",
+        "src/features/compare/components/DesktopCompareScreen.js",
+        "src/features/dashboard/screens/DesktopDashboardScreen.tsx",
+        "src/features/managers/components/ManagerProfileClient.js",
+        "src/features/market/catalogue/components/MarketListingsSection.tsx",
+        "src/features/market/screens/components/MarketPageClient.tsx",
+        "src/features/matches/components/desktop/MatchesClient.js",
+        "src/features/players/components/desktop/catalogue/PlayersDiscovery.js",
+        "src/features/players/components/desktop/profile/PlayerProfileClient.js",
+        "src/features/playoffs/components/PlayoffClient.tsx",
+        "src/features/predictions/components/PredictionsClient.js",
+        "src/features/rounds/components/desktop/RoundsPageClient.js",
+        "src/features/schedule/components/DesktopScheduleScreen.js",
+        "src/features/standings/components/DesktopStandingsScreen.js",
+        "src/features/teams/components/desktop/TeamProfileClient.tsx",
+        "src/features/tournaments/components/screens/DesktopTournamentDetailScreen.jsx",
+        "src/features/tournaments/components/screens/DesktopTournamentsScreen.tsx"
+      ],
+      "owner": "UI-01C shared composition / shell registration",
+      "removalGate": "Review direct callers, barrel dispatch and test consumers together; no implicit API removal during reconciliation."
+    },
+    {
+      "file": "src/components/mobile/MobileHeaderActions.tsx",
+      "callers": ["src/components/mobile/MobileScreen.tsx"],
+      "owner": "UI-01C / UI-02 capability and state composition",
+      "removalGate": "Review direct callers, barrel dispatch and test consumers together; no implicit API removal during reconciliation."
+    },
+    {
+      "file": "src/components/ui/Card.js",
+      "callers": ["src/components/ui/index.js"],
+      "owner": "feature UI adoption / legacy theme compatibility",
+      "removalGate": "Review direct callers, barrel dispatch and test consumers together; no implicit API removal during reconciliation."
+    },
+    {
+      "file": "src/components/ui/ThemeBackground.js",
+      "callers": ["src/components/ui/index.js"],
+      "owner": "feature UI adoption / legacy theme compatibility",
+      "removalGate": "Review direct callers, barrel dispatch and test consumers together; no implicit API removal during reconciliation."
+    },
+    {
+      "file": "src/components/ui/ThemeSwitcher.js",
+      "callers": [],
+      "owner": "feature UI adoption / legacy theme compatibility",
+      "removalGate": "Review direct callers, barrel dispatch and test consumers together; no implicit API removal during reconciliation."
+    },
+    {
+      "file": "src/components/ui/UserAvatar.js",
+      "callers": ["src/components/ui/index.js"],
+      "owner": "UI-01C / UI-02 capability and state composition",
+      "removalGate": "Review direct callers, barrel dispatch and test consumers together; no implicit API removal during reconciliation."
+    },
+    {
+      "file": "src/components/ui/card-variants/ElegantCard.js",
+      "callers": [
+        "src/components/schedule/AutoAlignActionRow.js",
+        "src/components/ui/Card.js",
+        "src/components/ui/StatsTable.js",
+        "src/components/ui/index.js",
+        "src/features/compare/components/HeadToHeadCard.js",
+        "src/features/dashboard/components/cards/NextMatchesCard.js",
+        "src/features/home/components/DesktopHome.jsx",
+        "src/features/market/analytics/components/cards/BiddingDuelDetailsCard.tsx",
+        "src/features/market/analytics/components/cards/BiddingDuelsMatrixCard.tsx",
+        "src/features/market/analytics/components/cards/BiggestDominanceCard.js",
+        "src/features/market/analytics/components/cards/HottestRivalryCard.js",
+        "src/features/market/analytics/components/cards/MarketPodiumCard.js",
+        "src/features/market/analytics/components/cards/MarketStatCard.js",
+        "src/features/market/analytics/components/cards/PositionAnalysisGrid.js",
+        "src/features/market/catalogue/components/LiveMarketTable.js",
+        "src/features/market/catalogue/components/MarketListingsSection.tsx",
+        "src/features/market/screens/components/MarketPageClient.tsx",
+        "src/features/market/trends/components/MarketKPIs.js",
+        "src/features/market/trends/components/MarketTrendsChart.tsx",
+        "src/features/players/components/desktop/catalogue/PlayerFilters.js",
+        "src/features/players/components/desktop/catalogue/PlayerStatsSection.js",
+        "src/features/players/components/desktop/catalogue/SquadDistributionPieCard.js",
+        "src/features/players/components/desktop/catalogue/SquadPositionBarCard.js",
+        "src/features/rounds/components/desktop/RoundStandings.js",
+        "src/features/rounds/components/desktop/RoundsPageClient.js",
+        "src/features/rounds/components/desktop/stats/CoachRatingCard.js",
+        "src/features/rounds/components/desktop/stats/GradaCard.js",
+        "src/features/rounds/components/desktop/stats/ScoreOverviewCard.js",
+        "src/features/rounds/components/desktop/stats/history/PerformanceChart.js",
+        "src/features/rounds/components/desktop/stats/history/RecordsGrid.js",
+        "src/features/season-review/screens/DesktopSeasonReviewScreen.tsx",
+        "src/features/tournaments/components/TournamentFixtures.js",
+        "src/features/tournaments/components/TournamentRow.js",
+        "src/features/tournaments/components/screens/DesktopTournamentDetailScreen.jsx",
+        "src/features/tournaments/components/stats/HallOfFame.js",
+        "src/features/tournaments/components/stats/RecordsSection.js"
+      ],
+      "owner": "feature UI adoption / legacy theme compatibility",
+      "removalGate": "Review direct callers, barrel dispatch and test consumers together; no implicit API removal during reconciliation."
+    },
+    {
+      "file": "src/components/ui/card-variants/GlassCard.js",
+      "callers": ["src/components/ui/Card.js", "src/components/ui/index.js"],
+      "owner": "feature UI adoption / legacy theme compatibility",
+      "removalGate": "Review direct callers, barrel dispatch and test consumers together; no implicit API removal during reconciliation."
+    },
+    {
+      "file": "src/components/ui/card-variants/MeshCard.js",
+      "callers": ["src/components/ui/Card.js", "src/components/ui/index.js"],
+      "owner": "feature UI adoption / legacy theme compatibility",
+      "removalGate": "Review direct callers, barrel dispatch and test consumers together; no implicit API removal during reconciliation."
+    },
+    {
+      "file": "src/components/ui/card-variants/NeoCard.js",
+      "callers": ["src/components/ui/Card.js"],
+      "owner": "feature UI adoption / legacy theme compatibility",
+      "removalGate": "Review direct callers, barrel dispatch and test consumers together; no implicit API removal during reconciliation."
+    },
+    {
+      "file": "src/components/ui/card-variants/StandardCard.js",
+      "callers": ["src/components/ui/Card.js"],
+      "owner": "feature UI adoption / legacy theme compatibility",
+      "removalGate": "Review direct callers, barrel dispatch and test consumers together; no implicit API removal during reconciliation."
+    },
+    {
+      "file": "src/contexts/CardThemeContext.js",
+      "callers": [
+        "src/app/layout.js",
+        "src/components/ui/Card.js",
+        "src/components/ui/ThemeBackground.js",
+        "src/components/ui/ThemeSwitcher.js"
+      ],
+      "owner": "feature UI adoption / legacy theme compatibility",
+      "removalGate": "Review direct callers, barrel dispatch and test consumers together; no implicit API removal during reconciliation."
+    },
+    {
+      "file": "src/lib/constants/thresholds.js",
+      "callers": [],
+      "owner": "feature UI adoption / legacy theme compatibility",
+      "removalGate": "Review direct callers, barrel dispatch and test consumers together; no implicit API removal during reconciliation."
+    },
+    {
+      "file": "src/lib/mobile/screen-state.ts",
+      "callers": [],
+      "owner": "UI-01C / UI-02 capability and state composition",
+      "removalGate": "Review direct callers, barrel dispatch and test consumers together; no implicit API removal during reconciliation."
+    },
+    {
+      "file": "src/lib/utils/analytics.ts",
+      "callers": [],
+      "owner": "feature UI adoption / legacy theme compatibility",
+      "removalGate": "Review direct callers, barrel dispatch and test consumers together; no implicit API removal during reconciliation."
+    }
+  ],
+  "tokens": {
+    "--accent": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": []
+    },
+    "--accent-foreground": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": []
+    },
+    "--action-accent": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": [
+        "src/app/globals.css",
+        "src/components/ui/primitives/button-styles.ts",
+        "src/styles/tokens/semantic-tokens.css"
+      ]
+    },
+    "--action-primary": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": [
+        "src/app/globals.css",
+        "src/components/ui/primitives/Badge.tsx",
+        "src/components/ui/primitives/button-styles.ts",
+        "src/styles/tokens/semantic-tokens.css"
+      ]
+    },
+    "--action-primary-content": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/app/globals.css", "src/components/ui/primitives/button-styles.ts"]
+    },
+    "--app-header-height": {
+      "definitions": ["src/app/globals.css"],
+      "references": ["src/app/globals.css", "src/components/shell/desktop/AppHeader.tsx"]
+    },
+    "--app-safe-area-top": {
+      "definitions": ["src/app/globals.css"],
+      "references": [
+        "src/app/globals.css",
+        "src/app/mobile-native.css",
+        "src/components/shell/desktop/AppHeader.tsx"
+      ]
+    },
+    "--background": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": [
+        "src/app/globals.css",
+        "src/app/mobile-native.css",
+        "src/features/hoopgrid/hooks/useHoopgridShare.js",
+        "src/features/players/components/desktop/catalogue/SquadSectionDrawer.js"
+      ]
+    },
+    "--border": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": [
+        "src/app/(auth)/login/page.js",
+        "src/app/globals.css",
+        "src/app/mobile-native.css",
+        "src/features/players/components/desktop/catalogue/SquadSectionDrawer.js",
+        "src/features/rounds/components/desktop/stats/history/PerformanceChart.js"
+      ]
+    },
+    "--border-default": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/app/globals.css", "src/styles/tokens/semantic-tokens.css"]
+    },
+    "--card": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/app/globals.css", "src/app/mobile-native.css"]
+    },
+    "--card-foreground": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": []
+    },
+    "--color-": {
+      "definitions": [],
+      "references": [
+        "src/features/market/analytics/components/cards/MarketPodiumCard.js",
+        "src/features/market/analytics/components/cards/MarketStatCard.js"
+      ]
+    },
+    "--color-accent": {
+      "definitions": ["src/app/globals.css"],
+      "references": []
+    },
+    "--color-accent-foreground": {
+      "definitions": ["src/app/globals.css"],
+      "references": []
+    },
+    "--color-action-primary-content": {
+      "definitions": ["src/app/globals.css"],
+      "references": []
+    },
+    "--color-background": {
+      "definitions": ["src/app/globals.css"],
+      "references": []
+    },
+    "--color-black": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--color-border": {
+      "definitions": ["src/app/globals.css"],
+      "references": []
+    },
+    "--color-card": {
+      "definitions": ["src/app/globals.css"],
+      "references": []
+    },
+    "--color-card-foreground": {
+      "definitions": ["src/app/globals.css"],
+      "references": []
+    },
+    "--color-control-content": {
+      "definitions": ["src/app/globals.css"],
+      "references": []
+    },
+    "--color-control-placeholder": {
+      "definitions": ["src/app/globals.css"],
+      "references": []
+    },
+    "--color-control-surface": {
+      "definitions": ["src/app/globals.css"],
+      "references": []
+    },
+    "--color-destructive": {
+      "definitions": ["src/app/globals.css"],
+      "references": []
+    },
+    "--color-destructive-foreground": {
+      "definitions": ["src/app/globals.css"],
+      "references": []
+    },
+    "--color-foreground": {
+      "definitions": ["src/app/globals.css"],
+      "references": []
+    },
+    "--color-ink-muted": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--color-ink-secondary": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--color-ink-strong": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--color-input": {
+      "definitions": ["src/app/globals.css"],
+      "references": []
+    },
+    "--color-muted": {
+      "definitions": ["src/app/globals.css"],
+      "references": []
+    },
+    "--color-muted-foreground": {
+      "definitions": ["src/app/globals.css"],
+      "references": []
+    },
+    "--color-obsidian-black": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--color-obsidian-deep": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--color-obsidian-deepest": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--color-obsidian-muted": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--color-obsidian-panel": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--color-obsidian-raised": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--color-obsidian-soft": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--color-orange-deep": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--color-orange-ink": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--color-orange-pressed": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--color-orange-strong": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--color-orange-warm": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--color-paper-canvas": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--color-paper-card": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--color-paper-muted": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--color-paper-subtle": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--color-popover": {
+      "definitions": ["src/app/globals.css"],
+      "references": []
+    },
+    "--color-popover-foreground": {
+      "definitions": ["src/app/globals.css"],
+      "references": []
+    },
+    "--color-primary": {
+      "definitions": ["src/app/globals.css"],
+      "references": []
+    },
+    "--color-primary-foreground": {
+      "definitions": ["src/app/globals.css"],
+      "references": []
+    },
+    "--color-red-ink": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--color-red-strong": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--color-ring": {
+      "definitions": ["src/app/globals.css"],
+      "references": []
+    },
+    "--color-secondary": {
+      "definitions": ["src/app/globals.css"],
+      "references": []
+    },
+    "--color-secondary-foreground": {
+      "definitions": ["src/app/globals.css"],
+      "references": []
+    },
+    "--color-slate-control": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--color-slate-deep": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--color-slate-light": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--color-slate-muted": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--color-slate-outline": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--color-slate-soft": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--color-white-bright": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--color-white-pure": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--color-white-soft": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--content-muted": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/app/globals.css", "src/styles/tokens/semantic-tokens.css"]
+    },
+    "--content-on-accent": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/app/globals.css", "src/styles/tokens/semantic-tokens.css"]
+    },
+    "--content-on-danger": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/app/globals.css", "src/styles/tokens/semantic-tokens.css"]
+    },
+    "--content-on-primary": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/app/globals.css", "src/styles/tokens/semantic-tokens.css"]
+    },
+    "--content-primary": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": [
+        "src/app/globals.css",
+        "src/components/shell/shared/AppBackground.tsx",
+        "src/styles/tokens/semantic-tokens.css"
+      ]
+    },
+    "--content-secondary": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/app/globals.css", "src/styles/tokens/semantic-tokens.css"]
+    },
+    "--control-border": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": [
+        "src/app/globals.css",
+        "src/components/ui/primitives/Input.tsx",
+        "src/styles/tokens/semantic-tokens.css"
+      ]
+    },
+    "--control-content": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/app/globals.css", "src/components/ui/primitives/Input.tsx"]
+    },
+    "--control-placeholder": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/app/globals.css", "src/components/ui/primitives/Input.tsx"]
+    },
+    "--control-surface": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/app/globals.css", "src/components/ui/primitives/Input.tsx"]
+    },
+    "--destructive": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": []
+    },
+    "--destructive-foreground": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": []
+    },
+    "--effect-glass-border": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--effect-glass-surface": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--effect-glow-primary": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--effect-glow-subtle": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--effect-gradient-accent": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--effect-gradient-card": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--effect-gradient-mesh": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--effect-shell-ambient-primary": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/components/shell/shared/AppBackground.tsx"]
+    },
+    "--effect-shell-ambient-subtle": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/components/shell/shared/AppBackground.tsx"]
+    },
+    "--effect-shell-brand-glow": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": [
+        "src/components/shell/desktop/Sidebar.tsx",
+        "src/components/shell/shared/AppBrand.tsx"
+      ]
+    },
+    "--focus-ring": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": [
+        "src/app/globals.css",
+        "src/components/ui/primitives/Input.tsx",
+        "src/components/ui/primitives/button-styles.ts",
+        "src/styles/tokens/semantic-tokens.css"
+      ]
+    },
+    "--font-bebas": {
+      "definitions": [],
+      "references": ["src/app/globals.css", "src/app/mobile-native.css"]
+    },
+    "--font-body": {
+      "definitions": [],
+      "references": ["src/app/mobile-native.css"]
+    },
+    "--font-display": {
+      "definitions": ["src/app/globals.css"],
+      "references": [
+        "src/app/mobile-native.css",
+        "src/features/standings/components/PlacementStatsCard.js",
+        "src/features/standings/components/PointsProgressionCard.js",
+        "src/features/standings/components/PositionEvolutionCard.js",
+        "src/features/standings/components/RollingAverageCard.js"
+      ]
+    },
+    "--font-inter": {
+      "definitions": [],
+      "references": ["src/app/globals.css"]
+    },
+    "--font-outfit": {
+      "definitions": [],
+      "references": ["src/app/globals.css"]
+    },
+    "--font-sans": {
+      "definitions": ["src/app/globals.css"],
+      "references": ["src/app/globals.css", "src/app/mobile-native.css"]
+    },
+    "--font-ui": {
+      "definitions": ["src/app/globals.css"],
+      "references": []
+    },
+    "--foreground": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": [
+        "src/app/globals.css",
+        "src/app/mobile-native.css",
+        "src/features/hoopgrid/hooks/useHoopgridShare.js"
+      ]
+    },
+    "--glass-border": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/app/globals.css"]
+    },
+    "--glass-surface": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/app/globals.css"]
+    },
+    "--glow-primary": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": [
+        "src/app/globals.css",
+        "src/features/matches/components/desktop/RoundSelector.js"
+      ]
+    },
+    "--glow-subtle": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/app/globals.css"]
+    },
+    "--gradient-accent": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/app/globals.css"]
+    },
+    "--gradient-card": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/app/globals.css"]
+    },
+    "--gradient-mesh": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/components/ui/ThemeBackground.js"]
+    },
+    "--home-avatar-color": {
+      "definitions": [],
+      "references": ["src/app/mobile-native.css"]
+    },
+    "--home-line-x": {
+      "definitions": ["src/app/mobile-native.css"],
+      "references": ["src/app/mobile-native.css"]
+    },
+    "--input": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": []
+    },
+    "--manager-card-bg": {
+      "definitions": ["src/app/globals.css"],
+      "references": ["src/features/standings/components/InitialSquadListCard.js"]
+    },
+    "--mobile-gutter": {
+      "definitions": ["src/app/mobile-native.css"],
+      "references": ["src/app/mobile-native.css"]
+    },
+    "--mobile-nav-height": {
+      "definitions": ["src/app/mobile-native.css"],
+      "references": ["src/app/mobile-native.css"]
+    },
+    "--muted": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/app/globals.css", "src/app/mobile-native.css"]
+    },
+    "--muted-foreground": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": [
+        "src/app/globals.css",
+        "src/app/mobile-native.css",
+        "src/features/rounds/components/desktop/stats/history/PerformanceChart.js"
+      ]
+    },
+    "--overlay-ink-faint": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--overlay-obsidian-glass": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--overlay-obsidian-mesh-medium": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--overlay-obsidian-mesh-soft": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--overlay-obsidian-mesh-strong": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--overlay-orange-glow": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--overlay-orange-glow-faint": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--overlay-paper-glass": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--overlay-white-faint": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--popover": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": []
+    },
+    "--popover-foreground": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": []
+    },
+    "--primary": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": [
+        "src/app/globals.css",
+        "src/app/mobile-native.css",
+        "src/components/lineup/LineupCourt.js",
+        "src/components/ui/CustomSelect.js",
+        "src/features/hoopgrid/hooks/useHoopgridShare.js",
+        "src/features/players/components/desktop/catalogue/SquadSectionDrawer.js",
+        "src/features/rounds/components/desktop/BasketballCourt.js"
+      ]
+    },
+    "--primary-foreground": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": []
+    },
+    "--primary-rgb": {
+      "definitions": [],
+      "references": ["src/features/rounds/components/desktop/RoundStandings.js"]
+    },
+    "--radius": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/app/globals.css"]
+    },
+    "--radius-compact": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--radius-control": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": [
+        "src/components/ui/primitives/Input.tsx",
+        "src/components/ui/primitives/Skeleton.tsx",
+        "src/components/ui/primitives/button-styles.ts"
+      ]
+    },
+    "--radius-rounded": {
+      "definitions": ["src/styles/tokens/base-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--radius-surface": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": [
+        "src/components/ui/primitives/Surface.tsx",
+        "src/styles/tokens/semantic-tokens.css"
+      ]
+    },
+    "--ring": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": []
+    },
+    "--secondary": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": [
+        "src/app/mobile-native.css",
+        "src/features/players/components/desktop/catalogue/SquadSectionDrawer.js"
+      ]
+    },
+    "--secondary-foreground": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": []
+    },
+    "--shell-accent-content": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--shell-accent-surface": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--shell-action-primary": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/app/globals.css", "src/styles/tokens/semantic-tokens.css"]
+    },
+    "--shell-action-primary-content": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--shell-border": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/app/globals.css", "src/styles/tokens/semantic-tokens.css"]
+    },
+    "--shell-content": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/app/globals.css", "src/styles/tokens/semantic-tokens.css"]
+    },
+    "--shell-focus-ring": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/styles/tokens/semantic-tokens.css"]
+    },
+    "--shell-navigation-shadow": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/app/globals.css"]
+    },
+    "--shell-overlay": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/app/globals.css"]
+    },
+    "--shell-progress-accent": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/app/globals.css"]
+    },
+    "--shell-sheet-shadow": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/app/globals.css"]
+    },
+    "--shell-surface": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/app/globals.css", "src/styles/tokens/semantic-tokens.css"]
+    },
+    "--sidebar-accent": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": []
+    },
+    "--sidebar-accent-foreground": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": []
+    },
+    "--sidebar-background": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/features/players/components/desktop/catalogue/SquadSectionDrawer.js"]
+    },
+    "--sidebar-border": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/features/players/components/desktop/catalogue/SquadSectionDrawer.js"]
+    },
+    "--sidebar-foreground": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": []
+    },
+    "--sidebar-primary": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": []
+    },
+    "--sidebar-primary-foreground": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": []
+    },
+    "--sidebar-ring": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": []
+    },
+    "--status-danger": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": [
+        "src/app/globals.css",
+        "src/components/ui/primitives/Badge.tsx",
+        "src/components/ui/primitives/Input.tsx",
+        "src/styles/tokens/semantic-tokens.css"
+      ]
+    },
+    "--surface-app": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": [
+        "src/app/globals.css",
+        "src/components/shell/shared/AppBackground.tsx",
+        "src/components/ui/primitives/button-styles.ts",
+        "src/styles/tokens/semantic-tokens.css"
+      ]
+    },
+    "--surface-card": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": [
+        "src/app/globals.css",
+        "src/components/ui/primitives/Surface.tsx",
+        "src/styles/tokens/semantic-tokens.css"
+      ]
+    },
+    "--surface-muted": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": [
+        "src/app/globals.css",
+        "src/components/ui/primitives/Input.tsx",
+        "src/components/ui/primitives/button-styles.ts",
+        "src/styles/tokens/semantic-tokens.css"
+      ]
+    },
+    "--surface-popover": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": ["src/app/globals.css", "src/styles/tokens/semantic-tokens.css"]
+    },
+    "--surface-secondary": {
+      "definitions": ["src/styles/tokens/semantic-tokens.css"],
+      "references": [
+        "src/app/globals.css",
+        "src/components/ui/primitives/Avatar.tsx",
+        "src/components/ui/primitives/Badge.tsx",
+        "src/components/ui/primitives/Skeleton.tsx",
+        "src/components/ui/primitives/button-styles.ts",
+        "src/styles/tokens/semantic-tokens.css"
+      ]
+    },
+    "--team-color": {
+      "definitions": [],
+      "references": [
+        "src/features/market/catalogue/components/MarketPlayerCard.tsx",
+        "src/features/schedule/components/PlayerChip.js"
+      ]
+    },
+    "--team-hover-color": {
+      "definitions": [],
+      "references": ["src/features/schedule/components/MatchCard.js"]
+    },
+    "--zinc-950": {
+      "definitions": [],
+      "references": ["src/components/ui/Tooltip.js"]
+    }
+  }
+}

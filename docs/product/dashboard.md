@@ -27,9 +27,8 @@ does not need to block the entire page.
   [`src/app/(app)/dashboard/page.tsx`](<../../src/app/(app)/dashboard/page.tsx>).
 - UI: [`Home components`](../../src/features/home/components) and
   [`Dashboard screens`](../../src/features/dashboard/screens) and feature-owned cards.
-- Dashboard data: [`server.ts`](../../src/features/dashboard/server.ts); legacy
-  [`dashboardService.ts`](../../src/lib/services/app/dashboardService.ts) remains a compatibility facade
-  for consumers assigned to later tasks. News and Home have separate feature contracts.
+- Dashboard data: [`server.ts`](../../src/features/dashboard/server.ts). Consumers use this owned
+  contract directly; the legacy facade was retired in Task 25A. News and Home have separate contracts.
 - Home data: [`Home services`](../../src/features/home/server.ts) own activity, personal summary
   and landing statistics. Desktop retains its landing-statistics request; phone streams summary
   and initial activity separately, with browser filter/pagination requests to `/api/home/activity`.

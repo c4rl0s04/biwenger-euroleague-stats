@@ -54,15 +54,15 @@ definitely have made.
 ## Internal flow
 
 - The page entry authenticates and loads a cached server-side overview.
-- [`seasonResilienceService.ts`](../../src/lib/services/features/seasonResilienceService.ts)
+- [Season Review server contract](../../src/features/season-review/server.ts)
   normalizes the frozen data, builds the historical autopsy, and coordinates recommendations.
-- [`resilience.ts`](../../src/lib/season-review/resilience.ts) contains the pure daily-ledger,
+- [`resilience.ts`](../../src/features/season-review/server/engines/resilience.ts) contains the pure daily-ledger,
   payout and roster-pressure logic.
-- [`season-simulator.ts`](../../src/lib/season-review/season-simulator.ts) owns complete-season agent
+- [`season-simulator.ts`](../../src/features/season-review/server/engines/season-simulator.ts) owns complete-season agent
   simulation and paired Monte Carlo aggregation.
-- [`simulation-dataset.ts`](../../src/lib/season-review/simulation-dataset.ts) aligns historical
+- [`simulation-dataset.ts`](../../src/features/season-review/server/engines/simulation-dataset.ts) aligns historical
   player points and prices to simulation rounds.
-- [`simulation-analysis.ts`](../../src/lib/season-review/simulation-analysis.ts) defines the complete
+- [`simulation-analysis.ts`](../../src/features/season-review/server/engines/simulation-analysis.ts) defines the complete
   grid, paired experiments, statistical aggregation, Pareto frontier, and public ranking profiles.
 - A validated authenticated server action recalculates custom scenarios after the controls settle.
 

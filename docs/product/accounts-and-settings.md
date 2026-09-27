@@ -29,9 +29,8 @@ Authentication mechanics and route boundaries are documented in
   [`DesktopSettingsScreen`](../../src/features/accounts/screens/DesktopSettingsScreen.js),
   [`MobileSettingsScreen`](../../src/features/accounts/screens/MobileSettingsScreen.tsx), and
   [`MobileSettingsDetail`](../../src/features/accounts/screens/MobileSettingsDetail.tsx).
-- Services: [`accountReadService`](../../src/features/accounts/server/services/account-read.service.ts),
-  [`accountCommandService`](../../src/features/accounts/server/services/account-command.service.ts),
-  and manager profile services.
+- Services: [Accounts](../../src/features/accounts/server.ts) owns account operations;
+  [Managers](../../src/features/managers/server.ts) owns manager profiles and squad reads.
 - HTTP: `/api/auth/*`, `/api/user/change-password`, `/api/user/link-biwenger`, and `/api/users/*`.
 - Data: [`accountRepository`](../../src/features/accounts/server/repositories/account.repository.ts)
   backed by Drizzle user queries and encrypted credential storage.
