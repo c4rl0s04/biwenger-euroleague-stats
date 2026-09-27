@@ -243,4 +243,161 @@ describe('SyncManager', () => {
       expect(countEmitted).toBe(1);
     });
   });
+
+  describe('cache invalidation lifecycle', () => {
+    it('calls clearCache() when all sync steps complete successfully', async () => {
+      const cache = await import('../../utils/cache');
+      const { SyncManager } = await import('../manager');
+      const manager = new SyncManager({ useAdvisoryLock: false });
+      manager.addStep(
+        definition(
+          'success-step',
+          vi.fn(async () => ({ summary: 'ok' }))
+        )
+      );
+
+      await manager.run();
+
+      expect(manager.hasErrors).toBe(false);
+      expect(cache.clearCache).toHaveBeenCalledOnce();
+    });
+
+    it('does not call clearCache() if a sync step throws an error', async () => {
+      const cache = await import('../../utils/cache');
+      const { SyncManager } = await import('../manager');
+      const manager = new SyncManager({ useAdvisoryLock: false });
+      manager.addStep(
+        definition(
+          'failing-step',
+          vi.fn(async () => {
+            throw new Error('Database write failure');
+          })
+        )
+      );
+
+      await manager.run();
+
+      expect(manager.hasErrors).toBe(true);
+      expect(cache.clearCache).not.toHaveBeenCalled();
+    });
+
+    it('does not call clearCache() if preconditions fail', async () => {
+      const seasonGuard = await import('../season-guard');
+      vi.mocked(seasonGuard.assertSyncSeasonWritable).mockRejectedValueOnce(
+        new Error('Season is frozen')
+      );
+      const cache = await import('../../utils/cache');
+      const { SyncManager } = await import('../manager');
+      const manager = new SyncManager({ useAdvisoryLock: false });
+      manager.addStep(
+        definition(
+          'step-1',
+          vi.fn(async () => ({ summary: 'ok' }))
+        )
+      );
+
+      await manager.run();
+
+      expect(manager.hasErrors).toBe(true);
+      expect(cache.clearCache).not.toHaveBeenCalled();
+    });
+
+    it('does not call clearCache() when the advisory lock is unavailable', async () => {
+      const lockClient = {
+        query: vi.fn(async () => ({ rows: [{ locked: false }] })),
+        release: vi.fn(),
+      };
+      mockDb.connect.mockResolvedValue(lockClient);
+      const cache = await import('../../utils/cache');
+      const { SyncManager } = await import('../manager');
+      const manager = new SyncManager({ useAdvisoryLock: true });
+      manager.addStep(
+        definition(
+          'never',
+          vi.fn(async () => ({ summary: 'ok' }))
+        )
+      );
+
+      await manager.run();
+
+      expect(manager.lockUnavailable).toBe(true);
+      expect(cache.clearCache).not.toHaveBeenCalled();
+    });
+  });
+  it('closes the pool and reports failure when lock acquisition rejects', async () => {
+    const client = {
+      query: vi.fn().mockRejectedValue(new Error('lock query failed')),
+      release: vi.fn(),
+    };
+    mockDb.connect.mockResolvedValue(client);
+    const { SyncManager } = await import('../manager');
+    const cache = await import('../../utils/cache');
+    const schema = await import('../../db/schema-validation');
+    const run = vi.fn();
+    const manager = new SyncManager();
+    manager.addStep(definition('never', run));
+    await manager.run();
+    expect(manager.hasErrors).toBe(true);
+    expect(run).not.toHaveBeenCalled();
+    expect(schema.validateSchemaReady).not.toHaveBeenCalled();
+    expect(cache.clearCache).not.toHaveBeenCalled();
+    expect(client.release).toHaveBeenCalledWith(true);
+    expect(mockDb.end).toHaveBeenCalledOnce();
+  });
+
+  it.each(['routine', 'bootstrap', 'live'] as const)(
+    'uses the same lock and closes skipped %s runs',
+    async (mode) => {
+      const client = {
+        query: vi.fn().mockResolvedValue({ rows: [{ locked: false }] }),
+        release: vi.fn(),
+      };
+      mockDb.connect.mockResolvedValue(client);
+      const { SyncManager } = await import('../manager');
+      const manager = new SyncManager({ mode });
+      await manager.run();
+      expect(client.query).toHaveBeenCalledExactlyOnceWith(
+        'SELECT pg_try_advisory_lock($1) AS locked',
+        [823744]
+      );
+      expect(mockDb.end).toHaveBeenCalledOnce();
+      expect(manager.logs.some((entry) => entry.message === 'Sync finished successfully.')).toBe(
+        false
+      );
+    }
+  );
+
+  it.each([false, true])(
+    'releases the lock before ending the pool after step failure=%s',
+    async (fails) => {
+      const events: string[] = [];
+      const client = {
+        query: vi.fn(async (sql: string) => {
+          events.push(sql);
+          return { rows: [{ locked: true }] };
+        }),
+        release: vi.fn(() => {
+          events.push('release');
+        }),
+      };
+      mockDb.connect.mockResolvedValue(client);
+      mockDb.end.mockImplementationOnce(async () => {
+        events.push('end');
+      });
+      const { SyncManager } = await import('../manager');
+      const manager = new SyncManager();
+      manager.addStep(
+        definition('step', async () => {
+          if (fails) throw new Error('step failed');
+        })
+      );
+      await manager.run();
+      expect(manager.hasErrors).toBe(fails);
+      expect(events.slice(-3)).toEqual([
+        'SELECT pg_advisory_unlock($1) AS unlocked',
+        'release',
+        'end',
+      ]);
+    }
+  );
 });

@@ -117,3 +117,12 @@ remaining on the active execution path.
 
 Follow [database safety](../operations/database-safety.md), [season lifecycle](../operations/season-lifecycle.md),
 and the [data sync runbook](../operations/data-sync.md) before executing commands.
+
+## Infrastructure and cache lifecycle audit
+
+The [Task 22 receipt](../migration/reports/task-22-infrastructure-cache.md) records retained
+ownership, lock cleanup tests, cache keys and operational limits. Successful sync clears
+only its process-local cache; GitHub sync jobs do not invalidate existing web-process,
+HTTP or browser caches. The routine/bootstrap/live lock is not a blanket guarantee for
+standalone maintenance/import commands. See the receipt before scheduling those commands
+alongside normal ingestion.

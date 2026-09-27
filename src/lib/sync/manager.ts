@@ -138,26 +138,26 @@ export class SyncManager {
     let advisoryLock: AdvisoryLock | null = null;
     this.context.db = pool;
 
-    if (this.useAdvisoryLock) {
-      advisoryLock = await acquireAdvisoryLock(pool, this.lockKey, this.mode);
-      if (!advisoryLock.acquired) {
-        this.lockUnavailable = true;
-        this.reporter.runSkipped({ reason: 'Another synchronization is already running' });
-        this.logs.push({
-          type: 'info',
-          message: 'Another synchronization is already running. Skipping this run.',
-          timestamp: new Date(),
-        });
-        return;
-      }
-    }
-
     let completedStepsCount = 0;
     let failedStep: SyncStepDefinition | null = null;
     this.warningsCount = 0;
     this.currentStepWarnings = [];
 
     try {
+      if (this.useAdvisoryLock) {
+        advisoryLock = await acquireAdvisoryLock(pool, this.lockKey, this.mode);
+        if (!advisoryLock.acquired) {
+          this.lockUnavailable = true;
+          this.reporter.runSkipped({ reason: 'Another synchronization is already running' });
+          this.logs.push({
+            type: 'info',
+            message: 'Another synchronization is already running. Skipping this run.',
+            timestamp: new Date(),
+          });
+          return;
+        }
+      }
+
       await validateSchemaReady(pool);
 
       const season = await assertSyncSeasonWritable(pool, this.targetSeasonId);
@@ -255,7 +255,7 @@ export class SyncManager {
       this.error('Synchronization preconditions failed.', error, { stepId: 'preconditions' });
       this.reporter.preconditionsFailed({ error });
     } finally {
-      if (!this.hasErrors) clearCache();
+      if (!this.hasErrors && !this.lockUnavailable) clearCache();
       if (advisoryLock?.acquired) await advisoryLock.release();
       if (this.context.db && typeof this.context.db.end === 'function') {
         await this.context.db.end();
@@ -277,7 +277,7 @@ export class SyncManager {
           message: 'Sync finished with errors.',
           timestamp: new Date(),
         });
-      } else {
+      } else if (!this.lockUnavailable) {
         this.reporter.runCompleted({
           mode: this.mode,
           totalSteps: this.steps.length,

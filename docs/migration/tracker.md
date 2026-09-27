@@ -272,12 +272,12 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 22 — Infrastructure / cache lifecycle
 
-- **State:** Planned.
+- **State:** Integrated into main at `2c06e2bc`; full verification passed.
 - **Dependencies / approval:** Read/command contracts stable; inventory can start earlier.
 - **Scope:** Review DB infrastructure, sync, scripts, locks and invalidation; not a wholesale sync rewrite.
 - **Completion check:** Retained infrastructure has ownership/rationale; identity/season cache keys and invalidation verified.
-- **Evidence:** Task 01 superseded sync histories.
-- **Next action:** Audit current main only; no production sync or schema operations.
+- **Evidence:** [Task 22 receipt](reports/task-22-infrastructure-cache.md); retained ownership and operational limits audited; lock cleanup fixed; 35 focused checks including two disposable PostgreSQL tests passed; full `npm run verify` passed with 2,848 tests.
+- **Next action:** Completed. Continue Task 23 in its existing `refactor/application-shell` worktree; do not restart the parallel shell work.
 
 ### Task 23 — Shell / search interactions
 
@@ -325,7 +325,7 @@ real provider mutations and changes to credentials/authorization unless separate
 - **Next action:** Obtain release authority; keep unavailable verification explicitly pending.
 
 Tasks can be combined into a bounded PR when dependencies and review scope permit; IDs remain stable.
-All read-domain scopes (Tasks 04–11), the sensitive-operation security inventory (Task 12), provider boundaries (Task 13), lineup reads (Task 14), lineup commands (Task 15), private market reads audit (Task 16), market commands (Task 17), accounts/settings (Task 18), hoopgrid (Task 19), assistant (Task 20), and other actions (Task 21) are merged into `main`. The next domain milestone is **Task 22 — Infrastructure / cache lifecycle**. In the UI migration track, UI-01A, UI-01T, UI-01B, and UI-01H are complete and merged; **Task 23 / UI-SHELL — Application Shell** is complete and validated on branch `refactor/application-shell` for PR #49 review, establishing the canonical chrome foundation before demand-driven **UI-01C — demand-driven shared compositions**, **UI-02 — interactive controls / overlays**, **UI-03 — Season Predictions pilot**, **UI-04 — foundation/design review**, then feature-by-feature legacy UI migration.
+Tasks 04–22 are integrated into main. Task 22 closed at `2c06e2bc`; Task 23 continues in the existing `refactor/application-shell` worktree. In the UI migration track, UI-01A, UI-01T, UI-01B, and UI-01H are complete and merged; **Task 23 / UI-SHELL — Application Shell** is complete and validated on branch `refactor/application-shell` for PR #49 review, establishing the canonical chrome foundation before **UI-01C — demand-driven shared compositions**, **UI-02 — interactive controls / overlays**, **UI-03 — Season Predictions pilot**, **UI-04 — foundation/design review**, then feature-by-feature legacy UI migration.
 
 ## UI presentation ownership and cleanup contract
 
