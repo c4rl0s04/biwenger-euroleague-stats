@@ -26,22 +26,11 @@ describe('Rounds architecture registration', () => {
       expect(source).not.toMatch(/@\/lib\/(?:db|services)|Record<string,\s*any>/);
     }
   });
-  it('limits existing page-auth debt to six exact infrastructure edges per page', () => {
+  it('uses the enforced authentication contract without persistence exceptions', () => {
+    expect(policy.exceptions).toEqual([]);
     for (const page of pages) {
-      const exceptions = policy.exceptions.filter((entry) =>
-        entry.edge.startsWith(`entrypoint-persistence: ${page} -> `)
-      );
-      expect(exceptions).toHaveLength(6);
-      for (const entry of exceptions) {
-        expect(entry.edge).toMatch(
-          / -> (src\/auth\.js|src\/lib\/credentials\/repository\.ts) -> (drizzle-orm|src\/lib\/db\/(client|index|schema)\.ts)$/
-        );
-        expect(entry.removeWhen).toContain('security gate');
-      }
+      expect(readFileSync(page, 'utf8')).toContain("from '@/auth'");
     }
-    expect(
-      policy.exceptions.filter((entry) => routes.some((route) => entry.edge.includes(route)))
-    ).toEqual([]);
   });
   it('keeps mobile presentation independent from loose database-shaped record renderers', () => {
     for (const file of ['MobileRoundsScreen.tsx', 'RoundSectionScreen.tsx', 'RoundRows.tsx']) {

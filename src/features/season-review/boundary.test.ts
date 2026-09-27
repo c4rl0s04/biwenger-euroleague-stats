@@ -70,13 +70,7 @@ describe('Season Review feature boundary', () => {
     expect(policy.entrypoints).toContain('src/app/(app)/season-review/page.tsx');
     expect(policy.entrypoints).toContain('src/app/(app)/season-review/[section]/page.tsx');
 
-    const exceptions = policy.exceptions.filter((e: { edge: string }) =>
-      e.edge.includes('src/app/(app)/season-review/page.tsx')
-    );
-    expect(exceptions).toHaveLength(6);
-    for (const exp of exceptions) {
-      expect(exp.edge).toMatch(/-> (src\/auth.js|src\/lib\/credentials\/repository.ts) ->/);
-    }
+    expect(policy.exceptions).toEqual([]);
   });
 
   it('provides thin backward compatibility shims', () => {
