@@ -10,6 +10,8 @@ status: active
 
 # Task 22 — Infrastructure and cache lifecycle
 
+Integrated into main at `2c06e2bc`.
+
 Implementation date: 2026-09-27. Branch: `refactor/infrastructure`, based on main
 `89267368`. Task 21 is integrated at `af55af80`. This task retains cross-domain
 infrastructure in its existing layer; it does not introduce artificial feature wrappers.

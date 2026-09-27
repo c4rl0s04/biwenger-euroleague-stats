@@ -269,12 +269,12 @@ real provider mutations and changes to credentials/authorization unless separate
 
 ### Task 22 — Infrastructure / cache lifecycle
 
-- **State:** Implemented and verified on `refactor/infrastructure`, based on main `89267368`.
+- **State:** Integrated into main at `2c06e2bc`; full verification passed.
 - **Dependencies / approval:** Read/command contracts stable; inventory can start earlier.
 - **Scope:** Review DB infrastructure, sync, scripts, locks and invalidation; not a wholesale sync rewrite.
 - **Completion check:** Retained infrastructure has ownership/rationale; identity/season cache keys and invalidation verified.
 - **Evidence:** [Task 22 receipt](reports/task-22-infrastructure-cache.md); retained ownership and operational limits audited; lock cleanup fixed; 35 focused checks including two disposable PostgreSQL tests passed; full `npm run verify` passed with 2,848 tests.
-- **Next action:** Fast-forward merge into main; proceed with Task 23 Shell / search interactions.
+- **Next action:** Completed. Continue Task 23 in its existing `refactor/application-shell` worktree; do not restart the parallel shell work.
 
 ### Task 23 — Shell / search interactions
 
@@ -322,7 +322,7 @@ real provider mutations and changes to credentials/authorization unless separate
 - **Next action:** Obtain release authority; keep unavailable verification explicitly pending.
 
 Tasks can be combined into a bounded PR when dependencies and review scope permit; IDs remain stable.
-Tasks 04–21 are integrated. Task 22 infrastructure / cache lifecycle is implemented and verified on `refactor/infrastructure`. In the UI migration track, UI-01A, UI-01T, and UI-01B are integrated; UI-01H rollout hardening is complete after PR #46, followed by **Task 23 — Shell / search interactions** as the first production consumer, before demand-driven **UI-01C — Shared Compositions** and **UI-02 — Interactive Controls & Overlays**.
+Tasks 04–22 are integrated into main. Task 22 closed at `2c06e2bc`; Task 23 continues in the existing `refactor/application-shell` worktree. In the UI migration track, UI-01A, UI-01T, and UI-01B are integrated; UI-01H rollout hardening is complete after PR #46, followed by **Task 23 — Shell / search interactions** as the first production consumer, before demand-driven **UI-01C — Shared Compositions** and **UI-02 — Interactive Controls & Overlays**.
 
 ## UI presentation ownership and cleanup contract
 
