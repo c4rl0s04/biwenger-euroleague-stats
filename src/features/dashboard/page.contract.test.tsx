@@ -22,7 +22,7 @@ vi.mock('@/features/dashboard/server', () => ({
 vi.mock('@/features/news/server', () => ({ fetchNewsFeed: mocks.news }));
 vi.mock('next/dynamic', () => ({ default: () => () => null }));
 vi.mock('@/components/ui', () => ({ CardSkeleton: () => null, PageHeader: () => null }));
-vi.mock('@/components/layout', () => ({ Section: () => null }));
+vi.mock('@/components/layout/Section', () => ({ default: () => null }));
 vi.mock('@/features/dashboard/public', async () => ({
   DesktopDashboardScreen: () => createElement('main', {}, 'Desktop Dashboard'),
   MobileDashboardScreen: ({ data }: { data: { managerName: string } }) =>

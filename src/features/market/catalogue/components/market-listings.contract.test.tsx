@@ -19,8 +19,8 @@ vi.mock('react', async (load) => ({
     return [state.values.has(index) ? state.values.get(index) : initial, setter];
   },
 }));
-vi.mock('@/components/layout', () => ({
-  Section: ({ children }: { children: ReactNode }) => <section>{children}</section>,
+vi.mock('@/components/layout/Section', () => ({
+  default: ({ children }: { children: ReactNode }) => <section>{children}</section>,
 }));
 vi.mock('@/components/ui/card-variants/ElegantCard', () => ({
   default: ({ children }: { children: ReactNode }) => <div>{children}</div>,
