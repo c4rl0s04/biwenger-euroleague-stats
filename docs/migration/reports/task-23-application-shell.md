@@ -9,7 +9,7 @@ status: active
 
 # Task 23 — Application Shell Migration
 
-Base: `89267368`.
+Base: `1be12d61`.
 Branch: `refactor/application-shell`.
 State: Implemented and locally verified; merge remains gated on the published exact-head checks.
 
@@ -334,11 +334,11 @@ The pre-hardening CI failure on Matches exposed old full-page chrome baselines. 
 
 ## Verification evidence
 
-- Latest reconciled main: `89267368d7e61c4b11c9e74003f3124f9c11d1a0`. The initial rebase onto `f74f22ab` was clean. Two subsequent clean merges preserve the new `fa48d5a2` sync price-history fix and `89267368` manual finance workflow/docs unchanged, together with Tasks 16–18 and earlier documentation updates.
+- Latest reconciled main: `1be12d611664d9e291e7cc5760524eee00f124ef`. The initial rebase onto `f74f22ab` was clean. Subsequent merges preserve the `fa48d5a2` sync price-history fix, `89267368` manual finance workflow/docs, and Task 22 infrastructure work (`2c06e2bc`, receipt `1be12d61`) unchanged. Only the Task 22 merge conflicted: the closing summary in `docs/migration/tracker.md` was reconciled by keeping main’s Tasks 04–22 integrated status and this branch’s complete UI-01C → UI-02 → UI-03 → UI-04 sequence. No newer main implementation was overwritten.
 - Runtime/test implementation: `0596fb591d8f922c4fe5ab77a655ff2b1d01ed12`.
-- Reviewed visual references: `d298083037bee6edc733ab7836a83cf54b08e801`. Final integrated implementation: `7c3fd5fdc9b643dcd9a90140dfc128af2da97707`.
-- Exact implementation synthetic merge candidate: `ffe0bbd5b3bce36825871ededcb94e0f21737d22` (main `89267368`, PR head `8bb7e09b`). Its tree `06786421f9e3ddb09994cbebdee811ac83c16bf1` is identical to final integrated implementation `7c3fd5fd`; the latter explicitly merges the finance workflow parent into the branch.
-- [Implementation candidate CI and current result](https://github.com/c4rl0s04/biwenger-euroleague-stats/actions/runs/36317677088). [Final publication checks](https://github.com/c4rl0s04/biwenger-euroleague-stats/pull/49/checks) also validate the subsequent evidence-only documentation commit. The PR verification record identifies that published head and synthetic merge SHA after publication; it is intentionally separate from the immutable implementation SHA to avoid a self-referential commit hash. Require Format Check, Test & Build, Browser contracts and visual regression, and Vercel success before merge. Deployment Smoke Check is conditionally skipped by its workflow, not a passing deployment test.
+- Reviewed visual references: `d298083037bee6edc733ab7836a83cf54b08e801`. Final integrated implementation: `1f84cf2f07651b9880ecdf13eb1203755674ace7`.
+- Exact implementation synthetic merge candidate: `b8f2d7cd1f48c18fda67fd7d7d7467ca7e73c90a` (main `1be12d61`, PR head `1f84cf2f`).
+- [Implementation candidate CI and current result](https://github.com/c4rl0s04/biwenger-euroleague-stats/actions/runs/36319628754). [Final publication checks](https://github.com/c4rl0s04/biwenger-euroleague-stats/pull/49/checks) also validate the subsequent evidence-only documentation commit. The PR verification record identifies that published head and synthetic merge SHA after publication; it is intentionally separate from the immutable implementation SHA to avoid a self-referential commit hash. Require Format Check, Test & Build, Browser contracts and visual regression, and Vercel success before merge. Deployment Smoke Check is conditionally skipped by its workflow, not a passing deployment test.
 
 ### Local commands and results
 
@@ -346,9 +346,9 @@ The pre-hardening CI failure on Matches exposed old full-page chrome baselines. 
 | ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | `npm run skills:check`                                                                | PASS — 6 repository skills                                                                                  |
 | `npm run architecture:check`                                                          | PASS — 1,105 modules, 99 entrypoints, no violations                                                         |
-| `npm run docs:check`                                                                  | PASS — 125 vault notes                                                                                      |
+| `npm run docs:check`                                                                  | PASS — 126 vault notes                                                                                      |
 | `npm run typecheck`                                                                   | PASS                                                                                                        |
-| `npm run test:run -- --maxWorkers=2`                                                  | PASS — 2,852 tests passed / 6 skipped; 347 files passed / 3 skipped                                         |
+| `npm run test:run -- --maxWorkers=2`                                                  | PASS — 2,875 tests passed / 8 skipped; 349 files passed / 4 skipped                                         |
 | `npm run lint`                                                                        | PASS — 0 errors, 25 warnings; includes the existing More-menu ref-cleanup warning and legacy image warnings |
 | `SKIP_DB=true npm run build`                                                          | PASS — production build, 52 static pages generated                                                          |
 | `npm run db:audit:schema:metadata`                                                    | PASS — 37 source/snapshot tables; no table, column or unique-constraint drift                               |
@@ -358,7 +358,7 @@ The pre-hardening CI failure on Matches exposed old full-page chrome baselines. 
 | `git diff --check`                                                                    | PASS                                                                                                        |
 | `npx --no-install vitest run src/components/shell src/lib/theme --maxWorkers=2`       | PASS — 49 tests across 9 files                                                                              |
 
-The full checks ran on the latest integrated application source. The finance workflow/documentation merge does not change that source; docs checks were repeated afterward. Publication CI revalidates the exact final tree, including this evidence-only update. All 18 changed domain/API files outside the intentional News boundary test and user-hook contract were independently compared with formatted main source and proved formatting-only.
+The full checks ran on the latest integrated application source, including Task 22. Docs checks were repeated after this receipt update. Publication CI revalidates the exact final tree, including this evidence-only update. All 18 changed domain/API files outside the intentional News boundary test and user-hook contract were independently compared with formatted main source and proved formatting-only.
 
 ### Browser results
 
@@ -366,7 +366,7 @@ The disposable runner executed `pwa-responsive.spec.ts`, `application-theme.spec
 
 Desktop and phone explicit-light smoke passed. Dark/light persistence, system changes, cross-tab updates, storage failures, SSR/pre-hydration behavior, Surface/Card neutrality, actual shell color/gradient resolution, safe areas, overflow, navigation pending state and More-menu initial focus/Tab wrapping/Escape/focus restoration passed. Hydration/runtime guards were retained. Legacy hard-coded light-mode styling remains migration debt, not a page redesign in this PR.
 
-The pre-latest-main publication `9c93b370` / synthetic candidate `6c698b67` passed the full nine-project Linux suite: **255 passed, 24 expected skips, zero failures**, including unchanged phone and other dark visual references ([run](https://github.com/c4rl0s04/biwenger-euroleague-stats/actions/runs/36316014263)). The latest combined-tree/full-publication acceptance is the live CI source linked above, not this earlier-base result. An initial full-unit run overlapped a resource-heavy Docker build and was interrupted after timeout failures; the sequential full rerun passed unchanged. The slow local Docker build and an intentionally shortened all-device native browser run are not claimed as complete acceptance runs. After the sync merge, an unchanged Hoopgrid import-heavy case timed out once while formatting also ran. Its isolated rerun passed 4/4, and the sequential full rerun passed 2,852 tests with original timeouts and no test changes. Disposable PostgreSQL fixture/season-integrity checks passed; no production database was used.
+The pre-Task-22 publication `0842fe6c` / synthetic candidate `c36d1d5e` passed the full nine-project Linux suite: **255 passed, 24 expected skips, zero failures**, including unchanged phone and other dark visual references ([run](https://github.com/c4rl0s04/biwenger-euroleague-stats/actions/runs/36318128568)). The latest combined-tree/full-publication acceptance is the live CI source linked above, not this earlier-base result. An initial full-unit run overlapped a resource-heavy Docker build and was interrupted after timeout failures; the sequential full rerun passed unchanged. The slow local Docker build and an intentionally shortened all-device native browser run are not claimed as complete acceptance runs. After the sync merge, an unchanged Hoopgrid import-heavy case timed out once while formatting also ran. Its isolated rerun passed 4/4, and the sequential full rerun passed 2,852 tests with original timeouts and no test changes. Disposable PostgreSQL fixture/season-integrity checks passed; no production database was used.
 
 ## Next milestone
 
