@@ -1,5 +1,6 @@
 import type { SyncMode, SyncStepDefinition } from './manager';
 import { run as syncBiwengerBoard } from './steps/biwenger-board';
+import { run as syncBiwengerPriceHistory } from './steps/biwenger-price-history';
 import { run as syncBiwengerCatalog } from './steps/biwenger-catalog';
 import { run as syncBiwengerFantasyPoints } from './steps/biwenger-fantasy-points';
 import { run as syncBiwengerLineups } from './steps/biwenger-lineups';
@@ -15,6 +16,7 @@ import { run as syncUserColors } from './steps/user-colors';
 
 export const SYNC_STEP_IDS = [
   'biwenger-catalog',
+  'biwenger-price-history',
   'euroleague-master-data',
   'match-linking',
   'biwenger-users',
@@ -36,10 +38,19 @@ export const PIPELINE: readonly SyncStepDefinition[] = [
     id: 'biwenger-catalog',
     title: 'Fantasy player, team and round catalogue',
     source: 'biwenger',
-    writes: ['players', 'teams', 'player_seasons', 'market_values'],
+    writes: ['players', 'teams', 'player_seasons'],
     modes: ['routine', 'bootstrap'],
     dependencies: [],
     run: syncBiwengerCatalog,
+  },
+  {
+    id: 'biwenger-price-history',
+    title: 'Authoritative daily player prices',
+    source: 'biwenger',
+    writes: ['market_values', 'sync_meta:biwenger-price-history'],
+    modes: ['routine', 'bootstrap'],
+    dependencies: ['biwenger-catalog'],
+    run: syncBiwengerPriceHistory,
   },
   {
     id: 'euroleague-master-data',

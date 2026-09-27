@@ -12,23 +12,6 @@ import { relevantRounds } from '../../rounds';
 
 const DEFAULT_SLEEP_MS = 600;
 
-export function historicalPriceDate(
-  value: unknown,
-  startsAt: string | null,
-  endsAt: string | null
-): string | null {
-  const validDate = (date: string) =>
-    /^\d{4}-\d{2}-\d{2}$/.test(date) &&
-    Number.isFinite(Date.parse(date)) &&
-    new Date(date).toISOString().slice(0, 10) === date;
-  if (!startsAt || !validDate(startsAt) || (endsAt && !validDate(endsAt))) return null;
-  const raw = String(value);
-  if (!/^\d{6}$/.test(raw)) return null;
-  const date = `20${raw.slice(0, 2)}-${raw.slice(2, 4)}-${raw.slice(4, 6)}`;
-  if (!validDate(date) || date < startsAt || (endsAt && date > endsAt)) return null;
-  return date;
-}
-
 export interface BiwengerCatalogDependencies {
   fetchAllPlayers: typeof fetchAllPlayers;
   fetchRoundGames: typeof fetchRoundGames;
@@ -50,26 +33,6 @@ export const parseBiwengerDate = (dateInt: number | string | null | undefined): 
   const year = str.substring(0, 4);
   const month = str.substring(4, 6);
   const day = str.substring(6, 8);
-  return `${year}-${month}-${day}`;
-};
-
-export const parsePriceDate = (dateInt: number | string): string => {
-  const str = dateInt.toString();
-  const year = '20' + str.substring(0, 2);
-  let month = str.substring(2, 4);
-  let day = str.substring(4, 6);
-
-  if (parseInt(month, 10) > 12) {
-    const temp = month;
-    month = day;
-    day = temp;
-  }
-
-  if (parseInt(month, 10) > 12) {
-    console.warn(`Invalid date encountered: ${dateInt}. Defaulting to ${year}-01-01`);
-    return `${year}-01-01`;
-  }
-
   return `${year}-${month}-${day}`;
 };
 
@@ -208,12 +171,6 @@ export async function syncBiwengerCatalog(
   );
 
   const mutations = preparePlayerMutations(db as any, { seasonId });
-  const boundaries = await db!.query(
-    'SELECT starts_at::text, ends_at::text FROM seasons WHERE id = $1',
-    [seasonId]
-  );
-  const startsAt = boundaries.rows[0]?.starts_at ?? null;
-  const endsAt = boundaries.rows[0]?.ends_at ?? null;
   const positions: any = CONFIG.POSITIONS;
   const teams = snapshot.teams;
 
@@ -235,8 +192,6 @@ export async function syncBiwengerCatalog(
   let newPlayersCount = 0;
   let skippedDetailsCount = 0;
   const warnings: string[] = [];
-  let skippedHistoricalPrices = 0;
-  if (!startsAt) warnings.push('Historical price import disabled: season starts_at is missing.');
 
   for (const [id, player] of Object.entries(playersList) as any[]) {
     const snapshot = normalizeBiwengerPlayer(id, player, positions);
@@ -260,17 +215,6 @@ export async function syncBiwengerCatalog(
       img: snapshot.img,
     });
 
-    if (snapshot.price != null) {
-      const todayInt = new Date().toISOString().slice(2, 10).replace(/-/g, '');
-      const priceDate = parsePriceDate(todayInt);
-
-      await mutations.insertMarketValue({
-        player_id: playerId,
-        price: snapshot.price,
-        date: priceDate,
-      });
-    }
-
     const isNewPlayer = !existingPlayerIds.has(playerId);
 
     if (isNewPlayer) {
@@ -290,21 +234,6 @@ export async function syncBiwengerCatalog(
             height: d.height || null,
             weight: d.weight || null,
           });
-
-          if (d.prices && Array.isArray(d.prices)) {
-            for (const [dateInt, price] of d.prices) {
-              const dateStr = historicalPriceDate(dateInt, startsAt, endsAt);
-              if (!dateStr) {
-                skippedHistoricalPrices++;
-                continue;
-              }
-              await mutations.insertMarketValue({
-                player_id: playerId,
-                price: price,
-                date: dateStr,
-              });
-            }
-          }
         }
       } catch (e: any) {
         const lookupId = player.slug || playerId;
@@ -318,11 +247,6 @@ export async function syncBiwengerCatalog(
   }
 
   manager.log(`New players detected: ${newPlayersCount} (fetched full details)`);
-  if (skippedHistoricalPrices > 0) {
-    warnings.push(
-      `Skipped ${skippedHistoricalPrices} historical prices with invalid or out-of-season dates.`
-    );
-  }
   manager.log(`Existing players: ${skippedDetailsCount} (skipped details fetch, updated price)`);
 
   return {

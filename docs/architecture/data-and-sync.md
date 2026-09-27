@@ -65,7 +65,9 @@ Routine, bootstrap, and live execution share the same advisory-lock key, so they
 Provider boundaries are explicit:
 
 - Biwenger owns fantasy identities, manager membership, rounds, fantasy points, lineups, board
-  history, ownership, market listings, transfers, finances, and tournaments.
+  history, ownership, market listings, transfers, finances, and tournaments. Its explicit daily price
+  history is reconciled independently of player biography enrichment; catalogue snapshots update
+  the current season price cache, while the history step owns dated `market_values` records.
 - EuroLeague Advanced API owns the official calendar, team/player mappings, team standings,
   sporting game data, season profiles, crests, play-by-play, and shots.
 - A persisted match links the fantasy competition to an official EuroLeague game code, but sporting
