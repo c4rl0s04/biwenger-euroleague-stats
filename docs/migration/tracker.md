@@ -69,8 +69,8 @@ The UI migration runs in parallel with the domain architecture migration, system
 | **UI-01B**   | Core UI primitives                       | Integrated via PR #44 at `665fd1d7`; [receipt](reports/ui-01b-core-primitives.md). Six primitives: `Button`, `IconButton`, `Input`, `Badge`, `Avatar`, `Skeleton`            | Primitives exported from `src/components/ui/foundation`      |
 | **UI-01H**   | Rollout hardening                        | Integrated via PR #46 at `6db446fd`; dark baseline default, strict ThemeContext, 0 React #418 SSR hydration mismatches                                                       | Foundation hardened for production chrome adoption           |
 | **UI-SHELL** | Application Shell Migration (Task 23)    | Integrated via PR #49 at `9cfb84e5`; [receipt](reports/task-23-application-shell.md)                                                                                         | Chrome foundation established for downstream feature screens |
-| **UI-01C**   | Demand-driven shared compositions        | Complete and locally verified on branch, bounded to EmptyState in both shell search views; [receipt](reports/ui-01c-ui-02-shared-ui.md)                                      | Extract from demonstrated shell/page reuse                   |
-| **UI-02**    | Interactive controls & overlays          | Complete and locally verified on branch, bounded to ModalDialog shared by MobileBottomSheet, MobileMoreMenu and CommandPalette; [receipt](reports/ui-01c-ui-02-shared-ui.md) | Builds on UI-01B primitives and UI-01C compositions          |
+| **UI-01C**   | Demand-driven shared compositions        | Integrated via PR #51 at `7f4df6e9`; bounded to `EmptyState` shared by GlobalSearch and CommandPalette; [receipt](reports/ui-01c-ui-02-shared-ui.md)                         | Extend only from demonstrated reuse                          |
+| **UI-02**    | Interactive controls & overlays          | Integrated via PR #51 at `7f4df6e9`; bounded to `ModalDialog` shared by MobileBottomSheet, MobileMoreMenu and CommandPalette; [receipt](reports/ui-01c-ui-02-shared-ui.md)  | Extend only when interaction reuse is demonstrated           |
 | **UI-03**    | Season Predictions pilot                 | Planned; first feature pilot of the new foundation                                                                                                                           | Validate before broader feature migration                    |
 | **UI-04**    | Foundation/design review                 | Planned; visual parity, comprehensive E2E matrix, WCAG 2.2 AA verification                                                                                                   | Final design system verification and closure                 |
 
@@ -82,9 +82,9 @@ selection and persistence use the preference, with resolved System state shown o
 Snow, dark rollout baseline and legacy Card themes are unchanged. Light/system are explicit user
 preferences; legacy feature-page migration remains incremental.
 
-PR #51 is merged; this change uses the latest shared foundation from `main` without modifying its
-branch or cherry-picking. Finish any pending UI-01C/UI-02 integration, then UI-03 Season Predictions.
-UI-03 remains planned and unstarted. See the [verification receipt](reports/theme-preference-settings.md).
+PR #51 is integrated at `7f4df6e9`, and the production theme preference control is integrated through
+PR #56 at `47f1afd9`. UI-01C/UI-02 and theme selection are therefore on `main`; the next UI milestone is
+UI-03 Season Predictions, which remains planned and unstarted. See the [verification receipt](reports/theme-preference-settings.md).
 
 ## Ordered task queue
 
@@ -298,7 +298,7 @@ real provider mutations and changes to credentials/authorization unless separate
 - **Scope:** Establish `src/components/shell` as the owner of persistent chrome, with shared/desktop/mobile/integration boundaries; migrate app background/content frame, sidebar, top header, footer, phone bottom navigation/More menu and global capability placement onto the new UI foundation while preserving routing, authentication, search-data ownership and PWA behavior. Search/control behavior stays separately bounded.
 - **Completion check:** Acyclic reusable composition; explicit shared/desktop/mobile ownership; preserved keyboard/focus/navigation/mobile/safe-area behavior; no auth/provider ownership drift; no duplicate legacy/new shell implementation; obsolete layout files/exports/styles removed once consumer checks prove them unused.
 - **Evidence:** [Task 23 receipt](reports/task-23-application-shell.md) records the candidate, current checks, visual decisions, and retained compatibility boundaries; historical counts are not final acceptance evidence.
-- **Next action:** PR #49 is merged. Review the bounded UI-01C/UI-02 implementation in PR #51 separately; next is UI-03 Season Predictions pilot (unimplemented), then UI-04 foundation/design review and feature-by-feature migration. No next milestone was implemented by Task 23.
+- **Next action:** PR #49 and the bounded UI-01C/UI-02 work from PR #51 are merged. Next is UI-03 Season Predictions pilot (unimplemented), then UI-04 foundation/design review and feature-by-feature migration.
 
 ### Task 24 — Shared UI / tokens
 
@@ -307,7 +307,7 @@ real provider mutations and changes to credentials/authorization unless separate
 - **Scope:** Maintain one semantic token system and domain-independent shared foundation. Integrated work includes token extraction, Surface/composable Card, system/dark/light runtime capability and core primitives. Do not bulk-restyle legacy pages or create a universal-card abstraction.
 - **Completion check:** Foundation contracts remain server-compatible and accessible; legacy screens default to the dark compatibility baseline until migrated; shared compositions are extracted only from demonstrated shell/page reuse.
 - **Evidence:** PR #40 design direction; `f868a602` token foundation; `222ae61b` Surface/Card; PR #43 (`55765dfe`) UI-01T; PR #44 (`665fd1d7`) UI-01B.
-- **Next action:** Use Task 23 shell/chrome as the first production consumer while extracting UI-01C compositions from real reuse.
+- **Next action:** UI-01C and UI-02 are integrated through PR #51; validate the foundation next with the UI-03 Season Predictions pilot.
 
 ### Task 25 — Exhaustive ownership closure
 
@@ -344,7 +344,7 @@ real provider mutations and changes to credentials/authorization unless separate
 - **Next action:** The user authorized integration and deployment verification for this closure. Record the final main SHA, successful production deployment and smoke checks; keep unavailable verification explicit.
 
 Tasks can be combined into a bounded PR when dependencies and review scope permit; IDs remain stable.
-Tasks 04–25 are integrated into main. Task 22 closed at `2c06e2bc`; Task 23 merged through PR #49. In the UI migration track, UI-01A, UI-01T, UI-01B, and UI-01H are complete and merged; **Task 23 / UI-SHELL — Application Shell** is integrated through PR #49, establishing the canonical chrome foundation before **UI-01C — demand-driven shared compositions**, **UI-02 — interactive controls / overlays**, **UI-03 — Season Predictions pilot**, **UI-04 — foundation/design review**, then feature-by-feature legacy UI migration.
+Tasks 04–25 are integrated into main. Task 22 closed at `2c06e2bc`; Task 23 merged through PR #49. In the UI migration track, UI-01A, UI-01T, UI-01B, UI-01H, **UI-SHELL**, **UI-01C**, and **UI-02** are integrated; the production Settings theme preference is integrated through PR #56. **UI-03 — Season Predictions pilot** is the next UI milestone, followed by **UI-04 — foundation/design review** and then feature-by-feature legacy UI migration.
 
 ## UI presentation ownership and cleanup contract
 
