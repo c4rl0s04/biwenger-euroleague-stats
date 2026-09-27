@@ -9,9 +9,9 @@ status: active
 
 # Task 23 — Application Shell Migration
 
-Base: `af55af80`.
+Base: `f74f22ab`.
 Branch: `refactor/application-shell`.
-State: Final hardening candidate under verification; merge requires exact-head GitHub checks.
+State: Implemented and locally verified; merge remains gated on the published exact-head checks.
 
 ## Scope and purpose
 
@@ -330,14 +330,43 @@ Reason: unmigrated presentation still relies on the legacy Card/theme family and
 
 ## Visual acceptance
 
-The pre-hardening CI failure on Matches exposed old full-page chrome baselines. Approved shell changes include the new header controls, semantic sidebar, readable avatar initial, removal of fake notification/social/legal controls, and the shorter semantic footer. Feature data, headings, route content and map remain owned by their existing features. Final snapshot changes must be inspected in the pinned Linux ARM64 browser environment; no blanket regeneration is acceptance evidence.
+The pre-hardening CI failure on Matches exposed old full-page chrome baselines. Approved shell changes include the new header controls, semantic sidebar, readable avatar initial, removal of fake notification/social/legal controls, and the shorter semantic footer. Feature data, headings, route content and map remain owned by their existing features. Only the desktop-1440 Matches and Team references were updated, separately for Linux and macOS, after inspecting the old and new captures. Linux captures used the pinned Playwright 1.58.2 ARM64 image against the freshly built disposable fixture app; macOS captures used the repository runner. The shorter footer accounts for the full-page height change. Team also reflects the existing main fix `9a3fe855`: missing participation produces a neutral `?` rather than a red DNP `-`; the fixture, Team implementation and player-form query are unchanged by this PR. Phone and all other references remain untouched. Normal macOS comparison passed afterward without snapshot updates; exact Linux comparison remains enforced by CI.
 
 ## Verification evidence
 
-Base: `af55af80fd6adca04901c909992a5db1cf1539f2` (latest origin/main at the start of this pass).
-Previous head: `cb5a4bc2af4600d276cdc78719fd861ba2e1ad20`.
+- Latest reconciled main: `f74f22ab02a5b57c81a7d821fc1d71715dedf2db`. Clean rebase, preserving Tasks 16–18, documentation updates and the finance ledger CLI.
+- Runtime/test implementation: `0596fb591d8f922c4fe5ab77a655ff2b1d01ed12`.
+- Final implementation including reviewed visual references: `d298083037bee6edc733ab7836a83cf54b08e801`.
+- Exact implementation synthetic merge candidate: `8e02ec21a952ba3e146a142aaa51505330be66ff` (parents: the main and final implementation SHAs above).
+- [Implementation candidate CI and current result](https://github.com/c4rl0s04/biwenger-euroleague-stats/actions/runs/36315813692). [Final publication checks](https://github.com/c4rl0s04/biwenger-euroleague-stats/pull/49/checks) also validate the subsequent evidence-only documentation commit. The PR verification record identifies that published head and synthetic merge SHA after publication; it is intentionally separate from the immutable implementation SHA to avoid a self-referential commit hash. Require Format Check, Test & Build, Browser contracts and visual regression, and Vercel success before merge. Deployment Smoke Check is conditionally skipped by its workflow, not a passing deployment test.
 
-The previous receipt's 2,687 tests / 1,049 modules / 88 entrypoints were stale and are not final-candidate evidence. Exact implementation commit, candidate, test counts and CI results will be recorded after verification. The immutable implementation SHA is recorded separately from any evidence-only documentation commit to avoid a self-referential commit hash.
+### Local commands and results
+
+| Command                                                                               | Result                                                                                                      |
+| ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `npm run skills:check`                                                                | PASS — 6 repository skills                                                                                  |
+| `npm run architecture:check`                                                          | PASS — 1,101 modules, 99 entrypoints, no violations                                                         |
+| `npm run docs:check`                                                                  | PASS — 123 vault notes                                                                                      |
+| `npm run typecheck`                                                                   | PASS                                                                                                        |
+| `npm run test:run -- --maxWorkers=2`                                                  | PASS — 2,822 tests passed / 2 skipped; 345 files passed / 2 skipped                                         |
+| `npm run lint`                                                                        | PASS — 0 errors, 25 warnings; includes the existing More-menu ref-cleanup warning and legacy image warnings |
+| `SKIP_DB=true npm run build`                                                          | PASS — production build, 52 static pages generated                                                          |
+| `npm run db:audit:schema:metadata`                                                    | PASS — 37 source/snapshot tables; no table, column or unique-constraint drift                               |
+| `npx --no-install drizzle-kit check`                                                  | PASS                                                                                                        |
+| `npm run verify`                                                                      | PASS — runs all checks above plus diff check                                                                |
+| `npx prettier --write "src/**/*.{js,jsx,ts,tsx,json,css,md}"` then matching `--check` | PASS                                                                                                        |
+| `git diff --check`                                                                    | PASS                                                                                                        |
+| `npx --no-install vitest run src/components/shell src/lib/theme --maxWorkers=2`       | PASS — 49 tests across 9 files                                                                              |
+
+The full checks ran on the rebased implementation. Later changes are reviewed PNG references and documentation; publication CI revalidates the exact final tree. All 18 changed domain/API files outside the intentional News boundary test and user-hook contract were independently compared with formatted main source and proved formatting-only.
+
+### Browser results
+
+The disposable runner executed `pwa-responsive.spec.ts`, `application-theme.spec.ts`, `home-architecture.spec.ts` and `feature-screens.spec.ts` together on iPhone 13, tablet-768 and desktop-1440: **38 passed, 3 expected project-specific skips, 1 stale desktop Matches reference failure**. After visual inspection and the bounded reference update, a normal `npm run test:e2e:local -- tests/e2e/feature-screens.spec.ts --project=desktop-1440` rerun **passed 1/1**, comparing both Matches and Team without regeneration. Thus all 39 applicable cases passed across the initial run plus the targeted correction run; this is not represented as a single all-green initial run.
+
+Desktop and phone explicit-light smoke passed. Dark/light persistence, system changes, cross-tab updates, storage failures, SSR/pre-hydration behavior, Surface/Card neutrality, actual shell color/gradient resolution, safe areas, overflow, navigation pending state and More-menu initial focus/Tab wrapping/Escape/focus restoration passed. Hydration/runtime guards were retained. Legacy hard-coded light-mode styling remains migration debt, not a page redesign in this PR.
+
+The full nine-project Linux suite is the CI acceptance source linked above, including unchanged phone and other dark visual references. An initial full-unit run overlapped a resource-heavy Docker build and was interrupted after timeout failures; the sequential full rerun passed unchanged. The slow local Docker build and an intentionally shortened all-device native browser run are not claimed as complete acceptance runs. Disposable PostgreSQL fixture/season-integrity checks passed; no production database was used.
 
 ## Next milestone
 
