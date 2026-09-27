@@ -102,6 +102,11 @@ for (const theme of ['dark', 'light']) {
       await expect(menu).toBeHidden();
       await expect(more).toBeFocused();
     } else {
+      // Tablet uses the header's expandable search instead of the inline desktop field.
+      const searchToggle = page.getByRole('button', { name: 'Abrir búsqueda', exact: true });
+      if (await searchToggle.isVisible()) {
+        await searchToggle.click();
+      }
       await page
         .getByRole('textbox', { name: 'Buscar jugadores, equipos y mánagers' })
         .fill('zz-no-match');
