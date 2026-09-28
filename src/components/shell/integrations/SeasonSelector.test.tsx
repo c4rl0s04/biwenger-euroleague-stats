@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -49,5 +50,14 @@ describe('SeasonSelector', () => {
     const html = renderToStaticMarkup(<SeasonSelector />);
     expect(html).toContain('24/25');
     expect(html).toContain('Histórico');
+  });
+
+  it('keeps dropdown rows minimal without redundant emoji status copy', () => {
+    const source = readFileSync(new URL('./SeasonSelector.tsx', import.meta.url), 'utf8');
+
+    expect(source).not.toContain('🟢');
+    expect(source).not.toContain('❄️');
+    expect(source).not.toContain('Temporada en curso');
+    expect(source).not.toContain('Temporada finalizada');
   });
 });
