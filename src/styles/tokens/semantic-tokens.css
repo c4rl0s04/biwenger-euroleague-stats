@@ -78,6 +78,12 @@
   --shell-navigation-shadow: 0 -18px 45px hsl(var(--color-black) / 0.42);
   --shell-sheet-shadow: 0 -28px 75px hsl(var(--color-black) / 0.65);
 
+  /* Stable shell presentation roles that preserve the existing chrome appearance. */
+  --shell-dialog-overlay: hsl(var(--color-black) / 0.72);
+  --shell-dialog-shadow: 0 -24px 80px hsl(var(--color-black) / 0.7);
+  --shell-command-overlay: hsl(var(--color-black) / 0.6);
+  --shell-heading-content: var(--color-white-pure);
+
   /* Application shell semantics */
   --shell-surface: var(--color-obsidian-black);
   --shell-content: var(--color-white-soft);
