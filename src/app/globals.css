@@ -52,6 +52,37 @@
   --color-control-content: hsl(var(--control-content));
   --color-control-placeholder: hsl(var(--control-placeholder));
 
+  /* Canonical semantic utility names for new UI and application shell code. */
+  --color-surface-app: hsl(var(--surface-app));
+  --color-surface-card: hsl(var(--surface-card));
+  --color-surface-popover: hsl(var(--surface-popover));
+  --color-surface-secondary: hsl(var(--surface-secondary));
+  --color-surface-muted: hsl(var(--surface-muted));
+
+  --color-content-primary: hsl(var(--content-primary));
+  --color-content-secondary: hsl(var(--content-secondary));
+  --color-content-muted: hsl(var(--content-muted));
+  --color-content-on-primary: hsl(var(--content-on-primary));
+  --color-content-on-accent: hsl(var(--content-on-accent));
+  --color-content-on-danger: hsl(var(--content-on-danger));
+
+  --color-action-primary: hsl(var(--action-primary));
+  --color-action-accent: hsl(var(--action-accent));
+  --color-status-danger: hsl(var(--status-danger));
+
+  --color-border-default: hsl(var(--border-default));
+  --color-control-border: hsl(var(--control-border));
+  --color-focus-ring: hsl(var(--focus-ring));
+
+  --color-shell-surface: hsl(var(--shell-surface));
+  --color-shell-content: hsl(var(--shell-content));
+  --color-shell-action-primary: hsl(var(--shell-action-primary));
+  --color-shell-action-primary-content: hsl(var(--shell-action-primary-content));
+  --color-shell-accent-surface: hsl(var(--shell-accent-surface));
+  --color-shell-accent-content: hsl(var(--shell-accent-content));
+  --color-shell-border: hsl(var(--shell-border));
+  --color-shell-focus-ring: hsl(var(--shell-focus-ring));
+
   --font-sans: var(--font-outfit), system-ui, sans-serif;
   --font-display: var(--font-bebas), sans-serif;
   --font-ui: var(--font-inter), sans-serif;
