@@ -502,12 +502,16 @@ UI-SHELL application shell/chrome migration            integrated at 9cfb84e5 vi
 UI-01C shared compositions                             integrated at 7f4df6e9 via PR #51: EmptyState
 UI-02  interactive controls                            integrated at 7f4df6e9 via PR #51: ModalDialog
 THEME   Settings System / Dark / Light control         integrated at 47f1afd9 via PR #56
-UI-03  Season Predictions pilot                       next; unimplemented
+UI-03  Season Predictions pilot                       first two-question demo implemented
 UI-04  foundation/design review                       refine before broad adoption
 
 Later:
 feature-by-feature legacy page migration
 ```
+
+The UI-03 demo adds `/season-predictions` with one player and one manager choice. Answers stay in
+local page state and disappear on refresh; persistence, scoring and further questions remain future
+product work.
 
 Each migrated feature slice also owns its structural cleanup: move feature-specific desktop/mobile screens
 to the owning feature, update barrels/imports/tests, remove obsolete global mobile screens or legacy UI

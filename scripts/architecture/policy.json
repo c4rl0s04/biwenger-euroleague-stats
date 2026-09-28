@@ -29,6 +29,7 @@
     "src/app/(app)/playoffs/predictions/[userId]/page.tsx",
     "src/app/(app)/predictions/page.tsx",
     "src/app/(app)/predictions/[section]/page.tsx",
+    "src/app/(app)/season-predictions/page.tsx",
     "src/app/(app)/tournaments/page.tsx",
     "src/app/(app)/tournaments/[id]/page.tsx",
     "src/app/(app)/tournaments/[id]/[section]/page.tsx",
