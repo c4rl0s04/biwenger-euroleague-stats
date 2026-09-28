@@ -30,21 +30,21 @@ export function SeasonSelector({ className = '', menuAlign = 'right' }: SeasonSe
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="shell-action touch-target flex items-center gap-2 px-3 py-2 bg-card/60 hover:bg-secondary border border-border/60 rounded-xl transition-all cursor-pointer group"
+        className="shell-action touch-target flex items-center gap-2 px-3 py-2 bg-surface-card/60 hover:bg-surface-secondary border border-border-default/60 rounded-xl transition-all cursor-pointer group"
         aria-label={isOpen ? 'Cerrar selector de temporada' : 'Abrir selector de temporada'}
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
-        <div className="flex items-center justify-center w-6 h-6 rounded-lg bg-primary/10 text-primary group-hover:scale-105 transition-transform">
+        <div className="flex items-center justify-center w-6 h-6 rounded-lg bg-action-primary/10 text-action-primary group-hover:scale-105 transition-transform">
           {isCustomSeason ? (
             <History className="w-3.5 h-3.5 text-amber-400" />
           ) : (
-            <Calendar className="w-3.5 h-3.5 text-primary" />
+            <Calendar className="w-3.5 h-3.5 text-action-primary" />
           )}
         </div>
 
         <div className="flex items-center gap-1.5 text-xs font-semibold tracking-tight">
-          <span className="text-foreground">{formatShortSeason(currentSeasonId)}</span>
+          <span className="text-content-primary">{formatShortSeason(currentSeasonId)}</span>
           {isCustomSeason ? (
             <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
               Histórico
@@ -58,7 +58,7 @@ export function SeasonSelector({ className = '', menuAlign = 'right' }: SeasonSe
         </div>
 
         <ChevronDown
-          className={`w-3.5 h-3.5 text-muted-foreground transition-transform duration-300 ${
+          className={`w-3.5 h-3.5 text-content-muted transition-transform duration-300 ${
             isOpen ? 'rotate-180' : ''
           }`}
         />
@@ -68,16 +68,16 @@ export function SeasonSelector({ className = '', menuAlign = 'right' }: SeasonSe
         <>
           <div className="fixed inset-0 z-[60]" onClick={() => setIsOpen(false)} />
           <div
-            className={`absolute z-[70] mt-2 rounded-2xl border border-border bg-card p-2 shadow-2xl animate-in fade-in zoom-in-95 duration-150 ${
+            className={`absolute z-[70] mt-2 rounded-2xl border border-border-default bg-surface-card p-2 shadow-2xl animate-in fade-in zoom-in-95 duration-150 ${
               menuAlign === 'left' ? 'left-0 w-[min(16rem,calc(100vw-7rem))]' : 'right-0 w-64'
             }`}
             role="menu"
           >
-            <div className="px-3 py-2 border-b border-border/40">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            <div className="px-3 py-2 border-b border-border-default/40">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-content-muted">
                 Seleccionar Temporada
               </p>
-              <p className="text-xs text-muted-foreground mt-0.5">
+              <p className="text-xs text-content-muted mt-0.5">
                 Navega por datos de campañas anteriores
               </p>
             </div>
@@ -99,8 +99,8 @@ export function SeasonSelector({ className = '', menuAlign = 'right' }: SeasonSe
                     }}
                     className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left transition-all ${
                       isSelected
-                        ? 'bg-primary/15 text-primary font-bold'
-                        : 'hover:bg-secondary text-foreground'
+                        ? 'bg-action-primary/15 text-action-primary font-bold'
+                        : 'hover:bg-surface-secondary text-content-primary'
                     }`}
                     role="menuitem"
                   >
@@ -115,21 +115,21 @@ export function SeasonSelector({ className = '', menuAlign = 'right' }: SeasonSe
                       </span>
                     </div>
 
-                    {isSelected && <Check className="w-4 h-4 text-primary flex-shrink-0 ml-2" />}
+                    {isSelected && <Check className="w-4 h-4 text-action-primary flex-shrink-0 ml-2" />}
                   </button>
                 );
               })}
             </div>
 
             {isCustomSeason && (
-              <div className="pt-2 mt-1 border-t border-border/40">
+              <div className="pt-2 mt-1 border-t border-border-default/40">
                 <button
                   type="button"
                   onClick={() => {
                     setIsOpen(false);
                     selectSeason(activeSeasonId);
                   }}
-                  className="w-full flex items-center justify-center gap-1.5 py-1.5 px-2 text-xs font-semibold text-primary hover:bg-primary/10 rounded-lg transition-colors cursor-pointer"
+                  className="w-full flex items-center justify-center gap-1.5 py-1.5 px-2 text-xs font-semibold text-action-primary hover:bg-action-primary/10 rounded-lg transition-colors cursor-pointer"
                 >
                   <Sparkles className="w-3.5 h-3.5" />
                   <span>Volver a temporada en curso</span>
