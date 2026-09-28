@@ -55,5 +55,5 @@ describe('MobileBottomSheet', () => {
     expect(source).toContain('--mobile-keyboard-inset');
     expect(source).not.toContain("bottom: 'auto'");
     expect(source).toContain("preventInitialFocusScroll={variant === 'search'}");
-  });;
+  });
 });
