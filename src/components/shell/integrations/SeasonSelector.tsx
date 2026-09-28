@@ -9,10 +9,7 @@ export interface SeasonSelectorProps {
   menuAlign?: 'left' | 'right';
 }
 
-export function SeasonSelector({
-  className = '',
-  menuAlign = 'right',
-}: SeasonSelectorProps) {
+export function SeasonSelector({ className = '', menuAlign = 'right' }: SeasonSelectorProps) {
   const { seasons, currentSeasonId, activeSeasonId, isCustomSeason, selectSeason } = useSeason();
   const [isOpen, setIsOpen] = useState(false);
 
