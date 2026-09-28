@@ -182,9 +182,9 @@ export function GlobalSearch({
         };
       default:
         return {
-          iconColor: 'text-muted-foreground',
-          activeBg: 'bg-secondary',
-          activeText: 'text-foreground',
+          iconColor: 'text-content-muted',
+          activeBg: 'bg-surface-secondary',
+          activeText: 'text-content-primary',
         };
     }
   };
@@ -209,17 +209,19 @@ export function GlobalSearch({
         className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer text-sm transition-colors ${
           isActive
             ? `${styles.activeBg} ${styles.activeText}`
-            : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+            : 'text-content-muted hover:bg-surface-secondary hover:text-content-primary'
         }`}
       >
         <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-current' : styles.iconColor}`} />
         <div className="flex-1 flex flex-col items-start min-w-0">
-          <span className={`font-medium truncate ${isActive ? 'text-current' : 'text-foreground'}`}>
+          <span
+            className={`font-medium truncate ${isActive ? 'text-current' : 'text-content-primary'}`}
+          >
             {item.name}
           </span>
           {subtitle && (
             <span
-              className={`text-xs truncate font-normal ${isActive ? 'opacity-80' : 'text-muted-foreground'}`}
+              className={`text-xs truncate font-normal ${isActive ? 'opacity-80' : 'text-content-muted'}`}
             >
               {subtitle}
             </span>
@@ -238,10 +240,10 @@ export function GlobalSearch({
       data-search-presentation={presentation}
     >
       {/* Search Input */}
-      <div className="group relative shrink-0 rounded-xl border border-border/50 bg-secondary transition-[border-color,box-shadow] focus-within:border-primary/40 focus-within:ring-1 focus-within:ring-primary/20">
+      <div className="group relative shrink-0 rounded-xl border border-border-default/50 bg-surface-secondary transition-[border-color,box-shadow] focus-within:border-action-primary/40 focus-within:ring-1 focus-within:ring-action-primary/20">
         <Search
           size={18}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors"
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-content-muted group-focus-within:text-action-primary transition-colors"
           aria-hidden="true"
         />
         <input
@@ -253,12 +255,12 @@ export function GlobalSearch({
           onKeyDown={handleKeyDown}
           placeholder="Buscar..."
           aria-label="Buscar jugadores, equipos y mánagers"
-          className="w-full rounded-xl bg-transparent py-2 pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none"
+          className="w-full rounded-xl bg-transparent py-2 pl-10 pr-10 text-sm text-content-primary placeholder:text-content-muted focus-visible:outline-none"
         />
         {loading && (
           <Loader2
             size={16}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground animate-spin"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-content-muted animate-spin"
             aria-hidden="true"
           />
         )}
@@ -269,7 +271,7 @@ export function GlobalSearch({
               setQuery('');
               setResults({ players: [], teams: [], users: [] });
             }}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-content-muted hover:text-content-primary"
             aria-label="Limpiar búsqueda"
           >
             <X size={16} aria-hidden="true" />
@@ -283,8 +285,8 @@ export function GlobalSearch({
           data-search-results={presentation}
           className={
             presentation === 'sheet'
-              ? 'mt-2 min-h-0 flex-1 overflow-y-auto overscroll-contain rounded-xl border border-border/50 bg-card'
-              : 'absolute left-0 right-0 top-full z-50 mt-2 max-h-[400px] overflow-y-auto rounded-xl border border-border/50 bg-card shadow-xl shadow-black/20'
+              ? 'mt-2 min-h-0 flex-1 overflow-y-auto overscroll-contain rounded-xl border border-border-default/50 bg-surface-card'
+              : 'absolute left-0 right-0 top-full z-50 mt-2 max-h-[400px] overflow-y-auto rounded-xl border border-border-default/50 bg-surface-card shadow-xl shadow-black/20'
           }
         >
           {!hasResults && !loading && (
@@ -314,7 +316,7 @@ export function GlobalSearch({
 
           {/* Teams */}
           {results.teams.length > 0 && (
-            <div className="p-2 border-t border-border/30">
+            <div className="p-2 border-t border-border-default/30">
               <div className="px-2 py-1.5 text-xs font-semibold text-amber-400/80 uppercase tracking-wider mb-1">
                 Equipos
               </div>
@@ -327,7 +329,7 @@ export function GlobalSearch({
 
           {/* Users */}
           {results.users.length > 0 && (
-            <div className="p-2 border-t border-border/30">
+            <div className="p-2 border-t border-border-default/30">
               <div className="px-2 py-1.5 text-xs font-semibold text-emerald-400/80 uppercase tracking-wider mb-1">
                 Usuarios
               </div>

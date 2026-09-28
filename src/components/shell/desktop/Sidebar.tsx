@@ -40,7 +40,7 @@ export function Sidebar({ className = '' }: SidebarProps) {
       className={`
         hidden md:sticky md:flex top-16 left-0 h-[calc(100dvh-4rem)] z-30
         ${sidebarWidth}
-        bg-card/60 backdrop-blur-xl border-r border-border/40
+        bg-surface-card/60 backdrop-blur-xl border-r border-border-default/40
         flex-col
         transition-all duration-300 ease-in-out
         ${className}
@@ -48,7 +48,7 @@ export function Sidebar({ className = '' }: SidebarProps) {
       aria-label="Navegación principal"
     >
       {/* Desktop Collapse / Expand Toggle */}
-      <div className="flex items-center h-14 px-4 border-b border-border/30 justify-center">
+      <div className="flex items-center h-14 px-4 border-b border-border-default/30 justify-center">
         <IconButton
           variant="ghost"
           size="sm"
@@ -81,8 +81,8 @@ export function Sidebar({ className = '' }: SidebarProps) {
                       transition-all duration-200 relative overflow-hidden
                       ${
                         isActive
-                          ? 'bg-primary/10 text-primary font-semibold shadow-sm'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+                          ? 'bg-action-primary/10 text-action-primary font-semibold shadow-sm'
+                          : 'text-content-muted hover:text-content-primary hover:bg-surface-secondary'
                       }
                     `}
                     title={isCollapsed ? item.name : undefined}
@@ -92,8 +92,8 @@ export function Sidebar({ className = '' }: SidebarProps) {
                       size={20}
                       className={`transition-all duration-200 shrink-0 ${
                         isActive
-                          ? 'text-primary drop-shadow-[0_0_8px_var(--effect-shell-brand-glow)] scale-105'
-                          : 'group-hover:text-foreground group-hover:scale-105'
+                          ? 'text-action-primary drop-shadow-[0_0_8px_var(--effect-shell-brand-glow)] scale-105'
+                          : 'group-hover:text-content-primary group-hover:scale-105'
                       }`}
                       aria-hidden="true"
                     />
@@ -113,7 +113,7 @@ export function Sidebar({ className = '' }: SidebarProps) {
                         e.stopPropagation();
                         setIsSectionsVisible(!isSectionsVisible);
                       }}
-                      className="absolute right-2 p-1 rounded-full hover:bg-primary/20 text-primary/70 hover:text-primary transition-all duration-200 cursor-pointer"
+                      className="absolute right-2 p-1 rounded-full hover:bg-action-primary/20 text-action-primary/70 hover:text-action-primary transition-all duration-200 cursor-pointer"
                       aria-label={
                         isSectionsVisible
                           ? 'Ocultar secciones de página'
@@ -134,12 +134,12 @@ export function Sidebar({ className = '' }: SidebarProps) {
 
                 {/* Dynamic Sections Sub-list */}
                 {!isCollapsed && hasSections && isSectionsVisible && (
-                  <ul className="mt-1 ml-4 space-y-0.5 border-l border-border/40 pl-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                  <ul className="mt-1 ml-4 space-y-0.5 border-l border-border-default/40 pl-2 animate-in fade-in slide-in-from-top-1 duration-200">
                     {sections.map((section) => (
                       <li key={section.id}>
                         <Link
                           href={`${pathname}#${section.id}`}
-                          className="block px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-secondary rounded-md transition-colors truncate"
+                          className="block px-3 py-1.5 text-xs text-content-muted hover:text-content-primary hover:bg-surface-secondary rounded-md transition-colors truncate"
                         >
                           {section.title || section.id}
                         </Link>

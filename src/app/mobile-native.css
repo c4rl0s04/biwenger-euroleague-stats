@@ -4,8 +4,8 @@
   --mobile-nav-height: 4.6rem;
   min-height: 100dvh;
   background:
-    radial-gradient(circle at 85% 2%, hsl(var(--primary) / 0.08), transparent 20rem),
-    hsl(var(--background));
+    radial-gradient(circle at 85% 2%, hsl(var(--action-primary) / 0.08), transparent 20rem),
+    hsl(var(--surface-app));
 }
 
 .mobile-native-screen {
@@ -27,8 +27,8 @@
   gap: 0.75rem;
   margin: 0 calc(var(--mobile-gutter) * -1);
   padding: calc(0.65rem + var(--app-safe-area-top)) var(--mobile-gutter) 0.65rem;
-  border-bottom: 1px solid hsl(var(--border) / 0.55);
-  background: hsl(var(--background) / 0.92);
+  border-bottom: 1px solid hsl(var(--border-default) / 0.55);
+  background: hsl(var(--surface-app) / 0.92);
   backdrop-filter: blur(22px) saturate(145%);
   -webkit-backdrop-filter: blur(22px) saturate(145%);
 }
@@ -41,7 +41,7 @@
 .mobile-native-eyebrow,
 .mobile-native-back-context {
   overflow: hidden;
-  color: hsl(var(--primary));
+  color: hsl(var(--action-primary));
   font-size: 0.64rem;
   font-weight: 900;
   letter-spacing: 0.16em;
@@ -54,7 +54,7 @@
 .mobile-native-title,
 .mobile-native-back-title {
   overflow: hidden;
-  color: white;
+  color: hsl(var(--shell-heading-content));
   font-size: clamp(1.7rem, 8vw, 2.2rem);
   line-height: 0.96;
   text-overflow: ellipsis;
@@ -76,14 +76,14 @@
   overflow: hidden;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 1;
-  color: hsl(var(--muted-foreground));
+  color: hsl(var(--content-muted));
   font-size: 0.72rem;
   line-height: 1.35;
 }
 
 .mobile-detail-intro {
   margin: 1rem 0 0.2rem;
-  color: hsl(var(--muted-foreground));
+  color: hsl(var(--content-muted));
   font-size: 0.76rem;
   line-height: 1.5;
 }
@@ -102,16 +102,16 @@
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  border: 1px solid hsl(var(--border) / 0.7);
+  border: 1px solid hsl(var(--border-default) / 0.7);
   border-radius: 0.9rem;
-  background: hsl(var(--card) / 0.8);
-  color: hsl(var(--foreground));
+  background: hsl(var(--surface-card) / 0.8);
+  color: hsl(var(--content-primary));
 }
 
 .mobile-native-icon-button:active {
-  border-color: hsl(var(--primary) / 0.5);
-  background: hsl(var(--primary) / 0.12);
-  color: hsl(var(--primary));
+  border-color: hsl(var(--action-primary) / 0.5);
+  background: hsl(var(--action-primary) / 0.12);
+  color: hsl(var(--action-primary));
   transform: scale(0.96);
 }
 
@@ -121,10 +121,10 @@
   height: 44px;
   place-items: center;
   overflow: hidden;
-  border: 1px solid hsl(var(--border) / 0.7);
+  border: 1px solid hsl(var(--border-default) / 0.7);
   border-radius: 0.9rem;
-  background: hsl(var(--card) / 0.8);
-  color: hsl(var(--foreground));
+  background: hsl(var(--surface-card) / 0.8);
+  color: hsl(var(--content-primary));
   cursor: pointer;
 }
 
@@ -141,7 +141,7 @@
 }
 
 .mobile-section-heading h2 {
-  color: hsl(var(--muted-foreground));
+  color: hsl(var(--content-muted));
   font-family: var(--font-sans);
   font-size: 0.69rem;
   font-weight: 900;
@@ -151,8 +151,8 @@
 
 .mobile-news-strip {
   margin: 0 calc(var(--mobile-gutter) * -1);
-  border-bottom: 1px solid hsl(var(--border) / 0.55);
-  background: hsl(var(--card) / 0.42);
+  border-bottom: 1px solid hsl(var(--border-default) / 0.55);
+  background: hsl(var(--surface-card) / 0.42);
 }
 
 .mobile-news-strip summary {
@@ -174,7 +174,7 @@
   flex-shrink: 0;
   align-items: center;
   gap: 0.28rem;
-  color: hsl(var(--primary));
+  color: hsl(var(--action-primary));
   font-size: 0.62rem;
   font-weight: 900;
   letter-spacing: 0.1em;
@@ -185,7 +185,7 @@
   min-width: 0;
   flex: 1;
   overflow: hidden;
-  color: hsl(var(--foreground) / 0.88);
+  color: hsl(var(--content-primary) / 0.88);
   font-size: 0.68rem;
   font-weight: 680;
   text-overflow: ellipsis;
@@ -194,7 +194,7 @@
 
 .mobile-news-expand {
   flex-shrink: 0;
-  color: hsl(var(--muted-foreground));
+  color: hsl(var(--content-muted));
   font-size: 0.62rem;
   font-weight: 850;
 }
@@ -209,13 +209,13 @@
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
-  color: hsl(var(--muted-foreground));
+  color: hsl(var(--content-muted));
   font-size: 0.68rem;
   line-height: 1.4;
 }
 
 .mobile-news-strip li strong {
-  color: hsl(var(--foreground));
+  color: hsl(var(--content-primary));
 }
 
 .mobile-alert-list .mobile-list-leading {
@@ -1090,7 +1090,7 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  background: rgb(0 0 0 / 0.72);
+  background: var(--shell-dialog-overlay);
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
 }
@@ -1102,12 +1102,12 @@
   left: 0;
   max-height: min(88dvh, 48rem);
   overflow-y: auto;
-  border: 1px solid hsl(var(--border) / 0.85);
+  border: 1px solid hsl(var(--border-default) / 0.85);
   border-bottom: 0;
   border-radius: 1.5rem 1.5rem 0 0;
-  background: hsl(var(--card) / 0.99);
+  background: hsl(var(--surface-card) / 0.99);
   padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
-  box-shadow: 0 -24px 80px rgb(0 0 0 / 0.7);
+  box-shadow: var(--shell-dialog-shadow);
   animation: mobile-native-sheet-enter 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -1117,7 +1117,7 @@
   height: 0.25rem;
   margin: 0.55rem auto 0;
   border-radius: 999px;
-  background: hsl(var(--muted-foreground) / 0.32);
+  background: hsl(var(--content-muted) / 0.32);
 }
 
 .mobile-native-sheet-header {
@@ -1129,14 +1129,14 @@
 }
 
 .mobile-native-sheet-header h2 {
-  color: white;
+  color: hsl(var(--shell-heading-content));
   font-size: 1.8rem;
   line-height: 1;
 }
 
 .mobile-native-sheet-header p {
   margin-top: 0.2rem;
-  color: hsl(var(--muted-foreground));
+  color: hsl(var(--content-muted));
   font-size: 0.72rem;
 }
 
@@ -1174,7 +1174,7 @@
 
 .mobile-more-category h3 {
   margin-bottom: 0.45rem;
-  color: hsl(var(--muted-foreground));
+  color: hsl(var(--content-muted));
   font-family: var(--font-sans);
   font-size: 0.64rem;
   font-weight: 900;
@@ -1200,9 +1200,9 @@
   align-items: center;
   gap: 0.8rem;
   margin-bottom: 0.2rem;
-  border: 1px solid hsl(var(--border) / 0.68);
+  border: 1px solid hsl(var(--border-default) / 0.68);
   border-radius: 1rem;
-  background: hsl(var(--secondary) / 0.42);
+  background: hsl(var(--surface-secondary) / 0.42);
   padding: 0.75rem;
 }
 
@@ -1213,8 +1213,8 @@
   flex: 0 0 auto;
   place-items: center;
   border-radius: 999px;
-  background: hsl(var(--primary) / 0.12);
-  color: hsl(var(--primary));
+  background: hsl(var(--action-primary) / 0.12);
+  color: hsl(var(--action-primary));
 }
 
 .mobile-account-identity > div {
@@ -1224,7 +1224,7 @@
 }
 
 .mobile-account-identity span {
-  color: hsl(var(--muted-foreground));
+  color: hsl(var(--content-muted));
   font-size: 0.62rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -1233,7 +1233,7 @@
 
 .mobile-account-identity strong {
   overflow: hidden;
-  color: hsl(var(--foreground));
+  color: hsl(var(--content-primary));
   font-size: 0.92rem;
   font-weight: 850;
   text-overflow: ellipsis;
@@ -1246,11 +1246,11 @@
   min-height: 48px;
   align-items: center;
   gap: 0.75rem;
-  border: 1px solid hsl(var(--border) / 0.62);
+  border: 1px solid hsl(var(--border-default) / 0.62);
   border-radius: 0.9rem;
-  background: hsl(var(--card) / 0.5);
+  background: hsl(var(--surface-card) / 0.5);
   padding: 0.7rem 0.85rem;
-  color: hsl(var(--foreground) / 0.88);
+  color: hsl(var(--content-primary) / 0.88);
   font-size: 0.76rem;
   font-weight: 780;
   text-align: left;
@@ -1258,12 +1258,12 @@
 
 .mobile-account-action svg {
   flex: 0 0 auto;
-  color: hsl(var(--primary));
+  color: hsl(var(--action-primary));
 }
 
 .mobile-account-action:active {
-  border-color: hsl(var(--primary) / 0.45);
-  background: hsl(var(--primary) / 0.1);
+  border-color: hsl(var(--action-primary) / 0.45);
+  background: hsl(var(--action-primary) / 0.1);
 }
 
 .mobile-account-sign-out {
@@ -1281,9 +1281,9 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border: 1px solid hsl(var(--border) / 0.8);
+  border: 1px solid hsl(var(--border-default) / 0.8);
   border-radius: 0.85rem;
-  color: hsl(var(--muted-foreground));
+  color: hsl(var(--content-muted));
   font-size: 0.75rem;
   font-weight: 800;
 }

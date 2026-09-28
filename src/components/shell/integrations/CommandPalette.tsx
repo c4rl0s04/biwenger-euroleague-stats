@@ -128,26 +128,26 @@ export function CommandPalette() {
       aria-label="Buscar en la aplicación"
       initialFocusRef={inputRef}
       onClose={() => setOpen(false)}
-      className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-start justify-center pt-[15vh] px-4"
+      className="fixed inset-0 z-[9999] bg-[var(--shell-command-overlay)] backdrop-blur-sm flex items-start justify-center pt-[15vh] px-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) setOpen(false);
       }}
     >
       <Command
-        className="w-full max-w-2xl bg-card border border-border rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+        className="w-full max-w-2xl bg-surface-card border border-border-default rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
         shouldFilter={false}
       >
         <div
-          className="command-palette-input-row flex items-center border-b border-border px-4"
+          className="command-palette-input-row flex items-center border-b border-border-default px-4"
           cmdk-input-wrapper=""
         >
-          <Search className="w-5 h-5 text-muted-foreground mr-2 shrink-0" />
+          <Search className="w-5 h-5 text-content-muted mr-2 shrink-0" />
           <Command.Input
             ref={inputRef}
             value={query}
             onValueChange={setQuery}
             placeholder="Buscar página, jugador, equipo..."
-            className="command-palette-input h-14 flex-1 bg-transparent text-lg text-foreground outline-none placeholder:text-muted-foreground"
+            className="command-palette-input h-14 flex-1 bg-transparent text-lg text-content-primary outline-none placeholder:text-content-muted"
           />
         </div>
 
@@ -157,7 +157,7 @@ export function CommandPalette() {
             <>
               <Command.Group
                 heading="Acciones Rápidas"
-                className="text-xs font-medium text-muted-foreground mb-2 px-2"
+                className="text-xs font-medium text-content-muted mb-2 px-2"
               >
                 {appPages.slice(0, 3).map((page) => (
                   <CommandPaletteItem
@@ -172,7 +172,7 @@ export function CommandPalette() {
 
               <Command.Group
                 heading="Configuración"
-                className="text-xs font-medium text-muted-foreground mb-2 px-2"
+                className="text-xs font-medium text-content-muted mb-2 px-2"
               >
                 <CommandPaletteItem
                   icon={Snowflake}
@@ -206,7 +206,7 @@ export function CommandPalette() {
               )}
 
               {loading && (
-                <Command.Loading className="p-4 text-center text-muted-foreground">
+                <Command.Loading className="p-4 text-center text-content-muted">
                   Buscando...
                 </Command.Loading>
               )}
@@ -304,15 +304,15 @@ function CommandPaletteItem({
   const getTypeStyles = () => {
     switch (type) {
       case 'page':
-        return 'aria-selected:bg-purple-500/10 aria-selected:text-purple-400 text-muted-foreground';
+        return 'aria-selected:bg-purple-500/10 aria-selected:text-purple-400 text-content-muted';
       case 'player':
-        return 'aria-selected:bg-blue-500/10 aria-selected:text-blue-400 text-muted-foreground';
+        return 'aria-selected:bg-blue-500/10 aria-selected:text-blue-400 text-content-muted';
       case 'team':
-        return 'aria-selected:bg-amber-500/10 aria-selected:text-amber-400 text-muted-foreground';
+        return 'aria-selected:bg-amber-500/10 aria-selected:text-amber-400 text-content-muted';
       case 'user':
-        return 'aria-selected:bg-emerald-500/10 aria-selected:text-emerald-400 text-muted-foreground';
+        return 'aria-selected:bg-emerald-500/10 aria-selected:text-emerald-400 text-content-muted';
       default:
-        return 'aria-selected:bg-primary/10 aria-selected:text-primary text-muted-foreground';
+        return 'aria-selected:bg-action-primary/10 aria-selected:text-action-primary text-content-muted';
     }
   };
 
