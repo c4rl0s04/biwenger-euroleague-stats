@@ -47,12 +47,13 @@ describe('MobileBottomSheet', () => {
     expect(html).toContain('mobile-native-sheet-body-search');
   });
 
-  it('tracks the visual viewport and opts search focus out of browser scrolling', () => {
+  it('uses the visual viewport only to calculate keyboard overlap', () => {
     const source = readFileSync(new URL('./MobileBottomSheet.tsx', import.meta.url), 'utf8');
 
     expect(source).toContain('window.visualViewport');
-    expect(source).toContain("viewport.addEventListener('resize', syncViewport)");
-    expect(source).toContain("viewport.addEventListener('scroll', syncViewport)");
+    expect(source).toContain('syncKeyboardInset');
+    expect(source).toContain('--mobile-keyboard-inset');
+    expect(source).not.toContain("bottom: 'auto'");
     expect(source).toContain("preventInitialFocusScroll={variant === 'search'}");
   });
 });

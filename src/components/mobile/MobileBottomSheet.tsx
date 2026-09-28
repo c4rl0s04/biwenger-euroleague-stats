@@ -4,28 +4,7 @@ import { ModalDialog } from '@/components/ui/foundation';
 
 import { X } from 'lucide-react';
 import { createPortal } from 'react-dom';
-import {
-  useEffect,
-  useId,
-  useRef,
-  useState,
-  type CSSProperties,
-  type ReactNode,
-  type RefObject,
-} from 'react';
-
-interface VisualViewportBounds {
-  top: number;
-  height: number;
-}
-
-function readVisualViewportBounds(): VisualViewportBounds | null {
-  if (typeof window === 'undefined' || !window.visualViewport) return null;
-  return {
-    top: window.visualViewport.offsetTop,
-    height: window.visualViewport.height,
-  };
-}
+import { useEffect, useId, useRef, type ReactNode, type RefObject } from 'react';
 
 interface MobileBottomSheetProps {
   open: boolean;
@@ -51,45 +30,42 @@ export default function MobileBottomSheet({
   const titleId = useId();
   const descriptionId = useId();
   const closeRef = useRef<HTMLButtonElement>(null);
-  const [visualViewport, setVisualViewport] = useState<VisualViewportBounds | null>(() =>
-    variant === 'search' ? readVisualViewportBounds() : null
-  );
+  const layerRef = useRef<HTMLDivElement>(null);
+  const layoutViewportHeightRef = useRef(typeof window === 'undefined' ? 0 : window.innerHeight);
 
   useEffect(() => {
-    if (variant !== 'search' || !window.visualViewport) return undefined;
+    if (!open && typeof window !== 'undefined') {
+      layoutViewportHeightRef.current = window.innerHeight;
+      return undefined;
+    }
+    if (!open || variant !== 'search' || !window.visualViewport) return undefined;
+
+    const layer = layerRef.current;
+    if (!layer) return undefined;
     const viewport = window.visualViewport;
-    const syncViewport = () => {
-      setVisualViewport({
-        top: viewport.offsetTop,
-        height: viewport.height,
-      });
+    const syncKeyboardInset = () => {
+      const overlap = layoutViewportHeightRef.current - viewport.height - viewport.offsetTop;
+      layer.style.setProperty('--mobile-keyboard-inset', `${Math.max(0, overlap)}px`);
     };
-    syncViewport();
-    viewport.addEventListener('resize', syncViewport);
-    viewport.addEventListener('scroll', syncViewport);
+
+    syncKeyboardInset();
+    viewport.addEventListener('resize', syncKeyboardInset);
+    viewport.addEventListener('scroll', syncKeyboardInset);
     return () => {
-      viewport.removeEventListener('resize', syncViewport);
-      viewport.removeEventListener('scroll', syncViewport);
+      viewport.removeEventListener('resize', syncKeyboardInset);
+      viewport.removeEventListener('scroll', syncKeyboardInset);
+      layer.style.removeProperty('--mobile-keyboard-inset');
     };
-  }, [variant]);
+  }, [open, variant]);
 
   if (!open || typeof document === 'undefined') return null;
 
-  const layerStyle: CSSProperties | undefined =
-    variant === 'search' && visualViewport
-      ? {
-          top: `${visualViewport.top}px`,
-          bottom: 'auto',
-          height: `${visualViewport.height}px`,
-        }
-      : undefined;
-
   return createPortal(
     <div
+      ref={layerRef}
       className={`mobile-native-sheet-layer ${
         variant === 'search' ? 'mobile-native-sheet-layer-search' : ''
       }`}
-      style={layerStyle}
     >
       <button
         type="button"
