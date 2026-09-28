@@ -1,10 +1,15 @@
 import { describe, expect, it } from 'vitest';
 
-import { MOBILE_PRIMARY_ITEMS, NAV_ITEMS, isNavigationItemActive } from './navigation';
+import {
+  MOBILE_NAV_CATEGORIES,
+  MOBILE_PRIMARY_ITEMS,
+  NAV_ITEMS,
+  isNavigationItemActive,
+} from './navigation';
 
 describe('shell navigation model', () => {
-  it('defines 16 canonical navigation items in order', () => {
-    expect(NAV_ITEMS).toHaveLength(16);
+  it('defines 17 canonical navigation items in order', () => {
+    expect(NAV_ITEMS).toHaveLength(17);
     expect(NAV_ITEMS[0].href).toBe('/');
     expect(NAV_ITEMS[1].href).toBe('/dashboard');
     expect(NAV_ITEMS[3].href).toBe('/standings');
@@ -17,6 +22,16 @@ describe('shell navigation model', () => {
       '/dashboard',
       '/standings',
     ]);
+  });
+
+  it('places season predictions in the desktop and mobile competition navigation', () => {
+    expect(NAV_ITEMS.find((item) => item.href === '/season-predictions')?.name).toBe(
+      'Predicciones de temporada'
+    );
+    expect(
+      MOBILE_NAV_CATEGORIES.find((category) => category.name === 'Competición')?.hrefs
+    ).toContain('/season-predictions');
+    expect(isNavigationItemActive('/season-predictions', '/predictions')).toBe(false);
   });
 
   it('identifies exact root route', () => {

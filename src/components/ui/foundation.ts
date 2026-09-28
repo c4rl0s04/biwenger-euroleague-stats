@@ -23,4 +23,11 @@ export { Avatar, type AvatarProps, type AvatarSize } from './primitives/Avatar';
 export { Input, type InputProps } from './primitives/Input';
 export { Skeleton, type SkeletonProps } from './primitives/Skeleton';
 export { EmptyState } from './compositions/EmptyState';
+export { PageHeader, type PageHeaderProps } from './compositions/PageHeader';
+export { SectionHeader, type SectionHeaderProps } from './compositions/SectionHeader';
 export { ModalDialog, type ModalDialogProps } from './controls/ModalDialog';
+export {
+  SearchableSelect,
+  type SearchableOption,
+  type SearchableSelectProps,
+} from './controls/SearchableSelect';

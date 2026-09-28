@@ -44,6 +44,12 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { name: 'Jornadas', href: '/rounds', icon: Clock },
   { name: 'Torneos', href: '/tournaments', icon: Medal },
   { name: 'Porras', href: '/predictions', icon: Target },
+  {
+    name: 'Predicciones de temporada',
+    shortName: 'Predicciones',
+    href: '/season-predictions',
+    icon: Target,
+  },
   { name: 'Playoffs', href: '/playoffs', icon: Swords },
   { name: 'Hoopgrid', href: '/hoopgrid', icon: LayoutGrid },
   { name: 'Comparativa', href: '/compare', icon: Scale },
@@ -59,7 +65,10 @@ export const MOBILE_PRIMARY_ITEMS: readonly NavItem[] = MOBILE_PRIMARY_HREFS.map
 export const MOBILE_NAV_CATEGORIES = [
   { name: 'Equipo', hrefs: ['/players', '/market', '/lineup'] },
   { name: 'Liga', hrefs: ['/matches', '/rounds', '/compare'] },
-  { name: 'Competición', hrefs: ['/tournaments', '/predictions', '/playoffs'] },
+  {
+    name: 'Competición',
+    hrefs: ['/tournaments', '/predictions', '/season-predictions', '/playoffs'],
+  },
   { name: 'Herramientas', hrefs: ['/assistant', '/hoopgrid', '/season-review'] },
 ] as const;
 
