@@ -54,7 +54,8 @@ describe('MobileBottomSheet', () => {
     expect(source).toContain('layoutViewportHeightRef.current - viewport.height - viewport.offsetTop');
     expect(source).toContain("viewport.addEventListener('resize', syncKeyboardInset)");
     expect(source).toContain("viewport.addEventListener('scroll', syncKeyboardInset)");
-    expect(source).toContain("'--mobile-keyboard-inset': `${keyboardInset}px`");
+    expect(source).toContain("layer.style.setProperty('--mobile-keyboard-inset'");
+    expect(source).toContain("layer.style.removeProperty('--mobile-keyboard-inset')");
     expect(source).not.toContain("bottom: 'auto'");
     expect(source).not.toContain("height: `${visualViewport.height}px`");
     expect(source).toContain("preventInitialFocusScroll={variant === 'search'}");
