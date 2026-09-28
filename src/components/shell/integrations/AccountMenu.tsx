@@ -88,7 +88,7 @@ export function AccountMenu({ className = '' }: AccountMenuProps) {
                 <span>Ver Perfil</span>
               </NavigationLink>
 
-              <div className="h-px bg-border/40 my-1 mx-1.5" />
+              <div className="h-px bg-border-default/40 my-1 mx-1.5" />
 
               <button
                 type="button"
