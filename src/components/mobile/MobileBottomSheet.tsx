@@ -42,9 +42,7 @@ export default function MobileBottomSheet({
   const titleId = useId();
   const descriptionId = useId();
   const closeRef = useRef<HTMLButtonElement>(null);
-  const layoutViewportHeightRef = useRef(
-    typeof window === 'undefined' ? 0 : window.innerHeight
-  );
+  const layoutViewportHeightRef = useRef(typeof window === 'undefined' ? 0 : window.innerHeight);
   const [keyboardInset, setKeyboardInset] = useState(0);
 
   useEffect(() => {
@@ -57,8 +55,7 @@ export default function MobileBottomSheet({
 
     const viewport = window.visualViewport;
     const syncKeyboardInset = () => {
-      const overlap =
-        layoutViewportHeightRef.current - viewport.height - viewport.offsetTop;
+      const overlap = layoutViewportHeightRef.current - viewport.height - viewport.offsetTop;
       setKeyboardInset(Math.max(0, overlap));
     };
 
@@ -74,9 +71,7 @@ export default function MobileBottomSheet({
   if (!open || typeof document === 'undefined') return null;
 
   const layerStyle: SearchSheetStyle | undefined =
-    variant === 'search'
-      ? { '--mobile-keyboard-inset': `${keyboardInset}px` }
-      : undefined;
+    variant === 'search' ? { '--mobile-keyboard-inset': `${keyboardInset}px` } : undefined;
 
   return createPortal(
     <div
