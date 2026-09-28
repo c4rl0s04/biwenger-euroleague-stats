@@ -24,6 +24,7 @@ export { Input, type InputProps } from './primitives/Input';
 export { Skeleton, type SkeletonProps } from './primitives/Skeleton';
 export { EmptyState } from './compositions/EmptyState';
 export { PageHeader, type PageHeaderProps } from './compositions/PageHeader';
+export { PageCanvas, type PageCanvasProps } from './compositions/PageCanvas';
 export { SectionHeader, type SectionHeaderProps } from './compositions/SectionHeader';
 export { ModalDialog, type ModalDialogProps } from './controls/ModalDialog';
 export {
