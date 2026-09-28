@@ -4,19 +4,7 @@ import { ModalDialog } from '@/components/ui/foundation';
 
 import { X } from 'lucide-react';
 import { createPortal } from 'react-dom';
-import {
-  useEffect,
-  useId,
-  useRef,
-  useState,
-  type CSSProperties,
-  type ReactNode,
-  type RefObject,
-} from 'react';
-
-type SearchSheetStyle = CSSProperties & {
-  '--mobile-keyboard-inset'?: string;
-};
+import { useEffect, useId, useRef, type ReactNode, type RefObject } from 'react';
 
 interface MobileBottomSheetProps {
   open: boolean;
@@ -42,21 +30,22 @@ export default function MobileBottomSheet({
   const titleId = useId();
   const descriptionId = useId();
   const closeRef = useRef<HTMLButtonElement>(null);
+  const layerRef = useRef<HTMLDivElement>(null);
   const layoutViewportHeightRef = useRef(typeof window === 'undefined' ? 0 : window.innerHeight);
-  const [keyboardInset, setKeyboardInset] = useState(0);
 
   useEffect(() => {
     if (!open && typeof window !== 'undefined') {
       layoutViewportHeightRef.current = window.innerHeight;
-      setKeyboardInset(0);
       return undefined;
     }
     if (!open || variant !== 'search' || !window.visualViewport) return undefined;
 
+    const layer = layerRef.current;
+    if (!layer) return undefined;
     const viewport = window.visualViewport;
     const syncKeyboardInset = () => {
       const overlap = layoutViewportHeightRef.current - viewport.height - viewport.offsetTop;
-      setKeyboardInset(Math.max(0, overlap));
+      layer.style.setProperty('--mobile-keyboard-inset', `${Math.max(0, overlap)}px`);
     };
 
     syncKeyboardInset();
@@ -65,20 +54,18 @@ export default function MobileBottomSheet({
     return () => {
       viewport.removeEventListener('resize', syncKeyboardInset);
       viewport.removeEventListener('scroll', syncKeyboardInset);
+      layer.style.removeProperty('--mobile-keyboard-inset');
     };
   }, [open, variant]);
 
   if (!open || typeof document === 'undefined') return null;
 
-  const layerStyle: SearchSheetStyle | undefined =
-    variant === 'search' ? { '--mobile-keyboard-inset': `${keyboardInset}px` } : undefined;
-
   return createPortal(
     <div
+      ref={layerRef}
       className={`mobile-native-sheet-layer ${
         variant === 'search' ? 'mobile-native-sheet-layer-search' : ''
       }`}
-      style={layerStyle}
     >
       <button
         type="button"
