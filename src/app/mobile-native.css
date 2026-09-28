@@ -1144,6 +1144,25 @@
   padding: 0 1rem 1rem;
 }
 
+.mobile-native-sheet-search {
+  display: flex;
+  height: min(88dvh, 48rem);
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 0.5rem);
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.mobile-native-sheet-search .mobile-native-sheet-header {
+  flex: 0 0 auto;
+}
+
+.mobile-native-sheet-body-search {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
 .mobile-more-category + .mobile-more-category {
   margin-top: 1rem;
 }
@@ -1159,8 +1178,10 @@
 }
 
 .mobile-search-sheet-content {
-  display: grid;
-  gap: 1rem;
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
 }
 
 .mobile-account-sheet-content {
