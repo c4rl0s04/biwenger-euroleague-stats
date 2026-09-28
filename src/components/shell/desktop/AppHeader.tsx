@@ -68,7 +68,7 @@ export function AppHeader({ className = '' }: AppHeaderProps) {
           <SeasonSelector />
 
           {/* Divider */}
-          <div className="hidden lg:block w-px h-6 bg-border/50" aria-hidden="true" />
+          <div className="hidden lg:block w-px h-6 bg-border-default/50" aria-hidden="true" />
 
           {/* Account Menu */}
           <AccountMenu />
