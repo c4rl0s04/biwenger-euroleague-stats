@@ -1,13 +1,6 @@
 'use client';
 
-import {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  useMemo,
-  type RefObject,
-} from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo, type RefObject } from 'react';
 import { Search, User, Users, Trophy, X, Loader2, type LucideIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { EmptyState } from '@/components/ui/foundation';
@@ -239,7 +232,9 @@ export function GlobalSearch({
   return (
     <div
       ref={dropdownRef}
-      className={`${presentation === 'sheet' ? 'flex min-h-0 flex-1 flex-col' : 'relative'} w-full ${className}`}
+      className={`${
+        presentation === 'sheet' ? 'flex min-h-0 flex-1 flex-col' : 'relative'
+      } w-full ${className}`}
       data-search-presentation={presentation}
     >
       {/* Search Input */}
