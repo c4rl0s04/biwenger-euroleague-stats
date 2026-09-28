@@ -21,6 +21,54 @@ describe('Application shell architecture boundary', () => {
     }
   });
 
+  it('keeps shell presentation on canonical semantic token names', () => {
+    const shellFiles = files('src/components/shell').filter(
+      (p) => !p.includes('.test.') && /\.(?:ts|tsx|js|jsx)$/.test(p)
+    );
+    const legacyUtility =
+      /\b(?:bg-(?:background|card|popover|primary|secondary|muted|destructive|border)|text-(?:foreground|muted-foreground|secondary-foreground|primary|primary-foreground|destructive)|border-(?:border|primary|destructive)|ring-(?:border|primary)|(?:via|from|to)-primary)(?=\/|[\s"'\`])/;
+
+    for (const file of shellFiles) {
+      expect(read(file), `Legacy semantic utility found in ${file}`).not.toMatch(legacyUtility);
+    }
+
+    const globals = read('src/app/globals.css');
+    for (const token of [
+      '--color-surface-card:',
+      '--color-content-primary:',
+      '--color-content-muted:',
+      '--color-action-primary:',
+      '--color-border-default:',
+      '--color-shell-surface:',
+      '--color-shell-action-primary:',
+    ]) {
+      expect(globals).toContain(token);
+    }
+
+    const mobile = read('src/app/mobile-native.css');
+    const headerChrome = mobile.slice(
+      mobile.indexOf('.mobile-app {'),
+      mobile.indexOf('.mobile-alert-list')
+    );
+    const sheetChrome = mobile.slice(
+      mobile.indexOf('.mobile-native-sheet-layer {'),
+      mobile.indexOf('.mobile-sticky-action-bar {')
+    );
+    const legacyCssVariable =
+      /var\(--(?:background|card|primary|secondary|foreground|muted-foreground|border)\)/;
+
+    expect(headerChrome).not.toMatch(legacyCssVariable);
+    expect(sheetChrome).not.toMatch(legacyCssVariable);
+    expect(sheetChrome).toContain('var(--shell-dialog-overlay)');
+    expect(sheetChrome).toContain('var(--shell-dialog-shadow)');
+
+    const semanticTokens = read('src/styles/tokens/semantic-tokens.css');
+    expect(semanticTokens).toContain('--shell-dialog-overlay:');
+    expect(semanticTokens).toContain('--shell-dialog-shadow:');
+    expect(semanticTokens).toContain('--shell-command-overlay:');
+    expect(semanticTokens).toContain('--shell-heading-content:');
+  });
+
   it('verifies obsolete legacy layout components have been completely deleted', () => {
     const obsoleteFiles = [
       'src/components/layout/AppShell.js',
