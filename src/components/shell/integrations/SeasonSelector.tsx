@@ -115,7 +115,9 @@ export function SeasonSelector({ className = '', menuAlign = 'right' }: SeasonSe
                       </span>
                     </div>
 
-                    {isSelected && <Check className="w-4 h-4 text-action-primary flex-shrink-0 ml-2" />}
+                    {isSelected && (
+                      <Check className="w-4 h-4 text-action-primary flex-shrink-0 ml-2" />
+                    )}
                   </button>
                 );
               })}
