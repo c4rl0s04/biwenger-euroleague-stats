@@ -28,7 +28,9 @@ export function AppBrand({ className = '', showWordmark = true }: AppBrandProps)
       {showWordmark && (
         <span className="hidden sm:block text-lg lg:text-xl font-bold font-sans tracking-tight text-content-primary">
           Biwenger
-          <span className="text-action-primary group-hover:text-action-primary/90 transition-colors">Stats</span>
+          <span className="text-action-primary group-hover:text-action-primary/90 transition-colors">
+            Stats
+          </span>
         </span>
       )}
     </NavigationLink>
