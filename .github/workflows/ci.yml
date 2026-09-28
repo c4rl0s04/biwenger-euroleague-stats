@@ -99,7 +99,7 @@ jobs:
             --fixture=${{ matrix.fixture }} --shard=${{ matrix.shard }}/${{ matrix.shards }} "${browser_args[@]}"
       - name: Upload browser evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: browser-results-${{ matrix.fixture }}-${{ matrix.shard }}
           path: test-results/

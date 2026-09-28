@@ -70,7 +70,7 @@ jobs:
               if len(report) > 100_000:
                   summary.write('\nSummary shortened; the downloadable report is complete.\n')
       - name: Upload full report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: manager-cash-${{ github.run_id }}-${{ github.run_attempt }}
           path: reports/manager-cash.txt
