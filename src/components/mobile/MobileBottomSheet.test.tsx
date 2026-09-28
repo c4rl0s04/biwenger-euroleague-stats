@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -44,5 +45,14 @@ describe('MobileBottomSheet', () => {
 
     expect(html).toContain('mobile-native-sheet-search');
     expect(html).toContain('mobile-native-sheet-body-search');
+  });
+
+  it('tracks the visual viewport and opts search focus out of browser scrolling', () => {
+    const source = readFileSync(new URL('./MobileBottomSheet.tsx', import.meta.url), 'utf8');
+
+    expect(source).toContain('window.visualViewport');
+    expect(source).toContain("viewport.addEventListener('resize', syncViewport)");
+    expect(source).toContain("viewport.addEventListener('scroll', syncViewport)");
+    expect(source).toContain("preventInitialFocusScroll={variant === 'search'}");
   });
 });

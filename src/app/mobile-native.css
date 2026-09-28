@@ -1144,10 +1144,14 @@
   padding: 0 1rem 1rem;
 }
 
+.mobile-native-sheet-layer-search {
+  overflow: hidden;
+}
+
 .mobile-native-sheet-search {
   display: flex;
-  height: min(88dvh, 48rem);
-  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 0.5rem);
+  height: min(88%, 48rem);
+  max-height: calc(100% - 0.5rem);
   flex-direction: column;
   overflow: hidden;
 }

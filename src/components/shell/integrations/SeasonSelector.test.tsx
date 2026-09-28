@@ -60,4 +60,13 @@ describe('SeasonSelector', () => {
     expect(source).not.toContain('Temporada en curso');
     expect(source).not.toContain('Temporada finalizada');
   });
+
+  it('supports left-aligned mobile menus while keeping right alignment as the default', () => {
+    const source = readFileSync(new URL('./SeasonSelector.tsx', import.meta.url), 'utf8');
+
+    expect(source).toContain("menuAlign?: 'left' | 'right'");
+    expect(source).toContain("menuAlign = 'right'");
+    expect(source).toContain('left-0 w-[min(16rem,calc(100vw-7rem))]');
+    expect(source).toContain('right-0 w-64');
+  });
 });

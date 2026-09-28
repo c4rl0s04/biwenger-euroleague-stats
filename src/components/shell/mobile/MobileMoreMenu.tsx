@@ -80,7 +80,7 @@ export function MobileMoreMenu({ isOpen, onClose, triggerRef }: MobileMoreMenuPr
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Temporada
             </span>
-            <SeasonSelector />
+            <SeasonSelector menuAlign="left" />
           </div>
           <GlobalSearch onClose={onClose} />
         </div>

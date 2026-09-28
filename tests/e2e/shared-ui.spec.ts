@@ -57,6 +57,23 @@ for (const theme of ['dark', 'light']) {
       });
       await expect(searchInput).toBeFocused();
       await expect(sheet.getByRole('button', { name: 'Cerrar búsqueda' })).toHaveCount(0);
+      const visualViewport = await page.evaluate(() => ({
+        top: window.visualViewport?.offsetTop ?? 0,
+        height: window.visualViewport?.height ?? window.innerHeight,
+      }));
+      const searchLayer = sheet.locator('..');
+      const layerMetrics = await searchLayer.evaluate((element) => ({
+        top: Number.parseFloat((element as HTMLElement).style.top || '0'),
+        height: Number.parseFloat((element as HTMLElement).style.height || '0'),
+      }));
+      expect(Math.abs(layerMetrics.top - visualViewport.top)).toBeLessThan(1);
+      expect(Math.abs(layerMetrics.height - visualViewport.height)).toBeLessThan(1);
+      const inputBox = await searchInput.boundingBox();
+      expect(inputBox).not.toBeNull();
+      expect(inputBox!.y).toBeGreaterThanOrEqual(visualViewport.top);
+      expect(inputBox!.y + inputBox!.height).toBeLessThanOrEqual(
+        visualViewport.top + visualViewport.height + 1
+      );
       await expect(sheet).toHaveAttribute('aria-describedby', /.+/);
       expect(
         await sheet.evaluate((element) => element.parentElement?.parentElement === document.body)
@@ -119,6 +136,20 @@ for (const theme of ['dark', 'light']) {
       const menu = page.getByRole('dialog', { name: 'Más secciones' });
       const menuClose = menu.getByRole('button', { name: 'Cerrar menú Más' });
       await expect(menuClose).toBeFocused();
+
+      const seasonTrigger = menu.getByRole('button', { name: 'Abrir selector de temporada' });
+      if (await seasonTrigger.count()) {
+        await seasonTrigger.click();
+        const seasonMenu = menu.getByRole('menu');
+        const seasonMenuBox = await seasonMenu.boundingBox();
+        const viewport = page.viewportSize();
+        expect(seasonMenuBox).not.toBeNull();
+        expect(viewport).not.toBeNull();
+        expect(seasonMenuBox!.x).toBeGreaterThanOrEqual(0);
+        expect(seasonMenuBox!.x + seasonMenuBox!.width).toBeLessThanOrEqual(viewport!.width + 1);
+        await menu.getByRole('button', { name: 'Cerrar selector de temporada' }).click();
+      }
+
       // Hidden/disabled descendants must not become the Shift+Tab boundary.
       await menu.evaluate((element) => {
         for (const state of ['hidden', 'disabled']) {
@@ -164,6 +195,8 @@ for (const theme of ['dark', 'light']) {
       const palette = page.getByRole('dialog', { name: 'Buscar en la aplicación' });
       const input = palette.getByRole('combobox');
       await expect(input).toBeFocused();
+      await expect(input).toHaveCSS('outline-style', 'none');
+      await expect(input.locator('..')).toHaveCSS('box-shadow', /inset/);
       await page.keyboard.press('Tab');
       await expect(input).toBeFocused();
       await page.keyboard.press('Shift+Tab');
