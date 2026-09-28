@@ -1,6 +1,6 @@
 'use client';
 
-import { LogIn, LogOut, Search, Settings, UserCircle2, X } from 'lucide-react';
+import { LogIn, LogOut, Search, Settings, UserCircle2 } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 import { useState, useRef, type ComponentType } from 'react';
 
@@ -23,6 +23,7 @@ export default function MobileHeaderActions() {
   const { currentUser, isAuthenticated, isClient } = useClientUser();
 
   const searchTriggerRef = useRef<HTMLButtonElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const profileTriggerRef = useRef<HTMLButtonElement>(null);
 
   const closeSheet = () => setActiveSheet(null);
@@ -60,16 +61,19 @@ export default function MobileHeaderActions() {
       </button>
       <MobileBottomSheet
         open={activeSheet === 'search'}
+        initialFocusRef={searchInputRef}
         returnFocusRef={searchTriggerRef}
         onClose={closeSheet}
         title="Buscar"
         description="Jugadores, equipos y mánagers"
+        variant="search"
       >
         <div className="mobile-search-sheet-content">
-          <GlobalSearch onClose={closeSheet} />
-          <button type="button" className="mobile-sheet-secondary-action" onClick={closeSheet}>
-            <X size={18} aria-hidden="true" /> Cerrar búsqueda
-          </button>
+          <GlobalSearch
+            inputRef={searchInputRef}
+            onClose={closeSheet}
+            presentation="sheet"
+          />
         </div>
       </MobileBottomSheet>
       <MobileBottomSheet
