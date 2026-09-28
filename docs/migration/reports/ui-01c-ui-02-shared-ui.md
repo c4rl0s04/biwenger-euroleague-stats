@@ -17,7 +17,8 @@ A fresh docs check exposed five upstream links to the deleted global service dir
 the architecture/product notes now point to the existing feature owners. Two Market contract tests
 still mocked the removed layout barrel; their mocks now target the existing Section default export,
 without changing assertions. No domain implementation was changed.
-Branch: `feat/ui-shared-compositions-controls`. No feature page, route, domain, auth, DB or dependency changes.
+Branch: `feat/ui-shared-compositions-controls`.
+Integrated via PR #51 at `7f4df6e9`. No feature page, route, domain, auth, DB or dependency changes.
 
 ## Reuse audit and delivery
 
@@ -98,5 +99,5 @@ failures were superseded by these successful final runs. Remote CI is reported o
 ## Next
 
 This completes only the demonstrated EmptyState and ModalDialog scope, not a full component library.
-UI-03 Season Predictions pilot remains next and unimplemented. UI-04 and feature migrations follow
-separately. The new PR is for review, not automatic merge.
+The bounded UI-01C/UI-02 work is integrated through PR #51 at `7f4df6e9`. UI-03 Season Predictions
+pilot remains next and unimplemented. UI-04 and feature migrations follow separately.

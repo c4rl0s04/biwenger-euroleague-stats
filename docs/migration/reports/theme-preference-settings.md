@@ -11,6 +11,7 @@ status: active
 
 Base: latest fetched `origin/main`, `7f4df6e9`, on 2026-09-27, including merged PR #51.
 Branch: `feat/theme-preference-settings`.
+Integrated via PR #56 at `47f1afd9`; follow-up documentation repair PR #57 is integrated at `a7d2523b`.
 
 Accounts owns `ThemePreferenceControl.tsx`; desktop Settings adds a bounded Appearance section,
 and mobile Appearance replaces the fixed dark-theme row. Native radios select `theme` and call
@@ -19,7 +20,8 @@ and mobile Appearance replaces the fixed dark-theme row. Native radios select `t
 Snow remains independent. No theme persistence, bootstrap, hydration, default, provider, chrome,
 authentication, database or provider behavior changes. Legacy settings forms and Card themes remain.
 Light/system are explicit user preferences; legacy feature-page migration remains incremental.
-UI-03 is not started. Finish pending UI-01C/UI-02 integration before Season Predictions.
+UI-01C and UI-02 were already integrated via PR #51 before this control. UI-03 Season Predictions is
+the next UI milestone and remains unstarted.
 
 ## Verification
 

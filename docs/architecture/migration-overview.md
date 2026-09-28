@@ -126,7 +126,7 @@ All read experiences across the application are now fully migrated into feature 
 
 Tournaments, Predictions, Playoffs, public Market and Managers remaining reads were earlier merged via PRs #35–39.
 
-At this historical milestone, the next domain step was **Task 13 — Provider boundaries**. Tasks 13–22 have since integrated. In parallel, the UI migration track has completed UI-00, UI-01A, UI-01T (`55765dfe`), and UI-01B (`665fd1d7`, PR #44, core primitives: Button, IconButton, Input, Badge, Avatar, Skeleton); the next UI milestone is **UI-01C — Interactive Controls & Overlays**.
+At this historical milestone, the next domain step was **Task 13 — Provider boundaries**. Tasks 13–22 have since integrated. In parallel, the UI migration track has since integrated UI-00, UI-01A, UI-01T (`55765dfe`), UI-01B (`665fd1d7`, PR #44), UI-01H, the application shell (PR #49), UI-01C `EmptyState` and UI-02 `ModalDialog` (PR #51), plus the production System / Dark / Light Settings control (PR #56). The next UI milestone is **UI-03 — Season Predictions pilot**.
 
 Residual Team detail orchestration/shared Player form work from the preserved campaign belongs to Task 25 review against the current schema. Saved Market components already match main; do not restart its old checkpoint Q. External Rounds/Standings/Market adapters retire as their final consumers migrate. Search interaction ownership belongs to Task 23. Unique UI token work is Task 24. The known Market phone-bids defect needs a separate behavior decision before final acceptance. Existing URLs remain compatibility contracts; renaming them is not a completion requirement.
 

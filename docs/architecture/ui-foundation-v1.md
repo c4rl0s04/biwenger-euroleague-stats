@@ -1346,9 +1346,9 @@ UI-01 establishes the foundational token, theming and primitive layers:
    Supports React Server Components without `'use client'` and exports exclusively through
    `@/components/ui/foundation`.
 4. **UI-01H — Foundation rollout hardening (this milestone):** protect unmigrated legacy UI: `system` remains the target default preference once migrated, while missing/invalid preferences resolve to the dark compatibility baseline during rollout; remove automatic no-JS light fallback; make `ThemeContext` enforce its provider boundary; and verify hydration safety across SSR and client stores. Light mode infrastructure is preserved for explicit opt-in.
-5. **UI-SHELL — Application shell / chrome migration (Task 23, PR #49):** first production adoption; migrate the global chrome (`AppShell`, `Sidebar`, `TopHeader`, `MobileNavigation`, footer, safe areas) onto the new foundation.
-6. **UI-01C — bounded shared compositions (implemented and verified):** `EmptyState` now shares empty-result copy presentation between GlobalSearch and CommandPalette. No domain data or surface policy; caller spacing is preserved. See the [UI-01C/UI-02 receipt](../migration/reports/ui-01c-ui-02-shared-ui.md).
-7. **UI-02 — bounded interactive foundation (implemented and verified):** `ModalDialog` shares focus, Escape, restoration and scroll-lock behavior between MobileBottomSheet, MobileMoreMenu and CommandPalette. Owners retain surface, portal/backdrop, placement and animation. No selector or full overlay library is claimed.
+5. **UI-SHELL — Application shell / chrome migration (Task 23, PR #49, integrated at `9cfb84e5`):** first production adoption; the global chrome (`AppShell`, `Sidebar`, `AppHeader`, `MobileNavigation`, footer and safe areas) now consumes the new foundation.
+6. **UI-01C — bounded shared compositions (integrated via PR #51 at `7f4df6e9`):** `EmptyState` shares empty-result copy presentation between GlobalSearch and CommandPalette. No domain data or surface policy; caller spacing is preserved. See the [UI-01C/UI-02 receipt](../migration/reports/ui-01c-ui-02-shared-ui.md).
+7. **UI-02 — bounded interactive foundation (integrated via PR #51 at `7f4df6e9`):** `ModalDialog` shares focus, Escape, restoration and scroll-lock behavior between MobileBottomSheet, MobileMoreMenu and CommandPalette. Owners retain surface, portal/backdrop, placement and animation. No selector or full overlay library is claimed.
 
 Do not implement every possible primitive in advance.
 
@@ -1436,7 +1436,7 @@ Existing Playwright visual-regression infrastructure should be reused when a scr
 
 The first foundation does not attempt to define or implement:
 
-- a general theme switcher;
+- a generic foundation-level theme switcher; the production System / Dark / Light preference control is feature-owned by Accounts/Settings;
 - multiple visual card themes;
 - a universal chart abstraction hiding Recharts;
 - a universal table abstraction for every data set;

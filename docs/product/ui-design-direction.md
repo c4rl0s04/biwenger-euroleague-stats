@@ -499,8 +499,9 @@ UI-01T theme-ready token/runtime work                  implemented foundation ca
 UI-01B core primitives                                 implemented foundation capability
 UI-01H rollout hardening                               dark compatibility default for legacy UI
 UI-SHELL application shell/chrome migration            integrated at 9cfb84e5 via PR #49
-UI-01C shared compositions                             bounded: EmptyState in both shell searches
-UI-02  interactive controls                            bounded: ModalDialog in three existing overlays
+UI-01C shared compositions                             integrated at 7f4df6e9 via PR #51: EmptyState
+UI-02  interactive controls                            integrated at 7f4df6e9 via PR #51: ModalDialog
+THEME   Settings System / Dark / Light control         integrated at 47f1afd9 via PR #56
 UI-03  Season Predictions pilot                       next; unimplemented
 UI-04  foundation/design review                       refine before broad adoption
 
