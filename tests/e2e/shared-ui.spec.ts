@@ -57,22 +57,32 @@ for (const theme of ['dark', 'light']) {
       });
       await expect(searchInput).toBeFocused();
       await expect(sheet.getByRole('button', { name: 'Cerrar búsqueda' })).toHaveCount(0);
-      const visualViewport = await page.evaluate(() => ({
-        top: window.visualViewport?.offsetTop ?? 0,
-        height: window.visualViewport?.height ?? window.innerHeight,
+      const viewportMetrics = await page.evaluate(() => ({
+        layoutHeight: window.innerHeight,
+        visualTop: window.visualViewport?.offsetTop ?? 0,
+        visualHeight: window.visualViewport?.height ?? window.innerHeight,
       }));
       const searchLayer = sheet.locator('..');
-      const layerMetrics = await searchLayer.evaluate((element) => ({
-        top: Number.parseFloat((element as HTMLElement).style.top || '0'),
-        height: Number.parseFloat((element as HTMLElement).style.height || '0'),
-      }));
-      expect(Math.abs(layerMetrics.top - visualViewport.top)).toBeLessThan(1);
-      expect(Math.abs(layerMetrics.height - visualViewport.height)).toBeLessThan(1);
+      await expect(searchLayer).toHaveCSS('position', 'fixed');
+      await expect(searchLayer).toHaveCSS('top', '0px');
+      await expect(searchLayer).toHaveCSS('bottom', '0px');
+      expect(
+        await searchLayer.evaluate((element) =>
+          getComputedStyle(element).getPropertyValue('--mobile-keyboard-inset').trim()
+        )
+      ).toMatch(/^\d+(?:\.\d+)?px$/);
+
+      const sheetBox = await sheet.boundingBox();
+      expect(sheetBox).not.toBeNull();
+      expect(
+        Math.abs(sheetBox!.y + sheetBox!.height - viewportMetrics.layoutHeight)
+      ).toBeLessThan(1);
+
       const inputBox = await searchInput.boundingBox();
       expect(inputBox).not.toBeNull();
-      expect(inputBox!.y).toBeGreaterThanOrEqual(visualViewport.top);
+      expect(inputBox!.y).toBeGreaterThanOrEqual(viewportMetrics.visualTop);
       expect(inputBox!.y + inputBox!.height).toBeLessThanOrEqual(
-        visualViewport.top + visualViewport.height + 1
+        viewportMetrics.visualTop + viewportMetrics.visualHeight + 1
       );
       await expect(sheet).toHaveAttribute('aria-describedby', /.+/);
       expect(
