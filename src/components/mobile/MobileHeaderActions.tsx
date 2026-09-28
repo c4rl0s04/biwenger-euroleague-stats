@@ -69,11 +69,7 @@ export default function MobileHeaderActions() {
         variant="search"
       >
         <div className="mobile-search-sheet-content">
-          <GlobalSearch
-            inputRef={searchInputRef}
-            onClose={closeSheet}
-            presentation="sheet"
-          />
+          <GlobalSearch inputRef={searchInputRef} onClose={closeSheet} presentation="sheet" />
         </div>
       </MobileBottomSheet>
       <MobileBottomSheet
