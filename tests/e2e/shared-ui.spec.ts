@@ -11,11 +11,34 @@ for (const theme of ['dark', 'light']) {
     await page.addInitScript((preference) => {
       localStorage.setItem('theme', preference);
     }, theme);
-    await page.route('**/api/search?*', (route) =>
-      route.fulfill({
+    await page.route('**/api/search?*', (route) => {
+      const query = new URL(route.request().url()).searchParams.get('q');
+      if (query === 'many-results') {
+        return route.fulfill({
+          json: {
+            success: true,
+            data: {
+              players: Array.from({ length: 5 }, (_, index) => ({
+                id: `player-${index + 1}`,
+                name: `Player ${index + 1}`,
+                team: 'Test Team',
+              })),
+              teams: Array.from({ length: 5 }, (_, index) => ({
+                id: `team-${index + 1}`,
+                name: `Team ${index + 1}`,
+              })),
+              users: Array.from({ length: 5 }, (_, index) => ({
+                id: `user-${index + 1}`,
+                name: `Manager ${index + 1}`,
+              })),
+            },
+          },
+        });
+      }
+      return route.fulfill({
         json: { success: true, data: { players: [], teams: [], users: [] } },
-      })
-    );
+      });
+    });
     await page.goto('/login?callbackUrl=%2Fdashboard');
     await page.getByLabel('Manager').fill(process.env.E2E_USERNAME!);
     await page.locator('#login-password').fill(process.env.E2E_PASSWORD!);
@@ -29,25 +52,45 @@ for (const theme of ['dark', 'light']) {
       await trigger.click();
       const sheet = page.getByRole('dialog', { name: 'Buscar', exact: true });
       const close = sheet.getByRole('button', { name: 'Cerrar hoja', exact: true });
-      await expect(close).toBeFocused();
+      const searchInput = sheet.getByRole('textbox', {
+        name: 'Buscar jugadores, equipos y mánagers',
+      });
+      await expect(searchInput).toBeFocused();
+      await expect(sheet.getByRole('button', { name: 'Cerrar búsqueda' })).toHaveCount(0);
       await expect(sheet).toHaveAttribute('aria-describedby', /.+/);
       expect(
         await sheet.evaluate((element) => element.parentElement?.parentElement === document.body)
       ).toBe(true);
       await expect(page.locator('body')).toHaveCSS('overflow', 'hidden');
       await page.keyboard.press('Shift+Tab');
-      await expect(
-        sheet.getByRole('button', { name: 'Cerrar búsqueda', exact: true })
-      ).toBeFocused();
-      await page.keyboard.press('Tab');
       await expect(close).toBeFocused();
+      await page.keyboard.press('Shift+Tab');
+      await expect(searchInput).toBeFocused();
 
       // A programmatic focus escape is contained, not only Tab at the boundaries.
       await trigger.evaluate((element) => element.focus());
       await expect(close).toBeFocused();
-      await sheet
-        .getByRole('textbox', { name: 'Buscar jugadores, equipos y mánagers' })
-        .fill('zz-no-match');
+
+      await searchInput.fill('many-results');
+      const resultViewport = sheet.locator('[data-search-results="sheet"]');
+      await expect(resultViewport).toBeVisible();
+      await expect(resultViewport.locator('[data-search-result]')).toHaveCount(15);
+      const resultMetrics = await resultViewport.evaluate((element) => ({
+        clientHeight: element.clientHeight,
+        scrollHeight: element.scrollHeight,
+        overflowY: getComputedStyle(element).overflowY,
+        position: getComputedStyle(element).position,
+      }));
+      expect(resultMetrics.clientHeight).toBeGreaterThan(88);
+      expect(resultMetrics.scrollHeight).toBeGreaterThan(resultMetrics.clientHeight);
+      expect(resultMetrics.overflowY).toBe('auto');
+      expect(resultMetrics.position).toBe('static');
+      await resultViewport.evaluate((element) => {
+        element.scrollTop = element.scrollHeight;
+      });
+      expect(await resultViewport.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
+
+      await searchInput.fill('zz-no-match');
       await expect(
         sheet.getByText('No se encontraron resultados para “zz-no-match”')
       ).toBeVisible();
