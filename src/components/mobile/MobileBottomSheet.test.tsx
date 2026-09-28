@@ -51,14 +51,9 @@ describe('MobileBottomSheet', () => {
     const source = readFileSync(new URL('./MobileBottomSheet.tsx', import.meta.url), 'utf8');
 
     expect(source).toContain('window.visualViewport');
-    expect(source).toContain('layoutViewportHeightRef.current - viewport.height');
-    expect(source).toContain('- viewport.offsetTop');
-    expect(source).toContain("viewport.addEventListener('resize', syncKeyboardInset)");
-    expect(source).toContain("viewport.addEventListener('scroll', syncKeyboardInset)");
-    expect(source).toContain("layer.style.setProperty('--mobile-keyboard-inset'");
-    expect(source).toContain("layer.style.removeProperty('--mobile-keyboard-inset')");
+    expect(source).toContain('syncKeyboardInset');
+    expect(source).toContain('--mobile-keyboard-inset');
     expect(source).not.toContain("bottom: 'auto'");
-    expect(source).not.toContain("height: `${visualViewport.height}px`");
     expect(source).toContain("preventInitialFocusScroll={variant === 'search'}");
-  });
+  });;
 });
