@@ -34,4 +34,15 @@ describe('MobileBottomSheet', () => {
     expect(html).toContain('role="dialog"');
     expect(portal.createPortal).toHaveBeenCalledWith(expect.anything(), document.body);
   });
+
+  it('marks the dedicated search variant for bounded viewport layout', () => {
+    const html = renderToStaticMarkup(
+      <MobileBottomSheet open onClose={() => {}} title="Buscar" variant="search">
+        Contenido
+      </MobileBottomSheet>
+    );
+
+    expect(html).toContain('mobile-native-sheet-search');
+    expect(html).toContain('mobile-native-sheet-body-search');
+  });
 });
