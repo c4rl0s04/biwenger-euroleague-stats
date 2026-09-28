@@ -1,6 +1,13 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+  type RefObject,
+} from 'react';
 import { Search, User, Users, Trophy, X, Loader2, type LucideIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { EmptyState } from '@/components/ui/foundation';
@@ -11,6 +18,8 @@ export interface GlobalSearchProps {
   onClose?: () => void;
   className?: string;
   autoFocus?: boolean;
+  presentation?: 'dropdown' | 'sheet';
+  inputRef?: RefObject<HTMLInputElement | null>;
 }
 
 interface PlayerItem {
@@ -41,7 +50,13 @@ type SearchResultItem =
   | ({ type: 'team' } & TeamItem)
   | ({ type: 'user' } & UserItem);
 
-export function GlobalSearch({ onClose, className = '', autoFocus = false }: GlobalSearchProps) {
+export function GlobalSearch({
+  onClose,
+  className = '',
+  autoFocus = false,
+  presentation = 'dropdown',
+  inputRef: externalInputRef,
+}: GlobalSearchProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<{
     players: PlayerItem[];
@@ -51,7 +66,8 @@ export function GlobalSearch({ onClose, className = '', autoFocus = false }: Glo
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const internalInputRef = useRef<HTMLInputElement>(null);
+  const inputRef = externalInputRef ?? internalInputRef;
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { beginNavigation } = useNavigationFeedback();
@@ -196,6 +212,7 @@ export function GlobalSearch({ onClose, className = '', autoFocus = false }: Glo
         type="button"
         onClick={() => handleSelect(item)}
         onMouseEnter={() => setActiveIndex(index)}
+        data-search-result
         className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer text-sm transition-colors ${
           isActive
             ? `${styles.activeBg} ${styles.activeText}`
@@ -220,9 +237,13 @@ export function GlobalSearch({ onClose, className = '', autoFocus = false }: Glo
   };
 
   return (
-    <div ref={dropdownRef} className={`relative w-full ${className}`}>
+    <div
+      ref={dropdownRef}
+      className={`${presentation === 'sheet' ? 'flex min-h-0 flex-1 flex-col' : 'relative'} w-full ${className}`}
+      data-search-presentation={presentation}
+    >
       {/* Search Input */}
-      <div className="relative group">
+      <div className="group relative shrink-0 rounded-xl border border-border/50 bg-secondary transition-[border-color,box-shadow] focus-within:border-primary/40 focus-within:ring-1 focus-within:ring-primary/20">
         <Search
           size={18}
           className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors"
@@ -237,7 +258,7 @@ export function GlobalSearch({ onClose, className = '', autoFocus = false }: Glo
           onKeyDown={handleKeyDown}
           placeholder="Buscar..."
           aria-label="Buscar jugadores, equipos y mánagers"
-          className="w-full pl-10 pr-10 py-2 rounded-xl bg-secondary border border-border/50 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
+          className="w-full rounded-xl bg-transparent py-2 pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none"
         />
         {loading && (
           <Loader2
@@ -263,7 +284,14 @@ export function GlobalSearch({ onClose, className = '', autoFocus = false }: Glo
 
       {/* Dropdown Results */}
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border/50 rounded-xl shadow-xl shadow-black/20 overflow-hidden z-50 max-h-[400px] overflow-y-auto">
+        <div
+          data-search-results={presentation}
+          className={
+            presentation === 'sheet'
+              ? 'mt-2 min-h-0 flex-1 overflow-y-auto overscroll-contain rounded-xl border border-border/50 bg-card'
+              : 'absolute left-0 right-0 top-full z-50 mt-2 max-h-[400px] overflow-y-auto rounded-xl border border-border/50 bg-card shadow-xl shadow-black/20'
+          }
+        >
           {!hasResults && !loading && (
             <EmptyState className="p-4">
               No se encontraron resultados para &ldquo;{query}&rdquo;
