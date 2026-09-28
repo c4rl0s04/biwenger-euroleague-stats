@@ -214,7 +214,9 @@ export function GlobalSearch({
       >
         <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-current' : styles.iconColor}`} />
         <div className="flex-1 flex flex-col items-start min-w-0">
-          <span className={`font-medium truncate ${isActive ? 'text-current' : 'text-content-primary'}`}>
+          <span
+            className={`font-medium truncate ${isActive ? 'text-current' : 'text-content-primary'}`}
+          >
             {item.name}
           </span>
           {subtitle && (
