@@ -29,6 +29,12 @@ flowchart LR
 
 ## Architecture and data flow
 
+Team logos retain the provider's crop parameters but remove thumbnail transforms
+(`width`, `height`, `resizeType`, and `format`) during collection and synchronization.
+Raster logos must be at least 128 × 128 pixels; SVG logos are validated as scalable images.
+If validation fails, the synchronizer reports the team and preserves its existing logo.
+Player portrait URL selection and validation are unchanged.
+
 The pipeline is split into two distinct scripts to prevent mixing web scraping concerns with database transactions:
 
 1. **Collection Stage (`scripts/euroleague/collect.ts`)**:
