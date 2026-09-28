@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { ModalDialog } from '../foundation';
@@ -30,5 +31,13 @@ describe('ModalDialog server contract', () => {
     expect(html).toMatch(/^<section/);
     expect(html).toContain('aria-labelledby="title"');
     expect(html).toContain('aria-describedby="description"');
+  });
+
+  it('supports preventing browser scroll when applying initial focus', () => {
+    const source = readFileSync(new URL('./ModalDialog.tsx', import.meta.url), 'utf8');
+
+    expect(source).toContain('preventInitialFocusScroll?: boolean');
+    expect(source).toContain('preventScroll: true');
+    expect(source).toContain('.focus(focusOptions)');
   });
 });
