@@ -51,7 +51,8 @@ describe('MobileBottomSheet', () => {
     const source = readFileSync(new URL('./MobileBottomSheet.tsx', import.meta.url), 'utf8');
 
     expect(source).toContain('window.visualViewport');
-    expect(source).toContain('layoutViewportHeightRef.current - viewport.height - viewport.offsetTop');
+    expect(source).toContain('layoutViewportHeightRef.current - viewport.height');
+    expect(source).toContain('- viewport.offsetTop');
     expect(source).toContain("viewport.addEventListener('resize', syncKeyboardInset)");
     expect(source).toContain("viewport.addEventListener('scroll', syncKeyboardInset)");
     expect(source).toContain("layer.style.setProperty('--mobile-keyboard-inset'");
