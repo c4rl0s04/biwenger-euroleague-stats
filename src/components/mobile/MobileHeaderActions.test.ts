@@ -9,6 +9,10 @@ describe('mobile header actions', () => {
     expect(source).toContain('aria-label="Abrir búsqueda"');
     expect(source).toContain('aria-label="Abrir perfil"');
     expect(source).toContain('title="Buscar"');
+    expect(source).toContain('variant="search"');
+    expect(source).toContain('presentation="sheet"');
+    expect(source).toContain('initialFocusRef={searchInputRef}');
+    expect(source).not.toContain('Cerrar búsqueda');
     expect(source).toContain('title="Cuenta"');
   });
 
