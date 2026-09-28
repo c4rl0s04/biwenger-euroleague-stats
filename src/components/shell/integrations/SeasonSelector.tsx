@@ -101,20 +101,15 @@ export function SeasonSelector({ className = '' }: SeasonSelectorProps) {
                     }`}
                     role="menuitem"
                   >
-                    <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="flex min-w-0 items-center gap-2.5">
                       {isActiveSeason ? (
-                        <div className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" />
+                        <div className="h-2 w-2 flex-shrink-0 rounded-full bg-emerald-400" />
                       ) : (
-                        <div className="w-2 h-2 rounded-full bg-slate-500 flex-shrink-0" />
+                        <div className="h-2 w-2 flex-shrink-0 rounded-full bg-slate-500" />
                       )}
-                      <div className="min-w-0">
-                        <div className="text-xs font-medium truncate flex items-center gap-1.5">
-                          <span>{season.name || season.id}</span>
-                        </div>
-                        <div className="text-[10px] text-muted-foreground">
-                          {isActiveSeason ? '🟢 Temporada en curso' : '❄️ Temporada finalizada'}
-                        </div>
-                      </div>
+                      <span className="truncate text-xs font-medium">
+                        {season.name || season.id}
+                      </span>
                     </div>
 
                     {isSelected && <Check className="w-4 h-4 text-primary flex-shrink-0 ml-2" />}
