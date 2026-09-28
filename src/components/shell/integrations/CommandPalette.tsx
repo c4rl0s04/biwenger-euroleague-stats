@@ -138,7 +138,7 @@ export function CommandPalette() {
         shouldFilter={false}
       >
         <div
-          className="flex items-center border-b border-border px-4 transition-[background-color,box-shadow] focus-within:bg-secondary/20 focus-within:ring-1 focus-within:ring-inset focus-within:ring-primary/40"
+          className="command-palette-input-row flex items-center border-b border-border px-4"
           cmdk-input-wrapper=""
         >
           <Search className="w-5 h-5 text-muted-foreground mr-2 shrink-0" />
@@ -147,7 +147,7 @@ export function CommandPalette() {
             value={query}
             onValueChange={setQuery}
             placeholder="Buscar página, jugador, equipo..."
-            className="h-14 flex-1 bg-transparent text-lg text-foreground outline-none placeholder:text-muted-foreground focus-visible:outline-none"
+            className="command-palette-input h-14 flex-1 bg-transparent text-lg text-foreground outline-none placeholder:text-muted-foreground"
           />
         </div>
 

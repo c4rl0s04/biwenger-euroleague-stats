@@ -6,6 +6,7 @@ export type ModalDialogProps = Omit<HTMLAttributes<HTMLElement>, 'role'> & {
   as?: 'div' | 'section';
   onClose: () => void;
   initialFocusRef?: RefObject<HTMLElement | null>;
+  preventInitialFocusScroll?: boolean;
   returnFocusRef?: RefObject<HTMLElement | null>;
 } & (
     | { 'aria-label': string; 'aria-labelledby'?: string }
@@ -40,6 +41,7 @@ export function ModalDialog({
   as: Element = 'div',
   onClose,
   initialFocusRef,
+  preventInitialFocusScroll = false,
   returnFocusRef,
   children,
   ...props
@@ -57,8 +59,9 @@ export function ModalDialog({
     }
     dialogs.push(dialog);
     const isTop = () => dialogs.at(-1) === dialog;
-    const focusFirst = () => (tabStops(dialog)[0] ?? dialog).focus();
-    (initialFocusRef?.current ?? tabStops(dialog)[0] ?? dialog).focus();
+    const focusOptions = preventInitialFocusScroll ? { preventScroll: true } : undefined;
+    const focusFirst = () => (tabStops(dialog)[0] ?? dialog).focus(focusOptions);
+    (initialFocusRef?.current ?? tabStops(dialog)[0] ?? dialog).focus(focusOptions);
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (!isTop() || event.defaultPrevented) return;
@@ -98,7 +101,7 @@ export function ModalDialog({
       if (!dialogs.length) document.body.style.overflow = originalOverflow;
       if (wasTop && previousFocus?.isConnected) previousFocus.focus();
     };
-  }, [initialFocusRef, returnFocusRef]);
+  }, [initialFocusRef, preventInitialFocusScroll, returnFocusRef]);
 
   return (
     <Element
