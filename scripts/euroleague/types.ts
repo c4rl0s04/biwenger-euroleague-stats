@@ -116,6 +116,12 @@ export function portraitUrl(
   }
 }
 
+export function teamLogoUrl(value: string): string {
+  const url = new URL(imageUrl(value));
+  for (const key of ['width', 'height', 'resizeType', 'format']) url.searchParams.delete(key);
+  return url.href;
+}
+
 export function hash(value: unknown): string {
   const canonical = (v: unknown): unknown =>
     Array.isArray(v)

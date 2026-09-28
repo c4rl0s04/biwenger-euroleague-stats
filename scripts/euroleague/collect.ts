@@ -4,6 +4,7 @@ import { chromium, type Page } from 'playwright';
 import {
   type Asset,
   portraitUrl,
+  teamLogoUrl,
   collectionSchema,
   SEASON,
   DEFAULT_COLLECTION_PATH,
@@ -169,7 +170,8 @@ export async function collect(page: Page, rosterOnly = true) {
   console.log(`Extracting rosters from 20 teams...`);
   for (const team of teamLinks) {
     const code = team.href.split('/').filter(Boolean).at(-1)!.toUpperCase();
-    const url = portraitUrl(team.name, team.images);
+    const source = portraitUrl(team.name, team.images);
+    const url = source ? teamLogoUrl(source) : null;
     if (url) {
       assets.push({
         kind: 'team',

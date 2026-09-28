@@ -14,6 +14,7 @@ import {
   collectionSchema,
   manifestSchema,
   normalize,
+  teamLogoUrl,
 } from './types';
 import { matchPlayer, loadOverrides } from './match';
 import { validateImage } from './validate';
@@ -350,9 +351,14 @@ async function main() {
     for (const entry of plan.entries) {
       if (entry.url) {
         try {
-          const val = await validateImage(entry.url);
-          entries.push({ ...entry, validation: val });
+          const url = entry.kind === 'team' ? teamLogoUrl(entry.url) : entry.url;
+          const val = await validateImage(url, entry.kind);
+          entries.push({ ...entry, url, validation: val });
         } catch {
+          if (entry.kind === 'team')
+            console.warn(
+              `Team logo validation failed for ${entry.name}; preserving existing logo.`
+            );
           // If image fails, keep player entry but set url = null
           entries.push({ ...entry, url: null, validation: null });
         }
