@@ -17,7 +17,7 @@ export function AppHeader({ className = '' }: AppHeaderProps) {
 
   return (
     <header
-      className={`app-top-header bg-card/60 backdrop-blur-xl border-b border-border/40 sticky top-0 z-40 transition-colors duration-300 ${className}`}
+      className={`app-top-header bg-surface-card/60 backdrop-blur-xl border-b border-border-default/40 sticky top-0 z-40 transition-colors duration-300 ${className}`}
       style={{
         boxSizing: 'border-box',
         height: 'calc(var(--app-header-height) + var(--app-safe-area-top))',
@@ -26,7 +26,7 @@ export function AppHeader({ className = '' }: AppHeaderProps) {
     >
       {/* Subtle brand accent line at top */}
       <div
-        className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-70"
+        className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-action-primary/40 to-transparent opacity-70"
         aria-hidden="true"
       />
 
@@ -46,7 +46,7 @@ export function AppHeader({ className = '' }: AppHeaderProps) {
           <button
             type="button"
             onClick={() => setSearchOpen((prev) => !prev)}
-            className="shell-action lg:hidden touch-target p-2 rounded-xl hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            className="shell-action lg:hidden touch-target p-2 rounded-xl hover:bg-surface-secondary text-content-muted hover:text-content-primary transition-colors cursor-pointer"
             aria-label={searchOpen ? 'Cerrar búsqueda' : 'Abrir búsqueda'}
             aria-expanded={searchOpen}
           >
@@ -57,7 +57,7 @@ export function AppHeader({ className = '' }: AppHeaderProps) {
           <NavigationLink
             href="/settings"
             navigationLabel="Ajustes"
-            className="hidden lg:flex p-2 rounded-xl hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            className="hidden lg:flex p-2 rounded-xl hover:bg-surface-secondary text-content-muted hover:text-content-primary transition-colors cursor-pointer"
             aria-label="Ajustes"
             title="Ajustes"
           >
@@ -77,7 +77,7 @@ export function AppHeader({ className = '' }: AppHeaderProps) {
 
       {/* Expandable Search Bar for Tablet (< 1024px) */}
       {searchOpen && (
-        <div className="lg:hidden absolute left-0 right-0 top-full px-4 pb-3 pt-2 bg-card border-b border-border/50 shadow-2xl animate-in fade-in slide-in-from-top-1 duration-150">
+        <div className="lg:hidden absolute left-0 right-0 top-full px-4 pb-3 pt-2 bg-surface-card border-b border-border-default/50 shadow-2xl animate-in fade-in slide-in-from-top-1 duration-150">
           <GlobalSearch autoFocus onClose={() => setSearchOpen(false)} />
         </div>
       )}
