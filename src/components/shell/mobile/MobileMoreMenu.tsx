@@ -76,7 +76,7 @@ export function MobileMoreMenu({ isOpen, onClose, triggerRef }: MobileMoreMenuPr
         </header>
 
         <div className="px-5 pb-4 space-y-3">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Temporada
             </span>
