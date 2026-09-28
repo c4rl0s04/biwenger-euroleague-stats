@@ -69,9 +69,7 @@ export function SeasonSelector({ className = '', menuAlign = 'right' }: SeasonSe
           <div className="fixed inset-0 z-[60]" onClick={() => setIsOpen(false)} />
           <div
             className={`absolute z-[70] mt-2 rounded-2xl border border-border bg-card p-2 shadow-2xl animate-in fade-in zoom-in-95 duration-150 ${
-              menuAlign === 'left'
-                ? 'left-0 w-[min(16rem,calc(100vw-7rem))]'
-                : 'right-0 w-64'
+              menuAlign === 'left' ? 'left-0 w-[min(16rem,calc(100vw-7rem))]' : 'right-0 w-64'
             }`}
             role="menu"
           >
