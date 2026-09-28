@@ -1002,3 +1002,22 @@ assertion that legacy components contain no domain rules.
 Review of ownership candidate `3cadaeb5` additionally identified the nullable Schedule date
 contract and duplicated offer financial projections. The same branch closes these through
 Lineup's public contract; see the receipt's review follow-up for preserved behavior and checks.
+
+## Task 27 — Architecture release reconciliation (2026-09-28)
+
+The [Task 27 receipt](../migration/reports/task-27-release-reconciliation.md) supersedes
+branch-only and pending-release statements above. Domain ownership PR #55 (`016d2488`)
+and residue PR #58 (`d6d268ca`) are integrated ancestors of remote main. Exact-merge CI,
+all browser jobs, production deployment and deployment smoke passed for `d6d268ca`.
+
+Current remote main and production alias were verified at `fbda5b28`, a descendant with
+only roster portrait data and UI documentation changes. Production is READY; read-only
+smoke passed 4/4 and the selected one-hour runtime-error window returned no errors.
+The latest descendant CI was still running at inspection, distinct from the successful
+architecture-merge CI. Architecture checking passes with 1,072 modules, 125 protected
+entrypoints and no policy exceptions.
+
+Task 27 release verification is complete for architecture. This documentation reconciliation
+still requires integration. Retained database/season/provider/auth infrastructure and shared
+competition contracts have explicit owners; live UI compatibility remains under the separate
+UI migration. Sync functionality and UI adoption are not expanded by this acceptance.
