@@ -66,7 +66,7 @@ describe('SeasonSelector', () => {
 
     expect(source).toContain("menuAlign?: 'left' | 'right'");
     expect(source).toContain("menuAlign = 'right'");
-    expect(source).toContain("left-0 w-[min(16rem,calc(100vw-7rem))]");
+    expect(source).toContain('left-0 w-[min(16rem,calc(100vw-7rem))]');
     expect(source).toContain('right-0 w-64');
   });
 });
