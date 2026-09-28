@@ -56,10 +56,10 @@ export function MobileMoreMenu({ isOpen, onClose, triggerRef }: MobileMoreMenuPr
         <div className="mobile-sheet-handle" aria-hidden="true" />
         <header className="flex items-center justify-between gap-4 px-5 pb-4 pt-2">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-primary">
+            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-action-primary">
               Navegación
             </p>
-            <h2 id="mobile-more-title" className="mt-1 text-3xl font-display text-foreground">
+            <h2 id="mobile-more-title" className="mt-1 text-3xl font-display text-content-primary">
               Más secciones
             </h2>
           </div>
@@ -77,7 +77,7 @@ export function MobileMoreMenu({ isOpen, onClose, triggerRef }: MobileMoreMenuPr
 
         <div className="px-5 pb-4 space-y-3">
           <div className="flex items-center gap-3">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            <span className="text-xs font-semibold text-content-muted uppercase tracking-wider">
               Temporada
             </span>
             <SeasonSelector menuAlign="left" />
@@ -115,7 +115,7 @@ export function MobileMoreMenu({ isOpen, onClose, triggerRef }: MobileMoreMenuPr
             </section>
           ))}
 
-          <div className="mt-4 grid grid-cols-2 gap-2 border-t border-border/40 pt-4">
+          <div className="mt-4 grid grid-cols-2 gap-2 border-t border-border-default/40 pt-4">
             <NavigationLink
               href="/settings"
               navigationLabel="Ajustes"
