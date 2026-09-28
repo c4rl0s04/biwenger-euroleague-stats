@@ -12,7 +12,9 @@ interface MobileBottomSheetProps {
   title: string;
   description?: string;
   children: ReactNode;
+  initialFocusRef?: RefObject<HTMLElement | null>;
   returnFocusRef?: RefObject<HTMLElement | null>;
+  variant?: 'default' | 'search';
 }
 
 export default function MobileBottomSheet({
@@ -21,7 +23,9 @@ export default function MobileBottomSheet({
   title,
   description,
   children,
+  initialFocusRef,
   returnFocusRef,
+  variant = 'default',
 }: MobileBottomSheetProps) {
   const titleId = useId();
   const descriptionId = useId();
@@ -38,11 +42,11 @@ export default function MobileBottomSheet({
       />
       <ModalDialog
         onClose={onClose}
-        initialFocusRef={closeRef}
+        initialFocusRef={initialFocusRef ?? closeRef}
         returnFocusRef={returnFocusRef}
         aria-labelledby={titleId}
         aria-describedby={description ? descriptionId : undefined}
-        className="mobile-native-sheet"
+        className={`mobile-native-sheet ${variant === 'search' ? 'mobile-native-sheet-search' : ''}`}
       >
         <span className="mobile-native-sheet-handle" aria-hidden="true" />
         <div className="mobile-native-sheet-header">
@@ -60,7 +64,11 @@ export default function MobileBottomSheet({
             <X size={20} aria-hidden="true" />
           </button>
         </div>
-        <div className="mobile-native-sheet-body">{children}</div>
+        <div
+          className={`mobile-native-sheet-body ${variant === 'search' ? 'mobile-native-sheet-body-search' : ''}`}
+        >
+          {children}
+        </div>
       </ModalDialog>
     </div>,
     document.body
