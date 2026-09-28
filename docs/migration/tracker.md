@@ -325,23 +325,23 @@ real provider mutations and changes to credentials/authorization unless separate
 - **Scope:** Run full checks and complete affected API/security/desktop/mobile/Linux matrices.
 - **Completion check:** Required checks pass; missing coverage and known defect decisions resolved; no masked regressions.
 - **Evidence:** [Task 26 acceptance receipt](reports/task-26-regression-acceptance.md); historical receipts are inputs, not new acceptance.
-- **Next action:** PR #53 restored main CI and production deployment. Integrate the verified PR #54 closure and confirm its final main CI, production alias and smoke check under Task 27.
+- **Next action:** PR #53 restored main CI and production deployment. PR #54 and the subsequent ownership closures are integrated; Task 27 records exact-merge CI, production deployment and smoke evidence.
 
 ### Domain ownership follow-up — before Task 27
 
-- **State:** Implemented on `refactor/domain-ownership`, based on main `4d9b2ba3`; build/browser acceptance open after resource-constrained local attempts; not merged.
+- **State:** Integrated through PR #55 at `016d2488`, followed by PR #58 at `d6d268ca` closing Lineup/Schedule rule residue and Hoopgrid CLI persistence. Exact-merge CI and production acceptance are recorded in Task 27.
 - **Scope:** Feature-owned Lineup rules, Market bidding and Accounts password persistence; explicit shared competition contracts and enforcement.
 - **Evidence:** [Domain ownership receipt](reports/domain-ownership-closure.md).
 - **Completion check:** Required local verification passes, no retired helper consumers or new dependency cycles, then integrate the approved candidate before final release reconciliation.
 
 ### Task 27 — Release / final reconciliation
 
-- **State:** Release reconciliation accompanying PR #54. Main recovery at `0736b96d` is deployed and smoke-tested; confirm the final closure merge separately.
+- **State:** Architecture release verified at `d6d268ca`; current production `fbda5b28` contains that release. Documentation reconciliation is prepared on `docs/task-27-release-reconciliation`; its integration remains subsequent.
 - **Dependencies / approval:** 26 and the domain ownership follow-up; explicit push/deploy approval.
-- **Scope:** Integrate approved history, verify CI/deployment and preservation; no unapproved production writes.
-- **Completion check:** Main/origin/deployed SHA agree, smoke/log checks pass and final receipt closes every task.
-- **Evidence:** Not inferred from prior PR merges.
-- **Next action:** The user authorized integration and deployment verification for this closure. Record the final main SHA, successful production deployment and smoke checks; keep unavailable verification explicit.
+- **Scope:** Reconcile architecture integration, CI, production deployment and preserved contracts. UI adoption and sync functionality are separate work; no production writes or deployment changes.
+- **Completion check:** Pin the architecture merge and successful exact-commit checks; verify current remote main and production provenance, smoke checks and bounded runtime logs; record remaining limitations.
+- **Evidence:** [Task 27 release receipt](reports/task-27-release-reconciliation.md): exact architecture-merge CI and deployment smoke passed; production deployment READY; current production read-only smoke passed 4/4.
+- **Next action:** Integrate this documentation receipt. Latest UI-documentation merge CI was still running at inspection; architecture acceptance uses successful exact-merge evidence, not that pending run. Continue UI adoption separately.
 
 Tasks can be combined into a bounded PR when dependencies and review scope permit; IDs remain stable.
 Tasks 04–25 are integrated into main. Task 22 closed at `2c06e2bc`; Task 23 merged through PR #49. In the UI migration track, UI-01A, UI-01T, UI-01B, UI-01H, **UI-SHELL**, **UI-01C**, and **UI-02** are integrated; the production Settings theme preference is integrated through PR #56. **UI-03 — Season Predictions pilot** is the next UI milestone, followed by **UI-04 — foundation/design review** and then feature-by-feature legacy UI migration.

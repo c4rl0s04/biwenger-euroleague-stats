@@ -10,10 +10,11 @@ status: active
 
 # Migration overview
 
-The feature architecture implementation is integrated through Task 25 (PRs #50 and #52).
-Task 26 verifies the combined application and corrects regressions; Task 27 reconciles main,
-CI and the production deployment. The [master tracker](../migration/tracker.md) and
-[Task 26 receipt](../migration/reports/task-26-regression-acceptance.md) hold current evidence.
+The architecture implementation and ownership follow-ups are integrated through PR #58
+at `d6d268ca`. Task 26 regression evidence and Task 27 exact-merge CI, deployment and smoke
+verification establish architecture release acceptance. The [master tracker](../migration/tracker.md)
+and [Task 27 receipt](../migration/reports/task-27-release-reconciliation.md) distinguish the
+accepted release from subsequent documentation integration and the separate UI migration.
 
 All application read domains, private-operation boundaries, offline jobs and synchronization
 ownership have completed their implementation batches. Retained database infrastructure and
@@ -24,8 +25,8 @@ continues; they must not be deleted before their consumers migrate.
 A subsequent ownership audit identified active global domain helpers beyond the UI migration.
 The [domain ownership follow-up](../migration/reports/domain-ownership-closure.md) moves Lineup,
 Market bidding and Accounts persistence into their features and gives reusable competition
-calculations/queries explicit shared contracts. Task 27 acceptance must use the eventual merged
-follow-up commit; earlier release evidence does not validate these changes.
+calculations/queries explicit shared contracts. PR #55 and the PR #58 residue closure are
+ancestors of the production commit verified in Task 27.
 
 The feature-by-feature entries below are historical milestones. Their original “remaining”
 columns describe dependencies at that point in time, not the current task queue.
@@ -45,8 +46,8 @@ Implementation completion is not a claim that every broader domain or legacy con
 
 Matches, Team Profile, Players catalogue/profile and Manager Profile have feature-owned read services,
 models and desktop/mobile composition. Their public/server contracts, HTTP compatibility,
-server guards and transitive import graphs are tested. Some explicitly retained shared
-query adapters remain; these references are not a claim that all global code is gone.
+server guards and transitive import graphs are tested. Shared competition reads use explicit
+server contracts; database and season infrastructure remain deliberately shared.
 
 ## Historical read foundations and their dependencies
 
@@ -184,4 +185,5 @@ and squad-table form rules inside Lineup/Schedule components, plus direct Hoopgr
 The [ownership residue follow-up](../migration/reports/ownership-residue.md) moves those rules
 into their feature contracts without moving or redesigning the screens. Import enforcement
 now includes the Hoopgrid CLI; semantic review remains necessary for legacy presentation.
-This bounded cleanup does not constitute integration or production acceptance.
+The original cleanup receipt remains historical. Its integration and production acceptance
+are recorded separately in the Task 27 receipt.
