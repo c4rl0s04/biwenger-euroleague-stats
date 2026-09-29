@@ -22,4 +22,13 @@ describe('mobile header actions', () => {
     expect(source).toContain('isClient');
     expect(source).toContain('activeUser = isClient ? currentUser : null');
   });
+
+  it('uses foundation controls without importing legacy avatar UI', () => {
+    const source = readFileSync(new URL('./MobileHeaderActions.tsx', import.meta.url), 'utf8');
+
+    expect(source).toContain("from '@/components/ui/foundation'");
+    expect(source).toContain('<IconButton');
+    expect(source).toContain('<Avatar');
+    expect(source).not.toContain('UserAvatar');
+  });
 });

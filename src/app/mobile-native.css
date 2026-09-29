@@ -1129,7 +1129,7 @@
 }
 
 .mobile-native-sheet-header h2 {
-  color: hsl(var(--shell-heading-content));
+  color: hsl(var(--content-primary));
   font-size: 1.8rem;
   line-height: 1;
 }

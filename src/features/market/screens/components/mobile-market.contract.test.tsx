@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import type { CurrentMarketListing } from '../../catalogue/models/market-catalogue';
 import type { RecentTransfer } from '../../trends/models/market-activity-extra';
 import type { MobileMarketOverview } from '../models/market-screen';
-vi.mock('@/components/mobile/MobileHeaderActions', () => ({ default: () => null }));
+vi.mock('@/components/shell/mobile/MobileHeaderActions', () => ({ default: () => null }));
 import MobileMarketScreen from './MobileMarketScreen';
 
 const listing = (id: number): CurrentMarketListing => ({

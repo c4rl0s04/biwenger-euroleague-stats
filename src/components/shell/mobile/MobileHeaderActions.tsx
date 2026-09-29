@@ -2,21 +2,13 @@
 
 import { LogIn, LogOut, Search, Settings, UserCircle2 } from 'lucide-react';
 import { signOut } from 'next-auth/react';
-import { useState, useRef, type ComponentType } from 'react';
+import { useState, useRef } from 'react';
 
-// Temporary page-composition → shell capability boundary; see Task 23 compatibility receipt.
 import { GlobalSearch } from '@/components/shell/integrations/GlobalSearch';
 import { NavigationLink } from '@/components/shell/shared/NavigationFeedback';
-import { UserAvatar } from '@/components/ui';
+import { Avatar, IconButton } from '@/components/ui/foundation';
+import MobileBottomSheet from '@/components/mobile/MobileBottomSheet';
 import { useClientUser } from '@/lib/hooks/useClientUser';
-
-import MobileBottomSheet from './MobileBottomSheet';
-
-const MobileUserAvatar = UserAvatar as unknown as ComponentType<{
-  src?: string | null;
-  alt: string;
-  size?: number;
-}>;
 
 export default function MobileHeaderActions() {
   const [activeSheet, setActiveSheet] = useState<'search' | 'profile' | null>(null);
@@ -33,8 +25,7 @@ export default function MobileHeaderActions() {
 
   return (
     <div className="mobile-native-header-actions">
-      <button
-        type="button"
+      <IconButton
         ref={searchTriggerRef}
         className="mobile-native-icon-button"
         onClick={() => setActiveSheet('search')}
@@ -43,22 +34,27 @@ export default function MobileHeaderActions() {
         aria-haspopup="dialog"
       >
         <Search size={20} aria-hidden="true" />
-      </button>
-      <button
-        type="button"
+      </IconButton>
+      <IconButton
         ref={profileTriggerRef}
-        className="mobile-native-avatar"
+        className="mobile-native-avatar w-12"
         onClick={() => setActiveSheet('profile')}
         aria-label="Abrir perfil"
         aria-expanded={activeSheet === 'profile'}
         aria-haspopup="dialog"
       >
         {activeUser ? (
-          <MobileUserAvatar src={activeUser.icon} alt={profileName} size={28} />
+          <Avatar
+            src={activeUser.icon}
+            alt=""
+            size="sm"
+            fallback={profileName.charAt(0).toUpperCase()}
+            className="h-7 w-7 border-0 bg-[hsl(var(--surface-muted))] text-[hsl(var(--content-muted))]"
+          />
         ) : (
           <UserCircle2 size={23} aria-hidden="true" />
         )}
-      </button>
+      </IconButton>
       <MobileBottomSheet
         open={activeSheet === 'search'}
         initialFocusRef={searchInputRef}
@@ -82,7 +78,13 @@ export default function MobileHeaderActions() {
         <div className="mobile-account-sheet-content">
           <div className="mobile-account-identity">
             {activeUser ? (
-              <MobileUserAvatar src={activeUser.icon} alt={profileName} size={52} />
+              <Avatar
+                src={activeUser.icon}
+                alt={profileName}
+                size="lg"
+                fallback={profileName.charAt(0).toUpperCase()}
+                className="h-[52px] w-[52px] border-0 bg-[hsl(var(--surface-muted))] text-[hsl(var(--content-muted))]"
+              />
             ) : (
               <span className="mobile-account-avatar-fallback">
                 <UserCircle2 size={28} aria-hidden="true" />

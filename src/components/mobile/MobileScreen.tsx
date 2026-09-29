@@ -2,7 +2,7 @@ import Link from 'next/link';
 import type { ComponentType, ReactNode } from 'react';
 import { ArrowLeft, ArrowRight, Search } from 'lucide-react';
 
-import MobileHeaderActions from './MobileHeaderActions';
+import MobileHeaderActions from '@/components/shell/mobile/MobileHeaderActions';
 
 type IconComponent = ComponentType<{
   size?: number;

@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { expect, it, vi } from 'vitest';
 import { SeasonPredictionsScreen } from './SeasonPredictionsScreen';
 
-vi.mock('@/components/mobile/MobileHeaderActions', () => ({ default: () => null }));
+vi.mock('@/components/shell/mobile/MobileHeaderActions', () => ({ default: () => null }));
 
 it('renders both configured sections, prompts and the demo-state notice', () => {
   const html = renderToStaticMarkup(
