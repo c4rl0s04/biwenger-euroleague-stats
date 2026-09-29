@@ -16,7 +16,7 @@ export default function MobileRoundsScreen({ data }: { data: RoundOverviewViewMo
   const { rounds, activeRoundId } = data;
   return (
     <MobileScreen labelledBy="mobile-screen-title">
-      <MobileScreenHeader eyebrow="Análisis" title="Jornadas" description={data.description} />
+      <MobileScreenHeader eyebrow="Análisis" title="Jornadas" />
       <div className="mobile-control-offset">
         <MobileSegmentedControl
           label="Seleccionar jornada"

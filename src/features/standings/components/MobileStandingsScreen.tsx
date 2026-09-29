@@ -33,11 +33,7 @@ export default function MobileStandingsScreen({ data }: { data: StandingsOvervie
 
   return (
     <MobileScreen labelledBy="mobile-screen-title">
-      <MobileScreenHeader
-        eyebrow="Liga"
-        title="Clasificación"
-        description="Tabla actual y pulso competitivo"
-      />
+      <MobileScreenHeader eyebrow="Liga" title="Clasificación" />
 
       <MobileMetricGrid>
         <MobileMetric

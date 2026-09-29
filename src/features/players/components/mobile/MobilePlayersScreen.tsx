@@ -40,11 +40,7 @@ export default function MobilePlayersScreen({
 
   return (
     <MobileScreen labelledBy="mobile-screen-title">
-      <MobileScreenHeader
-        eyebrow="Scouting"
-        title="Jugadores"
-        description={`${players.length} resultados`}
-      />
+      <MobileScreenHeader eyebrow="Scouting" title="Jugadores" />
 
       <div className="mobile-player-toolbar">
         <form onSubmit={applyFilters} role="search">

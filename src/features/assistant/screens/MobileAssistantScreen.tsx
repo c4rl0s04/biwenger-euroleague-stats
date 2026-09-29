@@ -8,11 +8,7 @@ export interface MobileAssistantScreenProps {
 export function MobileAssistantScreen({ conversationId }: MobileAssistantScreenProps) {
   return (
     <MobileScreen labelledBy="mobile-screen-title" className="mobile-assistant-screen">
-      <MobileScreenHeader
-        eyebrow="Estrategia"
-        title="Asistente"
-        description="Contexto privado y solo lectura"
-      />
+      <MobileScreenHeader eyebrow="Estrategia" title="Asistente" />
       <AssistantChat mobile initialConversationId={conversationId} />
     </MobileScreen>
   );

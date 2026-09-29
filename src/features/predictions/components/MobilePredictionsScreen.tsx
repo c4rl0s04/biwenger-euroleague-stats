@@ -18,11 +18,7 @@ export default function MobilePredictionsScreen({ stats }: { stats: PorrasStats 
   const victories = stats.porra_stats?.victorias?.[0];
   return (
     <MobileScreen labelledBy="mobile-screen-title">
-      <MobileScreenHeader
-        eyebrow="Competición"
-        title="Porras"
-        description="Aciertos, ranking y evolución"
-      />
+      <MobileScreenHeader eyebrow="Competición" title="Porras" />
       <MobileMetricGrid>
         <MobileMetric
           label="Líder"

@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { expect, it, vi } from 'vitest';
 import { SeasonPredictionsScreen } from './SeasonPredictionsScreen';
 
-vi.mock('@/components/mobile/MobileHeaderActions', () => ({ default: () => null }));
+vi.mock('@/components/shell/mobile/MobileHeaderActions', () => ({ default: () => null }));
 
 it('renders both configured sections, prompts and the demo-state notice', () => {
   const html = renderToStaticMarkup(
@@ -24,6 +24,7 @@ it('renders the shared phone header with one page title and the same questions',
   expect(html).toContain('class="mobile-native-header"');
   expect(html).toContain('id="mobile-screen-title"');
   expect(html).toContain('>Predicciones</h1>');
+  expect(html).not.toContain('mobile-native-description');
   expect(html).not.toContain('Predicciones de temporada</h1>');
   expect(html).toContain('¿Qué jugador sumará más puntos?');
   expect(html).toContain('¿Qué mánager terminará primero?');

@@ -31,11 +31,7 @@ export default function MobileSeasonReviewScreen({
   )?.entries[0];
   return (
     <MobileScreen labelledBy="mobile-screen-title">
-      <MobileScreenHeader
-        eyebrow="Temporada 2025/26"
-        title="Análisis"
-        description="De 40 M€ iguales a una liga con brechas"
-      />
+      <MobileScreenHeader eyebrow="Temporada 2025/26" title="Análisis" />
       <MobileMetricGrid>
         <MobileMetric label="Punto de partida" value="40 M€" detail="por usuario" tone="accent" />
         <MobileMetric

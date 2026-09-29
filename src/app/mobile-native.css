@@ -70,17 +70,6 @@
   text-transform: none;
 }
 
-.mobile-native-description {
-  display: -webkit-box;
-  margin-top: 0.3rem;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;
-  color: hsl(var(--content-muted));
-  font-size: 0.72rem;
-  line-height: 1.35;
-}
-
 .mobile-detail-intro {
   margin: 1rem 0 0.2rem;
   color: hsl(var(--content-muted));
@@ -1129,7 +1118,7 @@
 }
 
 .mobile-native-sheet-header h2 {
-  color: hsl(var(--shell-heading-content));
+  color: hsl(var(--content-primary));
   font-size: 1.8rem;
   line-height: 1;
 }

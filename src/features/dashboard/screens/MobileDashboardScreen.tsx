@@ -31,11 +31,7 @@ export default function MobileDashboardScreen({ data }: { data: MobileDashboardV
 
   return (
     <MobileScreen labelledBy="mobile-screen-title">
-      <MobileScreenHeader
-        eyebrow={data.managerName}
-        title="Dashboard"
-        description="Lo importante de tu temporada, ahora"
-      />
+      <MobileScreenHeader eyebrow={data.managerName} title="Dashboard" />
 
       <MobileNewsStrip items={data.news} />
 

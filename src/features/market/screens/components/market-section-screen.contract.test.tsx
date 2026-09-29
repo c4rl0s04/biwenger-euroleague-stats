@@ -1,6 +1,6 @@
 import { expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-vi.mock('@/components/mobile/MobileHeaderActions', () => ({ default: () => null }));
+vi.mock('@/components/shell/mobile/MobileHeaderActions', () => ({ default: () => null }));
 import MobileDetailScaffold from '@/components/mobile/MobileDetailScaffold';
 import { MobileSectionHeading } from '@/components/mobile/MobileScreen';
 import MarketSectionScreen from './MarketSectionScreen';
