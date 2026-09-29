@@ -15,37 +15,6 @@
   /* App chrome and installed-PWA safe areas */
   --app-header-height: 4rem;
   --app-safe-area-top: env(safe-area-inset-top, 0px);
-
-  /* Default canvas geometry for new application pages. */
-  --app-page-max-width: 80rem;
-  --app-page-gutter: 1rem;
-  --app-page-top: 2rem;
-  --app-page-bottom: 3rem;
-}
-
-@media (min-width: 640px) {
-  :root {
-    --app-page-gutter: 1.5rem;
-    --app-page-top: 3rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  :root {
-    --app-page-gutter: 2rem;
-    --app-page-top: 4rem;
-  }
-}
-
-.app-page-canvas {
-  width: 100%;
-  padding: var(--app-page-top) var(--app-page-gutter) var(--app-page-bottom);
-}
-
-.app-page-canvas__inner {
-  width: 100%;
-  max-width: var(--app-page-max-width);
-  margin-inline: auto;
 }
 
 /* Tailwind v4 theme configuration - Ignore "Unknown at rule @theme" lint warnings as this is a v4 feature */
