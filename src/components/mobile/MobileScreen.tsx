@@ -28,7 +28,6 @@ export function MobileScreen({ children, className = '', labelledBy }: MobileScr
 interface MobileScreenHeaderProps {
   title: string;
   eyebrow?: string;
-  description?: string;
   showSearch?: boolean;
   action?: ReactNode;
 }
@@ -36,7 +35,6 @@ interface MobileScreenHeaderProps {
 export function MobileScreenHeader({
   title,
   eyebrow,
-  description,
   showSearch = true,
   action,
 }: MobileScreenHeaderProps) {
@@ -47,7 +45,6 @@ export function MobileScreenHeader({
         <h1 id="mobile-screen-title" className="mobile-native-title">
           {title}
         </h1>
-        {description && <p className="mobile-native-description">{description}</p>}
       </div>
       {action ?? (showSearch ? <MobileHeaderActions /> : null)}
     </header>

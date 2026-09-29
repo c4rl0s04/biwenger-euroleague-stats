@@ -16,11 +16,7 @@ export default function MobilePlayoffsScreen({ leaderboard }: { leaderboard: Lea
   const bestAccuracy = Math.max(0, ...leaderboard.map((entry) => Number(entry.accuracy ?? 0)));
   return (
     <MobileScreen labelledBy="mobile-screen-title">
-      <MobileScreenHeader
-        eyebrow="Fase final"
-        title="Playoffs"
-        description="Predicciones y clasificación"
-      />
+      <MobileScreenHeader eyebrow="Fase final" title="Playoffs" />
       <MobileMetricGrid>
         <MobileMetric label="Líder" value={leader?.userName ?? '—'} tone="accent" />
         <MobileMetric label="Puntos" value={leader?.points ?? 0} />

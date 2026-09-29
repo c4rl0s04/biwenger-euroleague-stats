@@ -25,11 +25,7 @@ export default function MobileScheduleScreen({
   const activeRoundId = schedule?.round?.round_id;
   return (
     <MobileScreen labelledBy="mobile-screen-title" className="mobile-has-sticky-action">
-      <MobileScreenHeader
-        eyebrow="Tu plantilla"
-        title="Horario"
-        description={schedule?.round?.round_name ?? 'Selecciona jornada'}
-      />
+      <MobileScreenHeader eyebrow="Tu plantilla" title="Horario" />
       <div className="mobile-control-offset">
         <MobileSegmentedControl
           label="Seleccionar jornada"

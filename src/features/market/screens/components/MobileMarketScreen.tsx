@@ -20,11 +20,7 @@ export default function MobileMarketScreen({
 }: MobileMarketOverview) {
   return (
     <MobileScreen labelledBy="mobile-screen-title">
-      <MobileScreenHeader
-        eyebrow="Equipo"
-        title="Mercado"
-        description="Disponibles y actividad de la liga"
-      />
+      <MobileScreenHeader eyebrow="Equipo" title="Mercado" />
 
       <MobileMetricGrid>
         <MobileMetric label="Disponibles" value={listings.length} tone="accent" />

@@ -17,11 +17,7 @@ export default function MobileSettingsScreen({ biwengerLinked }: MobileSettingsS
       labelledBy="mobile-screen-title"
       className="[&_.mobile-native-title]:text-foreground!"
     >
-      <MobileScreenHeader
-        eyebrow="Cuenta"
-        title="Ajustes"
-        description="Seguridad, conexión y experiencia de la aplicación"
-      />
+      <MobileScreenHeader eyebrow="Cuenta" title="Ajustes" />
 
       <MobileSectionHeading>Tu cuenta</MobileSectionHeading>
       <div className="mobile-section-list">

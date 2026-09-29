@@ -87,11 +87,7 @@ export default function MobileLineupClient({ userId }: { userId: string | number
 
   return (
     <MobileScreen labelledBy="mobile-screen-title" className="mobile-has-sticky-action">
-      <MobileScreenHeader
-        eyebrow="Tu equipo"
-        title="Alineación"
-        description="Quinteto, capitán y banquillo"
-      />
+      <MobileScreenHeader eyebrow="Tu equipo" title="Alineación" />
       {message && (
         <p className="mobile-lineup-message" role="status">
           {message}

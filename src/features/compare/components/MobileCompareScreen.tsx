@@ -18,11 +18,7 @@ export default function MobileCompareScreen({
 }) {
   return (
     <MobileScreen labelledBy="mobile-screen-title">
-      <MobileScreenHeader
-        eyebrow="Cara a cara"
-        title="Comparativa"
-        description="Elige un rival para abrir el enfrentamiento"
-      />
+      <MobileScreenHeader eyebrow="Cara a cara" title="Comparativa" />
       <div className="mobile-compare-hero">
         <Scale size={28} aria-hidden="true" />
         <div>

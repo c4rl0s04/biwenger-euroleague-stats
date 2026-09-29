@@ -5,11 +5,7 @@ import { MobileScreen, MobileScreenHeader } from '@/components/mobile/MobileScre
 export function MobileHoopgridScreen() {
   return (
     <MobileScreen labelledBy="mobile-screen-title" className="mobile-hoopgrid-screen">
-      <MobileScreenHeader
-        eyebrow="Desafío diario"
-        title="Hoopgrid"
-        description="Nueve cruces. Un jugador válido en cada celda."
-      />
+      <MobileScreenHeader eyebrow="Desafío diario" title="Hoopgrid" />
       <Suspense
         fallback={<div className="mobile-hoopgrid-loading" aria-label="Cargando Hoopgrid" />}
       >

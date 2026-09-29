@@ -14,11 +14,7 @@ import type { TournamentCatalogue } from '../../models/tournament-catalogue';
 export default function MobileTournamentsScreen({ active, finished }: TournamentCatalogue) {
   return (
     <MobileScreen labelledBy="mobile-screen-title">
-      <MobileScreenHeader
-        eyebrow="Competición"
-        title="Torneos"
-        description="Activos, campeones e historial"
-      />
+      <MobileScreenHeader eyebrow="Competición" title="Torneos" />
       <MobileMetricGrid>
         <MobileMetric label="Activos" value={active.length} tone="accent" />
         <MobileMetric label="Finalizados" value={finished.length} />

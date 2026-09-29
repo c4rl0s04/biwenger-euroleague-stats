@@ -20,11 +20,7 @@ export default function MobileMatchesScreen({
   const activeRound = rounds.find((round) => round.roundId === activeRoundId) ?? rounds[0];
   return (
     <MobileScreen labelledBy="mobile-screen-title">
-      <MobileScreenHeader
-        eyebrow="Euroleague"
-        title="Partidos"
-        description={activeRound?.roundName ?? 'Calendario'}
-      />
+      <MobileScreenHeader eyebrow="Euroleague" title="Partidos" />
       <div className="mobile-control-offset">
         <MobileSegmentedControl
           label="Seleccionar jornada"

@@ -19,6 +19,9 @@ test('season predictions demo supports player and manager choices', async ({ pag
   if (phone) {
     const mobileHeader = page.locator('.mobile-native-header');
     await expect(mobileHeader).toHaveCSS('position', 'sticky');
+    await expect(mobileHeader.locator('.mobile-native-eyebrow')).toBeVisible();
+    await expect(mobileHeader.locator('.mobile-native-title')).toBeVisible();
+    await expect(mobileHeader.locator('.mobile-native-description')).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Abrir búsqueda' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Abrir perfil' })).toBeVisible();
     await expect(page.locator('.mobile-native-screen')).toHaveCSS(

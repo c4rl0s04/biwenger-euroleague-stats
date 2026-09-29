@@ -65,11 +65,7 @@ export function SeasonPredictionsScreen({
   if (phone) {
     return (
       <MobileScreen labelledBy="mobile-screen-title">
-        <MobileScreenHeader
-          eyebrow={seasonName}
-          title="Predicciones"
-          description="Elige quién crees que destacará esta temporada"
-        />
+        <MobileScreenHeader eyebrow={seasonName} title="Predicciones" />
         <div className="space-y-8 pt-6">{content}</div>
       </MobileScreen>
     );
