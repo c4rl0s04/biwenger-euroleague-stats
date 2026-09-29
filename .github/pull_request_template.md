@@ -1,10 +1,15 @@
-## Safety Checklist
+## Local Verification
 
-- [ ] `npm run lint`
-- [ ] `npm run typecheck`
-- [ ] `npm run docs:check`
-- [ ] `npm run test:run`
-- [ ] `SKIP_DB=true npm run build`
+- [ ] Focused tests and checks for the changed behavior passed; list the commands and results below.
+- [ ] `git diff --check` passed.
+- [ ] Remaining local verification gaps and visual behavior not checked are stated below.
+
+CI runs the full lint, typecheck, tests, build, and browser suite. A pending CI run is not a pass;
+required checks must pass before merge.
+
+### Commands and Results
+
+<!-- List each local command and its result. State whether CI is pending. -->
 
 ## Documentation Safety
 

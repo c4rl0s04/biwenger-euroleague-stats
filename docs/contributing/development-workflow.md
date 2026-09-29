@@ -34,21 +34,27 @@ status: active
 
 ## Local verification
 
-Run focused tests during implementation, then the full baseline before review:
+Run tests for the changed behavior and fast checks for the affected code before review. For example:
 
 ```bash
-npm run verify
-npm run test:e2e:local # for UI or browser behavior changes
+npm run test:run -- src/features/teams
+npm run architecture:check # when feature boundaries change
+git diff --check
 ```
 
-Run additional database or browser checks when the change affects those behaviors. Do not enable
-remote database tests merely to satisfy a local check.
+Run focused browser checks for changed UI behavior when practical, and schema consistency checks
+when database-backed models are affected. Do not enable remote database tests merely to satisfy a
+local check. The full unit suite, lint, build, and browser matrix run in CI after the pull request
+is opened. Use `npm run verify` locally only for a specific risk or failure, or when requested.
 
 ## Pull requests
 
 Describe the user-visible outcome, technical boundaries changed, verification performed, and known
-follow-up work. Call out intentional API contract changes. For schema work, include backup/audit
-evidence and a rollback plan without attaching sensitive dumps.
+follow-up work. For remote review, push the task branch and open a draft pull request unless the
+user requests local-only work or remote access is unavailable. Report local results and CI as
+pending, then end the agent turn without waiting or polling. Investigate CI failures when the user
+asks. Do not merge until required CI checks pass. Call out intentional API contract changes. For
+schema work, include backup/audit evidence and a rollback plan without attaching sensitive dumps.
 
 Review documentation like code: verify commands, local links, source references, and operational
 safety rather than only prose style.
