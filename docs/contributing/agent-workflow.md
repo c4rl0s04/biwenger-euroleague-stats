@@ -88,9 +88,10 @@ queries outside feature ownership. Do not add broad directory exemptions to sile
 
 ## Verification and handoff
 
-Use [testing](testing.md) for all commands and browser prerequisites. `npm run verify` runs the
-standard checks sequentially, with two Vitest workers to avoid resource contention, a database-disabled
-build, and offline schema checks. Focused tests remain useful during development.
+Use [testing](testing.md) for commands and browser prerequisites. Run focused local checks for the
+affected behavior; CI owns the full suite after the pull request is opened. `npm run verify` remains
+available for an explicit request or a specific risk or failure, and runs the standard checks
+sequentially with two Vitest workers, a database-disabled build, and offline schema checks.
 
 Record actual command results, baseline warnings, browser routes/viewports, and skipped checks.
 Do not run production mutations to satisfy local validation. Keep a concrete completion checklist

@@ -10,18 +10,28 @@ status: active
 
 # Testing
 
-## Standard verification
+## Focused local verification and CI
 
 Use the pinned Node version and run focused Vitest tests during development:
 
 ```bash
 npm run test:run -- src/features/teams
-npm run verify
+git diff --check
 ```
 
-The full verification command runs, in order: skills packaging, architecture graph, documentation,
-typecheck, all Vitest tests (`--maxWorkers=2`), lint, `SKIP_DB=true npm run build`,
-`npm run db:audit:schema:metadata`, `npx --no-install drizzle-kit check`, and `git diff --check`.
+Choose additional checks based on the changed files and risks: `npm run architecture:check` for
+feature boundaries, `npm run docs:check` for documentation, `npm run skills:check` for repository
+skills, schema metadata checks for database-backed models, and focused Playwright projects for
+changed browser behavior. Typecheck, lint, or build locally when a specific change or failure
+needs them. Record what ran and what CI has not yet checked.
+
+The optional `npm run verify` command runs, in order: skills packaging, architecture graph,
+documentation, typecheck, all Vitest tests (`--maxWorkers=2`), lint,
+`SKIP_DB=true npm run build`, `npm run db:audit:schema:metadata`,
+`npx --no-install drizzle-kit check`, and `git diff --check`. Agents do not run it by default
+before handoff because CI repeats these checks. After a pull request is opened, leave full
+validation to CI and do not wait for or poll its completion. A pending check is not a pass;
+investigate failures when the user asks, and require green CI before merging.
 The schema checks compare committed metadata and never connect to a database. Build warnings about
 absent provider configuration are expected in a database-disabled environment; inspect unexpected warnings.
 

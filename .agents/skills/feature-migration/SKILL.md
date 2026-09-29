@@ -16,7 +16,7 @@ Inventory observable contracts before editing: URLs, query quirks, identity prec
 response envelopes/statuses, ordering, freshness, and desktop/mobile states. Existing route tests and
 representative rendered screens are evidence; directory names alone are not.
 
-Record a baseline using [the verification workflow](../../../docs/contributing/testing.md). Keep
+Record a focused baseline using [the verification workflow](../../../docs/contributing/testing.md). Keep
 structural moves separate from redesign, provider mutations, and deliberate API evolution.
 
 ## Implement and verify
@@ -35,6 +35,7 @@ Remove obsolete imports only after finding all consumers. Any temporary exceptio
 edge, a reason, and a removal condition. Do not weaken checks to make a migration pass.
 
 Test real boundary behavior: invalid input, not found, empty data, identity precedence, errors,
-cache headers, and serializable output. Run graph checks and the required full validation. Use
-browser fixtures to compare migrated screens at desktop and phone sizes when presentation moves.
+cache headers, and serializable output. Run architecture graph checks and focused tests for the
+affected contracts. Use focused browser fixtures to compare migrated screens at desktop and phone
+sizes when presentation moves; leave the full browser matrix and verification suite to CI.
 Update the ledger with current branch/SHA, remaining adapters, commands and outcomes, and next owner.

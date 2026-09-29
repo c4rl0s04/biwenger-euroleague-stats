@@ -98,13 +98,14 @@ Small read-only investigations and explanations do not require a new worktree. A
 
 ## Validation expectations
 
-- Establish a relevant baseline before a non-trivial refactor so pre-existing failures are distinguishable from regressions.
-- Add focused tests for feature boundaries, validation, mappers, services, access and cache policy, and preserved HTTP contracts where applicable.
-- For architecture migrations, verify that pages and presentation components do not import database/query internals and that client-safe entrypoints do not export server-only code.
-- Before handing off implementation work, run the relevant project checks, normally including typecheck, focused tests, the full test suite, lint, production build, and `git diff --check`.
+- Establish a focused baseline before a non-trivial refactor so pre-existing failures are distinguishable from regressions.
+- Add and run focused tests for changed behavior, including feature boundaries, validation, mappers, services, access and cache policy, and preserved HTTP contracts where applicable. Run fast static checks relevant to the touched files and `git diff --check` before handoff.
+- For architecture migrations, run `npm run architecture:check` and verify that pages and presentation components do not import database/query internals and that client-safe entrypoints do not export server-only code.
 - Run schema or migration consistency checks when the affected code reads database-backed models, even when no schema change is intended.
-- Report every validation command and its result, remaining risks, any unverified visual behavior, and whether the task worktree is clean.
-- Do not report a task as complete when required validation was skipped or failed; state the exact limitation instead.
+- Run focused browser checks for changed UI behavior when practical; identify any unverified visual behavior. The full browser suite runs in CI.
+- Do not run `npm run verify`, the full unit suite, full lint, or a production build locally by default. GitHub Actions owns the full validation after a pull request is opened. Run broader local checks only when a specific risk or failure requires them, or the user asks.
+- For implementation intended for remote review, push the task branch and open a draft pull request unless the user requests local-only work or remote access is unavailable. Hand off with CI pending. Do not wait for or poll CI checks. Return to a CI failure when the user asks for investigation or repair. CI must pass before merge.
+- Report every local validation command and its result, remaining risks, the pull request and pending CI status when applicable, and whether the task worktree is clean. If a required focused check failed or was skipped, state the exact limitation; do not claim that the change is fully verified while CI is pending.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
