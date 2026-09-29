@@ -31,7 +31,13 @@ const NavigationFeedbackContext = createContext<NavigationFeedbackContextValue>(
   pendingNavigation: null,
 });
 
-export function NavigationFeedbackProvider({ children }: { children: ReactNode }) {
+export function NavigationFeedbackProvider({
+  children,
+  presentationMode,
+}: {
+  children: ReactNode;
+  presentationMode: 'desktop' | 'phone';
+}) {
   const pathname = usePathname();
   const [pendingNavigation, setPendingNavigation] = useState<PendingNavigation | null>(null);
 
@@ -81,7 +87,7 @@ export function NavigationFeedbackProvider({ children }: { children: ReactNode }
         aria-live="polite"
         aria-atomic="true"
         aria-label={activeNavigation ? `Cargando ${activeNavigation.label}` : 'Navegación lista'}
-        className={`navigation-progress ${activeNavigation ? 'navigation-progress-visible' : ''}`}
+        className={`navigation-progress ${presentationMode === 'phone' ? 'navigation-progress-phone' : ''} ${activeNavigation ? 'navigation-progress-visible' : ''}`}
       >
         <span className="sr-only">
           {activeNavigation ? `Cargando ${activeNavigation.label}` : ''}

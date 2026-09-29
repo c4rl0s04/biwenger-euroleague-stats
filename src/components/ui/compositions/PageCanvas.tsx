@@ -7,7 +7,10 @@ export type PageCanvasProps = HTMLAttributes<HTMLDivElement>;
 export function PageCanvas({ children, className, ...props }: PageCanvasProps) {
   return (
     <div
-      className={cn('w-full px-4 pb-12 pt-8 sm:px-6 sm:pt-12 lg:px-8 lg:pt-16', className)}
+      className={cn(
+        'w-full px-[var(--mobile-gutter,1rem)] pb-12 pt-8 sm:px-6 sm:pt-12 lg:px-8 lg:pt-16',
+        className
+      )}
       data-page-canvas
       {...props}
     >
