@@ -54,7 +54,7 @@
 .mobile-native-title,
 .mobile-native-back-title {
   overflow: hidden;
-  color: hsl(var(--shell-heading-content));
+  color: hsl(var(--content-primary));
   font-size: clamp(1.7rem, 8vw, 2.2rem);
   line-height: 0.96;
   text-overflow: ellipsis;
