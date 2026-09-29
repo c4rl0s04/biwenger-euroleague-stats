@@ -8,6 +8,8 @@ export interface PageHeaderProps extends HTMLAttributes<HTMLElement> {
 }
 
 export function PageHeader({ title, description, context, className, ...props }: PageHeaderProps) {
+  const [firstWord, ...remainingWords] = title.trim().split(/\s+/);
+
   return (
     <header className={cn('space-y-5', className)} {...props}>
       {context ? (
@@ -17,14 +19,9 @@ export function PageHeader({ title, description, context, className, ...props }:
         </div>
       ) : null}
       <div className="space-y-3">
-        <h1
-          className="w-fit max-w-full bg-clip-text font-display text-4xl leading-none tracking-tight text-transparent sm:text-5xl lg:text-6xl"
-          style={{
-            backgroundImage:
-              'linear-gradient(100deg, hsl(var(--action-primary)), hsl(var(--content-primary)) 65%)',
-          }}
-        >
-          {title}
+        <h1 className="w-fit max-w-full font-display text-4xl leading-none tracking-tight text-[hsl(var(--content-primary))] sm:text-5xl lg:text-6xl">
+          <span className="text-[hsl(var(--action-primary))]">{firstWord}</span>
+          {remainingWords.length ? ` ${remainingWords.join(' ')}` : null}
         </h1>
         {description ? (
           <p className="max-w-2xl font-sans text-base leading-relaxed text-[hsl(var(--content-secondary))]">
