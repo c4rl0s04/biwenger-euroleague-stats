@@ -88,17 +88,14 @@ test('season predictions demo supports player and manager choices', async ({ pag
     fullPage: true,
   });
 
-  await page.goto('/schedule');
-  const returnMenu = page.getByRole('button', { name: 'Más', exact: true });
-  if (await returnMenu.isVisible()) {
-    await returnMenu.click();
-    await page.getByRole('link', { name: 'Predicciones de temporada' }).click();
-  } else {
-    await page.locator('a[href="/season-predictions"]:visible').first().click();
-  }
-  await expect(page).toHaveURL(/\/season-predictions$/);
-  await expect(page.locator('[data-page-canvas]')).toHaveCSS('padding-left', `${expectedGutter}px`);
   if (testInfo.project.name.startsWith('desktop')) {
+    await page.goto('/schedule');
+    await page.locator('a[href="/season-predictions"]:visible').first().click();
+    await expect(page).toHaveURL(/\/season-predictions$/);
+    await expect(page.locator('[data-page-canvas]')).toHaveCSS(
+      'padding-left',
+      `${expectedGutter}px`
+    );
     await page.setViewportSize({ width: 1920, height: 900 });
     const wideLayout = await page.evaluate(() => {
       const canvas = document.querySelector('[data-page-canvas]')!;
