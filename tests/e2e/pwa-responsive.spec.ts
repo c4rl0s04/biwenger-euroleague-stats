@@ -70,6 +70,7 @@ test('authenticated mobile shell exposes bottom navigation and More sheet', asyn
     await page.evaluate(() => {
       document.documentElement.style.setProperty('--app-safe-area-top', '32px');
     });
+    await expect(page.locator('.navigation-progress')).toHaveCSS('top', '32px');
 
     const header = page.locator('header.mobile-native-header');
     const searchButton = page.getByRole('button', { name: 'Abrir búsqueda' });

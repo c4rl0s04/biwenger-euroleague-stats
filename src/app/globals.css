@@ -564,6 +564,10 @@ h3,
   transition: opacity 100ms ease-out;
 }
 
+.navigation-progress-phone {
+  top: var(--app-safe-area-top);
+}
+
 .navigation-progress-visible {
   visibility: visible;
   opacity: 1;

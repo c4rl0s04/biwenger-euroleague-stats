@@ -13,7 +13,7 @@ export function AppShell({ children, presentationMode = 'desktop' }: AppShellPro
   const isPhone = presentationMode === 'phone';
 
   return (
-    <NavigationFeedbackProvider>
+    <NavigationFeedbackProvider presentationMode={presentationMode}>
       <div
         className={`${isPhone ? 'mobile-app' : ''} min-h-screen flex flex-col`}
         data-presentation={presentationMode}
