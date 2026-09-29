@@ -156,7 +156,7 @@ The canvas must allow content to live directly on the page. A feature should not
 obtain a background or spacing context.
 
 New application pages use the shared `PageCanvas` composition. Its geometry is defined once in
-`src/app/globals.css`: 16px gutters on phones, 24px from 640px, 32px from 1024px, and an 80rem maximum
+`src/components/ui/compositions/PageCanvas.tsx`: 16px gutters on phones, 24px from 640px, 32px from 1024px, and an 80rem maximum
 content width measured **inside** those gutters. The default top spacing is 32px, 48px, and 64px at
 the same breakpoints. Page-specific screens may arrange content within the canvas, but should not
 repeat their own outer width and gutter utilities. Existing legacy pages retain their current

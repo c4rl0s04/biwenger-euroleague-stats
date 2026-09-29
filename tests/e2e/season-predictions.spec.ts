@@ -10,6 +10,30 @@ test('season predictions demo supports player and manager choices', async ({ pag
 
   await expect(page.getByRole('heading', { name: 'Predicciones de temporada' })).toBeVisible();
   await expect(page.getByText('Tus elecciones no se guardan')).toBeVisible();
+  const viewportWidth = await page.evaluate(() => window.innerWidth);
+  const expectedGutter = viewportWidth >= 1024 ? 32 : viewportWidth >= 640 ? 24 : 16;
+  const expectedTop = viewportWidth >= 1024 ? 64 : viewportWidth >= 640 ? 48 : 32;
+  const canvas = page.locator('[data-page-canvas]');
+  await expect(canvas).toHaveCSS('padding-left', `${expectedGutter}px`);
+  await expect(canvas).toHaveCSS('padding-right', `${expectedGutter}px`);
+  await expect(canvas).toHaveCSS('padding-top', `${expectedTop}px`);
+  const alignment = await page.evaluate(() => {
+    const canvas = document.querySelector('[data-page-canvas]')!;
+    const content = canvas.firstElementChild!;
+    const heading = canvas.querySelector('h1')!;
+    const section = canvas.querySelector('section')!;
+    return {
+      canvasLeft: canvas.getBoundingClientRect().left,
+      contentLeft: content.getBoundingClientRect().left,
+      contentWidth: content.getBoundingClientRect().width,
+      headingLeft: heading.getBoundingClientRect().left,
+      sectionLeft: section.getBoundingClientRect().left,
+    };
+  });
+  expect(alignment.contentLeft - alignment.canvasLeft).toBeGreaterThanOrEqual(expectedGutter - 1);
+  expect(alignment.contentWidth).toBeLessThanOrEqual(1280);
+  expect(Math.abs(alignment.headingLeft - alignment.contentLeft)).toBeLessThan(1);
+  expect(Math.abs(alignment.sectionLeft - alignment.contentLeft)).toBeLessThan(1);
   await page.screenshot({
     path: testInfo.outputPath('season-predictions-dark.png'),
     fullPage: true,
@@ -63,4 +87,26 @@ test('season predictions demo supports player and manager choices', async ({ pag
     path: testInfo.outputPath('season-predictions-light.png'),
     fullPage: true,
   });
+
+  if (testInfo.project.name.startsWith('desktop')) {
+    await page.goto('/schedule');
+    await page.locator('a[href="/season-predictions"]:visible').first().click();
+    await expect(page).toHaveURL(/\/season-predictions$/);
+    await expect(page.locator('[data-page-canvas]')).toHaveCSS(
+      'padding-left',
+      `${expectedGutter}px`
+    );
+    await page.setViewportSize({ width: 1920, height: 900 });
+    const wideLayout = await page.evaluate(() => {
+      const canvas = document.querySelector('[data-page-canvas]')!;
+      const content = canvas.firstElementChild!;
+      return {
+        canvasLeft: canvas.getBoundingClientRect().left,
+        contentLeft: content.getBoundingClientRect().left,
+        contentWidth: content.getBoundingClientRect().width,
+      };
+    });
+    expect(wideLayout.contentWidth).toBe(1280);
+    expect(wideLayout.contentLeft - wideLayout.canvasLeft).toBeGreaterThan(32);
+  }
 });
