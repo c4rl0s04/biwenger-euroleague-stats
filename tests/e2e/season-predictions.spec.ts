@@ -100,18 +100,18 @@ test('season predictions demo supports player and manager choices', async ({ pag
     page.getByRole('heading', { name: phone ? 'Predicciones' : 'Predicciones de temporada' })
   ).toBeVisible();
   if (phone) {
-    const titleColor = await page.locator('.mobile-native-title').evaluate((title) => {
-      const reference = document.createElement('span');
-      reference.style.color = 'hsl(var(--content-primary))';
-      title.parentElement!.append(reference);
-      const colors = {
-        actual: getComputedStyle(title).color,
-        expected: getComputedStyle(reference).color,
-      };
-      reference.remove();
-      return colors;
-    });
-    expect(titleColor.actual).toBe(titleColor.expected);
+    await expect
+      .poll(() =>
+        page.locator('.mobile-native-title').evaluate((title) => {
+          const reference = document.createElement('span');
+          reference.style.color = 'hsl(var(--content-primary))';
+          title.parentElement!.append(reference);
+          const matches = getComputedStyle(title).color === getComputedStyle(reference).color;
+          reference.remove();
+          return matches;
+        })
+      )
+      .toBe(true);
   }
   await page.screenshot({
     path: testInfo.outputPath('season-predictions-light.png'),
