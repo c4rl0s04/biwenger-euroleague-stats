@@ -29,7 +29,7 @@ export function SectionHeader({
           className={cn(
             level === 2
               ? 'font-display! text-4xl leading-none tracking-[0.04em]! uppercase! text-[hsl(var(--content-primary))] sm:text-5xl'
-              : 'font-sans! text-lg font-semibold tracking-tight! normal-case! text-[hsl(var(--content-primary))] sm:text-xl'
+              : 'font-display! text-2xl leading-none tracking-[0.04em]! uppercase! text-[hsl(var(--content-primary))] sm:text-3xl'
           )}
         >
           {level === 2 ? (
@@ -52,7 +52,7 @@ export function SectionHeader({
               'text-[hsl(var(--content-muted))]',
               level === 2
                 ? 'font-display text-lg leading-snug tracking-[0.04em] sm:text-xl'
-                : 'text-sm'
+                : 'font-display text-base leading-snug tracking-[0.04em] sm:text-lg'
             )}
           >
             {description}
