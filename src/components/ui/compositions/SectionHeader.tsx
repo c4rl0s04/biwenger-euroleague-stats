@@ -47,7 +47,16 @@ export function SectionHeader({
           )}
         </Heading>
         {description ? (
-          <p className="text-sm text-[hsl(var(--content-muted))]">{description}</p>
+          <p
+            className={cn(
+              'text-[hsl(var(--content-muted))]',
+              level === 2
+                ? 'font-display text-lg leading-snug tracking-[0.04em] sm:text-xl'
+                : 'text-sm'
+            )}
+          >
+            {description}
+          </p>
         ) : null}
       </div>
       {action}
