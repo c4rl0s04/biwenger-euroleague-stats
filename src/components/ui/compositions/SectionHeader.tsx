@@ -19,25 +19,32 @@ export function SectionHeader({
   ...props
 }: SectionHeaderProps) {
   const Heading = level === 2 ? 'h2' : 'h3';
+  const [firstWord, ...remainingWords] = title.trim().split(/\s+/);
 
   return (
-    <header
-      className={cn(
-        'flex flex-wrap items-end justify-between gap-3',
-        level === 2 ? 'border-b border-[hsl(var(--border-default))] pb-4' : 'pb-2',
-        className
-      )}
-      {...props}
-    >
-      <div className="space-y-1">
+    <header className={cn('flex flex-wrap items-end justify-between gap-3 pb-2', className)} {...props}>
+      <div className={level === 2 ? 'space-y-2' : 'space-y-1'}>
         <Heading
           id={headingId}
           className={cn(
-            'font-sans! font-semibold tracking-tight! normal-case! text-[hsl(var(--content-primary))]',
-            level === 2 ? 'text-xl sm:text-2xl' : 'text-lg sm:text-xl'
+            level === 2
+              ? 'font-display! text-4xl leading-none tracking-[0.04em]! uppercase! text-[hsl(var(--content-primary))] sm:text-5xl'
+              : 'font-sans! text-lg font-semibold tracking-tight! normal-case! text-[hsl(var(--content-primary))] sm:text-xl'
           )}
         >
-          {title}
+          {level === 2 ? (
+            <>
+              {remainingWords.length ? `${firstWord} ` : null}
+              <span
+                className="bg-clip-text text-transparent"
+                style={{ backgroundImage: 'var(--effect-gradient-accent)' }}
+              >
+                {remainingWords.length ? remainingWords.join(' ') : firstWord}
+              </span>
+            </>
+          ) : (
+            title
+          )}
         </Heading>
         {description ? (
           <p className="text-sm text-[hsl(var(--content-muted))]">{description}</p>
