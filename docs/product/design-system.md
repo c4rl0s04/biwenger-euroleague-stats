@@ -134,7 +134,8 @@ Use typography to create hierarchy before adding extra decoration.
 The new `SectionHeader` uses condensed uppercase display type for primary section headings. A
 single-word title takes the theme-aware orange accent gradient; for longer titles, the first word
 takes the primary content color and the remaining words take the orange gradient. Nested section
-headings and descriptions use the same display font at smaller sizes; descriptive text stays muted.
+headings use Outfit with a semibold weight. Section descriptions use Outfit in a muted color. Add a
+nested heading only when it groups multiple pieces of content.
 
 Do not apply uppercase/display styling indiscriminately. Long entity names, controls and dense tables
 must prioritize readability.

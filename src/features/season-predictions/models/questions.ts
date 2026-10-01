@@ -33,10 +33,6 @@ export const PREDICTION_SECTIONS: readonly PredictionSection[] = [
     id: 'player',
     title: 'Jugadores',
     description: 'Elige al jugador que destacará esta temporada.',
-    subsection: {
-      title: 'Rendimiento individual',
-      description: 'Pronósticos sobre los puntos de la temporada.',
-    },
   },
   { id: 'manager', title: 'Mánagers', description: 'Piensa en la clasificación final de la liga.' },
 ] as const;
