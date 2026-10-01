@@ -9,6 +9,7 @@ it('renders both configured sections, prompts and the demo-state notice', () => 
     <SeasonPredictionsScreen seasonName="2026/27" options={{ players: [], managers: [] }} />
   );
   expect(html.replace(/<[^>]*>/g, '')).toContain('Predicciones de temporada');
+  expect(html).not.toContain('2026/27');
   expect(html.indexOf('Jugadores')).toBeLessThan(html.indexOf('Mánagers'));
   expect(html).toContain('¿Qué jugador sumará más puntos?');
   expect(html).toContain('¿Qué mánager terminará primero?');

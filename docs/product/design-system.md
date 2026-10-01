@@ -155,12 +155,16 @@ Features should not reimplement these concerns.
 The canvas must allow content to live directly on the page. A feature should not need a Card merely to
 obtain a background or spacing context.
 
-New application pages use the shared `PageCanvas` composition. Its geometry is defined once in
-`src/components/ui/compositions/PageCanvas.tsx`: 16px gutters on phones, 24px from 640px, 32px from 1024px, and an 80rem maximum
-content width measured **inside** those gutters. The default top spacing is 32px, 48px, and 64px at
-the same breakpoints. Page-specific screens may arrange content within the canvas, but should not
-repeat their own outer width and gutter utilities. Existing legacy pages retain their current
-wrappers until their visual migration is reviewed.
+New application pages use the shared `PageCanvas` composition for open page content and
+`PageSection` for full-width section bands. Both use `PageContainer` for the same geometry: 16px
+gutters on phones, 24px from 640px, 32px from 1024px, and an 80rem maximum content width measured
+**inside** those gutters. `PageCanvas` provides default top spacing of 32px, 48px, and 64px at the
+same breakpoints. `PageSection` owns its background and vertical spacing while its children choose
+their headings and layout. Existing legacy pages retain their current wrappers until their visual
+migration is reviewed.
+
+Keep one page `h1`, use `h2` for section headings and `h3` for nested groups. Card titles use the
+next heading level for their place in the page, independent of the card layout.
 
 ## Desktop behavior
 

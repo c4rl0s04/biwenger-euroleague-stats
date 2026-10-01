@@ -2,6 +2,7 @@
   color-scheme: dark;
   /* Surfaces */
   --surface-app: var(--color-obsidian-deepest);
+  --surface-section-alternate: var(--color-obsidian-section);
   --surface-card: var(--color-obsidian-deep);
   --surface-popover: var(--color-obsidian-raised);
   --surface-secondary: var(--color-obsidian-soft);
@@ -168,6 +169,7 @@
   color-scheme: light;
   /* Surfaces: warm canvas, near-white card, white raised, recessed subtle. */
   --surface-app: var(--color-paper-canvas);
+  --surface-section-alternate: var(--color-paper-subtle);
   --surface-card: var(--color-paper-card);
   --surface-popover: var(--color-white-pure);
   --surface-secondary: var(--color-paper-subtle);
