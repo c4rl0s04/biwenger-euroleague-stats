@@ -1,19 +1,22 @@
+import { auth } from '@/auth';
+import { redirect } from 'next/navigation';
 import { getRequestSeasonContext } from '@/lib/seasons/server';
 import { isPhonePresentation } from '@/lib/mobile/presentation-server';
 import { SeasonPredictionsScreen } from '@/features/season-predictions/public';
-import { getSeasonPredictionOptions } from '@/features/season-predictions/server';
+import { readSeasonPredictions } from '@/features/season-predictions/server';
 
 export const metadata = {
   title: 'Predicciones de temporada - Biwenger Stats',
   description: 'Elige tus predicciones para la temporada.',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function SeasonPredictionsPage() {
-  const [options, context, phone] = await Promise.all([
-    getSeasonPredictionOptions(),
-    getRequestSeasonContext(),
-    isPhonePresentation(),
-  ]);
+  const session = await auth();
+  if (!session?.user?.id) redirect('/login');
+  const [context, phone] = await Promise.all([getRequestSeasonContext(), isPhonePresentation()]);
+  const data = await readSeasonPredictions(context.currentSeasonId, session.user.id);
   const seasonName =
     context.seasons.find((season) => season.id === context.currentSeasonId)?.name ??
     context.currentSeasonId;
@@ -21,7 +24,7 @@ export default async function SeasonPredictionsPage() {
     <SeasonPredictionsScreen
       key={context.currentSeasonId}
       seasonName={seasonName}
-      options={options}
+      data={data}
       phone={phone}
     />
   );

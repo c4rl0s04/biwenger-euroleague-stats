@@ -1,32 +1,56 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { expect, it, vi } from 'vitest';
+import { PREDICTION_QUESTIONS } from '../models/questions';
+import type { SeasonPredictionsPageData } from '../models/submission';
 import { SeasonPredictionsScreen } from './SeasonPredictionsScreen';
 
 vi.mock('@/components/shell/mobile/MobileHeaderActions', () => ({ default: () => null }));
 
-it('renders both configured sections, prompts and the demo-state notice', () => {
-  const html = renderToStaticMarkup(
-    <SeasonPredictionsScreen seasonName="2026/27" options={{ players: [], managers: [] }} />
-  );
-  expect(html.replace(/<[^>]*>/g, '')).toContain('Predicciones de temporada');
-  expect(html).not.toContain('2026/27');
-  expect(html.indexOf('Jugadores')).toBeLessThan(html.indexOf('Mánagers'));
-  expect(html).toContain('¿Qué jugador sumará más puntos?');
-  expect(html).toContain('¿Qué mánager terminará primero?');
-  expect(html).toContain('Tus elecciones no se guardan');
-  expect(html).toContain('Elige un jugador');
-  expect(html).toContain('Elige un mánager');
+const data: SeasonPredictionsPageData = {
+  seasonId: '2026-27',
+  status: 'open',
+  opensAt: '2026-10-01T00:00:00.000Z',
+  locksAt: '2026-10-08T00:00:00.000Z',
+  locksAtLabel: '8 de octubre de 2026, 2:00',
+  serverNow: '2026-10-02T00:00:00.000Z',
+  questionSetVersion: 'season-predictions-v1',
+  questions: [...PREDICTION_QUESTIONS],
+  options: {
+    players: [{ id: 'p1', name: 'Jugador', image: null }],
+    teams: [{ id: 't1', name: 'Equipo', image: null }],
+    managers: [{ id: 'm1', name: 'Mánager', image: null }],
+  },
+  submission: null,
+  league: null,
+};
+
+it('renders the 12 questions in section order and a single page-level save', () => {
+  const html = renderToStaticMarkup(<SeasonPredictionsScreen seasonName="2026/27" data={data} />);
+  expect(html.indexOf('Jugadores')).toBeLessThan(html.indexOf('Equipos'));
+  expect(html.indexOf('Equipos')).toBeLessThan(html.indexOf('Mánagers'));
+  for (const question of PREDICTION_QUESTIONS) expect(html).toContain(question.prompt);
+  expect(html.match(/>Guardar predicciones<\/button>/g)).toHaveLength(1);
+  expect(html).toContain('Usar este orden');
+  expect(html).not.toContain('Hay cambios sin guardar');
 });
 
-it('renders the shared phone header with one page title and the same questions', () => {
+it('renders the same prompts with the shared phone header', () => {
   const html = renderToStaticMarkup(
-    <SeasonPredictionsScreen seasonName="2026/27" options={{ players: [], managers: [] }} phone />
+    <SeasonPredictionsScreen seasonName="2026/27" data={data} phone />
   );
   expect(html).toContain('class="mobile-native-header"');
   expect(html).toContain('id="mobile-screen-title"');
-  expect(html).toContain('>Predicciones</h1>');
-  expect(html).not.toContain('mobile-native-description');
-  expect(html).not.toContain('Predicciones de temporada</h1>');
-  expect(html).toContain('¿Qué jugador sumará más puntos?');
-  expect(html).toContain('¿Qué mánager terminará primero?');
+  for (const question of PREDICTION_QUESTIONS) expect(html).toContain(question.prompt);
+});
+
+it('hides candidate cards and league answers before the window opens', () => {
+  const html = renderToStaticMarkup(
+    <SeasonPredictionsScreen
+      seasonName="2026/27"
+      data={{ ...data, status: 'not-open', options: { players: [], teams: [], managers: [] } }}
+    />
+  );
+  expect(html).toContain('todavía no están abiertas');
+  expect(html).not.toContain(PREDICTION_QUESTIONS[0].prompt);
+  expect(html).not.toContain('Predicciones de la liga');
 });

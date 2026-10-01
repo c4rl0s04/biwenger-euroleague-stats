@@ -88,6 +88,10 @@ const ROUTE_CONTRACT_MANIFEST: Record<string, RouteContractEntry> = {
   '/api/rounds/list': { status: 'covered', reason: 'rounds handler contract tests' },
   '/api/rounds/standings': { status: 'covered', reason: 'handler contract tests' },
   '/api/rounds/stats': { status: 'covered', reason: 'handler contract tests' },
+  '/api/season-predictions/submission': {
+    status: 'covered',
+    reason: 'season prediction submission handler contract tests',
+  },
   '/api/search': { status: 'covered', reason: 'search handler contract tests' },
   '/api/standings/advanced': { status: 'covered', reason: 'handler contract tests' },
   '/api/standings/analytics': { status: 'covered', reason: 'handler contract tests' },

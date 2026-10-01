@@ -1,145 +1,201 @@
+import pg from 'pg';
+import { test as rawTest } from 'playwright/test';
 import { expect, test } from './fixtures';
 
-test('season predictions demo supports player and manager choices', async ({ page }, testInfo) => {
+test.beforeEach(async () => {
   test.skip(!process.env.BIWENGER_E2E_DISPOSABLE, 'Requires disposable season data.');
-  await page.goto('/login?callbackUrl=%2Fseason-predictions');
-  await page.getByLabel('Manager').fill(process.env.E2E_USERNAME!);
-  await page.locator('#login-password').fill(process.env.E2E_PASSWORD!);
-  await page.getByRole('button', { name: 'Entrar' }).click();
-  await expect(page).toHaveURL(/\/season-predictions$/);
-
-  const phone = (await page.locator('[data-presentation="phone"]').count()) > 0;
-  await expect(
-    page.getByRole('heading', { name: phone ? 'Predicciones' : 'Predicciones de temporada' })
-  ).toBeVisible();
-  await expect(page.getByText('Tus elecciones no se guardan')).toBeVisible();
-  const viewportWidth = await page.evaluate(() => window.innerWidth);
-  const expectedGutter = viewportWidth >= 1024 ? 32 : viewportWidth >= 640 ? 24 : 16;
-  const expectedTop = viewportWidth >= 1024 ? 64 : viewportWidth >= 640 ? 48 : 32;
-  if (phone) {
-    const mobileHeader = page.locator('.mobile-native-header');
-    await expect(mobileHeader).toHaveCSS('position', 'sticky');
-    await expect(mobileHeader.locator('.mobile-native-eyebrow')).toBeVisible();
-    await expect(mobileHeader.locator('.mobile-native-title')).toBeVisible();
-    await expect(mobileHeader.locator('.mobile-native-description')).toHaveCount(0);
-    await expect(page.getByRole('button', { name: 'Abrir búsqueda' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Abrir perfil' })).toBeVisible();
-    await expect(page.locator('.mobile-native-screen')).toHaveCSS(
-      'padding-left',
-      viewportWidth < 359 ? '12px' : '16px'
-    );
-  } else {
-    const canvas = page.locator('[data-page-canvas]');
-    await expect(canvas).toHaveCSS('padding-left', `${expectedGutter}px`);
-    await expect(canvas).toHaveCSS('padding-right', `${expectedGutter}px`);
-    await expect(canvas).toHaveCSS('padding-top', `${expectedTop}px`);
-    const alignment = await page.evaluate(() => {
-      const canvas = document.querySelector('[data-page-canvas]')!;
-      const content = canvas.firstElementChild!;
-      const heading = canvas.querySelector('h1')!;
-      const section = canvas.querySelector('section')!;
-      return {
-        canvasLeft: canvas.getBoundingClientRect().left,
-        contentLeft: content.getBoundingClientRect().left,
-        contentWidth: content.getBoundingClientRect().width,
-        headingLeft: heading.getBoundingClientRect().left,
-        sectionLeft: section.getBoundingClientRect().left,
-      };
-    });
-    expect(alignment.contentLeft - alignment.canvasLeft).toBeGreaterThanOrEqual(expectedGutter - 1);
-    expect(alignment.contentWidth).toBeLessThanOrEqual(1280);
-    expect(Math.abs(alignment.headingLeft - alignment.contentLeft)).toBeLessThan(1);
-    expect(Math.abs(alignment.sectionLeft - alignment.contentLeft)).toBeLessThan(1);
+  const client = new pg.Client({ connectionString: process.env.E2E_DATABASE_URL });
+  await client.connect();
+  try {
+    await client.query(`DELETE FROM season_prediction_submissions WHERE season_id = '2025-26';
+      UPDATE season_prediction_windows SET opens_at = clock_timestamp(),
+        locks_at = clock_timestamp() + interval '168 hours' WHERE season_id = '2025-26';`);
+    await client.query(`UPDATE season_prediction_windows SET candidates = jsonb_set(candidates,
+      '{players,0,name}', to_jsonb('Fixture Contributor With A Very Long Name For A Narrow Phone'::text))
+      WHERE season_id = '2025-26'`);
+  } finally {
+    await client.end();
   }
-  await page.screenshot({
-    path: testInfo.outputPath('season-predictions-dark.png'),
-    fullPage: true,
-  });
-  const mobileMore = page.getByRole('button', { name: 'Más', exact: true });
-  if (await mobileMore.isVisible()) {
-    await mobileMore.click();
-    await expect(page.getByRole('link', { name: 'Predicciones de temporada' })).toBeVisible();
-    await page.getByRole('button', { name: 'Cerrar menú Más' }).click();
-  } else {
-    await expect(page.locator('a[href="/season-predictions"]:visible').first()).toBeVisible();
-  }
-  expect(
-    await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)
-  ).toBe(true);
+});
 
-  await page.getByRole('button', { name: /Seleccionar jugador: Elige un jugador/ }).click();
-  await expect(page.getByRole('dialog', { name: 'Seleccionar jugador' })).toBeVisible();
-  await page.screenshot({ path: testInfo.outputPath('season-predictions-picker.png') });
-  const playerSearch = page.getByRole('combobox', { name: 'Buscar seleccionar jugador' });
-  await expect(playerSearch).toBeFocused();
-  await expect(page.getByRole('option').first()).toContainText('Base');
-  await playerSearch.fill('Fixture');
-  await expect(page.getByRole('option').first()).toBeVisible();
-  await playerSearch.press('ArrowDown');
-  await playerSearch.press('Enter');
-  await expect(page.getByText('Tu elección:').first()).toBeVisible();
-  await page.getByRole('button', { name: /Borrar elección:/ }).click();
-  await expect(
-    page.getByRole('button', { name: /Seleccionar jugador: Elige un jugador/ })
-  ).toBeVisible();
-
-  await page.getByRole('button', { name: /Seleccionar mánager: Elige un mánager/ }).click();
-  await page.getByRole('combobox', { name: 'Buscar seleccionar mánager' }).fill('zzzz-no-result');
-  await expect(page.getByText('No hay mánagers que coincidan')).toBeVisible();
-  await page.getByRole('combobox', { name: 'Buscar seleccionar mánager' }).fill('');
-  await page.getByRole('option').first().click();
-  await expect(page.getByText('Tu elección:').first()).toBeVisible();
-
-  await page.reload();
-  await expect(
-    page.getByRole('button', { name: /Seleccionar mánager: Elige un mánager/ })
-  ).toBeVisible();
-  await page.evaluate(() => {
-    localStorage.setItem('theme', 'light');
-    window.dispatchEvent(new StorageEvent('storage', { key: 'theme', newValue: 'light' }));
-  });
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-  await expect(
-    page.getByRole('heading', { name: phone ? 'Predicciones' : 'Predicciones de temporada' })
-  ).toBeVisible();
-  if (phone) {
-    await expect
-      .poll(() =>
-        page.locator('.mobile-native-title').evaluate((title) => {
-          const reference = document.createElement('span');
-          reference.style.color = 'hsl(var(--content-primary))';
-          title.parentElement!.append(reference);
-          const matches = getComputedStyle(title).color === getComputedStyle(reference).color;
-          reference.remove();
-          return matches;
-        })
-      )
-      .toBe(true);
-  }
-  await page.screenshot({
-    path: testInfo.outputPath('season-predictions-light.png'),
-    fullPage: true,
-  });
-
-  if (testInfo.project.name.startsWith('desktop')) {
-    await page.goto('/schedule');
-    await page.locator('a[href="/season-predictions"]:visible').first().click();
+for (const theme of ['dark', 'light'] as const) {
+  test(`season predictions save, reorder and locked league view in ${theme}`, async ({
+    page,
+  }, testInfo) => {
+    await page.addInitScript((preference) => localStorage.setItem('theme', preference), theme);
+    await page.goto('/login?callbackUrl=%2Fseason-predictions');
+    await page.getByLabel('Manager').fill(process.env.E2E_USERNAME!);
+    await page.locator('#login-password').fill(process.env.E2E_PASSWORD!);
+    await page.getByRole('button', { name: 'Entrar' }).click();
     await expect(page).toHaveURL(/\/season-predictions$/);
-    await expect(page.locator('[data-page-canvas]')).toHaveCSS(
-      'padding-left',
-      `${expectedGutter}px`
+
+    const phone = (await page.locator('[data-presentation="phone"]').count()) > 0;
+    await expect(
+      page.getByRole('heading', { name: phone ? 'Predicciones' : 'Predicciones de temporada' })
+    ).toBeVisible();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+    await expect(page.getByText('Las respuestas solo se guardan')).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: /clasificación de la temporada regular/ })
+    ).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(
+      true
     );
-    await page.setViewportSize({ width: 1920, height: 900 });
-    const wideLayout = await page.evaluate(() => {
-      const canvas = document.querySelector('[data-page-canvas]')!;
-      const content = canvas.firstElementChild!;
-      return {
-        canvasLeft: canvas.getBoundingClientRect().left,
-        contentLeft: content.getBoundingClientRect().left,
-        contentWidth: content.getBoundingClientRect().width,
-      };
+
+    const picker = page
+      .getByRole('button', { name: /Seleccionar jugador: Elige un jugador/ })
+      .first();
+    await picker.click();
+    const search = page.getByRole('combobox', { name: 'Buscar seleccionar jugador' });
+    await expect(search).toBeFocused();
+    await search.fill('no-such-player');
+    await expect(page.getByText('No hay jugadores que coincidan')).toBeVisible();
+    if (phone && theme === 'dark') {
+      await search.fill('Very Long Name');
+      await expect(
+        page.getByRole('option', { name: /Fixture Contributor With A Very Long Name/ })
+      ).toBeVisible();
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)
+      ).toBe(true);
+    }
+    await search.fill('Fixture Guard');
+    await search.press('Enter');
+    await expect(page.getByText('Hay cambios sin guardar.')).toBeVisible();
+
+    const teamRanking = page.locator('[aria-labelledby="team-ranking-title"]');
+    await expect(teamRanking.getByText('Fixture Athens')).toBeVisible();
+    if (phone) {
+      const handle = teamRanking.getByRole('button', { name: 'Arrastrar Fixture Athens' });
+      const bounds = (await handle.boundingBox())!;
+      expect(bounds.width).toBeGreaterThanOrEqual(44);
+      expect(bounds.height).toBeGreaterThanOrEqual(44);
+      await expect(handle).toHaveCSS('touch-action', 'none');
+      await expect(handle.locator('xpath=../..')).toHaveCSS('touch-action', 'pan-y');
+    }
+    await teamRanking.getByRole('button', { name: 'Bajar Fixture Athens' }).click();
+    await expect(
+      teamRanking.getByText('Fixture Athens ahora está en la posición 2.')
+    ).toBeAttached();
+    const raiseAthens = teamRanking.getByRole('button', { name: 'Subir Fixture Athens' });
+    await raiseAthens.focus();
+    await page.keyboard.press('Enter');
+    await expect(
+      teamRanking.getByText('Fixture Athens ahora está en la posición 1.')
+    ).toBeAttached();
+    await expect(
+      teamRanking.getByRole('button', { name: 'Arrastrar Fixture Athens' })
+    ).toBeFocused();
+    await teamRanking.getByRole('button', { name: 'Bajar Fixture Athens' }).click();
+    await expect(teamRanking.getByRole('button', { name: 'Borrar clasificación' })).toBeVisible();
+    if (!phone && theme === 'dark') {
+      const handle = teamRanking.getByRole('button', { name: 'Arrastrar Fixture Madrid' });
+      const target = teamRanking.getByRole('button', { name: 'Arrastrar Fixture Athens' });
+      const from = (await handle.boundingBox())!;
+      const to = (await target.boundingBox())!;
+      await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2 + 12, { steps: 10 });
+      await page.mouse.up();
+      await expect(
+        teamRanking.getByText('Fixture Madrid ahora está en la posición 2.')
+      ).toBeAttached();
+    }
+    const managerRanking = page.locator('[aria-labelledby="manager-ranking-title"]');
+    await managerRanking.getByRole('button', { name: 'Usar este orden' }).click();
+    await page.getByRole('button', { name: 'Guardar predicciones', exact: true }).click();
+    await expect(page.getByText('Predicciones guardadas.')).toBeVisible();
+    await page.reload();
+    await expect(
+      page
+        .locator('[aria-labelledby="player-total-points-title"]')
+        .getByRole('button', { name: /Seleccionar jugador: Fixture Guard/ })
+    ).toBeVisible();
+    await expect(teamRanking.getByRole('button', { name: 'Borrar clasificación' })).toBeVisible();
+    await expect(
+      managerRanking.getByRole('button', { name: 'Borrar clasificación' })
+    ).toBeVisible();
+    await page.screenshot({
+      path: testInfo.outputPath(`season-predictions-${theme}.png`),
+      fullPage: true,
     });
-    expect(wideLayout.contentWidth).toBe(1280);
-    expect(wideLayout.contentLeft - wideLayout.canvasLeft).toBeGreaterThan(32);
+
+    await page
+      .locator('[aria-labelledby="player-total-points-title"]')
+      .getByRole('button', { name: /Borrar elección/ })
+      .click();
+    await expect(page.getByText('Hay cambios sin guardar.')).toBeVisible();
+    await page.getByRole('button', { name: 'Guardar predicciones', exact: true }).click();
+    await expect(page.getByText('Predicciones guardadas.')).toBeVisible();
+
+    // The server integration test covers access timing; this verifies the locked presentation.
+    const client = new pg.Client({ connectionString: process.env.E2E_DATABASE_URL });
+    await client.connect();
+    try {
+      await client.query(`INSERT INTO season_prediction_submissions (season_id, user_id, answers)
+        VALUES ('2025-26', '99002', '{"team-champion":{"kind":"single","id":"9901"}}'::jsonb);
+        UPDATE season_prediction_windows SET locks_at = clock_timestamp()
+        WHERE season_id = '2025-26'`);
+    } finally {
+      await client.end();
+    }
+    await page.reload();
+    await expect(page.getByText('Tus respuestas están bloqueadas.')).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Guardar predicciones', exact: true })
+    ).toHaveCount(0);
+    await page.getByText('Fixture Rival').last().click();
+    await expect(page.getByText('Fixture Madrid').last()).toBeVisible();
+    await expect(page.getByText('Sin respuesta').first()).toBeVisible();
+  });
+}
+
+rawTest('save failures and stale revisions keep the draft unsaved', async ({ page }, testInfo) => {
+  rawTest.skip(!process.env.BIWENGER_E2E_DISPOSABLE || testInfo.project.name !== 'desktop-1440');
+  const client = new pg.Client({ connectionString: process.env.E2E_DATABASE_URL });
+  await client.connect();
+  try {
+    await client.query(`DELETE FROM season_prediction_submissions WHERE season_id = '2025-26';
+      UPDATE season_prediction_windows SET opens_at = clock_timestamp(),
+        locks_at = clock_timestamp() + interval '168 hours' WHERE season_id = '2025-26'`);
+    await page.goto('/login?callbackUrl=%2Fseason-predictions');
+    await page.getByLabel('Manager').fill(process.env.E2E_USERNAME!);
+    await page.locator('#login-password').fill(process.env.E2E_PASSWORD!);
+    await page.getByRole('button', { name: 'Entrar' }).click();
+    await expect(page).toHaveURL(/\/season-predictions$/);
+    await page
+      .getByRole('button', { name: /Seleccionar equipo: Elige un equipo/ })
+      .first()
+      .click();
+    await page.getByRole('option').first().click();
+    await expect(page.getByText('Hay cambios sin guardar.')).toBeVisible();
+    await page.route('**/api/season-predictions/submission', (route) =>
+      route.fulfill({
+        status: 503,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: 'Error de prueba' }),
+      })
+    );
+    await page.getByRole('button', { name: 'Guardar predicciones', exact: true }).click();
+    await expect(page.getByText('Error de prueba')).toBeVisible();
+    await page.unroute('**/api/season-predictions/submission');
+    await page.getByRole('button', { name: 'Guardar predicciones', exact: true }).click();
+    await expect(page.getByText('Predicciones guardadas.')).toBeVisible();
+    await client.query(`UPDATE season_prediction_submissions SET revision = revision + 1
+      WHERE season_id = '2025-26' AND user_id = '99001'`);
+    await page
+      .getByRole('button', { name: /Borrar elección/ })
+      .first()
+      .click();
+    await page.getByRole('button', { name: 'Guardar predicciones', exact: true }).click();
+    await expect(page.getByText('Tus predicciones se modificaron en otra pestaña.')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Recargar respuestas' })).toBeVisible();
+    await client.query(`UPDATE season_prediction_windows SET opens_at = clock_timestamp() + interval '1 hour'
+      WHERE season_id = '2025-26'`);
+    await page.reload();
+    await expect(page.getByText('Las predicciones todavía no están abiertas.')).toBeVisible();
+    await expect(page.getByRole('heading', { name: /más puntos fantasy/ })).toHaveCount(0);
+  } finally {
+    await client.end();
   }
 });
