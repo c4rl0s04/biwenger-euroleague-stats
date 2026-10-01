@@ -131,6 +131,10 @@ Use typography to create hierarchy before adding extra decoration.
 - body typography: explanatory copy;
 - tabular numerals: metrics where alignment/scanning matters.
 
+The new desktop `PageHeader` uses condensed uppercase display type: the first word takes the primary
+content color and the remaining words take the theme-aware orange accent gradient. Its description
+remains plain body text beneath the title.
+
 Do not apply uppercase/display styling indiscriminately. Long entity names, controls and dense tables
 must prioritize readability.
 
