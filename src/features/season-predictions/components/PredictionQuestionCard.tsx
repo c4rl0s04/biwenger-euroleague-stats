@@ -9,11 +9,13 @@ export function PredictionQuestionCard({
   options,
   value,
   onChange,
+  headingLevel = 3,
 }: {
   question: PredictionQuestion;
   options: SeasonPredictionOptions;
   value: string | null;
   onChange: (id: string | null) => void;
+  headingLevel?: 3 | 4;
 }) {
   const choices = question.section === 'player' ? options.players : options.managers;
   const selected = choices.find((choice) => choice.id === value);
@@ -21,7 +23,11 @@ export function PredictionQuestionCard({
   return (
     <Card variant="default" aria-labelledby={`${question.id}-title`} className="h-full">
       <CardHeader>
-        <CardTitle id={`${question.id}-title`} as="h3" className="text-lg!">
+        <CardTitle
+          id={`${question.id}-title`}
+          as={headingLevel === 4 ? 'h4' : 'h3'}
+          className="text-lg!"
+        >
           {question.prompt}
         </CardTitle>
       </CardHeader>

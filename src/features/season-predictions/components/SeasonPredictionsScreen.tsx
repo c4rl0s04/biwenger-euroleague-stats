@@ -42,6 +42,13 @@ export function SeasonPredictionsScreen({
           title={section.title}
           description={section.description}
         />
+        {section.subsection ? (
+          <SectionHeader
+            level={3}
+            title={section.subsection.title}
+            description={section.subsection.description}
+          />
+        ) : null}
         <div className="grid gap-4 lg:grid-cols-2">
           {PREDICTION_QUESTIONS.filter((question) => question.section === section.id)
             .sort((a, b) => a.order - b.order)
@@ -51,6 +58,7 @@ export function SeasonPredictionsScreen({
                 question={question}
                 options={options}
                 value={answers[question.id] ?? null}
+                headingLevel={section.subsection ? 4 : 3}
                 onChange={(id) =>
                   setAnswers((current) => {
                     const next = { ...current };

@@ -8,6 +8,16 @@ export interface PredictionQuestion {
   order: number;
 }
 
+export interface PredictionSection {
+  id: PredictionSubject;
+  title: string;
+  description: string;
+  subsection?: {
+    title: string;
+    description: string;
+  };
+}
+
 export const PREDICTION_QUESTIONS: readonly PredictionQuestion[] = [
   { id: 'top-scorer', section: 'player', prompt: '¿Qué jugador sumará más puntos?', order: 1 },
   {
@@ -18,11 +28,15 @@ export const PREDICTION_QUESTIONS: readonly PredictionQuestion[] = [
   },
 ] as const;
 
-export const PREDICTION_SECTIONS = [
+export const PREDICTION_SECTIONS: readonly PredictionSection[] = [
   {
     id: 'player',
     title: 'Jugadores',
     description: 'Elige al jugador que destacará esta temporada.',
+    subsection: {
+      title: 'Rendimiento individual',
+      description: 'Pronósticos sobre los puntos de la temporada.',
+    },
   },
   { id: 'manager', title: 'Mánagers', description: 'Piensa en la clasificación final de la liga.' },
 ] as const;
