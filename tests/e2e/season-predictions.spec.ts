@@ -65,33 +65,42 @@ for (const theme of ['dark', 'light'] as const) {
     await expect(page.getByText('Hay cambios sin guardar.')).toBeVisible();
 
     const teamRanking = page.locator('[aria-labelledby="team-ranking-title"]');
-    await expect(teamRanking.getByText('Fixture Athens')).toBeVisible();
+    if (phone) {
+      await teamRanking.getByRole('button', { name: 'Ordenar clasificación' }).click();
+      await expect(
+        page.getByRole('dialog', { name: /clasificación de la temporada regular/ })
+      ).toBeVisible();
+    }
+    const teamEditor = phone
+      ? page.getByRole('dialog', { name: /clasificación de la temporada regular/ })
+      : teamRanking;
+    await expect(teamEditor.getByText('Fixture Athens')).toBeVisible();
     if (touch) {
-      const handle = teamRanking.getByRole('button', { name: 'Arrastrar Fixture Athens' });
+      const handle = teamEditor.getByRole('button', { name: 'Arrastrar Fixture Athens' });
       const bounds = (await handle.boundingBox())!;
       expect(bounds.width).toBeGreaterThanOrEqual(44);
       expect(bounds.height).toBeGreaterThanOrEqual(44);
       await expect(handle).toHaveCSS('touch-action', 'none');
       await expect(handle.locator('xpath=../..')).toHaveCSS('touch-action', 'pan-y');
     }
-    await teamRanking.getByRole('button', { name: 'Bajar Fixture Athens' }).click();
+    await teamEditor.getByRole('button', { name: 'Bajar Fixture Athens' }).click();
     await expect(
-      teamRanking.getByText('Fixture Athens ahora está en la posición 2.')
+      teamEditor.getByText('Fixture Athens ahora está en la posición 2.')
     ).toBeAttached();
-    const raiseAthens = teamRanking.getByRole('button', { name: 'Subir Fixture Athens' });
+    const raiseAthens = teamEditor.getByRole('button', { name: 'Subir Fixture Athens' });
     await raiseAthens.focus();
     await page.keyboard.press('Enter');
     await expect(
-      teamRanking.getByText('Fixture Athens ahora está en la posición 1.')
+      teamEditor.getByText('Fixture Athens ahora está en la posición 1.')
     ).toBeAttached();
     await expect(
-      teamRanking.getByRole('button', { name: 'Arrastrar Fixture Athens' })
+      teamEditor.getByRole('button', { name: 'Arrastrar Fixture Athens' })
     ).toBeFocused();
-    await teamRanking.getByRole('button', { name: 'Bajar Fixture Athens' }).click();
-    await expect(teamRanking.getByRole('button', { name: 'Borrar clasificación' })).toBeVisible();
+    await teamEditor.getByRole('button', { name: 'Bajar Fixture Athens' }).click();
+    await expect(teamEditor.getByRole('button', { name: 'Borrar clasificación' })).toBeVisible();
     if (!touch && theme === 'dark') {
-      const handle = teamRanking.getByRole('button', { name: 'Arrastrar Fixture Madrid' });
-      const target = teamRanking.getByRole('button', { name: 'Arrastrar Fixture Athens' });
+      const handle = teamEditor.getByRole('button', { name: 'Arrastrar Fixture Madrid' });
+      const target = teamEditor.getByRole('button', { name: 'Arrastrar Fixture Athens' });
       const from = (await handle.boundingBox())!;
       const to = (await target.boundingBox())!;
       await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
@@ -99,11 +108,20 @@ for (const theme of ['dark', 'light'] as const) {
       await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2 + 12, { steps: 10 });
       await page.mouse.up();
       await expect(
-        teamRanking.getByText('Fixture Madrid ahora está en la posición 2.')
+        teamEditor.getByText('Fixture Madrid ahora está en la posición 2.')
       ).toBeAttached();
     }
+    if (phone) {
+      await teamEditor.getByRole('button', { name: 'Volver a las preguntas' }).click();
+      await expect(teamRanking.getByRole('button', { name: 'Cambiar orden' })).toBeFocused();
+    }
     const managerRanking = page.locator('[aria-labelledby="manager-ranking-title"]');
-    await managerRanking.getByRole('button', { name: 'Usar este orden' }).click();
+    if (phone) await managerRanking.getByRole('button', { name: 'Ordenar clasificación' }).click();
+    const managerEditor = phone
+      ? page.getByRole('dialog', { name: /clasificación final de mánagers/ })
+      : managerRanking;
+    await managerEditor.getByRole('button', { name: 'Usar este orden' }).click();
+    if (phone) await managerEditor.getByRole('button', { name: 'Volver a las preguntas' }).click();
     await page.getByRole('button', { name: 'Guardar predicciones', exact: true }).click();
     await expect(page.getByText('Predicciones guardadas.')).toBeVisible();
     await page.reload();
@@ -194,7 +212,9 @@ rawTest('save failures and stale revisions keep the draft unsaved', async ({ pag
     await client.query(`UPDATE season_prediction_windows SET opens_at = clock_timestamp() + interval '1 hour'
       WHERE season_id = '2025-26'`);
     await page.reload();
-    await expect(page.getByText('Las predicciones todavía no están abiertas.')).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Las predicciones todavía no están abiertas.' }).first()
+    ).toBeVisible();
     await expect(page.getByRole('heading', { name: /más puntos fantasy/ })).toHaveCount(0);
   } finally {
     await client.end();

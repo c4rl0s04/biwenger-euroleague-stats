@@ -89,6 +89,12 @@ export function SeasonPredictionsScreen({
     return () => window.clearInterval(timer);
   }, [data.status, data.locksAt, data.serverNow]);
 
+  useEffect(() => {
+    if (saveState !== 'saved') return;
+    const timer = window.setTimeout(() => setSaveState('idle'), 3500);
+    return () => window.clearTimeout(timer);
+  }, [saveState]);
+
   function updateAnswer(id: PredictionQuestionId, answer: PredictionAnswer | null) {
     setAnswers((current) => {
       const next = { ...current };
@@ -204,8 +210,23 @@ export function SeasonPredictionsScreen({
                 headingId={`${section.id}-heading`}
                 title={section.title}
                 description={section.description}
+                action={
+                  phone && data.status === 'open' ? (
+                    <span className="rounded-full border border-[hsl(var(--border-default))] px-3 py-1 text-xs font-semibold tabular-nums text-[hsl(var(--content-secondary))]">
+                      {
+                        data.questions.filter(
+                          (question) =>
+                            question.section === section.id &&
+                            answers[question.id as PredictionQuestionId]
+                        ).length
+                      }{' '}
+                      de{' '}
+                      {data.questions.filter((question) => question.section === section.id).length}
+                    </span>
+                  ) : undefined
+                }
               />
-              <div className="grid gap-4 lg:grid-cols-2">
+              <div className={`grid lg:grid-cols-2 ${phone ? 'gap-3' : 'gap-4'}`}>
                 {data.questions
                   .filter((question) => question.section === section.id)
                   .sort((a, b) => a.order - b.order)
@@ -225,6 +246,7 @@ export function SeasonPredictionsScreen({
                             )
                           }
                           disabled={readOnly}
+                          phone={phone}
                         />
                       );
                     return (
@@ -234,6 +256,7 @@ export function SeasonPredictionsScreen({
                         options={data.options}
                         value={answer?.kind === 'single' ? answer.id : null}
                         disabled={readOnly}
+                        phone={phone}
                         onChange={(id) =>
                           updateAnswer(
                             question.id as PredictionQuestionId,
@@ -272,6 +295,44 @@ export function SeasonPredictionsScreen({
         </p>
         {saveState === 'conflict' ? (
           <Button variant="secondary" onClick={() => window.location.reload()}>
+            Recargar respuestas
+          </Button>
+        ) : null}
+      </div>
+    ) : null;
+
+  const phoneSavePanel =
+    data.status === 'open' && !readOnly ? (
+      <div
+        className={
+          dirty || saveState === 'saved'
+            ? 'fixed inset-x-0 bottom-[calc(var(--mobile-nav-height)+env(safe-area-inset-bottom,0px))] z-[70] space-y-2 border-t border-[hsl(var(--border-default))] bg-[hsl(var(--surface-app)/0.96)] px-4 py-3 shadow-lg backdrop-blur-xl'
+            : 'px-4 py-6'
+        }
+      >
+        {dirty ? (
+          <Button
+            className="min-h-12 w-full"
+            onClick={save}
+            disabled={saveState === 'saving' || saveState === 'conflict'}
+          >
+            {saveState === 'saving' ? 'Guardando…' : 'Guardar predicciones'}
+          </Button>
+        ) : null}
+        <p
+          role="status"
+          aria-live="polite"
+          className={`text-center text-sm ${saveState === 'error' || saveState === 'conflict' ? 'text-[hsl(var(--status-danger))]' : 'text-[hsl(var(--content-secondary))]'}`}
+        >
+          {message ||
+            (dirty
+              ? 'Hay cambios sin guardar.'
+              : revision
+                ? 'Todos los cambios están guardados.'
+                : 'Aún no has guardado respuestas.')}
+        </p>
+        {saveState === 'conflict' ? (
+          <Button variant="secondary" className="w-full" onClick={() => window.location.reload()}>
             Recargar respuestas
           </Button>
         ) : null}
@@ -328,12 +389,17 @@ export function SeasonPredictionsScreen({
 
   if (phone)
     return (
-      <MobileScreen labelledBy="mobile-screen-title">
+      <MobileScreen
+        labelledBy="mobile-screen-title"
+        className={
+          dirty ? 'pb-[calc(var(--mobile-nav-height)+env(safe-area-inset-bottom,0px)+10rem)]!' : ''
+        }
+      >
         <MobileScreenHeader eyebrow={seasonName} title="Predicciones" />
         <div className="px-4 py-8">{data.status === 'not-open' ? closedPanel : statusPanel}</div>
         {sections}
         {league}
-        {savePanel ? <div className="px-4">{savePanel}</div> : null}
+        {phoneSavePanel}
       </MobileScreen>
     );
 
