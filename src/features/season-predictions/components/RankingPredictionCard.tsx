@@ -5,16 +5,16 @@ import { createPortal } from 'react-dom';
 import { Reorder, useDragControls, useReducedMotion } from 'framer-motion';
 import { ChevronDown, ChevronUp, GripVertical, X } from 'lucide-react';
 import {
+  Avatar,
   Button,
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
   IconButton,
   ModalDialog,
 } from '@/components/ui/foundation';
 import type { PredictionChoice } from '../models/options';
 import type { PredictionQuestion } from '../models/questions';
+import { PredictionCardHeading } from './PredictionCardHeading';
 
 function RankingRow({
   id,
@@ -223,50 +223,75 @@ export function RankingPredictionCard({
   if (!phone)
     return (
       <Card aria-labelledby={`${question.id}-title`} className="lg:col-span-2">
-        <CardHeader>
-          <CardTitle id={`${question.id}-title`} className="text-lg!">
-            {question.prompt}
-          </CardTitle>
-        </CardHeader>
+        <PredictionCardHeading
+          question={question}
+          answered={Boolean(value)}
+          disabled={disabled}
+          phone={false}
+        />
         <CardContent>{rankingContent}</CardContent>
       </Card>
     );
 
   return (
     <>
-      <Card density="compact" aria-labelledby={`${question.id}-title`}>
-        <CardHeader>
-          <CardTitle id={`${question.id}-title`} className="text-base! leading-snug">
-            {question.prompt}
-          </CardTitle>
-        </CardHeader>
+      <Card
+        density="compact"
+        aria-labelledby={`${question.id}-title`}
+        className={value ? 'border-l-[3px] border-l-[hsl(var(--action-primary))]' : ''}
+      >
+        <PredictionCardHeading
+          question={question}
+          answered={Boolean(value)}
+          disabled={disabled}
+          phone
+        />
         <CardContent className="space-y-4">
           {value ? (
             <ol className="space-y-1.5 text-sm">
               {draft.slice(0, 3).map((id, index) => (
-                <li key={id} className="flex min-w-0 gap-2">
-                  <span className="shrink-0 font-semibold tabular-nums text-[hsl(var(--action-primary))]">
-                    {index + 1}.
+                <li
+                  key={id}
+                  className="flex min-w-0 items-center gap-2.5 rounded-[var(--radius-control)] bg-[hsl(var(--surface-secondary))] px-3 py-2"
+                >
+                  <span className="w-5 shrink-0 font-semibold tabular-nums text-[hsl(var(--action-primary))]">
+                    {index + 1}
                   </span>
-                  <span className="min-w-0 break-words">
+                  <Avatar
+                    src={byId.get(id)?.image}
+                    alt=""
+                    fallback={(byId.get(id)?.name ?? '?').slice(0, 1)}
+                    size="sm"
+                  />
+                  <span className="min-w-0 flex-1 break-words font-medium">
                     {byId.get(id)?.name ?? 'Candidato desconocido'}
                   </span>
                 </li>
               ))}
               {draft.length > 3 ? (
-                <li className="text-[hsl(var(--content-muted))]">Y {draft.length - 3} más…</li>
+                <li className="px-3 pt-1 text-xs text-[hsl(var(--content-muted))]">
+                  Y {draft.length - 3} posiciones más
+                </li>
               ) : null}
             </ol>
           ) : (
-            <p className="text-sm text-[hsl(var(--content-muted))]">Sin respuesta</p>
+            <div className="rounded-[var(--radius-control)] border border-dashed border-[hsl(var(--border-default))] px-3 py-3 text-sm text-[hsl(var(--content-muted))]">
+              Ordena los {options.length} {question.section === 'team' ? 'equipos' : 'mánagers'} de
+              la temporada.
+            </div>
           )}
           {(!disabled || value) && (
-            <div className="flex flex-wrap items-center gap-2">
-              <Button ref={openButtonRef} variant="secondary" onClick={() => setEditorOpen(true)}>
+            <div className="flex flex-col items-stretch gap-1">
+              <Button
+                ref={openButtonRef}
+                variant="secondary"
+                className="w-full"
+                onClick={() => setEditorOpen(true)}
+              >
                 {disabled ? 'Ver clasificación' : value ? 'Cambiar orden' : 'Ordenar clasificación'}
               </Button>
               {!disabled && value ? (
-                <Button variant="ghost" onClick={() => onChange(null)}>
+                <Button variant="ghost" size="sm" onClick={() => onChange(null)}>
                   Borrar clasificación
                 </Button>
               ) : null}

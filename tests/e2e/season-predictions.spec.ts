@@ -29,6 +29,7 @@ for (const theme of ['dark', 'light'] as const) {
     await page.getByRole('button', { name: 'Entrar' }).click();
     await expect(page).toHaveURL(/\/season-predictions$/);
 
+    await expect(page.locator('[data-presentation]')).toHaveCount(1);
     const phone = (await page.locator('[data-presentation="phone"]').count()) > 0;
     const touch = Boolean(testInfo.project.use.hasTouch);
     await expect(

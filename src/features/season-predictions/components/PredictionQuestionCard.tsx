@@ -1,16 +1,10 @@
 import { X } from 'lucide-react';
-import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  IconButton,
-} from '@/components/ui/foundation';
+import { Button, Card, CardContent, IconButton } from '@/components/ui/foundation';
 import type { PredictionQuestion } from '../models/questions';
 import type { SeasonPredictionOptions } from '../models/options';
 import { ManagerPredictionPicker } from './ManagerPredictionPicker';
 import { PlayerPredictionPicker } from './PlayerPredictionPicker';
+import { PredictionCardHeading } from './PredictionCardHeading';
 import { TeamPredictionPicker } from './TeamPredictionPicker';
 
 export function PredictionQuestionCard({
@@ -43,17 +37,15 @@ export function PredictionQuestionCard({
       variant="default"
       density={phone ? 'compact' : 'comfortable'}
       aria-labelledby={`${question.id}-title`}
-      className="h-full"
+      className={`h-full ${phone && selected ? 'border-l-[3px] border-l-[hsl(var(--action-primary))]' : ''}`}
     >
-      <CardHeader>
-        <CardTitle
-          id={`${question.id}-title`}
-          as={headingLevel === 4 ? 'h4' : 'h3'}
-          className={phone ? 'text-base! leading-snug' : 'text-lg!'}
-        >
-          {question.prompt}
-        </CardTitle>
-      </CardHeader>
+      <PredictionCardHeading
+        question={question}
+        answered={Boolean(selected)}
+        disabled={disabled}
+        phone={phone}
+        level={headingLevel}
+      />
       <CardContent className={phone && !disabled ? 'flex items-center gap-2' : 'space-y-3'}>
         {disabled ? (
           <p className="text-sm text-[hsl(var(--content-secondary))]">

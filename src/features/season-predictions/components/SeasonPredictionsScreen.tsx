@@ -172,6 +172,26 @@ export function SeasonPredictionsScreen({
       ) : null}
     </div>
   );
+  const phoneOpenPanel = (
+    <div className="rounded-[var(--radius-surface)] border border-[hsl(var(--border-default))] bg-[hsl(var(--surface-card))] p-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="text-[0.7rem] font-bold uppercase tracking-[0.14em] text-[hsl(var(--action-primary))]">
+          Plazo abierto
+        </span>
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--action-primary)/0.1)] px-2.5 py-1 text-xs font-semibold tabular-nums text-[hsl(var(--action-primary))]">
+          <Clock3 size={14} aria-hidden="true" />
+          {remaining}
+        </span>
+      </div>
+      <p className="mt-3 text-sm leading-relaxed text-[hsl(var(--content-primary))]">
+        Puedes guardar y modificar tus respuestas hasta el {data.locksAtLabel}.
+      </p>
+      <p className="mt-3 border-t border-[hsl(var(--border-default))] pt-3 text-xs leading-relaxed text-[hsl(var(--content-muted))]">
+        Las respuestas solo se guardan al pulsar «Guardar predicciones». Los demás miembros podrán
+        verlas después del cierre.
+      </p>
+    </div>
+  );
   const closedPanel = (
     <Card className="mx-auto w-full max-w-2xl p-0!">
       <CardContent className="flex flex-col items-center gap-5 px-5 py-10 text-center sm:px-10 sm:py-12">
@@ -396,7 +416,13 @@ export function SeasonPredictionsScreen({
         }
       >
         <MobileScreenHeader eyebrow={seasonName} title="Predicciones" />
-        <div className="px-4 py-8">{data.status === 'not-open' ? closedPanel : statusPanel}</div>
+        <div className="px-4 py-8">
+          {data.status === 'not-open'
+            ? closedPanel
+            : data.status === 'open' && !readOnly
+              ? phoneOpenPanel
+              : statusPanel}
+        </div>
         {sections}
         {league}
         {phoneSavePanel}
