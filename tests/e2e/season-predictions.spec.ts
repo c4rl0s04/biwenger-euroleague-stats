@@ -30,6 +30,7 @@ for (const theme of ['dark', 'light'] as const) {
     await expect(page).toHaveURL(/\/season-predictions$/);
 
     const phone = (await page.locator('[data-presentation="phone"]').count()) > 0;
+    const touch = Boolean(testInfo.project.use.hasTouch);
     await expect(
       page.getByRole('heading', { name: phone ? 'Predicciones' : 'Predicciones de temporada' })
     ).toBeVisible();
@@ -65,7 +66,7 @@ for (const theme of ['dark', 'light'] as const) {
 
     const teamRanking = page.locator('[aria-labelledby="team-ranking-title"]');
     await expect(teamRanking.getByText('Fixture Athens')).toBeVisible();
-    if (phone) {
+    if (touch) {
       const handle = teamRanking.getByRole('button', { name: 'Arrastrar Fixture Athens' });
       const bounds = (await handle.boundingBox())!;
       expect(bounds.width).toBeGreaterThanOrEqual(44);
@@ -88,7 +89,7 @@ for (const theme of ['dark', 'light'] as const) {
     ).toBeFocused();
     await teamRanking.getByRole('button', { name: 'Bajar Fixture Athens' }).click();
     await expect(teamRanking.getByRole('button', { name: 'Borrar clasificación' })).toBeVisible();
-    if (!phone && theme === 'dark') {
+    if (!touch && theme === 'dark') {
       const handle = teamRanking.getByRole('button', { name: 'Arrastrar Fixture Madrid' });
       const target = teamRanking.getByRole('button', { name: 'Arrastrar Fixture Athens' });
       const from = (await handle.boundingBox())!;
