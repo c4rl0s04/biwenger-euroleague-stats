@@ -1,9 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Clock3 } from 'lucide-react';
 import { MobileScreen, MobileScreenHeader } from '@/components/mobile/MobileScreen';
 import {
   Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardTitle,
   PageCanvas,
   PageHeader,
   PageSection,
@@ -161,6 +166,27 @@ export function SeasonPredictionsScreen({
       ) : null}
     </div>
   );
+  const closedPanel = (
+    <Card className="mx-auto w-full max-w-2xl p-0!">
+      <CardContent className="flex flex-col items-center gap-5 px-5 py-10 text-center sm:px-10 sm:py-12">
+        <span
+          aria-hidden="true"
+          className="flex size-14 items-center justify-center rounded-full border border-[hsl(var(--action-primary)/0.24)] bg-[hsl(var(--action-primary)/0.1)] text-[hsl(var(--action-primary))]"
+        >
+          <Clock3 size={25} />
+        </span>
+        <div className="space-y-3">
+          <CardTitle as="h2" className="text-xl! leading-tight sm:text-2xl!">
+            Las predicciones todavía no están abiertas.
+          </CardTitle>
+          <CardDescription className="mx-auto max-w-lg text-base leading-relaxed">
+            Cuando comience el plazo, podrás elegir jugadores, equipos y mánagers. Tendrás siete
+            días para guardar y cambiar tus respuestas.
+          </CardDescription>
+        </div>
+      </CardContent>
+    </Card>
+  );
 
   const sections =
     data.status === 'not-open'
@@ -304,7 +330,7 @@ export function SeasonPredictionsScreen({
     return (
       <MobileScreen labelledBy="mobile-screen-title">
         <MobileScreenHeader eyebrow={seasonName} title="Predicciones" />
-        <div className="px-4 py-6">{statusPanel}</div>
+        <div className="px-4 py-8">{data.status === 'not-open' ? closedPanel : statusPanel}</div>
         {sections}
         {league}
         {savePanel ? <div className="px-4">{savePanel}</div> : null}
@@ -319,7 +345,11 @@ export function SeasonPredictionsScreen({
             title="Predicciones de temporada"
             description="Anticipa los protagonistas, las sorpresas y las clasificaciones finales."
           />
-          {statusPanel}
+          {data.status === 'not-open' ? (
+            <div className="py-4 sm:py-10">{closedPanel}</div>
+          ) : (
+            statusPanel
+          )}
         </div>
       </PageCanvas>
       {sections}
