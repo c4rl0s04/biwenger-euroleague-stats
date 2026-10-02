@@ -22,7 +22,10 @@ export function SectionHeader({
   const [firstWord, ...remainingWords] = title.trim().split(/\s+/);
 
   return (
-    <header className={cn('flex flex-wrap items-end justify-between gap-3 pb-2', className)} {...props}>
+    <header
+      className={cn('flex flex-wrap items-end justify-between gap-3 pb-2', className)}
+      {...props}
+    >
       <div className={level === 2 ? 'space-y-2' : 'space-y-1'}>
         <Heading
           id={headingId}
@@ -50,9 +53,7 @@ export function SectionHeader({
           <p
             className={cn(
               'font-sans text-[hsl(var(--content-muted))]',
-              level === 2
-                ? 'text-base leading-relaxed'
-                : 'text-sm leading-relaxed'
+              level === 2 ? 'text-base leading-relaxed' : 'text-sm leading-relaxed'
             )}
           >
             {description}

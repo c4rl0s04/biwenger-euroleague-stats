@@ -10,6 +10,7 @@ export interface PredictionChoice {
 
 export interface SeasonPredictionOptions {
   players: PredictionChoice[];
+  teams: PredictionChoice[];
   managers: PredictionChoice[];
 }
 

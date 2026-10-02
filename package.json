@@ -38,6 +38,8 @@
     "db:season:audit": "tsx -r dotenv/config scripts/db/audit-seasons.ts",
     "db:season:fingerprint": "tsx -r dotenv/config scripts/db/fingerprint-season.ts",
     "db:season:freeze": "tsx -r dotenv/config scripts/db/season-lifecycle.ts freeze",
+    "season-predictions:open": "NODE_OPTIONS=--conditions=react-server tsx -r dotenv/config scripts/season-predictions/open-window.ts",
+    "season-predictions:test:local": "NODE_OPTIONS=--conditions=react-server tsx scripts/season-predictions/test-local.ts",
     "db:season:create-next": "tsx -r dotenv/config scripts/db/season-lifecycle.ts create-next",
     "db:production:check": "tsx scripts/db/production-readiness.ts check",
     "db:production:apply": "tsx scripts/db/production-readiness.ts apply",

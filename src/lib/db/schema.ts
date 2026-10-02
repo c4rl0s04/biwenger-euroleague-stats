@@ -189,6 +189,44 @@ export const userSeasons = pgTable(
   })
 );
 
+// Season prediction windows are opened explicitly by an operator. Snapshots keep
+// questions and candidates stable throughout the editing window and afterwards.
+export const seasonPredictionWindows = pgTable('season_prediction_windows', {
+  seasonId: text('season_id')
+    .primaryKey()
+    .references(() => seasons.id),
+  opensAt: timestamp('opens_at', { withTimezone: true }).notNull(),
+  locksAt: timestamp('locks_at', { withTimezone: true }).notNull(),
+  questionSetVersion: text('question_set_version').notNull(),
+  questions: jsonb('questions').notNull(),
+  candidates: jsonb('candidates').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const seasonPredictionSubmissions = pgTable(
+  'season_prediction_submissions',
+  {
+    seasonId: text('season_id')
+      .notNull()
+      .references(() => seasons.id),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id),
+    answers: jsonb('answers').notNull(),
+    revision: integer('revision').notNull().default(1),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.seasonId, t.userId] }),
+    memberFk: foreignKey({
+      columns: [t.seasonId, t.userId],
+      foreignColumns: [userSeasons.seasonId, userSeasons.userId],
+      name: 'season_prediction_submissions_member_fk',
+    }),
+  })
+);
+
 // 3. User Rounds Table
 export const userRounds = pgTable(
   'user_rounds',

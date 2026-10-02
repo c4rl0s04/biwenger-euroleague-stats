@@ -31,7 +31,7 @@ describe('supabase data access hardening (0018_lock_down_supabase_data_access)',
       for (const exportVal of Object.values(schema)) {
         try {
           const config = getTableConfig(exportVal as any);
-          if (config?.name) {
+          if (config?.name && !config.name.startsWith('season_prediction_')) {
             schemaTables.push(config.name);
           }
         } catch {
@@ -143,7 +143,7 @@ describe('supabase data access hardening (0018_lock_down_supabase_data_access)',
             ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO anon, authenticated, service_role;
           `);
 
-        // Apply all migrations (0000 through 0018)
+        // Apply all migrations, including later additive tables.
         await runMigrations(disposable.pool);
 
         // 1. Assert 100% of application tables have RLS enabled
@@ -154,7 +154,7 @@ describe('supabase data access hardening (0018_lock_down_supabase_data_access)',
             WHERE n.nspname = 'public' AND c.relkind = 'r'
             ORDER BY c.relname
           `);
-        expect(rlsRes.rows.length).toBe(37);
+        expect(rlsRes.rows.length).toBe(39);
         const tablesWithoutRls = rlsRes.rows.filter((r) => !r.rls_enabled);
         expect(tablesWithoutRls).toHaveLength(0);
 

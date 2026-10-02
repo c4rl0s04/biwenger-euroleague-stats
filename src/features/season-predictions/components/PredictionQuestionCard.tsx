@@ -3,6 +3,7 @@ import type { PredictionQuestion } from '../models/questions';
 import type { SeasonPredictionOptions } from '../models/options';
 import { ManagerPredictionPicker } from './ManagerPredictionPicker';
 import { PlayerPredictionPicker } from './PlayerPredictionPicker';
+import { TeamPredictionPicker } from './TeamPredictionPicker';
 
 export function PredictionQuestionCard({
   question,
@@ -10,14 +11,21 @@ export function PredictionQuestionCard({
   value,
   onChange,
   headingLevel = 3,
+  disabled = false,
 }: {
   question: PredictionQuestion;
   options: SeasonPredictionOptions;
   value: string | null;
   onChange: (id: string | null) => void;
   headingLevel?: 3 | 4;
+  disabled?: boolean;
 }) {
-  const choices = question.section === 'player' ? options.players : options.managers;
+  const choices =
+    question.section === 'player'
+      ? options.players
+      : question.section === 'team'
+        ? options.teams
+        : options.managers;
   const selected = choices.find((choice) => choice.id === value);
 
   return (
@@ -32,12 +40,18 @@ export function PredictionQuestionCard({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        {question.section === 'player' ? (
+        {disabled ? (
+          <p className="text-sm text-[hsl(var(--content-secondary))]">
+            {selected?.name ?? 'Sin respuesta'}
+          </p>
+        ) : question.section === 'player' ? (
           <PlayerPredictionPicker options={choices} value={value} onChange={onChange} />
+        ) : question.section === 'team' ? (
+          <TeamPredictionPicker options={choices} value={value} onChange={onChange} />
         ) : (
           <ManagerPredictionPicker options={choices} value={value} onChange={onChange} />
         )}
-        {selected ? (
+        {selected && !disabled ? (
           <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
             <span className="text-[hsl(var(--content-muted))]">
               Tu elección:{' '}

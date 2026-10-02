@@ -21,6 +21,7 @@ status: active
 - [Deployment and rollback](deployment-and-rollback.md) — production deployment lifecycle, post-deploy
   smoke checks, and tiered rollback procedures.
 - [Season lifecycle](season-lifecycle.md) — freeze a completed season and activate the next one.
+- [Season predictions](season-predictions.md) — deploy closed predictions and open a seven-day window.
 - [Season simulations](season-simulations.md) — calculate and publish complete-season Monte Carlo
   results.
 - [Season data audit](season-data-audit.md) — findings from the isolated season snapshot audit.
