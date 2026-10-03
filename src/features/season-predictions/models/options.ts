@@ -14,6 +14,19 @@ export interface SeasonPredictionOptions {
   managers: PredictionChoice[];
 }
 
+export function withTeamCrests(
+  options: SeasonPredictionOptions,
+  crests: ReadonlyMap<string, string>
+): SeasonPredictionOptions {
+  return {
+    ...options,
+    teams: options.teams.map((team) => ({
+      ...team,
+      image: crests.get(team.id) ?? team.image,
+    })),
+  };
+}
+
 export function mapPlayerOptions(
   players: readonly PlayerCatalogueItemViewModel[]
 ): PredictionChoice[] {

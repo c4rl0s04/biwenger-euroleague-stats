@@ -89,6 +89,12 @@ export function SeasonPredictionsScreen({
     return () => window.clearInterval(timer);
   }, [data.status, data.locksAt, data.serverNow]);
 
+  useEffect(() => {
+    if (saveState !== 'saved') return;
+    const timer = window.setTimeout(() => setSaveState('idle'), 3500);
+    return () => window.clearTimeout(timer);
+  }, [saveState]);
+
   function updateAnswer(id: PredictionQuestionId, answer: PredictionAnswer | null) {
     setAnswers((current) => {
       const next = { ...current };
@@ -166,6 +172,26 @@ export function SeasonPredictionsScreen({
       ) : null}
     </div>
   );
+  const phoneOpenPanel = (
+    <div className="rounded-[var(--radius-surface)] border border-[hsl(var(--border-default))] bg-[hsl(var(--surface-card))] p-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="text-[0.7rem] font-bold uppercase tracking-[0.14em] text-[hsl(var(--action-primary))]">
+          Plazo abierto
+        </span>
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--action-primary)/0.1)] px-2.5 py-1 text-xs font-semibold tabular-nums text-[hsl(var(--action-primary))]">
+          <Clock3 size={14} aria-hidden="true" />
+          {remaining}
+        </span>
+      </div>
+      <p className="mt-3 text-sm leading-relaxed text-[hsl(var(--content-primary))]">
+        Puedes guardar y modificar tus respuestas hasta el {data.locksAtLabel}.
+      </p>
+      <p className="mt-3 border-t border-[hsl(var(--border-default))] pt-3 text-xs leading-relaxed text-[hsl(var(--content-muted))]">
+        Las respuestas solo se guardan al pulsar «Guardar predicciones». Los demás miembros podrán
+        verlas después del cierre.
+      </p>
+    </div>
+  );
   const closedPanel = (
     <Card className="mx-auto w-full max-w-2xl p-0!">
       <CardContent className="flex flex-col items-center gap-5 px-5 py-10 text-center sm:px-10 sm:py-12">
@@ -204,8 +230,23 @@ export function SeasonPredictionsScreen({
                 headingId={`${section.id}-heading`}
                 title={section.title}
                 description={section.description}
+                action={
+                  phone && data.status === 'open' ? (
+                    <span className="rounded-full border border-[hsl(var(--border-default))] px-3 py-1 text-xs font-semibold tabular-nums text-[hsl(var(--content-secondary))]">
+                      {
+                        data.questions.filter(
+                          (question) =>
+                            question.section === section.id &&
+                            answers[question.id as PredictionQuestionId]
+                        ).length
+                      }{' '}
+                      de{' '}
+                      {data.questions.filter((question) => question.section === section.id).length}
+                    </span>
+                  ) : undefined
+                }
               />
-              <div className="grid gap-4 lg:grid-cols-2">
+              <div className={`grid lg:grid-cols-2 ${phone ? 'gap-3' : 'gap-4'}`}>
                 {data.questions
                   .filter((question) => question.section === section.id)
                   .sort((a, b) => a.order - b.order)
@@ -225,6 +266,7 @@ export function SeasonPredictionsScreen({
                             )
                           }
                           disabled={readOnly}
+                          phone={phone}
                         />
                       );
                     return (
@@ -234,6 +276,7 @@ export function SeasonPredictionsScreen({
                         options={data.options}
                         value={answer?.kind === 'single' ? answer.id : null}
                         disabled={readOnly}
+                        phone={phone}
                         onChange={(id) =>
                           updateAnswer(
                             question.id as PredictionQuestionId,
@@ -272,6 +315,44 @@ export function SeasonPredictionsScreen({
         </p>
         {saveState === 'conflict' ? (
           <Button variant="secondary" onClick={() => window.location.reload()}>
+            Recargar respuestas
+          </Button>
+        ) : null}
+      </div>
+    ) : null;
+
+  const phoneSavePanel =
+    data.status === 'open' && !readOnly ? (
+      <div
+        className={
+          dirty || saveState === 'saved'
+            ? 'fixed inset-x-0 bottom-[calc(var(--mobile-nav-height)+env(safe-area-inset-bottom,0px))] z-[70] space-y-2 border-t border-[hsl(var(--border-default))] bg-[hsl(var(--surface-app)/0.96)] px-4 py-3 shadow-lg backdrop-blur-xl landscape:static landscape:shadow-none'
+            : 'px-4 py-6'
+        }
+      >
+        {dirty ? (
+          <Button
+            className="min-h-12 w-full"
+            onClick={save}
+            disabled={saveState === 'saving' || saveState === 'conflict'}
+          >
+            {saveState === 'saving' ? 'Guardando…' : 'Guardar predicciones'}
+          </Button>
+        ) : null}
+        <p
+          role="status"
+          aria-live="polite"
+          className={`text-center text-sm ${saveState === 'error' || saveState === 'conflict' ? 'text-[hsl(var(--status-danger))]' : 'text-[hsl(var(--content-secondary))]'}`}
+        >
+          {message ||
+            (dirty
+              ? 'Hay cambios sin guardar.'
+              : revision
+                ? 'Todos los cambios están guardados.'
+                : 'Aún no has guardado respuestas.')}
+        </p>
+        {saveState === 'conflict' ? (
+          <Button variant="secondary" className="w-full" onClick={() => window.location.reload()}>
             Recargar respuestas
           </Button>
         ) : null}
@@ -328,12 +409,23 @@ export function SeasonPredictionsScreen({
 
   if (phone)
     return (
-      <MobileScreen labelledBy="mobile-screen-title">
+      <MobileScreen
+        labelledBy="mobile-screen-title"
+        className={
+          dirty ? 'pb-[calc(var(--mobile-nav-height)+env(safe-area-inset-bottom,0px)+10rem)]!' : ''
+        }
+      >
         <MobileScreenHeader eyebrow={seasonName} title="Predicciones" />
-        <div className="px-4 py-8">{data.status === 'not-open' ? closedPanel : statusPanel}</div>
+        <div className="px-4 py-8">
+          {data.status === 'not-open'
+            ? closedPanel
+            : data.status === 'open' && !readOnly
+              ? phoneOpenPanel
+              : statusPanel}
+        </div>
         {sections}
         {league}
-        {savePanel ? <div className="px-4">{savePanel}</div> : null}
+        {phoneSavePanel}
       </MobileScreen>
     );
 

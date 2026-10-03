@@ -1,8 +1,10 @@
-import { Button, Card, CardContent, CardHeader, CardTitle } from '@/components/ui/foundation';
+import { X } from 'lucide-react';
+import { Button, Card, CardContent, IconButton } from '@/components/ui/foundation';
 import type { PredictionQuestion } from '../models/questions';
 import type { SeasonPredictionOptions } from '../models/options';
 import { ManagerPredictionPicker } from './ManagerPredictionPicker';
 import { PlayerPredictionPicker } from './PlayerPredictionPicker';
+import { PredictionCardHeading } from './PredictionCardHeading';
 import { TeamPredictionPicker } from './TeamPredictionPicker';
 
 export function PredictionQuestionCard({
@@ -12,6 +14,7 @@ export function PredictionQuestionCard({
   onChange,
   headingLevel = 3,
   disabled = false,
+  phone = false,
 }: {
   question: PredictionQuestion;
   options: SeasonPredictionOptions;
@@ -19,6 +22,7 @@ export function PredictionQuestionCard({
   onChange: (id: string | null) => void;
   headingLevel?: 3 | 4;
   disabled?: boolean;
+  phone?: boolean;
 }) {
   const choices =
     question.section === 'player'
@@ -29,29 +33,45 @@ export function PredictionQuestionCard({
   const selected = choices.find((choice) => choice.id === value);
 
   return (
-    <Card variant="default" aria-labelledby={`${question.id}-title`} className="h-full">
-      <CardHeader>
-        <CardTitle
-          id={`${question.id}-title`}
-          as={headingLevel === 4 ? 'h4' : 'h3'}
-          className="text-lg!"
-        >
-          {question.prompt}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
+    <Card
+      variant="default"
+      density={phone ? 'compact' : 'comfortable'}
+      aria-labelledby={`${question.id}-title`}
+      className={`h-full ${phone && selected ? 'border-l-[3px] border-l-[hsl(var(--action-primary))]' : ''}`}
+    >
+      <PredictionCardHeading
+        question={question}
+        answered={Boolean(selected)}
+        disabled={disabled}
+        phone={phone}
+        level={headingLevel}
+      />
+      <CardContent className={phone && !disabled ? 'flex items-center gap-2' : 'space-y-3'}>
         {disabled ? (
           <p className="text-sm text-[hsl(var(--content-secondary))]">
             {selected?.name ?? 'Sin respuesta'}
           </p>
-        ) : question.section === 'player' ? (
-          <PlayerPredictionPicker options={choices} value={value} onChange={onChange} />
-        ) : question.section === 'team' ? (
-          <TeamPredictionPicker options={choices} value={value} onChange={onChange} />
         ) : (
-          <ManagerPredictionPicker options={choices} value={value} onChange={onChange} />
+          <div className="min-w-0 flex-1">
+            {question.section === 'player' ? (
+              <PlayerPredictionPicker options={choices} value={value} onChange={onChange} />
+            ) : question.section === 'team' ? (
+              <TeamPredictionPicker options={choices} value={value} onChange={onChange} />
+            ) : (
+              <ManagerPredictionPicker options={choices} value={value} onChange={onChange} />
+            )}
+          </div>
         )}
-        {selected && !disabled ? (
+        {selected && !disabled && phone ? (
+          <IconButton
+            variant="ghost"
+            aria-label={`Borrar elección: ${selected.name}`}
+            onClick={() => onChange(null)}
+          >
+            <X size={18} aria-hidden="true" />
+          </IconButton>
+        ) : null}
+        {selected && !disabled && !phone ? (
           <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
             <span className="text-[hsl(var(--content-muted))]">
               Tu elección:{' '}
