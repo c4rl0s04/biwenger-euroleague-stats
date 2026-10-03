@@ -326,7 +326,7 @@ export function SeasonPredictionsScreen({
       <div
         className={
           dirty || saveState === 'saved'
-            ? 'fixed inset-x-0 bottom-[calc(var(--mobile-nav-height)+env(safe-area-inset-bottom,0px))] z-[70] space-y-2 border-t border-[hsl(var(--border-default))] bg-[hsl(var(--surface-app)/0.96)] px-4 py-3 shadow-lg backdrop-blur-xl'
+            ? 'fixed inset-x-0 bottom-[calc(var(--mobile-nav-height)+env(safe-area-inset-bottom,0px))] z-[70] space-y-2 border-t border-[hsl(var(--border-default))] bg-[hsl(var(--surface-app)/0.96)] px-4 py-3 shadow-lg backdrop-blur-xl landscape:static landscape:shadow-none'
             : 'px-4 py-6'
         }
       >
