@@ -22,6 +22,7 @@ function RankingRow({
   choice,
   count,
   disabled,
+  showLogo,
   onMove,
   onDragStart,
 }: {
@@ -30,6 +31,7 @@ function RankingRow({
   choice: PredictionChoice;
   count: number;
   disabled: boolean;
+  showLogo: boolean;
   onMove: (from: number, to: number) => void;
   onDragStart?: (id: string) => void;
 }) {
@@ -60,6 +62,9 @@ function RankingRow({
       <span className="w-6 shrink-0 font-semibold tabular-nums text-[hsl(var(--action-primary))]">
         {position + 1}.
       </span>
+      {showLogo ? (
+        <Avatar src={choice.image} alt="" fallback={choice.name.slice(0, 1)} size="sm" />
+      ) : null}
       <span className="min-w-0 flex-1 break-words font-medium">{choice.name}</span>
       {!disabled ? (
         <span className="flex shrink-0 gap-1">
@@ -164,6 +169,7 @@ export function RankingPredictionCard({
               choice={byId.get(id)!}
               count={draft.length}
               disabled
+              showLogo={question.section === 'team'}
               onMove={move}
             />
           ))}
@@ -184,6 +190,7 @@ export function RankingPredictionCard({
               choice={byId.get(id)!}
               count={draft.length}
               disabled={false}
+              showLogo={question.section === 'team'}
               onMove={move}
               onDragStart={(itemId) => {
                 draggedId.current = itemId;

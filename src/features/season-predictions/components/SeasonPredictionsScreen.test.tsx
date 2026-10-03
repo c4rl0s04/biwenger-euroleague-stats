@@ -43,6 +43,31 @@ it('renders the same prompts with the shared phone header', () => {
   for (const question of PREDICTION_QUESTIONS) expect(html).toContain(question.prompt);
 });
 
+it('shows question progress on desktop and frozen team logos in both ranking presentations', () => {
+  const populated: SeasonPredictionsPageData = {
+    ...data,
+    options: {
+      ...data.options,
+      teams: [{ id: 't1', name: 'Equipo', image: '/team-logo.png' }],
+    },
+    submission: {
+      answers: { 'team-ranking': { kind: 'ranking', ids: ['t1'] } },
+      revision: 1,
+      updatedAt: '2026-10-02T00:00:00.000Z',
+    },
+  };
+  const desktop = renderToStaticMarkup(
+    <SeasonPredictionsScreen seasonName="2026/27" data={populated} />
+  );
+  const phone = renderToStaticMarkup(
+    <SeasonPredictionsScreen seasonName="2026/27" data={populated} phone />
+  );
+  expect(desktop).toContain('Pregunta');
+  expect(desktop).toContain('Pendiente');
+  expect(desktop).toContain('src="/team-logo.png"');
+  expect(phone).toContain('src="/team-logo.png"');
+});
+
 it('hides candidate cards and league answers before the window opens', () => {
   const html = renderToStaticMarkup(
     <SeasonPredictionsScreen
