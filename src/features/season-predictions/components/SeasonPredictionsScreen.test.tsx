@@ -43,15 +43,19 @@ it('renders the same prompts with the shared phone header', () => {
   for (const question of PREDICTION_QUESTIONS) expect(html).toContain(question.prompt);
 });
 
-it('shows question progress on desktop and frozen team logos in both ranking presentations', () => {
+it('shows progress and frozen team and manager images in ranking presentations', () => {
   const populated: SeasonPredictionsPageData = {
     ...data,
     options: {
       ...data.options,
       teams: [{ id: 't1', name: 'Equipo', image: '/team-logo.png' }],
+      managers: [{ id: 'm1', name: 'Mánager', image: '/manager-avatar.png' }],
     },
     submission: {
-      answers: { 'team-ranking': { kind: 'ranking', ids: ['t1'] } },
+      answers: {
+        'team-ranking': { kind: 'ranking', ids: ['t1'] },
+        'manager-ranking': { kind: 'ranking', ids: ['m1'] },
+      },
       revision: 1,
       updatedAt: '2026-10-02T00:00:00.000Z',
     },
@@ -66,6 +70,8 @@ it('shows question progress on desktop and frozen team logos in both ranking pre
   expect(desktop).toContain('Pendiente');
   expect(desktop).toContain('src="/team-logo.png"');
   expect(phone).toContain('src="/team-logo.png"');
+  expect(desktop).toContain('src="/manager-avatar.png"');
+  expect(phone).toContain('src="/manager-avatar.png"');
 });
 
 it('hides candidate cards and league answers before the window opens', () => {
