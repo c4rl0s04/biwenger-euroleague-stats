@@ -8,13 +8,16 @@ import {
   type PredictionAnswers,
   type PredictionQuestion,
 } from '../../models/questions';
-import type { SeasonPredictionOptions } from '../../models/options';
+import { withTeamCrests, type SeasonPredictionOptions } from '../../models/options';
 import {
   PredictionError,
   validatePredictionAnswers,
   type SeasonPredictionsPageData,
 } from '../../models/submission';
-import { getSeasonPredictionCandidates } from '../queries/candidates.query';
+import {
+  getSeasonPredictionCandidates,
+  getSeasonPredictionTeamCrests,
+} from '../queries/candidates.query';
 
 const database = pool as Pool;
 
@@ -82,6 +85,10 @@ export async function readSeasonPredictions(
     };
   }
   const locked = now >= window.locks_at;
+  const teamCrests = await getSeasonPredictionTeamCrests(
+    seasonId,
+    window.candidates.teams.map((team) => team.id)
+  );
   const submissionResult = await database.query<{
     answers: PredictionAnswers;
     revision: number;
@@ -124,7 +131,7 @@ export async function readSeasonPredictions(
     serverNow: now.toISOString(),
     questionSetVersion: window.question_set_version,
     questions: window.questions,
-    options: window.candidates,
+    options: withTeamCrests(window.candidates, teamCrests),
     submission: own
       ? { answers: own.answers, revision: own.revision, updatedAt: own.updated_at.toISOString() }
       : null,

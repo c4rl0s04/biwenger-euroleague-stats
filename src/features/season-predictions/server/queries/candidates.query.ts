@@ -32,8 +32,12 @@ export async function getSeasonPredictionCandidates(
     [seasonId]
   );
   const teams = await connection.query<{ id: number; name: string | null; image: string | null }>(
-    `SELECT t.id, COALESCE(ts.name, t.name) AS name, COALESCE(ts.img, t.img) AS image
-       FROM team_seasons ts JOIN teams t ON t.id = ts.team_id WHERE ts.season_id = $1`,
+    `SELECT t.id, COALESCE(ts.name, t.name) AS name,
+            COALESCE(NULLIF(otm.crest_url, ''), NULLIF(t.img, ''), NULLIF(ts.img, '')) AS image
+       FROM team_seasons ts JOIN teams t ON t.id = ts.team_id
+       LEFT JOIN official_team_mappings otm ON otm.season_id = ts.season_id
+         AND otm.team_id = t.id AND otm.provider = 'euroleague_advanced'
+       WHERE ts.season_id = $1`,
     [seasonId]
   );
   const managers = await connection.query<{ id: string; name: string; image: string | null }>(
@@ -69,4 +73,20 @@ export async function getSeasonPredictionCandidates(
       }))
     ),
   };
+}
+
+/** Corrects display URLs in existing frozen windows without changing eligible IDs or saved answers. */
+export async function getSeasonPredictionTeamCrests(
+  seasonId: string,
+  teamIds: readonly string[],
+  connection: Pool | PoolClient = database
+): Promise<Map<string, string>> {
+  if (!teamIds.length) return new Map();
+  const result = await connection.query<{ id: string; image: string }>(
+    `SELECT team_id::text AS id, crest_url AS image FROM official_team_mappings
+       WHERE season_id = $1 AND provider = 'euroleague_advanced'
+         AND team_id = ANY($2::integer[]) AND NULLIF(crest_url, '') IS NOT NULL`,
+    [seasonId, teamIds.map(Number)]
+  );
+  return new Map(result.rows.map((row) => [row.id, row.image]));
 }
