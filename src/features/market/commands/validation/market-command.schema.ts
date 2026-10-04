@@ -5,6 +5,7 @@ import type {
   WithdrawPlayerInput,
   AcceptOfferInput,
   RejectOfferInput,
+  PlaceBidInput,
 } from '../models/market-command.models';
 
 export class MarketCommandValidationError extends Error {
@@ -61,6 +62,22 @@ export const rejectOfferInputSchema = z.object({
     .int('ID de oferta debe ser un entero')
     .positive('ID de oferta no proporcionado'),
 });
+
+export const placeBidInputSchema = z.object({
+  playerId: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
+  amount: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
+  expectedListing: z.object({
+    sellerId: z.number().int().positive().max(Number.MAX_SAFE_INTEGER).nullable(),
+    price: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER),
+    closesAt: z.string().refine((value) => !Number.isNaN(Date.parse(value))),
+  }),
+});
+
+export function validatePlaceBidInput(input: unknown): PlaceBidInput {
+  const result = placeBidInputSchema.safeParse(input);
+  if (!result.success) throw new MarketCommandValidationError('Parámetros de puja no válidos');
+  return result.data;
+}
 
 export function validateSellPlayerInput(input: unknown): SellPlayerInput {
   if (!input || typeof input !== 'object') {
