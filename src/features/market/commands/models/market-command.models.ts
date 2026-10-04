@@ -51,3 +51,20 @@ export interface RejectOfferResult {
   offerId: number;
   message?: string;
 }
+
+export interface PlaceBidInput {
+  playerId: number;
+  amount: number;
+  expectedListing: {
+    sellerId: number | null;
+    price: number;
+    closesAt: string;
+  };
+}
+
+export interface PlaceBidResult {
+  status: 'completed';
+  playerId: number;
+  amount: number;
+  offerId: number | null;
+}

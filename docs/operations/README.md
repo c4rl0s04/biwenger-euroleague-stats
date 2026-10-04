@@ -14,6 +14,7 @@ status: active
 - [Docker](docker.md) — start and inspect the provided three-service environment.
 - [Data sync](data-sync.md) — preflight and execute full, daily, live, or targeted ingestion.
 - [Manager cash report](manager-cash.md) — run the cash ledger on demand from GitHub Actions.
+- [Personal manual bidding](personal-bidding.md) — operate the private live-market page and send immediate bids.
 - [EuroLeague official website sync](euroleague-website-sync.md) — scrape and synchronize official photoshoot portraits, codes, and bio data.
 - [Database safety](database-safety.md) — backups, audits, migrations, and price-cache repair.
 - [Credential encryption](credential-encryption.md) — manager credential deployment, migration,
