@@ -1,4 +1,16 @@
 import 'server-only';
+export { personalBidErrorResponse, readPersonalJson } from './personal/server/http';
+export {
+  assertPersonalBidAccess,
+  readPersonalBidWorkspace,
+  readPersonalBidCount,
+  placePersonalBidNow,
+  schedulePersonalBid,
+  cancelScheduledPersonalBid,
+  verifyPersonalBidWebhook,
+  executeScheduledPersonalBid,
+  PERSONAL_BIDS_POLICY,
+} from './personal/server/services/personal-bids.service';
 export {
   getHighestTransferRecord,
   getBiggestGainRecord,
@@ -87,8 +99,17 @@ export { parseMarketTrendDays } from './trends/validation/market-trends';
 export {
   marketCommandService,
   createMarketCommandService,
+  MarketBidConflictError,
+  MarketBidOutcomeUnknownError,
   type MarketCommandService,
 } from './commands/server/services/market-command.service';
+export {
+  getLiveBidMarket,
+  getLivePlayerBidCount,
+  LiveBidCountUnavailableError,
+  LIVE_BIDDING_POLICY,
+} from './live/server/services/live-bidding.service';
+export { LiveMarketDataError } from './live/server/mappers/live-bidding.mapper';
 export {
   marketCommandRepository,
   type MarketCommandRepository,
@@ -100,6 +121,7 @@ export {
   validateWithdrawPlayerInput,
   validateAcceptOfferInput,
   validateRejectOfferInput,
+  validatePlaceBidInput,
 } from './commands/validation/market-command.schema';
 export type {
   SellPlayerInput,
@@ -112,4 +134,6 @@ export type {
   AcceptOfferResult,
   RejectOfferInput,
   RejectOfferResult,
+  PlaceBidInput,
+  PlaceBidResult,
 } from './commands/models/market-command.models';

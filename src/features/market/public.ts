@@ -77,7 +77,21 @@ export type {
   AcceptOfferResult,
   RejectOfferInput,
   RejectOfferResult,
+  PlaceBidInput,
+  PlaceBidResult,
 } from './commands/models/market-command.models';
+export type {
+  LiveBidMarket,
+  LiveMarketListing,
+  LiveMarketOffer,
+  LiveBidCount,
+} from './live/models/live-bidding';
+export type {
+  PersonalBidRule,
+  PersonalBidWorkspace,
+  PersonalBidStatus,
+} from './personal/models/personal-bids';
+export { PersonalBidsScreen } from './personal/components/PersonalBidsScreen';
 export {
   MarketCommandValidationError,
   sellPlayerInputSchema,
@@ -90,4 +104,5 @@ export {
   validateWithdrawPlayerInput,
   validateAcceptOfferInput,
   validateRejectOfferInput,
+  validatePlaceBidInput,
 } from './commands/validation/market-command.schema';
