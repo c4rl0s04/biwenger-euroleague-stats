@@ -99,6 +99,15 @@ export {
 } from './live/server/services/live-bidding.service';
 export { LiveMarketDataError } from './live/server/mappers/live-bidding.mapper';
 export {
+  assertPersonalBidAccess,
+  readPersonalBidWorkspace,
+  readPersonalBidCount,
+  placePersonalBidNow,
+  PersonalBidError,
+  PERSONAL_BIDS_POLICY,
+} from './personal/server/services/personal-bids.service';
+export { readPersonalJson, personalBidErrorResponse } from './personal/server/http';
+export {
   marketCommandRepository,
   type MarketCommandRepository,
 } from './commands/server/repositories/market-command.repository';
