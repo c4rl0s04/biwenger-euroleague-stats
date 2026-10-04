@@ -1921,8 +1921,8 @@
           "method": "btree",
           "with": {}
         },
-        "unique_personal_bid_pending_listing": {
-          "name": "unique_personal_bid_pending_listing",
+        "unique_personal_bid_active_listing": {
+          "name": "unique_personal_bid_active_listing",
           "columns": [
             {
               "expression": "user_id",
@@ -1950,7 +1950,7 @@
             }
           ],
           "isUnique": true,
-          "where": "status = 'pending'",
+          "where": "status IN ('pending', 'running', 'submitted', 'uncertain')",
           "concurrently": false,
           "method": "btree",
           "with": {}

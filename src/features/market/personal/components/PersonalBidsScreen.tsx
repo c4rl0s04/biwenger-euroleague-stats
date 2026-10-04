@@ -67,13 +67,16 @@ export function PersonalBidsScreen({ initialData }: { initialData: PersonalBidWo
   const busyRef = useRef(busy);
 
   const selected = data.market.listings.find((item) => item.playerId === selectedId) ?? null;
-  const pending =
+  const activeRule =
     selected &&
     data.rules.find(
       (rule) =>
         rule.playerId === selected.playerId &&
         rule.closesAt === selected.closesAt &&
-        rule.status === 'pending'
+        (rule.status === 'pending' ||
+          rule.status === 'running' ||
+          rule.status === 'submitted' ||
+          rule.status === 'uncertain')
     );
   const filtered = useMemo(
     () =>
@@ -205,7 +208,8 @@ export function PersonalBidsScreen({ initialData }: { initialData: PersonalBidWo
   function prepare(kind: 'now' | 'schedule') {
     setError('');
     setNotice('');
-    if (!selected || selected.isOwnListing || selected.ownWaitingOffers.length || pending) return;
+    if (!selected || selected.isOwnListing || selected.ownWaitingOffers.length || activeRule)
+      return;
     if (kind === 'now') {
       const value = validateAmount(amount);
       if (value === null) return;
@@ -455,25 +459,27 @@ export function PersonalBidsScreen({ initialData }: { initialData: PersonalBidWo
                       : 'Tu puja actual prevalece. No se enviará otra.'}
                   </p>
                 )}
-                {pending && (
+                {activeRule && (
                   <div className="rounded-xl border border-[hsl(var(--action-primary)/0.4)] p-3 text-sm">
-                    <strong>Puja programada</strong>
+                    <strong>{statusLabel[activeRule.status]}</strong>
                     <p className={muted}>
-                      {date(pending.executeAt)} · {euro(pending.amountWithoutBids)} /{' '}
-                      {euro(pending.amountWithBids)}
+                      {date(activeRule.executeAt)} · {euro(activeRule.amountWithoutBids)} /{' '}
+                      {euro(activeRule.amountWithBids)}
                     </p>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      className="mt-3"
-                      disabled={busy}
-                      onClick={() => cancel(pending.id)}
-                    >
-                      Cancelar programación
-                    </Button>
+                    {activeRule.status === 'pending' && (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="mt-3"
+                        disabled={busy}
+                        onClick={() => cancel(activeRule.id)}
+                      >
+                        Cancelar programación
+                      </Button>
+                    )}
                   </div>
                 )}
-                {!selected.isOwnListing && !selected.ownWaitingOffers.length && !pending && (
+                {!selected.isOwnListing && !selected.ownWaitingOffers.length && !activeRule && (
                   <>
                     <div className="space-y-3 border-t border-[hsl(var(--border-default))] pt-4">
                       <h3 className="font-semibold">Pujar ahora</h3>

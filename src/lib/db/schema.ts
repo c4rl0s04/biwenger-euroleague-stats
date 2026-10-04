@@ -254,9 +254,9 @@ export const personalBidRules = pgTable(
   },
   (t) => ({
     userStatusIdx: index('idx_personal_bid_rules_user_status').on(t.userId, t.status),
-    onePendingListing: uniqueIndex('unique_personal_bid_pending_listing')
+    oneActiveListing: uniqueIndex('unique_personal_bid_active_listing')
       .on(t.userId, t.leagueId, t.playerId, t.closesAt)
-      .where(sql`status = 'pending'`),
+      .where(sql`status IN ('pending', 'running', 'submitted', 'uncertain')`),
   })
 );
 

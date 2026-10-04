@@ -39,6 +39,8 @@ The database atomically moves a pending rule to running before provider contact.
 QStash delivery finds no pending rule and cannot send a duplicate. A `running` rule that
 remains after an interruption may have an unknown provider outcome and must be checked in
 Biwenger before any manual retry. An ambiguous network outcome is marked `uncertain`.
+The database also prevents another rule for the same listing while a rule is pending,
+running, submitted, or uncertain.
 Cancellation updates the database; a later QStash delivery is harmless. QStash message
 cancellation is not needed for correctness.
 

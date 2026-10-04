@@ -130,6 +130,24 @@ describe('personal bid execution', () => {
 });
 
 describe('personal bid scheduling', () => {
+  it('reports an existing active instruction from a wrapped database conflict', async () => {
+    vi.stubEnv('QSTASH_TOKEN', 'test-token');
+    vi.stubEnv('QSTASH_CURRENT_SIGNING_KEY', 'test-current');
+    vi.stubEnv('QSTASH_NEXT_SIGNING_KEY', 'test-next');
+    vi.stubEnv('PERSONAL_BID_CALLBACK_URL', 'https://example.com/api/personal/bids/execute');
+    mocks.insert.mockRejectedValue({ cause: { code: '23505' } });
+    await expect(
+      schedulePersonalBid('7', {
+        playerId: 21,
+        expectedListing: { sellerId: 5, price: 100, closesAt },
+        amountWithoutBids: 110,
+        amountWithBids: 160,
+        minutesBeforeClose: 5,
+      })
+    ).rejects.toMatchObject({ code: 'already_scheduled', status: 409 });
+    expect(mocks.publish).not.toHaveBeenCalled();
+  });
+
   it('publishes a one-shot message containing only the rule ID', async () => {
     vi.stubEnv('QSTASH_TOKEN', 'test-token');
     vi.stubEnv('QSTASH_CURRENT_SIGNING_KEY', 'test-current');

@@ -20,7 +20,7 @@ CREATE TABLE "personal_bid_rules" (
 --> statement-breakpoint
 ALTER TABLE "personal_bid_rules" ADD CONSTRAINT "personal_bid_rules_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "idx_personal_bid_rules_user_status" ON "personal_bid_rules" USING btree ("user_id","status");--> statement-breakpoint
-CREATE UNIQUE INDEX "unique_personal_bid_pending_listing" ON "personal_bid_rules" USING btree ("user_id","league_id","player_id","closes_at") WHERE status = 'pending';--> statement-breakpoint
+CREATE UNIQUE INDEX "unique_personal_bid_active_listing" ON "personal_bid_rules" USING btree ("user_id","league_id","player_id","closes_at") WHERE status IN ('pending', 'running', 'submitted', 'uncertain');--> statement-breakpoint
 ALTER TABLE "personal_bid_rules" ADD CONSTRAINT "personal_bid_rules_status_check" CHECK ("status" IN ('pending', 'running', 'submitted', 'skipped', 'uncertain', 'failed', 'cancelled'));
 --> statement-breakpoint
 ALTER TABLE "personal_bid_rules" ADD CONSTRAINT "personal_bid_rules_amounts_check" CHECK ("amount_without_bids" > 0 AND "amount_with_bids" > 0 AND "listing_price" >= 0);

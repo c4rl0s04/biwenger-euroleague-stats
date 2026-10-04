@@ -73,6 +73,12 @@ function parse<T>(schema: z.ZodType<T>, value: unknown): T {
   return result.data;
 }
 
+function isUniqueViolation(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false;
+  if ('code' in error && error.code === '23505') return true;
+  return 'cause' in error && isUniqueViolation(error.cause);
+}
+
 function requireMatchingListing(
   listings: LiveMarketListing[],
   playerId: number,
@@ -195,10 +201,10 @@ export async function schedulePersonalBid(userId: string, raw: unknown) {
       amountWithBids: input.amountWithBids,
     });
   } catch (error) {
-    if (typeof error === 'object' && error !== null && 'code' in error && error.code === '23505') {
+    if (isUniqueViolation(error)) {
       throw new PersonalBidError(
         'already_scheduled',
-        'Ya hay una puja programada para este anuncio.',
+        'Ya hay una puja activa para este anuncio.',
         409
       );
     }
