@@ -28,21 +28,24 @@ scripts load dotenv before importing shared configuration. Do not commit real va
 
 ## Biwenger and season
 
-| Variable                            | Purpose                                                                                               |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `BIWENGER_TOKEN`                    | Server-side token used by background ingestion.                                                       |
-| `BIWENGER_LEAGUE_ID`                | League bound to the selected season. Must be numeric for sync.                                        |
-| `BIWENGER_USER_ID`                  | Provider user identity used by ingestion. Must be numeric for sync.                                   |
-| `BIWENGER_API_VERSION_FALLBACK`     | Emergency version when `/account` auto-detection fails.                                               |
-| `BIWENGER_CREDENTIAL_KEYS`          | JSON array of manager-credential key objects: `[{"id":"...","key":"<32-byte base64>"}]`. Server-only. |
-| `BIWENGER_CREDENTIAL_ACTIVE_KEY_ID` | Key ID used for new manager-credential writes. Must exist exactly once in the key array.              |
-| `SEASON_ID`                         | Canonical `YYYY-YY` season identifier. Required for mutating sync.                                    |
-| `SEASON_NAME`                       | Human-readable season name.                                                                           |
-| `EUROLEAGUE_SEASON_CODE`            | Official provider code in `EYYYY` form matching the season start year.                                |
-| `EUROLEAGUE_ADVANCED_API_URL`       | Optional Advanced API base URL override.                                                              |
-| `EUROLEAGUE_ADVANCED_API_TOKEN`     | Optional bearer token; free endpoints do not require one.                                             |
-| `LEAGUE_START_DATE`                 | Season start date in `YYYY-MM-DD` form.                                                               |
-| `SEASON_AWARE_READS_CONFIRMED`      | Production operator assertion that reads isolate the activated season.                                |
+| Variable                                                | Purpose                                                                                               |
+| ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `BIWENGER_TOKEN`                                        | Server-side token used by background ingestion.                                                       |
+| `BIWENGER_LEAGUE_ID`                                    | League bound to the selected season. Must be numeric for sync.                                        |
+| `BIWENGER_USER_ID`                                      | Provider user identity used by ingestion. Must be numeric for sync.                                   |
+| `BIWENGER_API_VERSION_FALLBACK`                         | Emergency version when `/account` auto-detection fails.                                               |
+| `BIWENGER_CREDENTIAL_KEYS`                              | JSON array of manager-credential key objects: `[{"id":"...","key":"<32-byte base64>"}]`. Server-only. |
+| `BIWENGER_CREDENTIAL_ACTIVE_KEY_ID`                     | Key ID used for new manager-credential writes. Must exist exactly once in the key array.              |
+| `QSTASH_TOKEN`                                          | Server-only token for one-shot personal bid delivery.                                                 |
+| `QSTASH_CURRENT_SIGNING_KEY`, `QSTASH_NEXT_SIGNING_KEY` | Server-only keys used to verify QStash callbacks.                                                     |
+| `PERSONAL_BID_CALLBACK_URL`                             | Exact deployed HTTPS URL ending in `/api/personal/bids/execute`.                                      |
+| `SEASON_ID`                                             | Canonical `YYYY-YY` season identifier. Required for mutating sync.                                    |
+| `SEASON_NAME`                                           | Human-readable season name.                                                                           |
+| `EUROLEAGUE_SEASON_CODE`                                | Official provider code in `EYYYY` form matching the season start year.                                |
+| `EUROLEAGUE_ADVANCED_API_URL`                           | Optional Advanced API base URL override.                                                              |
+| `EUROLEAGUE_ADVANCED_API_TOKEN`                         | Optional bearer token; free endpoints do not require one.                                             |
+| `LEAGUE_START_DATE`                                     | Season start date in `YYYY-MM-DD` form.                                                               |
+| `SEASON_AWARE_READS_CONFIRMED`                          | Production operator assertion that reads isolate the activated season.                                |
 
 Season lifecycle scripts additionally accept `NEXT_SEASON_ID`, `NEXT_SEASON_NAME`,
 `SEASON_END_DATE`, and `SEASON_NOTES` for the record they create or close.

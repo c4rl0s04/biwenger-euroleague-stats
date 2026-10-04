@@ -86,6 +86,12 @@ export type {
   LiveMarketOffer,
   LiveBidCount,
 } from './live/models/live-bidding';
+export type {
+  PersonalBidRule,
+  PersonalBidWorkspace,
+  PersonalBidStatus,
+} from './personal/models/personal-bids';
+export { PersonalBidsScreen } from './personal/components/PersonalBidsScreen';
 export {
   MarketCommandValidationError,
   sellPlayerInputSchema,

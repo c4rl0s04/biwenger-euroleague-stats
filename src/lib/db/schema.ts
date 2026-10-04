@@ -227,6 +227,39 @@ export const seasonPredictionSubmissions = pgTable(
   })
 );
 
+// Personal, one-shot market instructions. A claimed rule is never automatically retried:
+// an interrupted provider POST has an unknowable outcome.
+export const personalBidRules = pgTable(
+  'personal_bid_rules',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    leagueId: integer('league_id').notNull(),
+    playerId: integer('player_id').notNull(),
+    playerName: text('player_name').notNull(),
+    sellerId: integer('seller_id'),
+    listingPrice: integer('listing_price').notNull(),
+    closesAt: timestamp('closes_at', { withTimezone: true }).notNull(),
+    executeAt: timestamp('execute_at', { withTimezone: true }).notNull(),
+    amountWithoutBids: integer('amount_without_bids').notNull(),
+    amountWithBids: integer('amount_with_bids').notNull(),
+    status: text('status').notNull().default('pending'),
+    queueMessageId: text('queue_message_id'),
+    resultCode: text('result_code'),
+    submittedAmount: integer('submitted_amount'),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    userStatusIdx: index('idx_personal_bid_rules_user_status').on(t.userId, t.status),
+    onePendingListing: uniqueIndex('unique_personal_bid_pending_listing')
+      .on(t.userId, t.leagueId, t.playerId, t.closesAt)
+      .where(sql`status = 'pending'`),
+  })
+);
+
 // 3. User Rounds Table
 export const userRounds = pgTable(
   'user_rounds',
