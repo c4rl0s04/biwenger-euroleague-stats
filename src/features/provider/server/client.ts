@@ -66,18 +66,22 @@ export class BiwengerProviderClient {
   /**
    * Discovers and caches the Biwenger API version from /account.
    */
-  async ensureApiVersion(): Promise<string | null> {
+  async ensureApiVersion(context?: BiwengerRequestContext): Promise<string | null> {
     if (this.cachedVersion) return this.cachedVersion;
 
     try {
-      const res = await this.executeFetch('/account', {
-        method: 'GET',
-        skipVersionCheck: true,
-        delayMs: 0,
-      });
+      const res = await this.executeFetch(
+        '/account',
+        { method: 'GET', skipVersionCheck: true, delayMs: 0 },
+        context
+      );
 
-      if (res && typeof res === 'object' && 'version' in res && (res as any).version) {
-        this.cachedVersion = String((res as any).version);
+      const version = res?.data?.version ?? res?.version;
+      if (
+        (typeof version === 'string' || typeof version === 'number') &&
+        /^\d+$/.test(String(version))
+      ) {
+        this.cachedVersion = String(version);
         return this.cachedVersion;
       }
 
@@ -141,7 +145,7 @@ export class BiwengerProviderClient {
 
     let finalEndpoint = endpoint;
     if (!options.skipVersionCheck && endpoint !== '/account') {
-      const v = await this.ensureApiVersion();
+      const v = await this.ensureApiVersion(context);
       if (v) {
         const separator = finalEndpoint.includes('?') ? '&' : '?';
         finalEndpoint = `${finalEndpoint}${separator}v=${v}`;
