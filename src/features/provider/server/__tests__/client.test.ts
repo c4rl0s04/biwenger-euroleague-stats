@@ -66,6 +66,38 @@ describe('BiwengerProviderClient', () => {
       expect(headers['X-User']).toBe('200');
     });
 
+    it('discovers nested version using the personal request context', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify({ status: 200, data: { version: 631 } }),
+      });
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify({ status: 200, data: [] }),
+      });
+
+      const client = createClient();
+      await client.query(
+        '/market',
+        { delayMs: 0 },
+        {
+          token: 'personal-token',
+          leagueId: '300',
+          userId: '400',
+        }
+      );
+
+      expect(fetchMock.mock.calls[0][1].headers).toMatchObject({
+        Authorization: 'Bearer personal-token',
+        'X-League': '300',
+        'X-User': '400',
+      });
+      expect(fetchMock.mock.calls[1][0]).toBe('https://biwenger.as.com/api/v2/market?v=631');
+      expect(fetchMock.mock.calls[1][1].headers.Authorization).toBe('Bearer personal-token');
+    });
+
     it('retries on HTTP 429 up to maxRetries for read queries', async () => {
       const client = createClient({
         versionFallback: 'fallback-v1',
