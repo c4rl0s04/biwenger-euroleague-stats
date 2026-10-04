@@ -20,8 +20,11 @@ player is selected and only when the league permits a free Premium count.
 1. Apply migration `0021_natural_secret_warriors` following the [database safety](database-safety.md)
    backup and audit process. The table stores rule amounts and outcomes, never provider credentials.
 2. Set `QSTASH_TOKEN`, `QSTASH_CURRENT_SIGNING_KEY`, `QSTASH_NEXT_SIGNING_KEY`, and
-   `PERSONAL_BID_CALLBACK_URL` in the deployed server environment. The callback must be the
-   exact public HTTPS URL ending in `/api/personal/bids/execute`.
+   `PERSONAL_BID_CALLBACK_URL` in the Vercel Production environment. For the current production
+   domain, set the callback to
+   `https://advanced-euroleague-biwenger-stats.vercel.app/api/personal/bids/execute`.
+   The production environment also needs the existing Biwenger credential keyring and the
+   manager's linked encrypted credential. Do not copy key material into this guide or a PR.
 3. Deploy the application. Verify the private page loads as the configured manager and is
    inaccessible to a different account. Verify the QStash callback rejects an unsigned POST.
 4. Create a low-risk scheduled rule from the private page. Confirm it appears as pending,
