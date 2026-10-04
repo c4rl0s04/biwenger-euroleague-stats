@@ -13,6 +13,7 @@ import type {
   WithdrawPlayerResult,
   AcceptOfferResult,
   RejectOfferResult,
+  PlaceBidResult,
 } from '../../models/market-command.models';
 import {
   validateSellPlayerInput,
@@ -20,8 +21,10 @@ import {
   validateWithdrawPlayerInput,
   validateAcceptOfferInput,
   validateRejectOfferInput,
+  validatePlaceBidInput,
   MarketCommandValidationError,
 } from '../../validation/market-command.schema';
+import { readLiveBidMarket } from '../../../live/server/services/live-bidding.service';
 import {
   marketCommandRepository,
   type MarketCommandRepository,
@@ -39,7 +42,31 @@ function sanitizeErrorMessage(error: unknown, fallback: string): string {
   return fallback;
 }
 
+export class MarketBidConflictError extends Error {
+  constructor(
+    readonly code:
+      | 'listing_changed'
+      | 'own_listing'
+      | 'existing_offer'
+      | 'listing_closed'
+      | 'amount_out_of_range'
+  ) {
+    super(code);
+    this.name = 'MarketBidConflictError';
+  }
+}
+
+export class MarketBidOutcomeUnknownError extends Error {
+  constructor() {
+    super(
+      'No se pudo confirmar si Biwenger recibió la puja. Comprueba tu cuenta antes de repetirla.'
+    );
+    this.name = 'MarketBidOutcomeUnknownError';
+  }
+}
+
 export interface MarketCommandService {
+  placeBid(userId: string, input: unknown): Promise<PlaceBidResult>;
   sellPlayer(userId: string, input: unknown): Promise<SellPlayerResult>;
   sellAllSquad(userId: string, input: unknown): Promise<SellAllResult>;
   withdrawPlayer(userId: string, input: unknown): Promise<WithdrawPlayerResult>;
@@ -51,6 +78,63 @@ export function createMarketCommandService(
   repository: MarketCommandRepository = marketCommandRepository
 ): MarketCommandService {
   return {
+    async placeBid(userId: string, input: unknown): Promise<PlaceBidResult> {
+      if (!userId) throw new MarketCommandValidationError('Se requiere un usuario autenticado');
+      const validated = validatePlaceBidInput(input);
+      const result = await executeUserProviderCommand(
+        userId,
+        'market.bid.place',
+        async (client, context) => {
+          const { market, providerContext } = await readLiveBidMarket(client, context, userId);
+          const matches = market.listings.filter((item) => item.playerId === validated.playerId);
+          if (matches.length !== 1) throw new MarketBidConflictError('listing_changed');
+          const listing = matches[0];
+          if (
+            listing.sellerId !== validated.expectedListing.sellerId ||
+            listing.price !== validated.expectedListing.price ||
+            listing.closesAt !== validated.expectedListing.closesAt
+          ) {
+            throw new MarketBidConflictError('listing_changed');
+          }
+          if (listing.isOwnListing) throw new MarketBidConflictError('own_listing');
+          if (listing.ownWaitingOffers.length) throw new MarketBidConflictError('existing_offer');
+          if (Date.parse(listing.closesAt) <= Date.now()) {
+            throw new MarketBidConflictError('listing_closed');
+          }
+          if (validated.amount < listing.price || validated.amount > market.maximumBid) {
+            throw new MarketBidConflictError('amount_out_of_range');
+          }
+
+          try {
+            return await client.command(
+              '/offers',
+              {
+                method: 'POST',
+                body: {
+                  to: listing.sellerId,
+                  type: 'purchase',
+                  amount: validated.amount,
+                  requestedPlayers: [listing.playerId],
+                },
+                retries: 0,
+              },
+              providerContext
+            );
+          } catch (error) {
+            if (error instanceof BiwengerNetworkError) throw new MarketBidOutcomeUnknownError();
+            throw error;
+          }
+        }
+      );
+      const rawId = (result.raw as { data?: { id?: unknown } } | undefined)?.data?.id;
+      return {
+        status: 'completed',
+        playerId: validated.playerId,
+        amount: validated.amount,
+        offerId:
+          typeof rawId === 'number' && Number.isSafeInteger(rawId) && rawId > 0 ? rawId : null,
+      };
+    },
     /**
      * Lists a player on the Biwenger market or executes an immediate sale.
      * Enforces fail-closed provider boundaries and updates local ownership on immediate sales.
