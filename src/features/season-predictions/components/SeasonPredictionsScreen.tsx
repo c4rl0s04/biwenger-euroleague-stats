@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Clock3 } from 'lucide-react';
 import { MobileScreen, MobileScreenHeader } from '@/components/mobile/MobileScreen';
 import {
@@ -16,11 +17,9 @@ import {
 } from '@/components/ui/foundation';
 import type { PredictionChoice, SeasonPredictionOptions } from '../models/options';
 import {
-  PREDICTION_SECTIONS,
   type PredictionAnswer,
   type PredictionAnswers,
   type PredictionQuestion,
-  type PredictionQuestionId,
 } from '../models/questions';
 import type { SeasonPredictionsPageData } from '../models/submission';
 import { PredictionQuestionCard } from './PredictionQuestionCard';
@@ -61,6 +60,7 @@ export function SeasonPredictionsScreen({
   data: SeasonPredictionsPageData;
   phone?: boolean;
 }) {
+  const router = useRouter();
   const [answers, setAnswers] = useState<PredictionAnswers>(data.submission?.answers ?? {});
   const [savedAnswers, setSavedAnswers] = useState<PredictionAnswers>(
     data.submission?.answers ?? {}
@@ -95,7 +95,11 @@ export function SeasonPredictionsScreen({
     return () => window.clearTimeout(timer);
   }, [saveState]);
 
-  function updateAnswer(id: PredictionQuestionId, answer: PredictionAnswer | null) {
+  useEffect(() => {
+    if (data.status === 'open' && (secondsLeft === 0 || serverLocked)) router.refresh();
+  }, [data.status, secondsLeft, serverLocked, router]);
+
+  function updateAnswer(id: string, answer: PredictionAnswer | null) {
     setAnswers((current) => {
       const next = { ...current };
       if (answer) next[id] = answer;
@@ -217,7 +221,7 @@ export function SeasonPredictionsScreen({
   const sections =
     data.status === 'not-open'
       ? null
-      : PREDICTION_SECTIONS.map((section, index) => (
+      : data.sections.map((section, index) => (
           <PageSection
             key={section.id}
             id={section.id}
@@ -235,9 +239,7 @@ export function SeasonPredictionsScreen({
                     <span className="rounded-full border border-[hsl(var(--border-default))] px-3 py-1 text-xs font-semibold tabular-nums text-[hsl(var(--content-secondary))]">
                       {
                         data.questions.filter(
-                          (question) =>
-                            question.section === section.id &&
-                            answers[question.id as PredictionQuestionId]
+                          (question) => question.section === section.id && answers[question.id]
                         ).length
                       }{' '}
                       de{' '}
@@ -251,7 +253,7 @@ export function SeasonPredictionsScreen({
                   .filter((question) => question.section === section.id)
                   .sort((a, b) => a.order - b.order)
                   .map((question) => {
-                    const answer = answers[question.id as PredictionQuestionId];
+                    const answer = answers[question.id];
                     if (question.kind === 'ranking')
                       return (
                         <RankingPredictionCard
@@ -260,10 +262,7 @@ export function SeasonPredictionsScreen({
                           options={choicesFor(question, data.options)}
                           value={answer?.kind === 'ranking' ? answer.ids : null}
                           onChange={(ids) =>
-                            updateAnswer(
-                              question.id as PredictionQuestionId,
-                              ids ? { kind: 'ranking', ids } : null
-                            )
+                            updateAnswer(question.id, ids ? { kind: 'ranking', ids } : null)
                           }
                           disabled={readOnly}
                           phone={phone}
@@ -278,10 +277,7 @@ export function SeasonPredictionsScreen({
                         disabled={readOnly}
                         phone={phone}
                         onChange={(id) =>
-                          updateAnswer(
-                            question.id as PredictionQuestionId,
-                            id ? { kind: 'single', id } : null
-                          )
+                          updateAnswer(question.id, id ? { kind: 'single', id } : null)
                         }
                       />
                     );
@@ -327,7 +323,7 @@ export function SeasonPredictionsScreen({
         className={
           dirty || saveState === 'saved'
             ? 'fixed inset-x-0 bottom-[calc(var(--mobile-nav-height)+env(safe-area-inset-bottom,0px))] z-[70] space-y-2 border-t border-[hsl(var(--border-default))] bg-[hsl(var(--surface-app)/0.96)] px-4 py-3 shadow-lg backdrop-blur-xl landscape:static landscape:shadow-none'
-            : 'px-4 py-6'
+            : 'py-6'
         }
       >
         {dirty ? (
@@ -388,11 +384,7 @@ export function SeasonPredictionsScreen({
                       <div key={question.id}>
                         <dt className="text-sm font-medium">{question.prompt}</dt>
                         <dd className="break-words text-sm text-[hsl(var(--content-secondary))]">
-                          {answerText(
-                            question,
-                            member.answers[question.id as PredictionQuestionId],
-                            data.options
-                          )}
+                          {answerText(question, member.answers[question.id], data.options)}
                         </dd>
                       </div>
                     ))}
@@ -416,7 +408,7 @@ export function SeasonPredictionsScreen({
         }
       >
         <MobileScreenHeader eyebrow={seasonName} title="Predicciones" />
-        <div className="px-4 py-8">
+        <div className="py-8">
           {data.status === 'not-open'
             ? closedPanel
             : data.status === 'open' && !readOnly

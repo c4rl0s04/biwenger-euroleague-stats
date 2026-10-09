@@ -1,0 +1,11 @@
+.phone {
+  display: none;
+}
+
+:global([data-presentation='phone']) .desktop {
+  display: none;
+}
+
+:global([data-presentation='phone']) .phone {
+  display: block;
+}

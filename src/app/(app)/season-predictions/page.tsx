@@ -22,7 +22,7 @@ export default async function SeasonPredictionsPage() {
     context.currentSeasonId;
   return (
     <SeasonPredictionsScreen
-      key={context.currentSeasonId}
+      key={`${context.currentSeasonId}-${data.status}`}
       seasonName={seasonName}
       data={data}
       phone={phone}
