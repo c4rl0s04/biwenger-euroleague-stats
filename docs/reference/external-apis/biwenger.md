@@ -27,6 +27,8 @@ server-only credential boundary. A viewed public manager never selects the comma
 
 The client delays each request by a random two-to-five-second interval and retries HTTP 429 up to
 three times with exponential delay. Other non-success responses are surfaced with provider details.
+Interactive live-market reads and bid-count checks opt out of the artificial delay. The bid-count
+POST is never retried automatically because it may have a credit cost outside Premium or Ultra.
 
 ## Endpoint families
 
@@ -48,7 +50,8 @@ three times with exponential delay. Other non-success responses are surfaced wit
 The live bidding services in `src/features/market/live` read the current account-specific
 market, separate from the database-backed public Market catalogue. `POST /market/bids` returns
 only a count, not other managers' amounts. The service calls it on demand only after confirming
-the linked account's configured league is Premium with `marketShowBids` enabled. Purchase bids
+the linked account's configured league is Premium or Ultra with `marketShowBids` enabled. Biwenger
+does not expose this count for the account's own sale listings. Purchase bids
 use `POST /offers` through the private Market command boundary, with a fresh listing check and
 no automatic retry after an ambiguous network failure.
 

@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowDownUp, Clock3, RefreshCw, Search } from 'lucide-react';
 import { Button, PageCanvas, PageHeader, PageSection } from '@/components/ui/foundation';
 import type { LiveMarketListing } from '../../live/models/live-bidding';
 import type { PersonalBidWorkspace } from '../models/personal-bids';
+import { BidCountCache } from '../lib/bid-count-cache';
 
 const euro = (value: number) =>
   new Intl.NumberFormat('es-ES', {
@@ -30,6 +31,7 @@ export function PersonalBidsScreen({ initialData }: { initialData: PersonalBidWo
   const [count, setCount] = useState<number | null>(null);
   const [countMessage, setCountMessage] = useState('');
   const [loadingCount, setLoadingCount] = useState(false);
+  const [countObservedAt, setCountObservedAt] = useState<number | null>(null);
   const [amount, setAmount] = useState('');
   const [confirmation, setConfirmation] = useState<Confirmation>(null);
   const [busy, setBusy] = useState(false);
@@ -38,6 +40,18 @@ export function PersonalBidsScreen({ initialData }: { initialData: PersonalBidWo
   const [refreshing, setRefreshing] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
   const busyRef = useRef(busy);
+  const prefetchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [countCache] = useState(
+    () =>
+      new BidCountCache(async (playerId) => {
+        const response = await fetch(`/api/personal/bids/count?playerId=${playerId}`, {
+          cache: 'no-store',
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message ?? 'No se pudo consultar el contador.');
+        return result.totalBids;
+      })
+  );
 
   const selected = data.market.listings.find((item) => item.playerId === selectedId) ?? null;
   const filtered = useMemo(
@@ -62,32 +76,98 @@ export function PersonalBidsScreen({ initialData }: { initialData: PersonalBidWo
     return Array.from(result.entries());
   }, [filtered]);
 
+  const loadCount = useCallback(
+    (listing: LiveMarketListing, observedAt: string) => countCache.load(listing, observedAt),
+    [countCache]
+  );
+
   useEffect(() => {
-    if (!selectedId) return;
-    const controller = new AbortController();
-    setCount(null);
+    if (!selected) return;
+    if (selected.isOwnListing) {
+      setCount(null);
+      setCountObservedAt(null);
+      setCountMessage('Biwenger no muestra el contador de tus propios anuncios.');
+      setLoadingCount(false);
+      return;
+    }
+    let active = true;
+    const cached = countCache.peek(selected, data.market.observedAt);
+    setCount(cached?.totalBids ?? null);
+    setCountObservedAt(cached?.fetchedAt ?? null);
     setCountMessage('');
-    setLoadingCount(true);
-    fetch(`/api/personal/bids/count?playerId=${selectedId}`, {
-      cache: 'no-store',
-      signal: controller.signal,
-    })
-      .then(async (response) => {
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.message ?? 'No se pudo consultar el contador.');
-        setCount(result.totalBids);
+    setLoadingCount(!cached || !countCache.isFresh(cached));
+    void loadCount(selected, data.market.observedAt)
+      .then((snapshot) => {
+        if (!active) return;
+        setCount(snapshot.totalBids);
+        setCountObservedAt(snapshot.fetchedAt);
       })
       .catch((reason) => {
-        if (!controller.signal.aborted)
-          setCountMessage(
-            reason instanceof Error ? reason.message : 'No se pudo consultar el contador.'
-          );
+        if (!active) return;
+        setCount(null);
+        setCountObservedAt(null);
+        setCountMessage(
+          reason instanceof Error ? reason.message : 'No se pudo consultar el contador.'
+        );
       })
       .finally(() => {
-        if (!controller.signal.aborted) setLoadingCount(false);
+        if (active) setLoadingCount(false);
       });
-    return () => controller.abort();
-  }, [selectedId, data.market.observedAt]);
+    return () => {
+      active = false;
+    };
+  }, [selected, data.market.observedAt, loadCount, countCache]);
+
+  useEffect(() => {
+    let active = true;
+    const firstListings = data.market.listings.filter((item) => !item.isOwnListing).slice(0, 3);
+    void (async () => {
+      for (const listing of firstListings) {
+        if (!active) break;
+        try {
+          await loadCount(listing, data.market.observedAt);
+        } catch {
+          // Stop warm-up after a denied or rate-limited request. Selection can retry explicitly.
+          break;
+        }
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [data.market, loadCount]);
+
+  useEffect(() => {
+    if (selectedId === null) return;
+    const index = filtered.findIndex((item) => item.playerId === selectedId);
+    if (index < 0) return;
+    const current = filtered[index];
+    const neighbors = [filtered[index + 1], filtered[index - 1]].filter(
+      (item): item is LiveMarketListing => Boolean(item && !item.isOwnListing)
+    );
+    let active = true;
+    void (async () => {
+      try {
+        if (!current.isOwnListing) await loadCount(current, data.market.observedAt);
+        for (const listing of neighbors) {
+          if (!active) break;
+          await loadCount(listing, data.market.observedAt);
+        }
+      } catch {
+        // Prefetch failure is shown only when the user selects that player.
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [selectedId, filtered, data.market.observedAt, loadCount]);
+
+  useEffect(
+    () => () => {
+      if (prefetchTimerRef.current) clearTimeout(prefetchTimerRef.current);
+    },
+    []
+  );
 
   useEffect(() => {
     busyRef.current = busy;
@@ -140,11 +220,26 @@ export function PersonalBidsScreen({ initialData }: { initialData: PersonalBidWo
   }
 
   function select(listing: LiveMarketListing) {
+    const cached = countCache.peek(listing, data.market.observedAt);
     setSelectedId(listing.playerId);
+    setCount(listing.isOwnListing ? null : (cached?.totalBids ?? null));
+    setCountObservedAt(listing.isOwnListing ? null : (cached?.fetchedAt ?? null));
+    setCountMessage(
+      listing.isOwnListing ? 'Biwenger no muestra el contador de tus propios anuncios.' : ''
+    );
+    setLoadingCount(!listing.isOwnListing && (!cached || !countCache.isFresh(cached)));
     setAmount('');
     setConfirmation(null);
     setNotice('');
     setError('');
+  }
+
+  function prefetchCount(listing: LiveMarketListing) {
+    if (listing.isOwnListing) return;
+    if (prefetchTimerRef.current) clearTimeout(prefetchTimerRef.current);
+    prefetchTimerRef.current = setTimeout(() => {
+      void loadCount(listing, data.market.observedAt).catch(() => undefined);
+    }, 150);
   }
 
   function validateAmount(raw: string) {
@@ -301,6 +396,8 @@ export function PersonalBidsScreen({ initialData }: { initialData: PersonalBidWo
                       key={`${listing.playerId}-${listing.closesAt}`}
                       type="button"
                       onClick={() => select(listing)}
+                      onMouseEnter={() => prefetchCount(listing)}
+                      onFocus={() => prefetchCount(listing)}
                       aria-pressed={selectedId === listing.playerId}
                       className={`flex min-h-18 w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-[hsl(var(--surface-section-alternate))] focus-visible:outline-2 focus-visible:outline-[hsl(var(--action-primary))] ${selectedId === listing.playerId ? 'bg-[hsl(var(--action-primary)/0.12)]' : ''}`}
                     >
@@ -345,9 +442,15 @@ export function PersonalBidsScreen({ initialData }: { initialData: PersonalBidWo
                     <strong className="block">{euro(data.market.maximumBid)}</strong>
                   </div>
                   <div>
-                    <span className={muted}>Otras pujas</span>
-                    <strong className="block">
-                      {loadingCount ? 'Consultando…' : count === null ? 'No disponible' : count}
+                    <span className={muted}>Pujas</span>
+                    <strong className="block" aria-live="polite">
+                      {count !== null
+                        ? count
+                        : selected.isOwnListing
+                          ? 'Tu anuncio'
+                          : loadingCount
+                            ? 'Consultando…'
+                            : 'No disponible'}
                     </strong>
                   </div>
                   <div>
@@ -362,6 +465,15 @@ export function PersonalBidsScreen({ initialData }: { initialData: PersonalBidWo
                   </div>
                 </div>
                 {countMessage && <p className={`text-xs ${muted}`}>{countMessage}</p>}
+                {countObservedAt !== null && (
+                  <p className={`text-xs ${muted}`}>
+                    Pujas consultadas a las{' '}
+                    {new Intl.DateTimeFormat('es-ES', { timeStyle: 'short' }).format(
+                      new Date(countObservedAt)
+                    )}
+                    {loadingCount ? ' · actualizando…' : ''}
+                  </p>
+                )}
                 {(selected.isOwnListing || selected.ownWaitingOffers.length) && (
                   <p className="rounded-xl bg-[hsl(var(--surface-section-alternate))] p-3 text-sm">
                     {selected.isOwnListing
