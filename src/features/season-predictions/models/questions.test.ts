@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { PREDICTION_QUESTIONS, QUESTION_SET_VERSION } from './questions';
+import { PREDICTION_QUESTIONS, QUESTION_SET_VERSION, sectionsForQuestionSet } from './questions';
 import { validateCurrentAnswers } from './submission';
 
 const options = {
@@ -32,6 +32,18 @@ it('keeps all 12 questions in stable player, team, manager order', () => {
   ]);
   expect(PREDICTION_QUESTIONS.map((question) => question.order)).toEqual(
     Array.from({ length: 12 }, (_, index) => index + 1)
+  );
+});
+
+it('resolves section presentation from the saved set version and question order', () => {
+  const sections = sectionsForQuestionSet(QUESTION_SET_VERSION, [
+    PREDICTION_QUESTIONS[9],
+    PREDICTION_QUESTIONS[5],
+  ]);
+  expect(sections.map((section) => section.id)).toEqual(['team', 'manager']);
+  expect(sections.map((section) => section.title)).toEqual(['Equipos', 'Mánagers']);
+  expect(sectionsForQuestionSet('unknown-version', [PREDICTION_QUESTIONS[0]])[0].title).toBe(
+    'Jugadores'
   );
 });
 

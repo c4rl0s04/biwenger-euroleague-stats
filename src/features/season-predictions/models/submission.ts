@@ -1,4 +1,9 @@
-import { PREDICTION_QUESTIONS, type PredictionAnswers, type PredictionQuestion } from './questions';
+import {
+  PREDICTION_QUESTIONS,
+  type PredictionAnswers,
+  type PredictionQuestion,
+  type PredictionSection,
+} from './questions';
 import type { SeasonPredictionOptions } from './options';
 
 export type PredictionWindowStatus = 'not-open' | 'open' | 'locked';
@@ -26,6 +31,7 @@ export interface SeasonPredictionsPageData {
   serverNow: string;
   questionSetVersion: string | null;
   questions: PredictionQuestion[];
+  sections: PredictionSection[];
   options: SeasonPredictionOptions;
   submission: PredictionSubmissionView | null;
   league: LeaguePredictionView[] | null;
@@ -78,7 +84,7 @@ export function validatePredictionAnswers(
       eligible.has(rawAnswer.id) &&
       Object.keys(rawAnswer).length === 2
     ) {
-      answers[id as keyof PredictionAnswers] = { kind: 'single', id: rawAnswer.id };
+      answers[id] = { kind: 'single', id: rawAnswer.id };
       continue;
     }
     if (
@@ -92,7 +98,7 @@ export function validatePredictionAnswers(
       ) &&
       new Set(rawAnswer.ids).size === choices.length
     ) {
-      answers[id as keyof PredictionAnswers] = { kind: 'ranking', ids: [...rawAnswer.ids] };
+      answers[id] = { kind: 'ranking', ids: [...rawAnswer.ids] };
       continue;
     }
     throw new PredictionError('invalid', `Respuesta inválida: ${question.prompt}`);

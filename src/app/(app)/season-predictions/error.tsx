@@ -1,17 +1,12 @@
 'use client';
 
-import { Button, PageCanvas, PageHeader } from '@/components/ui/foundation';
+import { Button } from '@/components/ui/foundation';
+import { SeasonPredictionsRouteState } from '@/features/season-predictions/public';
 
 export default function Error({ reset }: { error: Error; reset: () => void }) {
   return (
-    <PageCanvas>
-      <div className="space-y-6">
-        <PageHeader
-          title="Predicciones de temporada"
-          description="No se pudieron cargar las opciones de esta temporada."
-        />
-        <Button onClick={reset}>Reintentar</Button>
-      </div>
-    </PageCanvas>
+    <SeasonPredictionsRouteState description="No se pudieron cargar las opciones de esta temporada.">
+      <Button onClick={reset}>Reintentar</Button>
+    </SeasonPredictionsRouteState>
   );
 }

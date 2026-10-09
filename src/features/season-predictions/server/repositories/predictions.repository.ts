@@ -5,6 +5,7 @@ import { pool } from '@/lib/db/client';
 import {
   PREDICTION_QUESTIONS,
   QUESTION_SET_VERSION,
+  sectionsForQuestionSet,
   type PredictionAnswers,
   type PredictionQuestion,
 } from '../../models/questions';
@@ -79,6 +80,10 @@ export async function readSeasonPredictions(
       serverNow: now.toISOString(),
       questionSetVersion: window?.question_set_version ?? null,
       questions: window?.questions ?? [...PREDICTION_QUESTIONS],
+      sections: sectionsForQuestionSet(
+        window?.question_set_version ?? null,
+        window?.questions ?? PREDICTION_QUESTIONS
+      ),
       options: emptyOptions(),
       submission: null,
       league: null,
@@ -131,6 +136,7 @@ export async function readSeasonPredictions(
     serverNow: now.toISOString(),
     questionSetVersion: window.question_set_version,
     questions: window.questions,
+    sections: sectionsForQuestionSet(window.question_set_version, window.questions),
     options: withTeamCrests(window.candidates, teamCrests),
     submission: own
       ? { answers: own.answers, revision: own.revision, updatedAt: own.updated_at.toISOString() }

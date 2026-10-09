@@ -1,10 +1,11 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { expect, it, vi } from 'vitest';
-import { PREDICTION_QUESTIONS } from '../models/questions';
+import { PREDICTION_QUESTIONS, sectionsForQuestionSet } from '../models/questions';
 import type { SeasonPredictionsPageData } from '../models/submission';
 import { SeasonPredictionsScreen } from './SeasonPredictionsScreen';
 
 vi.mock('@/components/shell/mobile/MobileHeaderActions', () => ({ default: () => null }));
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
 const data: SeasonPredictionsPageData = {
   seasonId: '2026-27',
@@ -15,6 +16,7 @@ const data: SeasonPredictionsPageData = {
   serverNow: '2026-10-02T00:00:00.000Z',
   questionSetVersion: 'season-predictions-v1',
   questions: [...PREDICTION_QUESTIONS],
+  sections: sectionsForQuestionSet('season-predictions-v1', PREDICTION_QUESTIONS),
   options: {
     players: [{ id: 'p1', name: 'Jugador', image: null }],
     teams: [{ id: 't1', name: 'Equipo', image: null }],
@@ -84,4 +86,18 @@ it('hides candidate cards and league answers before the window opens', () => {
   expect(html).toContain('todavía no están abiertas');
   expect(html).not.toContain(PREDICTION_QUESTIONS[0].prompt);
   expect(html).not.toContain('Predicciones de la liga');
+});
+
+it('uses the saved question-set sections and does not render empty current sections', () => {
+  const onlyTeams: SeasonPredictionsPageData = {
+    ...data,
+    questions: [PREDICTION_QUESTIONS[5]],
+    sections: sectionsForQuestionSet('season-predictions-v1', [PREDICTION_QUESTIONS[5]]),
+  };
+  const html = renderToStaticMarkup(
+    <SeasonPredictionsScreen seasonName="2026/27" data={onlyTeams} />
+  );
+  expect(html).toContain('Equipos');
+  expect(html).not.toContain('Talento, puntos y sorpresas');
+  expect(html).not.toContain('El desenlace de tu liga fantasy');
 });

@@ -160,7 +160,9 @@ for (const theme of ['dark', 'light'] as const) {
       await client.end();
     }
     await page.reload();
-    await expect(page.getByText('Tus respuestas están bloqueadas.')).toBeVisible();
+    await expect(
+      page.locator('#main-content').getByText('Tus respuestas están bloqueadas.')
+    ).toBeVisible();
     await expect(
       page.getByRole('button', { name: 'Guardar predicciones', exact: true })
     ).toHaveCount(0);
@@ -169,6 +171,86 @@ for (const theme of ['dark', 'light'] as const) {
     await expect(page.getByText('Sin respuesta').first()).toBeVisible();
   });
 }
+
+rawTest(
+  'refreshes saved answers and the league view when the deadline passes',
+  async ({ page }, testInfo) => {
+    rawTest.skip(!process.env.BIWENGER_E2E_DISPOSABLE || testInfo.project.name !== 'desktop-1440');
+    const client = new pg.Client({ connectionString: process.env.E2E_DATABASE_URL });
+    await client.connect();
+    try {
+      await client.query(`DELETE FROM season_prediction_submissions WHERE season_id = '2025-26';
+      UPDATE season_prediction_windows SET opens_at = clock_timestamp(),
+        locks_at = clock_timestamp() + interval '168 hours' WHERE season_id = '2025-26';
+      INSERT INTO season_prediction_submissions (season_id, user_id, answers)
+        VALUES ('2025-26', '99002', '{"team-champion":{"kind":"single","id":"9901"}}'::jsonb);`);
+      await page.goto('/login?callbackUrl=%2Fseason-predictions');
+      await page.getByLabel('Manager').fill(process.env.E2E_USERNAME!);
+      await page.locator('#login-password').fill(process.env.E2E_PASSWORD!);
+      await page.getByRole('button', { name: 'Entrar' }).click();
+      await expect(page).toHaveURL(/\/season-predictions$/);
+
+      await client.query(`UPDATE season_prediction_windows
+      SET locks_at = clock_timestamp() + interval '8 seconds' WHERE season_id = '2025-26'`);
+      await page.reload();
+      await expect(
+        page.locator('#main-content').getByText('Tus respuestas están bloqueadas.')
+      ).toHaveCount(0);
+      await page
+        .getByRole('button', { name: /Seleccionar jugador: Elige un jugador/ })
+        .first()
+        .click();
+      await page.getByRole('option').first().click();
+      await expect(page.getByText('Hay cambios sin guardar.')).toBeVisible();
+
+      await expect(page.getByRole('heading', { name: 'Predicciones de la liga' })).toBeVisible({
+        timeout: 15_000,
+      });
+      await expect(
+        page.locator('#main-content').getByText('Tus respuestas están bloqueadas.')
+      ).toBeVisible();
+      await expect(
+        page
+          .locator('[aria-labelledby="player-total-points-title"]')
+          .getByRole('paragraph')
+          .filter({ hasText: 'Sin respuesta' })
+      ).toBeVisible();
+      await expect(
+        page.getByRole('button', { name: 'Guardar predicciones', exact: true })
+      ).toHaveCount(0);
+    } finally {
+      await client.end();
+    }
+  }
+);
+
+rawTest('uses the phone header in the route error state', async ({ page }, testInfo) => {
+  rawTest.skip(!process.env.BIWENGER_E2E_DISPOSABLE || testInfo.project.name !== 'iphone-13');
+  const client = new pg.Client({ connectionString: process.env.E2E_DATABASE_URL });
+  await client.connect();
+  const original = await client.query<{ candidates: unknown }>(
+    `SELECT candidates FROM season_prediction_windows WHERE season_id = '2025-26'`
+  );
+  try {
+    await client.query(
+      `UPDATE season_prediction_windows SET candidates = 'null'::jsonb WHERE season_id = '2025-26'`
+    );
+    await page.goto('/login?callbackUrl=%2Fseason-predictions');
+    await page.getByLabel('Manager').fill(process.env.E2E_USERNAME!);
+    await page.locator('#login-password').fill(process.env.E2E_PASSWORD!);
+    await page.getByRole('button', { name: 'Entrar' }).click();
+    await expect(page).toHaveURL(/\/season-predictions$/);
+    await expect(page.getByRole('heading', { name: 'Predicciones', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Reintentar' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Predicciones de temporada' })).toBeHidden();
+  } finally {
+    await client.query(
+      `UPDATE season_prediction_windows SET candidates = $1::jsonb WHERE season_id = '2025-26'`,
+      [JSON.stringify(original.rows[0].candidates)]
+    );
+    await client.end();
+  }
+});
 
 rawTest('save failures and stale revisions keep the draft unsaved', async ({ page }, testInfo) => {
   rawTest.skip(!process.env.BIWENGER_E2E_DISPOSABLE || testInfo.project.name !== 'desktop-1440');

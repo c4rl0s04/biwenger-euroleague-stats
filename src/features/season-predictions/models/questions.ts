@@ -100,7 +100,8 @@ export const PREDICTION_QUESTIONS = [
 
 export type PredictionQuestionId = (typeof PREDICTION_QUESTIONS)[number]['id'];
 export type PredictionAnswer = { kind: 'single'; id: string } | { kind: 'ranking'; ids: string[] };
-export type PredictionAnswers = Partial<Record<PredictionQuestionId, PredictionAnswer>>;
+// Saved windows retain their own question IDs, including IDs retired from the current set.
+export type PredictionAnswers = Record<string, PredictionAnswer>;
 
 export interface PredictionSection {
   id: PredictionSubject;
@@ -108,7 +109,7 @@ export interface PredictionSection {
   description: string;
 }
 
-export const PREDICTION_SECTIONS: readonly PredictionSection[] = [
+const V1_SECTIONS: readonly PredictionSection[] = [
   { id: 'player', title: 'Jugadores', description: 'Talento, puntos y sorpresas de la temporada.' },
   {
     id: 'team',
@@ -117,3 +118,28 @@ export const PREDICTION_SECTIONS: readonly PredictionSection[] = [
   },
   { id: 'manager', title: 'Mánagers', description: 'El desenlace de tu liga fantasy.' },
 ];
+
+// Retain each released version's section copy when introducing another question set.
+const SECTIONS_BY_VERSION: Readonly<Record<string, readonly PredictionSection[]>> = {
+  'season-predictions-v1': V1_SECTIONS,
+};
+
+export function sectionsForQuestionSet(
+  version: string | null,
+  questions: readonly PredictionQuestion[]
+): PredictionSection[] {
+  const requestedVersion = version ?? QUESTION_SET_VERSION;
+  const versioned = SECTIONS_BY_VERSION[requestedVersion];
+  if (requestedVersion === QUESTION_SET_VERSION && !versioned)
+    throw new Error(`Missing section metadata for ${QUESTION_SET_VERSION}`);
+  const current = new Map(
+    SECTIONS_BY_VERSION[QUESTION_SET_VERSION].map((section) => [section.id, section])
+  );
+  const selected = new Map(versioned?.map((section) => [section.id, section]));
+  const orderedIds = Array.from(
+    new Set([...questions].sort((a, b) => a.order - b.order).map((question) => question.section))
+  );
+  return orderedIds.map(
+    (id) => selected.get(id) ?? current.get(id) ?? { id, title: id, description: '' }
+  );
+}
