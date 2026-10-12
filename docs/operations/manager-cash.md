@@ -11,12 +11,13 @@ status: active
 
 Open **Actions → Manager cash report → Run workflow**, select **main**, and run it.
 Leave the manager field empty for everyone, or enter a manager name substring or ID.
-Detailed output defaults to enabled; disable it for the summary table only. A manager
+Detailed output defaults to enabled; disable it for the cash overview only. A manager
 filter always includes that manager's details alongside the league summary.
 
-Open the completed run to read its summary. Download the full text report from the
-**Artifacts** section; downloads expire after seven days. Reports have the same
-visibility as the repository's Actions results.
+Open the completed run to read the cash ranking on your phone. Tap a manager to expand
+their cash calculation, transactions, bonuses, and squads. Copy the run's URL to share
+the report. This repository is public, so anyone with the link can read the run summary.
+The full text report remains under **Artifacts** for seven days.
 
 The [workflow](../../.github/workflows/manager-cash.yml) runs the existing
 `npm run ledger` command against the latest synced database data. It does not start

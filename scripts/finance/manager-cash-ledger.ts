@@ -1,5 +1,6 @@
 #!/usr/bin/env tsx
 import * as dotenv from 'dotenv';
+import { writeFileSync } from 'node:fs';
 import { createCliPool } from '../../src/lib/db/cli';
 
 dotenv.config({ path: '.env.local' });
@@ -12,6 +13,7 @@ interface CliOptions {
   managerFilter?: string;
   showAllDetails: boolean;
   jsonOutput: boolean;
+  jsonFile?: string;
   noColor: boolean;
 }
 
@@ -91,6 +93,8 @@ function parseCliArgs(): CliOptions {
       options.showAllDetails = true;
     } else if (arg === '--json') {
       options.jsonOutput = true;
+    } else if (arg.startsWith('--json-file=')) {
+      options.jsonFile = arg.slice(12);
     } else if (arg === '--no-color') {
       options.noColor = true;
     }
@@ -557,6 +561,10 @@ async function main() {
   try {
     options.seasonId = await resolveSeasonId(pool, options.seasonId);
     const ledgers = await loadLedgerData(pool, options.seasonId, options.startDate, options.budget);
+
+    if (options.jsonFile) {
+      writeFileSync(options.jsonFile, JSON.stringify({ options, ledgers }));
+    }
 
     if (options.jsonOutput) {
       console.log(JSON.stringify({ options, ledgers }, null, 2));
