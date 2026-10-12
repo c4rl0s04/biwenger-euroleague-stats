@@ -46,7 +46,7 @@ jobs:
             exit 1
           fi
           mkdir -p reports
-          args=(--no-color)
+          args=(--no-color --json-file=reports/manager-cash.json)
           if [[ -n "$MANAGER" ]]; then
             args+=("--manager=$MANAGER")
           elif [[ "$ALL_DETAILS" == 'true' ]]; then
@@ -54,21 +54,8 @@ jobs:
           fi
           npm run --silent ledger -- "${args[@]}" > reports/manager-cash.txt
       - name: Publish run summary
-        shell: python
         run: |
-          import html
-          import os
-          from pathlib import Path
-
-          report = Path('reports/manager-cash.txt').read_text()
-          # Keep the summary below GitHub's 1 MiB limit; the artifact retains the full report.
-          preview = html.escape(report[:100_000])
-          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
-              summary.write('# Manager cash report\n\n')
-              summary.write('Calculated from the latest synced database data. Download the full text report under Artifacts.\n\n')
-              summary.write('<pre>' + preview + '</pre>\n')
-              if len(report) > 100_000:
-                  summary.write('\nSummary shortened; the downloadable report is complete.\n')
+          python3 scripts/finance/manager_cash_summary.py reports/manager-cash.json "$GITHUB_STEP_SUMMARY"
       - name: Upload full report
         uses: actions/upload-artifact@v4
         with:
