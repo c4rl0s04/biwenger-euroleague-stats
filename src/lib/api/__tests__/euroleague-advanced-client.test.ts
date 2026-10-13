@@ -7,6 +7,7 @@ import {
   parseMinutes,
   parseProviderNumber,
 } from '../euroleague/client';
+import { formatMatchTime } from '../../utils/date';
 
 const fixture = (name: string) =>
   JSON.parse(
@@ -23,6 +24,25 @@ const response = (body: unknown, status = 200) =>
   });
 
 describe('EuroleagueClient contracts', () => {
+  it('interprets schedule times as Spain time in summer and winter', async () => {
+    const row = fixture('schedule')[0];
+    const provider = new EuroleagueClient({
+      fetchImpl: vi.fn(async () =>
+        response([
+          { ...row, date: 'Sep 24, 2026', startime: '20:30' },
+          { ...row, date: 'Jan 14, 2027', startime: '20:30' },
+        ])
+      ) as typeof fetch,
+    });
+
+    const games = await provider.getSchedule(2026);
+    expect(games.map((game) => game.scheduledAt?.toISOString())).toEqual([
+      '2026-09-24T18:30:00.000Z',
+      '2027-01-14T19:30:00.000Z',
+    ]);
+    expect(games.map((game) => formatMatchTime(game.scheduledAt))).toEqual(['20:30', '20:30']);
+  });
+
   it('normalizes every free granular response used by the sync', async () => {
     const fetchImpl = vi.fn(async (url: URL | RequestInfo) => {
       const path = new URL(String(url)).pathname;
