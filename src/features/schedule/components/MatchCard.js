@@ -8,8 +8,6 @@ import PlayerChip from './PlayerChip';
 export default function MatchCard({ match }) {
   const hasPlayers = match.user_players.length > 0;
 
-  // Format time safely
-  // Format time using standardized utility (adds +1h correction)
   const timeStr = formatMatchTime(match.date);
 
   return (

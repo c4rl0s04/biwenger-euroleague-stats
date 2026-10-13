@@ -73,7 +73,16 @@ function parseScheduleDate(dateValue: unknown, timeValue: unknown): Date | null 
   const date = asString(dateValue);
   if (!date) return null;
   const parsed = new Date(`${date} ${asString(timeValue) || '00:00'} UTC`);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
+  if (Number.isNaN(parsed.getTime())) return null;
+  // The schedule feed gives Madrid wall time without a timezone; resolve its DST offset.
+  const offset = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Europe/Madrid',
+    timeZoneName: 'shortOffset',
+  })
+    .formatToParts(parsed)
+    .find((part) => part.type === 'timeZoneName')
+    ?.value.match(/GMT([+-]\d+)/)?.[1];
+  return offset ? new Date(parsed.getTime() - Number(offset) * 60 * 60 * 1000) : null;
 }
 
 function parseIsoDate(value: unknown): Date | null {
