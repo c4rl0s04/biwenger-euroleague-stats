@@ -5,6 +5,11 @@ import type { ScheduleMatch, ScheduleMatchPlayer } from '../models/schedule';
 
 vi.mock('./ScheduleLineupAction', () => ({ default: () => <button>Auto-Alinear</button> }));
 vi.mock('@/components/shell/mobile/MobileHeaderActions', () => ({ default: () => null }));
+vi.mock('@/components/ui/PlayerImage', () => ({
+  default: ({ src, alt }: { src: string; alt: string }) => (
+    <span data-image-src={src} aria-label={alt} />
+  ),
+}));
 
 const player = {
   id: 1,
@@ -21,6 +26,8 @@ const match = {
   away_id: 3,
   home_team: 'Madrid',
   away_team: 'Athens',
+  home_code: 'MAD',
+  away_code: 'ATH',
   user_players: [player],
 } as ScheduleMatch;
 
@@ -39,6 +46,10 @@ it('groups by Madrid day, preserves links, zero points and missing identity', ()
   expect(html).toContain('viernes, 16 de octubre');
   expect(html).toContain('00:30');
   expect(html).toContain('href="/team/2"');
+  expect(html).toContain('aria-label="Madrid"');
+  expect(html).toContain('>MAD</span>');
+  expect(html).toContain('>ATH</span>');
+  expect(html).toContain('https://cdn.biwenger.com/i/t/2.png');
   expect(html).toContain('href="/player/1"');
   expect(html).toContain('href="/schedule/map"');
   expect(html).toContain('0 pts');

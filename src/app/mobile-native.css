@@ -3477,10 +3477,18 @@
 .schedule-mobile-summary > div:last-child dd {
   color: hsl(var(--action-primary));
 }
+.schedule-mobile-day .mobile-section-heading {
+  padding: 0.55rem 0.65rem;
+  border-inline-start: 3px solid hsl(var(--action-primary));
+  border-radius: 0.35rem;
+  background: hsl(var(--action-primary) / 0.07);
+}
 .schedule-mobile-day .mobile-section-heading h2 {
+  color: hsl(var(--content-primary));
   text-transform: none;
   letter-spacing: normal;
-  font-size: 0.95rem;
+  font-size: 1.05rem;
+  font-weight: 800;
 }
 .schedule-mobile-day .mobile-section-heading h2::first-letter {
   text-transform: uppercase;
@@ -3497,7 +3505,7 @@
 }
 .schedule-mobile-match-header {
   display: grid;
-  grid-template-columns: 4.5rem minmax(0, 1fr);
+  grid-template-columns: 4.1rem minmax(0, 1fr);
   align-items: center;
   gap: 0.5rem;
 }
@@ -3510,15 +3518,26 @@
 }
 .schedule-mobile-teams {
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
 }
 .schedule-mobile-teams a {
   display: flex;
   align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
   min-height: 44px;
   color: hsl(var(--content-primary));
   font-size: 0.85rem;
   font-weight: 650;
   overflow-wrap: anywhere;
+}
+.schedule-mobile-team-logo {
+  display: flex;
+  align-items: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
 }
 .schedule-mobile-count {
   margin-top: 0.4rem;

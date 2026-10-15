@@ -13,6 +13,7 @@ import {
   MobileSectionLink,
 } from '@/components/mobile/MobileScreen';
 import MobileSegmentedControl from '@/components/mobile/MobileSegmentedControl';
+import PlayerImage from '@/components/ui/PlayerImage';
 
 export default function MobileScheduleScreen({
   schedule,
@@ -39,6 +40,7 @@ export default function MobileScheduleScreen({
       <div className="mobile-control-offset">
         <MobileSegmentedControl
           label="Seleccionar jornada"
+          revealActive
           items={rounds.map((round) => ({
             label: String(round.round_name).replace('Jornada ', 'J'),
             href: `/schedule?roundId=${round.round_id}`,
@@ -104,12 +106,36 @@ function MobileScheduleMatch({ match }: { match: ScheduleMatch }) {
           {formatMatchTime(match.date) || 'Por confirmar'}
         </time>
         <div className="schedule-mobile-teams">
-          <Link href={`/team/${match.home_id}`}>
-            {match.home_team || match.home_code || 'Local'}
-          </Link>
-          <Link href={`/team/${match.away_id}`}>
-            {match.away_team || match.away_code || 'Visitante'}
-          </Link>
+          {[
+            { id: match.home_id, name: match.home_team, code: match.home_code, fallback: 'Local' },
+            {
+              id: match.away_id,
+              name: match.away_team,
+              code: match.away_code,
+              fallback: 'Visitante',
+            },
+          ].map((team) => (
+            <Link
+              key={team.fallback}
+              href={`/team/${team.id}`}
+              aria-label={team.name || team.code || team.fallback}
+              title={team.name || undefined}
+            >
+              {team.id != null && (
+                <span className="schedule-mobile-team-logo" aria-hidden="true">
+                  <PlayerImage
+                    src={`https://cdn.biwenger.com/i/t/${team.id}.png`}
+                    alt={team.name || team.fallback}
+                    width={24}
+                    height={24}
+                    className="object-contain"
+                    hideFallback
+                  />
+                </span>
+              )}
+              <span>{team.code || team.name || team.fallback}</span>
+            </Link>
+          ))}
         </div>
       </div>
       <p className="schedule-mobile-count">
