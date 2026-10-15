@@ -2,12 +2,8 @@ import { readFileSync, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { expect, it } from 'vitest';
 
-it('preserves the unchanged lineup preview and HTTP command adapter', () => {
+it('preserves the unchanged HTTP command adapter', () => {
   const files = [
-    [
-      'src/components/schedule/LineupModal.js',
-      '8d1945bbf45be9fd75d174d63951666d460ee66cbbd042cb98cd3a1943558d20',
-    ],
     ['src/lib/api-client.js', 'd2be007a7e0b67e442311b8a575367ef42214e7aaf333ef075d836516cf726c3'],
   ];
   for (const [file, hash] of files)

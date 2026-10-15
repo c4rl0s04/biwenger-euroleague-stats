@@ -35,7 +35,7 @@ export default function MobileScheduleScreen({
     days.set(date, group);
   }
   return (
-    <MobileScreen labelledBy="mobile-screen-title" className="mobile-has-sticky-action">
+    <MobileScreen labelledBy="mobile-screen-title">
       <MobileScreenHeader eyebrow="Tu plantilla" title="Horario" />
       <div className="mobile-control-offset">
         <MobileSegmentedControl
@@ -59,6 +59,15 @@ export default function MobileScheduleScreen({
             <dd>{players.reduce((sum, player) => sum + (player.puntos ?? 0), 0)}</dd>
           </div>
         </dl>
+      )}
+      {schedule.found && schedule.matches.length > 0 && (
+        <div className="schedule-mobile-action">
+          <div>
+            <p>Tu alineación</p>
+            <span>Por horario de partido</span>
+          </div>
+          <AutoAlignButton matches={schedule.matches} userName={userName} mobile />
+        </div>
       )}
       {!schedule.found ? (
         <p className="schedule-mobile-empty" role="status">
@@ -88,11 +97,6 @@ export default function MobileScheduleScreen({
         icon={MapPinned}
         accent="blue"
       />
-      {schedule.found && schedule.matches?.length > 0 && (
-        <div className="mobile-sticky-action-bar">
-          <AutoAlignButton matches={schedule.matches} userName={userName} discrete />
-        </div>
-      )}
     </MobileScreen>
   );
 }

@@ -1,8 +1,9 @@
 'use client';
 
 import { buildAutoLineup } from '@/features/lineup/public';
-import { useState } from 'react';
-import { Sparkles, Loader2 } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Sparkles, Loader2, ListChecks } from 'lucide-react';
+import { Button } from '@/components/ui/foundation';
 import { apiClient } from '@/lib/api-client';
 import { clsx } from 'clsx';
 import LineupModal from './LineupModal';
@@ -17,10 +18,11 @@ import LineupModal from './LineupModal';
  * 5. Fill bench with next 5 earliest.
  * 6. Send to Biwenger via API.
  */
-export default function AutoAlignButton({ matches, userName, discrete = false }) {
+export default function AutoAlignButton({ matches, userName, discrete = false, mobile = false }) {
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [lineupPreview, setLineupPreview] = useState(null);
+  const buttonRef = useRef(null);
 
   const handleAutoAlign = async () => {
     if (!matches || matches.length === 0) {
@@ -60,13 +62,42 @@ export default function AutoAlignButton({ matches, userName, discrete = false })
       captain={lineupPreview.captain}
       formationType={lineupPreview.formationType}
       userName={userName}
+      returnFocusRef={buttonRef}
     />
   );
+
+  if (mobile) {
+    return (
+      <>
+        <Button
+          ref={buttonRef}
+          onClick={handleAutoAlign}
+          disabled={loading}
+          aria-busy={loading}
+          variant="secondary"
+          className="min-h-11 shrink-0 gap-2"
+        >
+          {loading ? (
+            <Loader2
+              size={18}
+              className="animate-spin motion-reduce:animate-none"
+              aria-hidden="true"
+            />
+          ) : (
+            <ListChecks size={18} aria-hidden="true" />
+          )}
+          {loading ? 'Alineando…' : 'Auto-Alinear'}
+        </Button>
+        {modal}
+      </>
+    );
+  }
 
   if (discrete) {
     return (
       <>
         <button
+          ref={buttonRef}
           onClick={handleAutoAlign}
           disabled={loading}
           className={clsx(
@@ -92,6 +123,7 @@ export default function AutoAlignButton({ matches, userName, discrete = false })
   return (
     <>
       <button
+        ref={buttonRef}
         onClick={handleAutoAlign}
         disabled={loading}
         className={clsx(
