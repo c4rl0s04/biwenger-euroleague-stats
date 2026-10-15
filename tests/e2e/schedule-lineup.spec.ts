@@ -54,6 +54,20 @@ test('Auto-lineup completion stays in the viewport with an intercepted save', as
           (value) => document.documentElement.setAttribute('data-theme', value),
           theme
         );
+        const exclusions = page.locator('.schedule-lineup-exclusions');
+        await exclusions.locator('summary').click();
+        await expect(exclusions.getByRole('checkbox')).toHaveCount(10);
+        await exclusions.getByRole('checkbox').first().check();
+        await expect(exclusions.locator('summary')).toHaveText('Excluir jugadores (1)');
+        await page.screenshot({
+          path: info.outputPath(`exclusions-${size.width}-${theme}.png`),
+          animations: 'disabled',
+        });
+        expect(
+          await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)
+        ).toBe(true);
+        await exclusions.getByRole('button', { name: 'Incluir todos' }).click();
+        await exclusions.locator('summary').click();
         // Reproduce a containing block that would trap an inline fixed modal.
         await page.locator('main').evaluate((element) => {
           element.style.transform = 'translateZ(0)';
@@ -130,6 +144,35 @@ test('Auto-lineup completion stays in the viewport with an intercepted save', as
         reservesID: [],
       },
     });
+    const exclusions = page.locator('.schedule-lineup-exclusions');
+    await exclusions.locator('summary').click();
+    const checkboxes = exclusions.getByRole('checkbox');
+    for (const checkbox of await checkboxes.all()) await checkbox.check();
+    const action = page.getByRole('button', { name: 'Auto-Alinear', exact: true });
+    await expect(action).toBeDisabled();
+    await expect(page.locator('.schedule-lineup-controls').getByRole('alert')).toContainText(
+      'Incluye más jugadores'
+    );
+    expect(submissions).toBe(sizes.length * 2);
+    await exclusions.getByRole('button', { name: 'Incluir todos' }).click();
+    await expect(action).toBeEnabled();
+    await exclusions.getByRole('checkbox', { name: /Fixture Guard/ }).check();
+    await action.click();
+    await expect(checkboxes.first()).toBeDisabled();
+    await expect.poll(() => Boolean(finishRequest)).toBe(true);
+    finishRequest?.();
+    finishRequest = undefined;
+    const dialog = page.getByRole('dialog', { name: 'Alineación enviada' });
+    await expect(dialog).toBeVisible();
+    const sent = requestBody as { lineup: { playersID: number[]; captain: number } };
+    expect(sent.lineup.playersID).not.toContain(99101);
+    expect(sent.lineup.playersID).toHaveLength(9);
+    expect(sent.lineup.captain).not.toBe(99101);
+    await page.keyboard.press('Escape');
+    await expect(dialog).not.toBeVisible();
+    await expect(exclusions.getByRole('checkbox', { name: /Fixture Guard/ })).toBeChecked();
+    await page.reload();
+    await expect(exclusions.locator('summary')).toHaveText('Excluir jugadores (0)');
   } finally {
     finishRequest?.();
     await client.query(

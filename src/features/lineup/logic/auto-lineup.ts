@@ -11,7 +11,8 @@ export interface AutoAlignMatch<T extends AutoAlignPlayer> {
 }
 type SelectedAutoAlignPlayer<T> = T & { matchDate: number; normPos: 'Base' | 'Alero' | 'Pivot' };
 export function buildAutoLineup<T extends AutoAlignPlayer>(
-  matches: AutoAlignMatch<T>[]
+  matches: AutoAlignMatch<T>[],
+  excludedPlayerIds: readonly SafeIdentifier[] = []
 ): {
   starters: SelectedAutoAlignPlayer<T>[];
   bench: SelectedAutoAlignPlayer<T>[];
@@ -21,6 +22,7 @@ export function buildAutoLineup<T extends AutoAlignPlayer>(
 } {
   // Preserve the existing new Date(null) epoch ordering for unscheduled matches.
   // 1. Flatten and Sort Players by Date
+  const excluded = new Set(excludedPlayerIds.map(String));
   const allPlayers = matches
     .flatMap((m) =>
       m.user_players.map((p) => ({
@@ -28,6 +30,7 @@ export function buildAutoLineup<T extends AutoAlignPlayer>(
         matchDate: new Date(m.date === null ? 0 : m.date).getTime(),
       }))
     )
+    .filter((player) => !excluded.has(String(player.id)))
     .sort((a, b) => a.matchDate - b.matchDate);
 
   if (allPlayers.length === 0) {

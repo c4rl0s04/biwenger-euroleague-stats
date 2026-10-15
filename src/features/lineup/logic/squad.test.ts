@@ -62,6 +62,41 @@ describe('automatic lineup compatibility', () => {
     expect(result.lineupPayload.playersID).toEqual([1, 2, 3, 5, 4, 6]);
     expect(result.captain.id).toBe(1);
   });
+  it('excludes starters, bench and captain by normalized identity without changing inputs', () => {
+    const matches = [
+      {
+        date: null,
+        user_players: Array.from({ length: 9 }, (_, id) => ({
+          id,
+          position: ['Base', 'Alero', 'Pivot'][id % 3],
+          puntos: 100 - id,
+        })),
+      },
+    ];
+    const original = structuredClone(matches);
+    const result = buildAutoLineup(matches, ['0', 7, 999]);
+    expect(result.lineupPayload.playersID).not.toContain(0);
+    expect(result.lineupPayload.playersID).not.toContain(7);
+    expect(result.lineupPayload.playersID).toHaveLength(7);
+    expect(result.captain.id).toBe(1);
+    expect(matches).toEqual(original);
+    expect(buildAutoLineup(matches, []).lineupPayload).toEqual(
+      buildAutoLineup(matches).lineupPayload
+    );
+  });
+  it('rejects exclusions leaving no players or an invalid position mix', () => {
+    const matches = [
+      {
+        date: null,
+        user_players: [
+          { id: 1, position: 'Pivot' },
+          ...[2, 3, 4, 5, 6].map((id) => ({ id, position: 'Base' })),
+        ],
+      },
+    ];
+    expect(() => buildAutoLineup(matches, [1, 2, 3, 4, 5, 6])).toThrow('No tienes jugadores');
+    expect(() => buildAutoLineup(matches, [1])).toThrow('Faltan 2 posiciones');
+  });
   it('preserves empty and insufficient squad errors', () => {
     expect(() => buildAutoLineup([])).toThrow('No tienes jugadores que jueguen en esta jornada.');
     expect(() => buildAutoLineup([{ date: '2026-09-01', user_players: [{ id: 1 }] }])).toThrow(

@@ -66,7 +66,12 @@ export default function MobileScheduleScreen({
             <p>Tu alineación</p>
             <span>Por horario de partido</span>
           </div>
-          <AutoAlignButton matches={schedule.matches} userName={userName} mobile />
+          <AutoAlignButton
+            key={String(activeRoundId)}
+            matches={schedule.matches}
+            userName={userName}
+            mobile
+          />
         </div>
       )}
       {!schedule.found ? (

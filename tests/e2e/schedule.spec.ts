@@ -7,6 +7,8 @@ import { assertFixtureTarget } from '../../scripts/e2e/safety.mjs';
 test('Schedule preserves original read screens and map navigation', async ({ page }, info) => {
   test.setTimeout(180000);
   test.skip(!process.env.BIWENGER_E2E_DISPOSABLE, 'Requires synthetic local league.');
+  // Keep unrelated asynchronous shell news from shifting the overview screenshot.
+  await page.route('**/api/news', (route) => route.fulfill({ json: { success: true, data: [] } }));
   await page.route('https://cdn.biwenger.com/i/t/*.png', (route) =>
     route.fulfill({ contentType: 'image/png', body: readFileSync('public/icons/icon-192.png') })
   );

@@ -18,7 +18,15 @@ import LineupModal from './LineupModal';
  * 5. Fill bench with next 5 earliest.
  * 6. Send to Biwenger via API.
  */
-export default function AutoAlignButton({ matches, userName, discrete = false, mobile = false }) {
+export default function AutoAlignButton({
+  matches,
+  userName,
+  discrete = false,
+  mobile = false,
+  excludedPlayerIds = /** @type {Array<string | number>} */ ([]),
+  onLoadingChange,
+  disabled = false,
+}) {
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [lineupPreview, setLineupPreview] = useState(null);
@@ -31,8 +39,12 @@ export default function AutoAlignButton({ matches, userName, discrete = false, m
     }
 
     setLoading(true);
+    onLoadingChange?.(true);
     try {
-      const { starters, bench, captain, formationType, lineupPayload } = buildAutoLineup(matches);
+      const { starters, bench, captain, formationType, lineupPayload } = buildAutoLineup(
+        matches,
+        excludedPlayerIds
+      );
 
       // 6. Send to API
       const result = await apiClient.saveLineup(lineupPayload);
@@ -50,6 +62,7 @@ export default function AutoAlignButton({ matches, userName, discrete = false, m
       alert(`❌ Error: ${err.message}`);
     } finally {
       setLoading(false);
+      onLoadingChange?.(false);
     }
   };
 
@@ -72,7 +85,7 @@ export default function AutoAlignButton({ matches, userName, discrete = false, m
         <Button
           ref={buttonRef}
           onClick={handleAutoAlign}
-          disabled={loading}
+          disabled={loading || disabled}
           aria-busy={loading}
           variant="secondary"
           className="min-h-11 shrink-0 gap-2"
@@ -99,7 +112,7 @@ export default function AutoAlignButton({ matches, userName, discrete = false, m
         <button
           ref={buttonRef}
           onClick={handleAutoAlign}
-          disabled={loading}
+          disabled={loading || disabled}
           className={clsx(
             'flex items-center gap-2 px-3 py-2 rounded-lg text-[11px] font-bold tracking-widest uppercase transition-all duration-300',
             'bg-white/5 border border-white/10 hover:bg-indigo-500/10 hover:border-indigo-500/30',
@@ -125,7 +138,7 @@ export default function AutoAlignButton({ matches, userName, discrete = false, m
       <button
         ref={buttonRef}
         onClick={handleAutoAlign}
-        disabled={loading}
+        disabled={loading || disabled}
         className={clsx(
           'relative flex items-center justify-center gap-3 px-8 py-4 rounded-2xl text-base font-black transition-all duration-500 overflow-hidden group',
           'bg-gradient-to-br from-indigo-500 via-indigo-600 to-purple-700',

@@ -38,7 +38,7 @@ export default function DesktopScheduleScreen({ model: { schedule, users, rounds
 
       <div className="container mx-auto px-4 md:px-8 pb-6">
         <div className="max-w-7xl mx-auto">
-          <div className="pt-4 flex flex-col lg:flex-row gap-6 items-stretch">
+          <div className="pt-4 flex flex-col lg:flex-row gap-6 items-start">
             <div className="w-full lg:max-w-md shrink-0">
               <ScheduleControls
                 users={users}
@@ -71,6 +71,7 @@ export default function DesktopScheduleScreen({ model: { schedule, users, rounds
                   </div>
                   <div className="relative z-20 flex-1 p-4 bg-zinc-950 border border-white/10 rounded-xl shadow-2xl shadow-black/50 flex flex-col items-center justify-center min-h-[88px]">
                     <AutoAlignButton
+                      key={`${userId}-${schedule.round.round_id}`}
                       userId={userId}
                       matches={schedule.matches}
                       userName={users.find((u) => String(u.id) === String(userId))?.name}
