@@ -47,6 +47,8 @@ test('Auto-lineup completion stays in the viewport with an intercepted save', as
           { width: 430, height: 932 },
         ]
       : [info.project.use.viewport!];
+    // Streamed React segments can retain a hidden copy outside the active screen after reload.
+    const exclusions = page.getByRole('main').locator('.schedule-lineup-exclusions');
     for (const size of sizes) {
       await page.setViewportSize(size);
       for (const theme of ['dark', 'light']) {
@@ -54,7 +56,6 @@ test('Auto-lineup completion stays in the viewport with an intercepted save', as
           (value) => document.documentElement.setAttribute('data-theme', value),
           theme
         );
-        const exclusions = page.locator('.schedule-lineup-exclusions');
         await exclusions.locator('summary').click();
         await expect(exclusions.getByRole('checkbox')).toHaveCount(10);
         await exclusions.getByRole('checkbox').first().check();
@@ -144,7 +145,6 @@ test('Auto-lineup completion stays in the viewport with an intercepted save', as
         reservesID: [],
       },
     });
-    const exclusions = page.locator('.schedule-lineup-exclusions');
     await exclusions.locator('summary').click();
     const checkboxes = exclusions.getByRole('checkbox');
     for (const checkbox of await checkboxes.all()) await checkbox.check();
@@ -172,6 +172,8 @@ test('Auto-lineup completion stays in the viewport with an intercepted save', as
     await expect(dialog).not.toBeVisible();
     await expect(exclusions.getByRole('checkbox', { name: /Fixture Guard/ })).toBeChecked();
     await page.reload();
+    await expect(exclusions).toHaveCount(1);
+    await expect(page.locator('.schedule-lineup-exclusions:visible')).toHaveCount(1);
     await expect(exclusions.locator('summary')).toHaveText('Excluir jugadores (0)');
   } finally {
     finishRequest?.();
