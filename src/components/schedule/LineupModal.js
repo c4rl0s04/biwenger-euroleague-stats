@@ -1,6 +1,8 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { createPortal } from 'react-dom';
+import { useId } from 'react';
+import { ModalDialog, Button } from '@/components/ui/foundation';
 import { useRouter } from 'next/navigation';
 import { X, CheckCircle2, Trophy } from 'lucide-react';
 
@@ -8,15 +10,15 @@ import { X, CheckCircle2, Trophy } from 'lucide-react';
 const POSITION_CONFIG = {
   Base: {
     label: 'B',
-    badge: 'text-blue-400 bg-blue-400/10 border-blue-400/20',
+    badge: 'bg-blue-400/10 border-blue-400/20',
   },
   Alero: {
     label: 'A',
-    badge: 'text-green-400 bg-green-400/10 border-green-400/20',
+    badge: 'bg-green-400/10 border-green-400/20',
   },
   Pivot: {
     label: 'P',
-    badge: 'text-red-400 bg-red-400/10 border-red-400/20',
+    badge: 'bg-red-400/10 border-red-400/20',
   },
 };
 
@@ -26,7 +28,7 @@ function PlayerRow({ player, index, isCaptain, isStarter, onPlayerClick }) {
 
   return (
     <div
-      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-colors ${
+      className={`flex items-center gap-3 px-3 py-1 rounded-xl border transition-colors ${
         isCaptain
           ? 'bg-yellow-500/5 border-yellow-500/20'
           : isStarter
@@ -41,7 +43,8 @@ function PlayerRow({ player, index, isCaptain, isStarter, onPlayerClick }) {
 
       {/* Position badge */}
       <span
-        className={`text-[8px] font-black px-1.5 py-0.5 rounded border shrink-0 tracking-widest ${config.badge}`}
+        title={pos}
+        className={`text-[10px] text-content-primary font-semibold px-1.5 py-0.5 rounded border shrink-0 ${config.badge}`}
       >
         {config.label}
       </span>
@@ -49,8 +52,8 @@ function PlayerRow({ player, index, isCaptain, isStarter, onPlayerClick }) {
       {/* Player name — clickable */}
       <button
         onClick={() => onPlayerClick(player.id)}
-        className={`flex-1 text-sm font-semibold truncate text-left transition-all duration-150 hover:scale-[1.02] hover:brightness-125 active:scale-95 cursor-pointer ${
-          isCaptain ? 'text-yellow-300' : 'text-foreground'
+        className={`flex-1 min-w-0 min-h-11 text-sm font-semibold truncate text-left hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring cursor-pointer ${
+          isCaptain ? 'text-action-primary' : 'text-foreground'
         }`}
       >
         {player.name}
@@ -59,10 +62,8 @@ function PlayerRow({ player, index, isCaptain, isStarter, onPlayerClick }) {
       {/* Captain trophy */}
       {isCaptain && (
         <div className="flex items-center gap-1 shrink-0">
-          <Trophy size={11} className="text-yellow-500 fill-yellow-500" />
-          <span className="text-[8px] font-black text-yellow-500 uppercase tracking-widest">
-            Cap
-          </span>
+          <Trophy size={12} className="text-action-primary" aria-hidden="true" />
+          <span className="text-[10px] font-semibold text-action-primary">Cap</span>
         </div>
       )}
 
@@ -84,116 +85,104 @@ export default function LineupModal({
   captain,
   formationType,
   userName,
+  returnFocusRef,
 }) {
   const router = useRouter();
+  const titleId = useId();
 
   const handlePlayerClick = (playerId) => {
     onClose();
     router.push(`/player/${playerId}`);
   };
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-4">
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+  if (!isOpen || typeof document === 'undefined') return null;
+  return createPortal(
+    <div className="schedule-lineup-overlay">
+      <button
+        type="button"
+        className="schedule-lineup-backdrop"
+        onClick={onClose}
+        aria-label="Cerrar resumen de alineación"
+        tabIndex={-1}
+      />
+      <ModalDialog
+        onClose={onClose}
+        aria-labelledby={titleId}
+        preventInitialFocusScroll
+        returnFocusRef={returnFocusRef}
+        className="schedule-lineup-dialog"
+      >
+        {/* Header */}
+        <div className="flex shrink-0 items-center justify-between gap-3 px-5 py-4 border-b border-border">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <CheckCircle2 size={16} className="text-green-400 shrink-0" />
+            <div className="min-w-0">
+              <h2 id={titleId} className="text-base font-bold text-foreground mb-1">
+                Alineación enviada
+              </h2>
+              <p className="text-xs text-muted-foreground break-words">
+                {userName ? `${userName} · ` : ''}Esquema {formationType}
+              </p>
+            </div>
+          </div>
+          <button
             onClick={onClose}
-          />
-
-          {/* Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-            className="relative w-full max-w-sm bg-card border border-border rounded-2xl shadow-2xl overflow-hidden"
+            aria-label="Cerrar alineación"
+            className="flex shrink-0 items-center justify-center size-11 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-focus-ring cursor-pointer"
           >
-            {/* Formation banner */}
-            <div className="px-5 pt-4 pb-3 border-b border-border bg-secondary/30">
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">
-                Esquema
-              </p>
-              <p className="text-3xl font-black text-foreground tracking-tight">{formationType}</p>
-            </div>
-            {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-              <div className="flex items-center gap-2.5">
-                <CheckCircle2 size={16} className="text-green-400 shrink-0" />
-                <div>
-                  <p className="text-sm font-black text-foreground leading-none mb-1">
-                    Alineación enviada
-                  </p>
-                  <p className="text-[10px] text-muted-foreground font-medium tracking-wide">
-                    {userName}
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={onClose}
-                className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-              >
-                <X size={15} />
-              </button>
-            </div>
-
-            {/* Starters */}
-            <div className="px-3 pt-3 pb-1">
-              <p className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] px-1 mb-2">
-                Quinteto Inicial
-              </p>
-              <div className="space-y-1">
-                {starters.map((player, i) => (
-                  <PlayerRow
-                    key={player.id}
-                    player={player}
-                    index={i}
-                    isCaptain={player.id === captain?.id}
-                    isStarter
-                    onPlayerClick={handlePlayerClick}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Divider */}
-            <div className="mx-4 my-2 border-t border-border" />
-
-            {/* Bench */}
-            <div className="px-3 pb-3">
-              <p className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] px-1 mb-2">
-                Banquillo
-              </p>
-              <div className="space-y-1">
-                {bench.map((player, i) => (
-                  <PlayerRow
-                    key={player.id}
-                    player={player}
-                    index={i}
-                    isCaptain={false}
-                    isStarter={false}
-                    onPlayerClick={handlePlayerClick}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="px-4 pb-4">
-              <button
-                onClick={onClose}
-                className="w-full py-2.5 rounded-xl bg-secondary hover:bg-muted border border-border text-xs font-bold text-muted-foreground hover:text-foreground transition-all tracking-widest uppercase cursor-pointer"
-              >
-                Cerrar
-              </button>
-            </div>
-          </motion.div>
+            <X size={15} />
+          </button>
         </div>
-      )}
-    </AnimatePresence>
+
+        <div className="schedule-lineup-player-list">
+          {/* Starters */}
+          <div className="px-3 pt-3 pb-1">
+            <p className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] px-1 mb-2">
+              Quinteto Inicial
+            </p>
+            <div className="space-y-1">
+              {starters.map((player, i) => (
+                <PlayerRow
+                  key={player.id}
+                  player={player}
+                  index={i}
+                  isCaptain={player.id === captain?.id}
+                  isStarter
+                  onPlayerClick={handlePlayerClick}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="mx-4 my-2 border-t border-border" />
+
+          {/* Bench */}
+          <div className="px-3 pb-3">
+            <p className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] px-1 mb-2">
+              Banquillo
+            </p>
+            <div className="space-y-1">
+              {bench.map((player, i) => (
+                <PlayerRow
+                  key={player.id}
+                  player={player}
+                  index={i}
+                  isCaptain={false}
+                  isStarter={false}
+                  onPlayerClick={handlePlayerClick}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+        {/* Footer */}
+        <div className="shrink-0 border-t border-border p-4">
+          <Button onClick={onClose} variant="secondary" className="w-full min-h-11">
+            Cerrar
+          </Button>
+        </div>
+      </ModalDialog>
+    </div>,
+    document.body
   );
 }
