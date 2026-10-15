@@ -3446,3 +3446,146 @@
     scroll-behavior: auto;
   }
 }
+
+/* Schedule owns this compact composition; shared match rows stay unchanged. */
+.schedule-mobile-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  border-block: 1px solid hsl(var(--border-default));
+}
+.schedule-mobile-summary > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.schedule-mobile-summary dt,
+.schedule-mobile-count,
+.schedule-mobile-player-copy > span {
+  color: hsl(var(--content-muted));
+  font-size: 0.75rem;
+}
+.schedule-mobile-summary dd {
+  color: hsl(var(--content-primary));
+  font-size: 1.35rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.schedule-mobile-summary > div:last-child dd {
+  color: hsl(var(--action-primary));
+}
+.schedule-mobile-day .mobile-section-heading h2 {
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: 0.95rem;
+}
+.schedule-mobile-day .mobile-section-heading h2::first-letter {
+  text-transform: uppercase;
+}
+.schedule-mobile-match {
+  min-width: 0;
+  padding: 0.75rem;
+  border: 1px solid hsl(var(--border-default));
+  border-radius: 0.85rem;
+  background: hsl(var(--surface-card));
+}
+.schedule-mobile-match-active {
+  border-inline-start: 3px solid hsl(var(--action-primary));
+}
+.schedule-mobile-match-header {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.5rem;
+}
+.schedule-mobile-match time {
+  color: hsl(var(--content-primary));
+  overflow-wrap: anywhere;
+  font-size: 1.15rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.schedule-mobile-teams {
+  display: grid;
+}
+.schedule-mobile-teams a {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  color: hsl(var(--content-primary));
+  font-size: 0.85rem;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+.schedule-mobile-count {
+  margin-top: 0.4rem;
+}
+.schedule-mobile-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.65rem;
+  list-style: none;
+  padding: 0;
+}
+.schedule-mobile-chips li {
+  min-width: 0;
+  max-width: 100%;
+}
+.schedule-mobile-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 48px;
+  max-width: 100%;
+  padding: 0.3rem 0.65rem 0.3rem 0.3rem;
+  border: 1px solid hsl(var(--border-default));
+  border-radius: 1.5rem;
+  background: hsl(var(--surface-muted) / 0.5);
+  color: hsl(var(--content-primary));
+}
+.schedule-mobile-avatar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 2px solid;
+  border-radius: 50%;
+  background: hsl(var(--surface-muted));
+}
+.schedule-mobile-avatar img {
+  object-fit: cover;
+  object-position: top;
+}
+.schedule-mobile-player-copy {
+  display: grid;
+  min-width: 0;
+  gap: 0.15rem;
+}
+.schedule-mobile-player-copy strong {
+  color: hsl(var(--content-primary));
+  font-size: 0.8rem;
+  overflow-wrap: anywhere;
+}
+.schedule-mobile-points {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.schedule-mobile-chip:focus-visible,
+.schedule-mobile-teams a:focus-visible {
+  outline: 2px solid hsl(var(--focus-ring));
+  outline-offset: 3px;
+}
+.schedule-mobile-empty {
+  padding-block: 2rem;
+  color: hsl(var(--content-muted));
+}

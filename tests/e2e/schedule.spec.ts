@@ -31,8 +31,61 @@ test('Schedule preserves original read screens and map navigation', async ({ pag
       stylePath: 'tests/e2e/screenshot.css',
     });
   };
-  await capture('schedule-overview');
+  if (!phone) await capture('schedule-overview');
   if (phone) {
+    await expect(page.locator('.schedule-mobile-day')).toHaveCount(1);
+    await expect(page.locator('.schedule-mobile-summary')).toContainText('24');
+    await expect(page.locator('.schedule-mobile-chip').first()).toContainText('Fixture Guard');
+    await expect(page.locator('.schedule-mobile-teams a').first()).toHaveAttribute(
+      'href',
+      /\/team\/\d+/
+    );
+    const roundLink = page
+      .getByRole('navigation', { name: 'Seleccionar jornada' })
+      .getByRole('link')
+      .first();
+    await expect(roundLink).toHaveAttribute('aria-current', 'page');
+    await roundLink.click();
+    await expect(page).toHaveURL(/roundId=/);
+    for (const width of [320, 390, 430]) {
+      await page.setViewportSize({ width, height: 844 });
+      for (const theme of ['dark', 'light']) {
+        await page.evaluate(
+          (value) => document.documentElement.setAttribute('data-theme', value),
+          theme
+        );
+        await waitForScreenshotPaint(page);
+        expect(
+          await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)
+        ).toBe(true);
+        await expect(page.locator('.schedule-mobile-chip').first()).toBeVisible();
+        expect(
+          await page
+            .locator('.schedule-mobile-player-copy strong')
+            .first()
+            .evaluate((element) => getComputedStyle(element).color)
+        ).toBe(
+          await page
+            .locator('.schedule-mobile-match time')
+            .first()
+            .evaluate((element) => getComputedStyle(element).color)
+        );
+        await page.screenshot({
+          path: info.outputPath(`schedule-${width}-${theme}.png`),
+          fullPage: true,
+          animations: 'disabled',
+        });
+      }
+    }
+    await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'dark'));
+    await page.setViewportSize(info.project.use.viewport!);
+    await capture('schedule-overview');
+    await page.locator('.schedule-mobile-teams a').first().click();
+    await expect(page).toHaveURL(/\/team\/\d+$/);
+    await page.goBack();
+    await page.locator('.schedule-mobile-chip').first().click();
+    await expect(page).toHaveURL(/\/player\/99101$/);
+    await page.goBack();
     const mapLink = page.locator('a.mobile-section-link[href="/schedule/map"]');
     await expect(mapLink).toBeVisible();
     await mapLink.click();
