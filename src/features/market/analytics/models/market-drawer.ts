@@ -5,12 +5,7 @@ import type { ManagerDirectoryViewModel, MarketAnalytics } from './market-analyt
 export interface MarketDrawerRowsByType {
   player: MarketAnalytics['bestValue' | 'topPlayer' | 'mostOwners' | 'infirmary'];
   user: MarketAnalytics[ // Existing profit/trade dispatch supports this shape, though no current card opens it.
-    | 'topTrader'
-    | 'bigSpender'
-    | 'bestSeller'
-    | 'theThief'
-    | 'theVictim'
-    | 'overpayerManager'];
+    'topTrader' | 'bigSpender' | 'bestSeller' | 'theThief' | 'theVictim' | 'overpayerManager'];
   transaction: MarketAnalytics['recordTransfer' | 'recordBid' | 'biggestSteal' | 'inflatedPlayer'];
   temporal: MarketAnalytics[
     | 'bestFlip'

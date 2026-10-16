@@ -1,10 +1,5 @@
 export type TransferValueAssessment =
-  | 'saving'
-  | 'overpay'
-  | 'favorable_sale'
-  | 'below_market_sale'
-  | 'at_market'
-  | 'unavailable';
+  'saving' | 'overpay' | 'favorable_sale' | 'below_market_sale' | 'at_market' | 'unavailable';
 
 export type TransferValueTone = 'positive' | 'negative' | 'neutral' | 'unavailable';
 

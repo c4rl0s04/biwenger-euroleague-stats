@@ -4,8 +4,7 @@
  */
 
 export type ValidationResult<T> =
-  | { valid: true; value: T; error?: never }
-  | { valid: false; value?: never; error: string };
+  { valid: true; value: T; error?: never } | { valid: false; value?: never; error: string };
 
 interface NumberValidationOptions {
   defaultValue?: number;

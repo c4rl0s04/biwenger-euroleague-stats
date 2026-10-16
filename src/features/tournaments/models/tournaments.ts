@@ -1,12 +1,7 @@
 /** Historical tournament snapshots have heterogeneous JSON contracts. Preserve
  * their complete JSON value until their presentation-specific models migrate. */
 export type TournamentJson =
-  | null
-  | boolean
-  | number
-  | string
-  | TournamentJson[]
-  | { [key: string]: TournamentJson };
+  null | boolean | number | string | TournamentJson[] | { [key: string]: TournamentJson };
 
 export interface Tournament {
   id: number;

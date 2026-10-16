@@ -1,7 +1,5 @@
 export type ServiceWorkerStrategy =
-  | 'network-only'
-  | 'network-with-offline-fallback'
-  | 'cache-first';
+  'network-only' | 'network-with-offline-fallback' | 'cache-first';
 
 const PUBLIC_SHELL_ASSETS = new Set([
   '/offline',
