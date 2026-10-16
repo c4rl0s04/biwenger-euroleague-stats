@@ -87,16 +87,13 @@ export async function readManagerCaptainStats(userId: string | number): Promise<
 
   // Four sequential queries preserving original order and bind parameters [userId, seasonId]
   const overall = (await (pgClient as any).query(overallQuery, [userId, seasonId])).rows[0] as
-    | CaptainOverallRow
-    | undefined;
+    CaptainOverallRow | undefined;
   const mostUsed = (await (pgClient as any).query(mostUsedQuery, [userId, seasonId]))
     .rows as CaptainUsageRow[];
   const best = (await (pgClient as any).query(bestQuery, [userId, seasonId])).rows[0] as
-    | CaptainRoundRow
-    | undefined;
+    CaptainRoundRow | undefined;
   const worst = (await (pgClient as any).query(worstQuery, [userId, seasonId])).rows[0] as
-    | CaptainRoundRow
-    | undefined;
+    CaptainRoundRow | undefined;
 
   return { overall, mostUsed, best, worst };
 }

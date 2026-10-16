@@ -104,8 +104,7 @@ export async function getUserLineup(userId: string, roundId: string | number): P
     WHERE ur.season_id = $3 AND ur.user_id = $1 AND ur.round_id = $2
   `;
   const totals = (await pgClient.query(totalsQuery, [userId, roundId, seasonId])).rows[0] as
-    | LineupTotalsRow
-    | undefined;
+    LineupTotalsRow | undefined;
 
   // 3. Process lineup and detect missing players (ghost players)
   const lineup: LineupPlayer[] = rawLineup.map((p) => ({
