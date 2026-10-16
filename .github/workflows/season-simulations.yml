@@ -80,7 +80,7 @@ jobs:
           node-version: '20'
           cache: npm
       - run: npm ci
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: season-analysis-screen-shard-*
           path: artifacts/screen-shards
@@ -115,7 +115,7 @@ jobs:
           node-version: '20'
           cache: npm
       - run: npm ci
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: season-analysis-screen-merged
           path: artifacts/input
@@ -145,7 +145,7 @@ jobs:
           node-version: '20'
           cache: npm
       - run: npm ci
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: season-analysis-refine-shard-*
           path: artifacts/refine-shards
@@ -180,7 +180,7 @@ jobs:
           node-version: '20'
           cache: npm
       - run: npm ci
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: season-analysis-refine-merged
           path: artifacts/input
@@ -212,7 +212,7 @@ jobs:
           node-version: '20'
           cache: npm
       - run: npm ci
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: season-analysis-final-shard-*
           path: artifacts/final-shards
