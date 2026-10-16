@@ -63,7 +63,7 @@ jobs:
           SIMULATION_SHARD_COUNT: '24'
           SIMULATION_OUTPUT: artifacts/screen-shard-${{ matrix.shard }}.json
         run: npm run simulation:analysis:run
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: season-analysis-screen-shard-${{ matrix.shard }}
           path: artifacts/screen-shard-${{ matrix.shard }}.json
@@ -92,7 +92,7 @@ jobs:
           SIMULATION_OUTPUT: artifacts/screen-analysis.json
           SIMULATION_SHORTLIST_LIMIT: '120'
         run: npm run simulation:analysis:merge
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: season-analysis-screen-merged
           path: artifacts/screen-analysis.json
@@ -128,7 +128,7 @@ jobs:
           SIMULATION_INPUT: artifacts/input/screen-analysis.json
           SIMULATION_OUTPUT: artifacts/refine-shard-${{ matrix.shard }}.json
         run: npm run simulation:analysis:run
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: season-analysis-refine-shard-${{ matrix.shard }}
           path: artifacts/refine-shard-${{ matrix.shard }}.json
@@ -157,7 +157,7 @@ jobs:
           SIMULATION_OUTPUT: artifacts/refine-analysis.json
           SIMULATION_SHORTLIST_LIMIT: '24'
         run: npm run simulation:analysis:merge
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: season-analysis-refine-merged
           path: artifacts/refine-analysis.json
@@ -193,7 +193,7 @@ jobs:
           SIMULATION_INPUT: artifacts/input/refine-analysis.json
           SIMULATION_OUTPUT: artifacts/final-shard-${{ matrix.shard }}.json
         run: npm run simulation:analysis:run
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: season-analysis-final-shard-${{ matrix.shard }}
           path: artifacts/final-shard-${{ matrix.shard }}.json
