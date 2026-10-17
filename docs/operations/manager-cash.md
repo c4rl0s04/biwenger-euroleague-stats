@@ -38,6 +38,8 @@ npm run sync:bootstrap -- --step=biwenger-board
 
 This command writes to the configured database. Review its target and obtain the
 required production approval before running it, then generate a new report.
+Board history is bounded by the target season's canonical start date, so older
+seasons returned by Biwenger are not imported into the current season.
 
 The existing ledger defaults apply: the active season, a €40,000,000 budget, and
 September 19, 2026 as the initial squad valuation date. Initial prices use the exact

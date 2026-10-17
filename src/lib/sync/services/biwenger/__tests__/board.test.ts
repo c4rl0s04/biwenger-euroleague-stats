@@ -11,11 +11,32 @@ describe('Biwenger Board Service', () => {
     );
   });
 
+  it('refuses to fetch history without a canonical season start date', async () => {
+    const fetch = vi.fn();
+    const manager: any = {
+      context: {
+        seasonId: '2026-27',
+        db: {
+          select: vi.fn().mockReturnValue({
+            from: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue([]) }),
+          }),
+        },
+      },
+    };
+
+    await expect(syncBiwengerBoard(manager, { fetch })).rejects.toThrow(
+      'Board history requires a valid canonical season start date.'
+    );
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
   it('processes board batches including bonuses, porras, and transfers', async () => {
     const mockDb = {
       select: vi.fn().mockReturnValue({
         from: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue([{ name: 'June', status: 'active' }]),
+          where: vi
+            .fn()
+            .mockResolvedValue([{ name: 'June', status: 'active', startsAt: '2025-09-01' }]),
         }),
       }),
       query: vi.fn().mockResolvedValue({ rows: [{ id: 1 }], rowCount: 1 }),
@@ -98,7 +119,7 @@ describe('Biwenger Board Service', () => {
       select: vi.fn().mockReturnValue({
         from: vi.fn().mockReturnValue({
           where: vi.fn().mockResolvedValue([
-            { name: 'Lender', status: 'active' },
+            { name: 'Lender', status: 'active', startsAt: '2026-09-01' },
             { name: 'Borrower', status: 'active' },
           ]),
         }),
@@ -145,6 +166,11 @@ describe('Biwenger Board Service', () => {
             },
           ],
         },
+        {
+          type: 'loan',
+          date: 1759685765,
+          content: [{ player: 103, from: { id: 10 }, to: { id: 20 }, amount: 300000 }],
+        },
       ],
     });
 
@@ -176,7 +202,9 @@ describe('Biwenger Board Service', () => {
         context: {
           db: {
             select: vi.fn().mockReturnValue({
-              from: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue([]) }),
+              from: vi.fn().mockReturnValue({
+                where: vi.fn().mockResolvedValue([{ startsAt: '2026-09-01' }]),
+              }),
             }),
             query: vi.fn(),
           },
@@ -209,7 +237,9 @@ describe('Biwenger Board Service', () => {
       context: {
         db: {
           select: vi.fn().mockReturnValue({
-            from: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue([]) }),
+            from: vi
+              .fn()
+              .mockReturnValue({ where: vi.fn().mockResolvedValue([{ startsAt: '2026-09-01' }]) }),
           }),
           query: vi.fn().mockRejectedValue(new Error('database write failed')),
         },

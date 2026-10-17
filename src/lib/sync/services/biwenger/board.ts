@@ -2,7 +2,7 @@ import { biwengerFetch } from '../../../api/biwenger-client';
 import { CONFIG } from '../../../config';
 import { prepareMarketMutations, type MarketMutations } from '../../../db/mutations/market';
 import type { SyncManager } from '../../manager';
-import { getSeasonActiveUserNames } from '../../repositories/sync-queries';
+import { getSeasonActiveUserNames, getSeasonStartDate } from '../../repositories/sync-queries';
 
 export interface BoardDependencies {
   fetch: typeof biwengerFetch;
@@ -231,6 +231,17 @@ export async function syncBiwengerBoard(
   const db = manager.context.db;
   const seasonId = manager.context.seasonId;
   if (!seasonId) throw new Error('Canonical sync season was not resolved before board ingestion.');
+  const startsAt = await getSeasonStartDate(seasonId, db);
+  const seasonStart = startsAt ? Date.parse(`${startsAt}T00:00:00Z`) : NaN;
+  if (!Number.isFinite(seasonStart)) {
+    throw new Error('Board history requires a valid canonical season start date.');
+  }
+  const cutoffDate = new Date(
+    Math.max(
+      seasonStart,
+      manager.mode === 'routine' ? Date.now() - 7 * 24 * 60 * 60 * 1000 : seasonStart
+    )
+  );
   const snapshot = await manager.getBiwengerCompetition();
   const playersList = snapshot.players;
   const teams = snapshot.teams;
@@ -281,9 +292,6 @@ export async function syncBiwengerBoard(
     }
 
     let reachedCutoff = false;
-    const cutoffDate =
-      manager.mode === 'routine' ? new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) : new Date(0);
-
     for (const t of items) {
       const itemDate = new Date(t.date * 1000);
       if (itemDate < cutoffDate) {
@@ -337,8 +345,8 @@ export async function syncBiwengerBoard(
       }
     }
 
-    if (reachedCutoff && manager.mode === 'routine') {
-      manager.log('Reached routine 7-day cutoff; stopping history fetch');
+    if (reachedCutoff) {
+      manager.log(`Reached board cutoff ${cutoffDate.toISOString()}; stopping history fetch`);
       moreTransfers = false;
     } else if (items.length < limit) {
       moreTransfers = false;
