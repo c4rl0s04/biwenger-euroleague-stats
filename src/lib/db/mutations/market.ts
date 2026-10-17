@@ -63,7 +63,7 @@ export interface MarketMutations {
     params: InsertTransferParams
   ) => Promise<{ id: number | null; created: boolean }>;
   insertBid: (params: InsertBidParams) => Promise<void>;
-  insertFinance: (params: InsertFinanceParams) => Promise<void>;
+  insertFinance: (params: InsertFinanceParams) => Promise<boolean>;
   insertPorra: (params: InsertPorraParams) => Promise<void>;
   insertPlayerFallback: (params: InsertPlayerFallbackParams) => Promise<void>;
 }
@@ -119,7 +119,8 @@ export function prepareMarketMutations(
     },
 
     insertFinance: async (params: InsertFinanceParams) => {
-      await db.query(
+      // shortcut: board events have no stored source ID; distinct identical payments need one.
+      const res = await db.query(
         `INSERT INTO finances (season_id, user_id, round_id, date, type, amount, description)
          SELECT $1, $2, $3, $4, $5, $6, $7
          WHERE NOT EXISTS (
@@ -142,6 +143,7 @@ export function prepareMarketMutations(
           params.description,
         ]
       );
+      return (res.rowCount ?? 0) > 0;
     },
 
     insertPorra: async (params: InsertPorraParams) => {

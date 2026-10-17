@@ -93,6 +93,7 @@ describe('Biwenger Board Service', () => {
   });
 
   it('records a loan fee for both managers and ignores the player return', async () => {
+    const insertedFinances = new Set<string>();
     const mockDb = {
       select: vi.fn().mockReturnValue({
         from: vi.fn().mockReturnValue({
@@ -102,7 +103,13 @@ describe('Biwenger Board Service', () => {
           ]),
         }),
       }),
-      query: vi.fn().mockResolvedValue({ rows: [], rowCount: 1 }),
+      query: vi.fn().mockImplementation(async (sql: string, params: unknown[]) => {
+        if (!sql.includes('INSERT INTO finances')) return { rows: [], rowCount: 1 };
+        const key = JSON.stringify(params);
+        if (insertedFinances.has(key)) return { rows: [], rowCount: 0 };
+        insertedFinances.add(key);
+        return { rows: [], rowCount: 1 };
+      }),
     };
     const manager: any = {
       context: { db: mockDb, seasonId: '2026-27' },
@@ -110,39 +117,36 @@ describe('Biwenger Board Service', () => {
       log: vi.fn(),
       getBiwengerCompetition: vi.fn().mockResolvedValue({ players: {}, teams: {} }),
     };
-    const mockFetch = vi
-      .fn()
-      .mockResolvedValueOnce({
-        data: [
-          {
-            type: 'loan',
-            date: 1791396115,
-            content: [
-              {
-                player: 101,
-                from: { id: 10, name: 'Lender' },
-                to: { id: 20, name: 'Borrower' },
-                amount: 500000,
-                rounds: 2,
-              },
-              { player: 102, from: { id: 10 }, to: null, amount: 500000 },
-            ],
-          },
-          {
-            type: 'loanReturn',
-            date: 1792025423,
-            content: [
-              {
-                player: 101,
-                from: { id: 20, name: 'Borrower' },
-                to: { id: 10, name: 'Lender' },
-                rounds: 2,
-              },
-            ],
-          },
-        ],
-      })
-      .mockResolvedValueOnce({ data: [] });
+    const mockFetch = vi.fn().mockResolvedValue({
+      data: [
+        {
+          type: 'loan',
+          date: 1791396115,
+          content: [
+            {
+              player: 101,
+              from: { id: 10, name: 'Lender' },
+              to: { id: 20, name: 'Borrower' },
+              amount: 500000,
+              rounds: 2,
+            },
+            { player: 102, from: { id: 10 }, to: null, amount: 0 },
+          ],
+        },
+        {
+          type: 'loanReturn',
+          date: 1792025423,
+          content: [
+            {
+              player: 101,
+              from: { id: 20, name: 'Borrower' },
+              to: { id: 10, name: 'Lender' },
+              rounds: 2,
+            },
+          ],
+        },
+      ],
+    });
 
     const result = await syncBiwengerBoard(manager, {
       fetch: mockFetch,
@@ -157,5 +161,78 @@ describe('Biwenger Board Service', () => {
       ['10', 'loan_fee', 500000],
       ['20', 'loan_fee', -500000],
     ]);
+
+    const repeated = await syncBiwengerBoard(manager, {
+      fetch: mockFetch,
+      leagueId: 'test-league-1',
+    });
+    expect(repeated.counts.finances).toBe(0);
+  });
+
+  it.each([null, [{ player: 101, from: { id: 10 }, amount: 500000 }]])(
+    'fails on malformed paid loan content: %j',
+    async (content) => {
+      const manager: any = {
+        context: {
+          db: {
+            select: vi.fn().mockReturnValue({
+              from: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue([]) }),
+            }),
+            query: vi.fn(),
+          },
+          seasonId: '2026-27',
+        },
+        mode: 'bootstrap',
+        log: vi.fn(),
+        getBiwengerCompetition: vi.fn().mockResolvedValue({ players: {}, teams: {} }),
+      };
+
+      await expect(
+        syncBiwengerBoard(manager, {
+          fetch: vi.fn().mockResolvedValue({
+            data: [
+              {
+                type: 'loan',
+                date: 1791396115,
+                content,
+              },
+            ],
+          }),
+          leagueId: 'test-league-1',
+        })
+      ).rejects.toThrow(/Invalid loan (board content|fee)/);
+    }
+  );
+
+  it('propagates a finance write failure', async () => {
+    const manager: any = {
+      context: {
+        db: {
+          select: vi.fn().mockReturnValue({
+            from: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue([]) }),
+          }),
+          query: vi.fn().mockRejectedValue(new Error('database write failed')),
+        },
+        seasonId: '2026-27',
+      },
+      mode: 'bootstrap',
+      log: vi.fn(),
+      getBiwengerCompetition: vi.fn().mockResolvedValue({ players: {}, teams: {} }),
+    };
+
+    await expect(
+      syncBiwengerBoard(manager, {
+        fetch: vi.fn().mockResolvedValue({
+          data: [
+            {
+              type: 'roundFinished',
+              date: 1791396115,
+              content: { results: [{ user: { id: 10 }, bonus: 500000 }] },
+            },
+          ],
+        }),
+        leagueId: 'test-league-1',
+      })
+    ).rejects.toThrow('database write failed');
   });
 });

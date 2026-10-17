@@ -44,7 +44,7 @@ async function processRoundBonus(
 
   for (const res of content.results) {
     if (res.bonus && res.bonus > 0) {
-      try {
+      finances += Number(
         await mutations.insertFinance({
           user_id: res.user.id || res.user,
           round_id: roundId,
@@ -52,11 +52,8 @@ async function processRoundBonus(
           type: 'round_bonus',
           amount: res.bonus,
           description: `Bonus ${roundName}`,
-        });
-        finances++;
-      } catch {
-        // Ignore duplicate finance inserts
-      }
+        })
+      );
     }
   }
   return finances;
@@ -68,7 +65,7 @@ async function processAdminBonus(
   mutations: MarketMutations
 ): Promise<number> {
   if (content.to && content.amount) {
-    try {
+    return Number(
       await mutations.insertFinance({
         user_id: content.to.id || content.to,
         round_id: null,
@@ -76,11 +73,8 @@ async function processAdminBonus(
         type: 'admin_bonus',
         amount: content.amount,
         description: content.text || 'Abono Administración',
-      });
-      return 1;
-    } catch {
-      // Ignore duplicate finance inserts
-    }
+      })
+    );
   }
   return 0;
 }
@@ -90,10 +84,11 @@ async function processLoanFees(
   date: string,
   mutations: MarketMutations
 ): Promise<number> {
-  if (!Array.isArray(content)) return 0;
+  if (!Array.isArray(content)) throw new Error(`Invalid loan board content at ${date}`);
   let finances = 0;
 
   for (const loan of content) {
+    if (loan?.amount === 0) continue;
     if (
       !Number.isSafeInteger(loan?.amount) ||
       loan.amount <= 0 ||
@@ -105,7 +100,7 @@ async function processLoanFees(
       loan.to.id <= 0 ||
       loan.from.id === loan.to.id
     )
-      continue;
+      throw new Error(`Invalid loan fee at ${date} for player ${loan?.player ?? 'unknown'}`);
 
     const fee = Number(loan.amount);
     const lenderId = String(loan.from.id);
@@ -114,15 +109,16 @@ async function processLoanFees(
       [lenderId, fee],
       [borrowerId, -fee],
     ] as const) {
-      await mutations.insertFinance({
-        user_id: userId,
-        round_id: null,
-        date,
-        type: 'loan_fee',
-        amount,
-        description: `Loan fee for player #${loan.player}`,
-      });
-      finances++;
+      finances += Number(
+        await mutations.insertFinance({
+          user_id: userId,
+          round_id: null,
+          date,
+          type: 'loan_fee',
+          amount,
+          description: `Loan fee for player #${loan.player}`,
+        })
+      );
     }
   }
 
@@ -309,7 +305,7 @@ export async function syncBiwengerBoard(
         continue;
       }
 
-      if (!t.content) continue;
+      if (!t.content && t.type !== 'loan') continue;
 
       if (t.type === 'roundFinished') {
         const date = new Date(t.date * 1000).toISOString();
