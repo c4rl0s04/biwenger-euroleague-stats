@@ -26,6 +26,19 @@ with a 60-second statement timeout. It reuses Scheduled Sync's `POSTGRES_HOST`,
 `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, and optional `POSTGRES_PORT`
 repository secrets; no additional secret or provider credential is needed.
 
+Cash adjustments include round bonuses, administrative credits, and loan fees. A
+loan fee credits the lender and charges the borrower when the loan starts; the
+player's return does not move cash. A report run only reads what has already synced.
+To include loans older than the routine sync's seven-day board window, run a
+one-time board history sync after deploying the fix:
+
+```bash
+npm run sync:bootstrap -- --step=biwenger-board
+```
+
+This command writes to the configured database. Review its target and obtain the
+required production approval before running it, then generate a new report.
+
 The existing ledger defaults apply: the active season, a €40,000,000 budget, and
 September 19, 2026 as the initial squad valuation date. Initial prices use the exact
 date when present, otherwise the nearest later price, then the nearest earlier price.

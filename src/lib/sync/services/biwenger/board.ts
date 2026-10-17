@@ -85,6 +85,50 @@ async function processAdminBonus(
   return 0;
 }
 
+async function processLoanFees(
+  content: any,
+  date: string,
+  mutations: MarketMutations
+): Promise<number> {
+  if (!Array.isArray(content)) return 0;
+  let finances = 0;
+
+  for (const loan of content) {
+    if (
+      !Number.isSafeInteger(loan?.amount) ||
+      loan.amount <= 0 ||
+      !Number.isSafeInteger(loan.player) ||
+      loan.player <= 0 ||
+      !Number.isSafeInteger(loan.from?.id) ||
+      loan.from.id <= 0 ||
+      !Number.isSafeInteger(loan.to?.id) ||
+      loan.to.id <= 0 ||
+      loan.from.id === loan.to.id
+    )
+      continue;
+
+    const fee = Number(loan.amount);
+    const lenderId = String(loan.from.id);
+    const borrowerId = String(loan.to.id);
+    for (const [userId, amount] of [
+      [lenderId, fee],
+      [borrowerId, -fee],
+    ] as const) {
+      await mutations.insertFinance({
+        user_id: userId,
+        round_id: null,
+        date,
+        type: 'loan_fee',
+        amount,
+        description: `Loan fee for player #${loan.player}`,
+      });
+      finances++;
+    }
+  }
+
+  return finances;
+}
+
 async function processBettingPool(
   content: any,
   manager: SyncManager,
@@ -259,6 +303,7 @@ export async function syncBiwengerBoard(
           'bettingPool',
           'roundFinished',
           'adminTransfer',
+          'loan',
         ].includes(t.type)
       ) {
         continue;
@@ -275,6 +320,12 @@ export async function syncBiwengerBoard(
       if (t.type === 'adminTransfer') {
         const date = new Date(t.date * 1000).toISOString();
         totalFinances += await processAdminBonus(t.content, date, mutations);
+        continue;
+      }
+
+      if (t.type === 'loan') {
+        const date = new Date(t.date * 1000).toISOString();
+        totalFinances += await processLoanFees(t.content, date, mutations);
         continue;
       }
 

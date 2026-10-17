@@ -24,7 +24,9 @@ def transactions(title, items, description, sign=''):
         detail = safe(item[description] or item.get('type', ''))
         counterparty = item.get('counterparty')
         counterpart = f" · {safe(counterparty)}" if counterparty else ''
-        lines.append(f"- {safe(str(item['date'])[:10])} · {detail}{counterpart} · **{sign}{euros(item['price'] if 'price' in item else item['amount'])}**")
+        amount = item['price'] if 'price' in item else item['amount']
+        prefix = sign or ('−' if amount < 0 else '+')
+        lines.append(f"- {safe(str(item['date'])[:10])} · {detail}{counterpart} · **{prefix}{euros(abs(amount))}**")
     return lines + ['']
 
 
@@ -69,7 +71,7 @@ def render(data):
                 f"| Initial cash | {euros(manager['initialCash'])} |",
                 f"| Sales | +{euros(manager['totalSales'])} |",
                 f"| Purchases | −{euros(manager['totalPurchases'])} |",
-                f"| Bonuses | +{euros(manager['totalBonuses'])} |",
+                f"| Cash adjustments | {'−' if manager['totalBonuses'] < 0 else '+'}{euros(abs(manager['totalBonuses']))} |",
                 f"| **Current cash** | **{euros(manager['currentCash'])}** |",
                 '',
                 '#### Initial squad',
@@ -79,7 +81,7 @@ def render(data):
             ]
             lines += transactions('Sales', manager['sales'], 'playerName', '+')
             lines += transactions('Purchases', manager['purchases'], 'playerName', '−')
-            lines += transactions('Bonuses', manager['bonuses'], 'description', '+')
+            lines += transactions('Cash adjustments', manager['bonuses'], 'description')
             lines += [
                 '#### Current squad',
                 '',

@@ -91,4 +91,71 @@ describe('Biwenger Board Service', () => {
     expect(result.counts.pools).toBe(1);
     expect(result.counts.transfers).toBe(1);
   });
+
+  it('records a loan fee for both managers and ignores the player return', async () => {
+    const mockDb = {
+      select: vi.fn().mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([
+            { name: 'Lender', status: 'active' },
+            { name: 'Borrower', status: 'active' },
+          ]),
+        }),
+      }),
+      query: vi.fn().mockResolvedValue({ rows: [], rowCount: 1 }),
+    };
+    const manager: any = {
+      context: { db: mockDb, seasonId: '2026-27' },
+      mode: 'bootstrap',
+      log: vi.fn(),
+      getBiwengerCompetition: vi.fn().mockResolvedValue({ players: {}, teams: {} }),
+    };
+    const mockFetch = vi
+      .fn()
+      .mockResolvedValueOnce({
+        data: [
+          {
+            type: 'loan',
+            date: 1791396115,
+            content: [
+              {
+                player: 101,
+                from: { id: 10, name: 'Lender' },
+                to: { id: 20, name: 'Borrower' },
+                amount: 500000,
+                rounds: 2,
+              },
+              { player: 102, from: { id: 10 }, to: null, amount: 500000 },
+            ],
+          },
+          {
+            type: 'loanReturn',
+            date: 1792025423,
+            content: [
+              {
+                player: 101,
+                from: { id: 20, name: 'Borrower' },
+                to: { id: 10, name: 'Lender' },
+                rounds: 2,
+              },
+            ],
+          },
+        ],
+      })
+      .mockResolvedValueOnce({ data: [] });
+
+    const result = await syncBiwengerBoard(manager, {
+      fetch: mockFetch,
+      leagueId: 'test-league-1',
+    });
+    const financeCalls = mockDb.query.mock.calls.filter(([sql]) =>
+      String(sql).includes('INSERT INTO finances')
+    );
+
+    expect(result.counts.finances).toBe(2);
+    expect(financeCalls.map(([, params]) => [params[1], params[4], params[5]])).toEqual([
+      ['10', 'loan_fee', 500000],
+      ['20', 'loan_fee', -500000],
+    ]);
+  });
 });
