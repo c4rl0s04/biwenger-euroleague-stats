@@ -2,7 +2,7 @@ import { biwengerFetch } from '../../../api/biwenger-client';
 import { CONFIG } from '../../../config';
 import { prepareMarketMutations, type MarketMutations } from '../../../db/mutations/market';
 import type { SyncManager } from '../../manager';
-import { getSeasonActiveUserNames } from '../../repositories/sync-queries';
+import { getSeasonActiveUserNames, getSeasonStartDate } from '../../repositories/sync-queries';
 
 export interface BoardDependencies {
   fetch: typeof biwengerFetch;
@@ -44,7 +44,7 @@ async function processRoundBonus(
 
   for (const res of content.results) {
     if (res.bonus && res.bonus > 0) {
-      try {
+      finances += Number(
         await mutations.insertFinance({
           user_id: res.user.id || res.user,
           round_id: roundId,
@@ -52,11 +52,8 @@ async function processRoundBonus(
           type: 'round_bonus',
           amount: res.bonus,
           description: `Bonus ${roundName}`,
-        });
-        finances++;
-      } catch {
-        // Ignore duplicate finance inserts
-      }
+        })
+      );
     }
   }
   return finances;
@@ -68,7 +65,7 @@ async function processAdminBonus(
   mutations: MarketMutations
 ): Promise<number> {
   if (content.to && content.amount) {
-    try {
+    return Number(
       await mutations.insertFinance({
         user_id: content.to.id || content.to,
         round_id: null,
@@ -76,13 +73,56 @@ async function processAdminBonus(
         type: 'admin_bonus',
         amount: content.amount,
         description: content.text || 'Abono Administración',
-      });
-      return 1;
-    } catch {
-      // Ignore duplicate finance inserts
-    }
+      })
+    );
   }
   return 0;
+}
+
+async function processLoanFees(
+  content: any,
+  date: string,
+  mutations: MarketMutations
+): Promise<number> {
+  if (!Array.isArray(content)) throw new Error(`Invalid loan board content at ${date}`);
+  let finances = 0;
+
+  for (const loan of content) {
+    if (loan?.amount === 0) continue;
+    if (
+      !Number.isSafeInteger(loan?.amount) ||
+      loan.amount <= 0 ||
+      !Number.isSafeInteger(loan.player) ||
+      loan.player <= 0 ||
+      !Number.isSafeInteger(loan.from?.id) ||
+      loan.from.id <= 0 ||
+      !Number.isSafeInteger(loan.to?.id) ||
+      loan.to.id <= 0 ||
+      loan.from.id === loan.to.id
+    )
+      throw new Error(`Invalid loan fee at ${date} for player ${loan?.player ?? 'unknown'}`);
+
+    const fee = Number(loan.amount);
+    const lenderId = String(loan.from.id);
+    const borrowerId = String(loan.to.id);
+    for (const [userId, amount] of [
+      [lenderId, fee],
+      [borrowerId, -fee],
+    ] as const) {
+      finances += Number(
+        await mutations.insertFinance({
+          user_id: userId,
+          round_id: null,
+          date,
+          type: 'loan_fee',
+          amount,
+          description: `Loan fee for player #${loan.player}`,
+        })
+      );
+    }
+  }
+
+  return finances;
 }
 
 async function processBettingPool(
@@ -191,6 +231,17 @@ export async function syncBiwengerBoard(
   const db = manager.context.db;
   const seasonId = manager.context.seasonId;
   if (!seasonId) throw new Error('Canonical sync season was not resolved before board ingestion.');
+  const startsAt = await getSeasonStartDate(seasonId, db);
+  const seasonStart = startsAt ? Date.parse(`${startsAt}T00:00:00Z`) : NaN;
+  if (!Number.isFinite(seasonStart)) {
+    throw new Error('Board history requires a valid canonical season start date.');
+  }
+  const cutoffDate = new Date(
+    Math.max(
+      seasonStart,
+      manager.mode === 'routine' ? Date.now() - 7 * 24 * 60 * 60 * 1000 : seasonStart
+    )
+  );
   const snapshot = await manager.getBiwengerCompetition();
   const playersList = snapshot.players;
   const teams = snapshot.teams;
@@ -241,9 +292,6 @@ export async function syncBiwengerBoard(
     }
 
     let reachedCutoff = false;
-    const cutoffDate =
-      manager.mode === 'routine' ? new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) : new Date(0);
-
     for (const t of items) {
       const itemDate = new Date(t.date * 1000);
       if (itemDate < cutoffDate) {
@@ -259,12 +307,13 @@ export async function syncBiwengerBoard(
           'bettingPool',
           'roundFinished',
           'adminTransfer',
+          'loan',
         ].includes(t.type)
       ) {
         continue;
       }
 
-      if (!t.content) continue;
+      if (!t.content && t.type !== 'loan') continue;
 
       if (t.type === 'roundFinished') {
         const date = new Date(t.date * 1000).toISOString();
@@ -275,6 +324,12 @@ export async function syncBiwengerBoard(
       if (t.type === 'adminTransfer') {
         const date = new Date(t.date * 1000).toISOString();
         totalFinances += await processAdminBonus(t.content, date, mutations);
+        continue;
+      }
+
+      if (t.type === 'loan') {
+        const date = new Date(t.date * 1000).toISOString();
+        totalFinances += await processLoanFees(t.content, date, mutations);
         continue;
       }
 
@@ -290,8 +345,8 @@ export async function syncBiwengerBoard(
       }
     }
 
-    if (reachedCutoff && manager.mode === 'routine') {
-      manager.log('Reached routine 7-day cutoff; stopping history fetch');
+    if (reachedCutoff) {
+      manager.log(`Reached board cutoff ${cutoffDate.toISOString()}; stopping history fetch`);
       moreTransfers = false;
     } else if (items.length < limit) {
       moreTransfers = false;

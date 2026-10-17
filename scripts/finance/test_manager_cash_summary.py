@@ -36,6 +36,17 @@ class ManagerCashSummaryTest(unittest.TestCase):
         self.assertIn('### 1. Alex \\| &lt;script&gt;', output)
         self.assertNotIn('<details>', output)
 
+    def test_loan_fee_is_shown_as_a_negative_cash_adjustment(self):
+        manager = self.report['ledgers'][0]
+        manager['bonuses'].append({'date': '2026-10-07', 'description': 'Loan fee', 'amount': -600_000})
+        manager['totalBonuses'] = -100_000
+        manager['currentCash'] = 30_900_000
+
+        output = render(self.report)
+        self.assertIn('Cash adjustments | −100.000 €', output)
+        self.assertIn('Loan fee · **−600.000 €**', output)
+        self.assertNotIn('+-', output)
+
 
 if __name__ == '__main__':
     unittest.main()

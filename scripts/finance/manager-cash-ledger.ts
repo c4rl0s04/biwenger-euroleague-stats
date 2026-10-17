@@ -137,6 +137,10 @@ function formatEuro(amount: number): string {
   return `${formatted} €`;
 }
 
+function formatSignedEuro(amount: number): string {
+  return `${amount < 0 ? '-' : '+'}${formatEuro(Math.abs(amount))}`;
+}
+
 function formatShortEuro(amount: number): string {
   const abs = Math.abs(amount);
   const sign = amount < 0 ? '-' : '';
@@ -417,7 +421,7 @@ function printSummaryTable(ledgers: ManagerFinanceLedger[], options: CliOptions,
     'Init Cash'.padStart(col.initCash) +
     'Buys (-)'.padStart(col.buys) +
     'Sales (+)'.padStart(col.sales) +
-    'Bonus'.padStart(col.bonus) +
+    'Other'.padStart(col.bonus) +
     'Liquid Cash'.padStart(col.cash) +
     'Roster'.padStart(col.roster) +
     'Squad Val'.padStart(col.squadVal) +
@@ -510,28 +514,29 @@ function printManagerDetails(m: ManagerFinanceLedger, c: ReturnType<typeof creat
   console.log(c.dim(`----------------------------------------------------------------------------------------`));
   console.log(`  ${'Total Cash Spent on Buys:'.padEnd(62)} ${c.bold(c.red(`-${formatEuro(m.totalPurchases)}`.padStart(16)))}\n`);
 
-  console.log(c.bold(`4. ROUND BONUSES & PRIZES (+ CASH)`));
+  console.log(c.bold(`4. BONUSES & LOAN FEES (CASH ADJUSTMENTS)`));
   console.log(c.dim(`----------------------------------------------------------------------------------------`));
   if (m.bonuses.length === 0) {
-    console.log(c.dim('  (No bonuses recorded)'));
+    console.log(c.dim('  (No cash adjustments recorded)'));
   } else {
     m.bonuses.forEach((b, i) => {
       const num = `${i + 1}.`.padEnd(4);
       const dateStr = b.date.slice(0, 10).padEnd(12);
       const desc = (b.description || b.type).padEnd(46);
-      const amountStr = c.green(`+${formatEuro(b.amount)}`.padStart(16));
+      const amountStr = (b.amount < 0 ? c.red : c.green)(formatSignedEuro(b.amount).padStart(16));
       console.log(`  ${num}${dateStr}${desc}${amountStr}`);
     });
   }
   console.log(c.dim(`----------------------------------------------------------------------------------------`));
-  console.log(`  ${'Total Bonuses Awarded:'.padEnd(62)} ${c.bold(c.green(`+${formatEuro(m.totalBonuses)}`.padStart(16)))}\n`);
+  const adjustmentColor = m.totalBonuses < 0 ? c.red : c.green;
+  console.log(`  ${'Total Cash Adjustments:'.padEnd(62)} ${c.bold(adjustmentColor(formatSignedEuro(m.totalBonuses).padStart(16)))}\n`);
 
   console.log(c.bold(`5. CURRENT CASH CALCULATION`));
   console.log(c.dim(`----------------------------------------------------------------------------------------`));
   console.log(`  ${'Initial Cash:'.padEnd(32)} ${formatEuro(m.initialCash).padStart(16)}`);
   console.log(`  ${'+ Total Sales:'.padEnd(32)} ${c.green(`+${formatEuro(m.totalSales)}`.padStart(16))}`);
   console.log(`  ${'- Total Purchases:'.padEnd(32)} ${c.red(`-${formatEuro(m.totalPurchases)}`.padStart(16))}`);
-  console.log(`  ${'+ Total Bonuses:'.padEnd(32)} ${c.green(`+${formatEuro(m.totalBonuses)}`.padStart(16))}`);
+  console.log(`  ${'+ Cash Adjustments:'.padEnd(32)} ${adjustmentColor(formatSignedEuro(m.totalBonuses).padStart(16))}`);
   console.log(c.dim(`  ------------------------------------------------`));
   const cashColor = m.currentCash >= 0 ? c.green : c.red;
   console.log(`  ${c.bold('CURRENT LIQUID CASH:'.padEnd(32))} ${c.bold(cashColor(formatEuro(m.currentCash).padStart(16)))}\n`);

@@ -175,6 +175,21 @@ export async function getExistingPlayerSeasonMap(
 }
 
 /**
+ * Returns the canonical start date used to bound board history to its season.
+ */
+export async function getSeasonStartDate(
+  seasonId: string,
+  client?: SyncDb
+): Promise<string | null> {
+  const db = resolveDrizzle(client);
+  const rows = await db
+    .select({ startsAt: sql<string | null>`${schema.seasons.startsAt}::text`.as('starts_at') })
+    .from(schema.seasons)
+    .where(eq(schema.seasons.id, seasonId));
+  return rows[0]?.startsAt ?? null;
+}
+
+/**
  * Returns a Set of valid/active user display names for the target season.
  */
 export async function getSeasonActiveUserNames(

@@ -27,6 +27,9 @@ describe('syncBoard', () => {
     db = {
       query: vi.fn(async (sql) => {
         const queryText = typeof sql === 'string' ? sql : sql?.text || '';
+        if (queryText.toLowerCase().includes('from "seasons"')) {
+          return { rows: [{ starts_at: '2026-09-01' }], rowCount: 1 };
+        }
         if (queryText.toLowerCase().includes('user_seasons')) {
           return {
             rows: [{ name: 'June' }, { name: 'All Stars' }],
@@ -62,7 +65,7 @@ describe('syncBoard', () => {
         data: [
           {
             type: 'transfer',
-            date: 1759685765,
+            date: 1791396115,
             content: [
               {
                 player: 24806,
@@ -82,7 +85,7 @@ describe('syncBoard', () => {
     expect(result.counts.transfers).toBe(1);
     expect(db.query).toHaveBeenCalledWith(
       expect.stringContaining('INSERT INTO fichajes'),
-      expect.arrayContaining([1759685765, 'June', 'Mercado', 24806, 1872600])
+      expect.arrayContaining([1791396115, 'June', 'Mercado', 24806, 1872600])
     );
     expect(mgr.warn).toHaveBeenCalledWith(
       'Inserted 1 transfers with players missing from playersList'
@@ -95,7 +98,7 @@ describe('syncBoard', () => {
         data: [
           {
             type: 'transfer',
-            date: 1759685765,
+            date: 1791396115,
             content: [
               {
                 player: 24806,
@@ -124,7 +127,7 @@ describe('syncBoard', () => {
         data: [
           {
             type: 'bettingPool',
-            date: 1759685765,
+            date: 1791396115,
             content: {
               pool: {
                 round: { id: 7, name: 'Jornada 7' },

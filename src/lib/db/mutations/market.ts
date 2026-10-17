@@ -63,7 +63,7 @@ export interface MarketMutations {
     params: InsertTransferParams
   ) => Promise<{ id: number | null; created: boolean }>;
   insertBid: (params: InsertBidParams) => Promise<void>;
-  insertFinance: (params: InsertFinanceParams) => Promise<void>;
+  insertFinance: (params: InsertFinanceParams) => Promise<boolean>;
   insertPorra: (params: InsertPorraParams) => Promise<void>;
   insertPlayerFallback: (params: InsertPlayerFallbackParams) => Promise<void>;
 }
@@ -119,8 +119,20 @@ export function prepareMarketMutations(
     },
 
     insertFinance: async (params: InsertFinanceParams) => {
-      await db.query(
-        'INSERT INTO finances (season_id, user_id, round_id, date, type, amount, description) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+      // shortcut: board events have no stored source ID; distinct identical payments need one.
+      const res = await db.query(
+        `INSERT INTO finances (season_id, user_id, round_id, date, type, amount, description)
+         SELECT $1, $2, $3, $4, $5, $6, $7
+         WHERE NOT EXISTS (
+           SELECT 1 FROM finances
+           WHERE season_id = $1
+             AND user_id IS NOT DISTINCT FROM $2::text
+             AND round_id IS NOT DISTINCT FROM $3::integer
+             AND date IS NOT DISTINCT FROM $4::text
+             AND type IS NOT DISTINCT FROM $5::text
+             AND amount IS NOT DISTINCT FROM $6::integer
+             AND description IS NOT DISTINCT FROM $7::text
+         )`,
         [
           seasonId,
           params.user_id,
@@ -131,6 +143,7 @@ export function prepareMarketMutations(
           params.description,
         ]
       );
+      return (res.rowCount ?? 0) > 0;
     },
 
     insertPorra: async (params: InsertPorraParams) => {
