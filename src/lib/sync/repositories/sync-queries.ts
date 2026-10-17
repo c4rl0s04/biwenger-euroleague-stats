@@ -183,7 +183,7 @@ export async function getSeasonStartDate(
 ): Promise<string | null> {
   const db = resolveDrizzle(client);
   const rows = await db
-    .select({ startsAt: schema.seasons.startsAt })
+    .select({ startsAt: sql<string | null>`${schema.seasons.startsAt}::text`.as('starts_at') })
     .from(schema.seasons)
     .where(eq(schema.seasons.id, seasonId));
   return rows[0]?.startsAt ?? null;
