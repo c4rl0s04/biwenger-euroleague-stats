@@ -1,5 +1,5 @@
 FROM node:24.20.0-bookworm-slim AS node
-FROM mcr.microsoft.com/playwright:v1.64.1-noble
+FROM mcr.microsoft.com/playwright:v1.58.2-noble
 COPY --from=node /usr/local/ /usr/local/
 RUN apt-get update && apt-get install -y --no-install-recommends postgresql-16 && rm -rf /var/lib/apt/lists/*
 ENV PG_BINDIR=/usr/lib/postgresql/16/bin
