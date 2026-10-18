@@ -21,6 +21,9 @@ test('Auto-lineup completion stays in the viewport with an intercepted save', as
     await client.query(`UPDATE player_seasons SET owner_id='99001',team_id=9901,
       position=CASE player_id % 3 WHEN 0 THEN 'Base' WHEN 1 THEN 'Alero' ELSE 'Pivot' END
       WHERE season_id='2025-26' AND player_id BETWEEN 99201 AND 99209`);
+    await client.query(
+      "UPDATE players SET name='Fixture Contributor With An Exceptionally Long Player Name' WHERE id=99201"
+    );
     await page.route('https://cdn.biwenger.com/i/t/*.png', (route) =>
       route.fulfill({ contentType: 'image/png', body: readFileSync('public/icons/icon-192.png') })
     );
@@ -46,29 +49,58 @@ test('Auto-lineup completion stays in the viewport with an intercepted save', as
           { width: 390, height: 844 },
           { width: 430, height: 932 },
         ]
-      : [info.project.use.viewport!];
+      : [
+          { width: 1024, height: 768 },
+          { width: 1280, height: 800 },
+          { width: 1440, height: 900 },
+        ];
     // Streamed React segments can retain a hidden copy outside the active screen after reload.
-    const exclusions = page.getByRole('main').locator('.schedule-lineup-exclusions');
+    const exclusions = page
+      .getByRole('main')
+      .locator(phone ? '.schedule-lineup-exclusions' : '[data-desktop-lineup]');
+    const exclusionToggle = phone
+      ? exclusions.locator('summary')
+      : exclusions.getByRole('button', { name: /^Excluir jugadores/ });
     for (const size of sizes) {
       await page.setViewportSize(size);
       for (const theme of ['dark', 'light']) {
         await page.evaluate(
-          (value) => document.documentElement.setAttribute('data-theme', value),
-          theme
+          ({ value, desktop }) => {
+            document.documentElement.setAttribute('data-theme', value);
+            if (desktop) {
+              document.documentElement.style.colorScheme = value;
+              document.documentElement.classList.toggle('dark', value === 'dark');
+            }
+          },
+          { value: theme, desktop: !phone }
         );
-        await exclusions.locator('summary').click();
+        await exclusionToggle.click();
         await expect(exclusions.getByRole('checkbox')).toHaveCount(10);
         await exclusions.getByRole('checkbox').first().check();
-        await expect(exclusions.locator('summary')).toHaveText('Excluir jugadores (1)');
+        await expect(exclusionToggle).toHaveText('Excluir jugadores (1)');
+        if (!phone) {
+          await expect(exclusionToggle).toHaveAttribute('aria-expanded', 'true');
+          const grid = exclusions.locator('fieldset');
+          const bounds = await grid.boundingBox();
+          expect(bounds!.width).toBeGreaterThan(size.width * 0.5);
+          await expect(exclusions.getByText('Excluido', { exact: true })).toHaveCount(1);
+          await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+          await waitForScreenshotPaint(page);
+        }
         await page.screenshot({
           path: info.outputPath(`exclusions-${size.width}-${theme}.png`),
           animations: 'disabled',
+          fullPage: !phone,
         });
         expect(
           await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)
         ).toBe(true);
         await exclusions.getByRole('button', { name: 'Incluir todos' }).click();
-        await exclusions.locator('summary').click();
+        await exclusionToggle.click();
+        if (!phone) {
+          await expect(exclusionToggle).toHaveAttribute('aria-expanded', 'false');
+          await expect(exclusions.locator('fieldset')).toBeHidden();
+        }
         // Reproduce a containing block that would trap an inline fixed modal.
         await page.locator('main').evaluate((element) => {
           element.style.transform = 'translateZ(0)';
@@ -145,7 +177,7 @@ test('Auto-lineup completion stays in the viewport with an intercepted save', as
         reservesID: [],
       },
     });
-    await exclusions.locator('summary').click();
+    await exclusionToggle.click();
     const checkboxes = exclusions.getByRole('checkbox');
     for (const checkbox of await checkboxes.all()) await checkbox.check();
     const action = page.getByRole('button', { name: 'Auto-Alinear', exact: true });
@@ -173,10 +205,13 @@ test('Auto-lineup completion stays in the viewport with an intercepted save', as
     await expect(exclusions.getByRole('checkbox', { name: /Fixture Guard/ })).toBeChecked();
     await page.reload();
     await expect(exclusions).toHaveCount(1);
-    await expect(page.locator('.schedule-lineup-exclusions:visible')).toHaveCount(1);
-    await expect(exclusions.locator('summary')).toHaveText('Excluir jugadores (0)');
+    await expect(
+      page.locator(phone ? '.schedule-lineup-exclusions:visible' : '[data-desktop-lineup]:visible')
+    ).toHaveCount(1);
+    await expect(exclusionToggle).toHaveText('Excluir jugadores (0)');
   } finally {
     finishRequest?.();
+    await client.query("UPDATE players SET name='Fixture Contributor 01' WHERE id=99201");
     await client.query(
       "UPDATE player_seasons SET owner_id=NULL,team_id=NULL,position='1' WHERE season_id='2025-26' AND player_id BETWEEN 99201 AND 99209"
     );

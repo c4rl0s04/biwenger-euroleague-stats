@@ -39,7 +39,18 @@ test('Schedule preserves original read screens and map navigation', async ({ pag
       stylePath: 'tests/e2e/screenshot.css',
     });
   };
-  if (!phone) await capture('schedule-overview');
+  if (!phone) {
+    await capture('schedule-overview');
+    await page.getByRole('main').locator('a[href="/team/9901"]').first().click();
+    await expect(page).toHaveURL(/\/team\/9901$/);
+    await page.goBack();
+    await page.getByRole('main').locator('a[href="/player/99101"]').first().click();
+    await expect(page).toHaveURL(/\/player\/99101$/);
+    await page.goBack();
+    await page.getByRole('main').getByRole('link', { name: 'Mapa', exact: true }).click();
+    await expect(page).toHaveURL(/\/matches\?roundId=1#mapa-de-sedes$/);
+    await expect(page.getByRole('heading', { name: 'Mapa de Sedes', exact: true })).toBeVisible();
+  }
   if (phone) {
     await expect(page.locator('.schedule-mobile-day')).toHaveCount(1);
     await expect(page.locator('.schedule-mobile-summary')).toContainText('24');
@@ -108,14 +119,8 @@ test('Schedule preserves original read screens and map navigation', async ({ pag
   );
 });
 
-test('Schedule reveals round 6 on load and follows round navigation without vertical scrolling', async ({
-  page,
-}, info) => {
+test('Schedule reveals round 6 on load and follows round navigation', async ({ page }, info) => {
   test.skip(!process.env.BIWENGER_E2E_DISPOSABLE, 'Requires synthetic local league.');
-  test.skip(
-    info.project.name.startsWith('desktop') || info.project.name.startsWith('tablet'),
-    'Phone-only round rail.'
-  );
   const connectionString = process.env.E2E_DATABASE_URL;
   assertFixtureTarget(connectionString, process.env);
   const client = new pg.Client({ connectionString });
@@ -138,6 +143,36 @@ test('Schedule reveals round 6 on load and follows round navigation without vert
     await page.locator('#login-password').fill(process.env.E2E_PASSWORD!);
     await page.getByRole('button', { name: 'Entrar' }).click();
     await expect(page).toHaveURL(/\/schedule\?roundId=6$/);
+    const phone =
+      (await page.locator('[data-presentation]').getAttribute('data-presentation')) === 'phone';
+    if (!phone) {
+      await page.route('**/api/users/lineup', () => {
+        throw new Error('Round navigation must never submit a lineup');
+      });
+      const select = page.getByRole('combobox', { name: 'Seleccionar jornada' });
+      await expect(select).toHaveValue('6');
+      await page.getByRole('button', { name: 'Excluir jugadores (0)', exact: true }).click();
+      await page.getByRole('checkbox', { name: /Fixture Guard/ }).check();
+      await expect(
+        page.getByRole('button', { name: 'Excluir jugadores (1)', exact: true })
+      ).toBeVisible();
+      await select.selectOption('12');
+      await expect(page).toHaveURL(/roundId=12$/);
+      await expect(page.getByRole('button', { name: 'Jornada siguiente' })).toBeDisabled();
+      await expect(
+        page.getByRole('button', { name: 'Excluir jugadores (0)', exact: true })
+      ).toBeVisible();
+      await select.selectOption('1');
+      await expect(page).toHaveURL(/roundId=1$/);
+      await expect(page.getByRole('button', { name: 'Jornada anterior' })).toBeDisabled();
+      const next = page.getByRole('button', { name: 'Jornada siguiente' });
+      await next.focus();
+      await page.keyboard.press('Enter');
+      await expect(page).toHaveURL(/roundId=2$/);
+      await page.reload();
+      await expect(select).toHaveValue('2');
+      return;
+    }
     const rail = page.getByRole('navigation', { name: 'Seleccionar jornada' });
     const expectActiveVisible = async (label: string) => {
       await expect(rail.locator('[aria-current="page"]')).toHaveText(label);
@@ -173,4 +208,25 @@ test('Schedule reveals round 6 on load and follows round navigation without vert
       ]);
     await client.end();
   }
+});
+
+test('Desktop Schedule preserves the empty squad state and map access', async ({ page }, info) => {
+  test.skip(!process.env.BIWENGER_E2E_DISPOSABLE, 'Requires synthetic local league.');
+  test.skip(!info.project.name.startsWith('desktop'), 'Desktop composition only.');
+  await page.route('**/api/users/lineup', () => {
+    throw new Error('Empty schedule must never submit a lineup');
+  });
+  await page.goto('/login?callbackUrl=%2Fschedule');
+  await page.getByLabel('Manager').fill('Fixture Rival');
+  await page.locator('#login-password').fill(process.env.E2E_PASSWORD!);
+  await page.getByRole('button', { name: 'Entrar' }).click();
+  await expect(page).toHaveURL(/\/schedule$/);
+  const main = page.getByRole('main');
+  await expect(main.getByRole('status')).toHaveText('No hay partidos programados para esta fecha.');
+  await expect(main.getByRole('button', { name: 'Auto-Alinear', exact: true })).toHaveCount(0);
+  await expect(main.getByRole('combobox', { name: 'Seleccionar jornada' })).toBeVisible();
+  await expect(main.getByRole('link', { name: 'Mapa', exact: true })).toHaveAttribute(
+    'href',
+    '/matches?roundId=1#mapa-de-sedes'
+  );
 });

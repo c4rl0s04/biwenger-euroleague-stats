@@ -1,197 +1,56 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  User,
-  Calendar,
-  Check,
-  Sparkles,
-} from 'lucide-react';
-import { clsx } from 'clsx';
-import { getColorForUser } from '@/lib/constants/colors';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Avatar, IconButton } from '@/components/ui/foundation';
+import styles from './schedule-desktop.module.css';
 
-/** @param {{users: import('@/features/managers/public').ManagerDirectoryViewModel[], activeUserId?: string, activeRoundId: number | null, rounds: import('../models/schedule').ScheduleRound[], matches?: import('../models/schedule').ScheduleMatch[]}} props */
-export default function ScheduleControls({ users, activeUserId, activeRoundId, rounds, matches }) {
+/** @param {{users: import('@/features/managers/public').ManagerDirectoryViewModel[], activeUserId?: string, activeRoundId: number | null, rounds: import('../models/schedule').ScheduleRound[]}} props */
+export default function ScheduleControls({ users, activeUserId, activeRoundId, rounds }) {
   const router = useRouter();
-
-  // Find current active objects
-  const activeUser = users.find((u) => String(u.id) === String(activeUserId)) || users[0];
-  const activeRound = rounds.find((r) => String(r.round_id) === String(activeRoundId)) || rounds[0];
-
-  // Theme color for the active manager
-  const activeColor = activeUser
-    ? getColorForUser(activeUser.id, activeUser.name, activeUser.color_index)
-    : null;
-
-  // Helper to push URL updates (Now only for roundId)
-  const updateParams = (newRoundId) => {
-    router.push(`/schedule?roundId=${newRoundId}`);
-  };
-
-  // Logic for Next/Prev Round Arrows
-  const handlePrevRound = () => {
-    const idx = rounds.findIndex((r) => String(r.round_id) === String(activeRoundId));
-    if (idx > 0) {
-      updateParams(rounds[idx - 1].round_id);
-    }
-  };
-
-  const handleNextRound = () => {
-    const idx = rounds.findIndex((r) => String(r.round_id) === String(activeRoundId));
-    if (idx < rounds.length - 1) {
-      updateParams(rounds[idx + 1].round_id);
-    }
-  };
+  const manager = users.find((user) => String(user.id) === String(activeUserId));
+  const index = rounds.findIndex((round) => String(round.round_id) === String(activeRoundId));
+  const changeRound = (id) => router.push(`/schedule?roundId=${id}`);
 
   return (
-    <div className="flex flex-col gap-4 h-full">
-      <div className="flex items-center justify-between px-1">
-        <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-          Filtros de Vista
-        </span>
+    <div className={styles.controls}>
+      <div className={styles.manager}>
+        <Avatar alt="" fallback={manager?.name?.charAt(0) || '?'} size="sm" />
+        <span>{manager?.name || 'Tu plantilla'}</span>
       </div>
-
-      <div className="relative z-0 flex items-center p-1 bg-popover border border-white/10 rounded-xl shadow-2xl shadow-black/50 w-full max-w-2xl flex-1">
-        {/* 1. MANAGER IDENTITY (Locked) */}
-        <div className="flex items-center gap-3 px-4 py-2 mr-1">
-          <div
-            className={`w-2 h-2 rounded-full ring-1 ring-white/10 ${activeColor?.text.replace('text-', 'bg-')}`}
-            style={{
-              backgroundColor: activeColor?.stroke,
-              boxShadow: `0 0 8px ${activeColor?.stroke}40`,
-            }}
-          />
-          <span className="text-[11px] font-black text-white uppercase tracking-[0.2em]">
-            {activeUser?.name}
-          </span>
-        </div>
-
-        {/* Divider */}
-        <div className="w-px h-4 bg-white/10 mx-1" />
-
-        {/* 2. ROUND SELECTOR */}
-        <div className="flex-1 flex items-center">
-          {/* Prev Arrow */}
-          <button
-            onClick={handlePrevRound}
-            className="p-2 text-muted-foreground hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
-            title="Previous Round"
-          >
-            <ChevronLeft size={16} />
-          </button>
-
-          {/* Dropdown in the middle */}
-          <div className="flex-1">
-            <Dropdown
-              icon={<Calendar size={16} />}
-              label={activeRound?.round_name || 'Select Round'}
-              align="center"
-              fullWidth
-            >
-              {(close) => (
-                <div className="max-h-[300px] overflow-y-auto sidebar-scroll bg-zinc-950">
-                  <div className="px-3 py-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest border-b border-border sticky top-0 bg-zinc-950 z-50">
-                    Jornadas
-                  </div>
-                  <div className="p-1">
-                    {rounds.map((r) => {
-                      const isActive = String(r.round_id) === String(activeRoundId);
-                      return (
-                        <button
-                          key={r.round_id}
-                          onClick={() => {
-                            updateParams(r.round_id);
-                            close();
-                          }}
-                          className={clsx(
-                            'w-full text-left px-3 py-2 text-sm rounded-md flex items-center justify-between transition-colors my-0.5 cursor-pointer',
-                            isActive
-                              ? 'bg-muted text-white font-medium'
-                              : 'text-zinc-400 hover:bg-muted/50 hover:text-zinc-200'
-                          )}
-                        >
-                          {r.round_name}
-                          {isActive && (
-                            <Check size={14} className={activeColor?.text || 'text-primary'} />
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </Dropdown>
-          </div>
-
-          {/* Next Arrow */}
-          <button
-            onClick={handleNextRound}
-            className="p-2 text-muted-foreground hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
-            title="Next Round"
-          >
-            <ChevronRight size={16} />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// --- Reusable Internal Dropdown Component ---
-function Dropdown({ icon, label, children, align = 'left', fullWidth = false }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const containerRef = useRef(null);
-
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (containerRef.current && !containerRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [containerRef]);
-
-  return (
-    <div className={clsx('relative', fullWidth && 'w-full')} ref={containerRef}>
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={clsx(
-          'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer',
-          'hover:bg-white/5 text-zinc-300 hover:text-white',
-          isOpen && 'bg-white/5 text-white',
-          fullWidth && 'w-full justify-center'
-        )}
-      >
-        <span className="text-zinc-500">{icon}</span>
-        <span className="truncate max-w-[120px] md:max-w-none">{label}</span>
-        <ChevronDown
-          size={14}
-          className={clsx('text-zinc-600 transition-transform', isOpen && 'rotate-180')}
-        />
-      </button>
-
-      {/* FIX: z-[100] ensures it sits above everything.
-         We also keep the solid bg-zinc-950 to block content behind it.
-      */}
-      {isOpen && (
-        <div
-          className={clsx(
-            'absolute top-full mt-2 z-[100] bg-zinc-950 border border-border rounded-xl shadow-2xl shadow-black overflow-hidden min-w-[240px]',
-            align === 'left'
-              ? 'left-0'
-              : align === 'right'
-                ? 'right-0'
-                : 'left-1/2 -translate-x-1/2'
-          )}
+      <div className={styles.roundPicker}>
+        <IconButton
+          variant="ghost"
+          aria-label="Jornada anterior"
+          disabled={index <= 0}
+          onClick={() => changeRound(rounds[index - 1].round_id)}
         >
-          {typeof children === 'function' ? children(() => setIsOpen(false)) : children}
-        </div>
-      )}
+          <ChevronLeft size={18} aria-hidden="true" />
+        </IconButton>
+        <label className={styles.roundLabel}>
+          <span className="sr-only">Seleccionar jornada</span>
+          <select
+            value={activeRoundId ?? ''}
+            onChange={(event) => changeRound(event.target.value)}
+            disabled={!rounds.length}
+          >
+            {index < 0 && <option value="">Selecciona jornada</option>}
+            {rounds.map((round) => (
+              <option key={round.round_id} value={round.round_id ?? ''}>
+                {round.round_name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <IconButton
+          variant="ghost"
+          aria-label="Jornada siguiente"
+          disabled={index < 0 || index >= rounds.length - 1}
+          onClick={() => changeRound(rounds[index + 1].round_id)}
+        >
+          <ChevronRight size={18} aria-hidden="true" />
+        </IconButton>
+      </div>
     </div>
   );
 }

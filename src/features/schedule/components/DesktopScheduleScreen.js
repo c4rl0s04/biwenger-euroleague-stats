@@ -1,120 +1,80 @@
-import { AlertCircle } from 'lucide-react';
+import Link from 'next/link';
+import { MapPinned } from 'lucide-react';
 import ScheduleControls from './ScheduleControls';
 import MatchCard from './MatchCard';
 import RoundSummary from './RoundSummary';
-import AutoAlignButton from './ScheduleLineupAction';
+import ScheduleLineupAction from './ScheduleLineupAction';
 import Section from '@/components/layout/Section';
-import { PageHeader } from '@/components/ui';
+import { PageCanvas, PageHeader, EmptyState } from '@/components/ui/foundation';
+import { formatMatchDate } from '@/lib/utils/date';
+import styles from './schedule-desktop.module.css';
+
 /** @param {{model: import('../models/schedule').ScheduleScreenModel}} props */
 export default function DesktopScheduleScreen({ model: { schedule, users, rounds, userId } }) {
-  const groupedMatches = schedule.found
-    ? schedule.matches.reduce((acc, match) => {
-        const date = new Date(match.date);
-        const dateKey = date.toLocaleDateString('es-ES', {
-          weekday: 'long',
-          day: 'numeric',
-          month: 'long',
-          timeZone: 'Europe/Madrid',
-        });
-        if (!acc[dateKey]) acc[dateKey] = [];
-        acc[dateKey].push(match);
-        return acc;
-      }, {})
-    : {};
-
-  const allActivePlayers = schedule.found
-    ? schedule.matches
-        .flatMap((match) => match.user_players)
-        .sort((left, right) => (right.puntos || 0) - (left.puntos || 0))
-    : [];
+  const matches = schedule.found ? schedule.matches : [];
+  const groupedMatches = matches.reduce((groups, match) => {
+    const day = match.date ? formatMatchDate(match.date) : 'Fecha por confirmar';
+    (groups[day] ??= []).push(match);
+    return groups;
+  }, {});
+  const manager = users.find((user) => String(user.id) === String(userId));
+  const players = schedule.userPlayers ?? matches.flatMap((match) => match.user_players);
 
   return (
-    <div className="min-h-screen">
-      {/* Page Header */}
-      <PageHeader
-        title="Horario Jugadores"
-        description={schedule.found ? schedule.round.round_name : 'Selecciona una jornada'}
-      />
-
-      <div className="container mx-auto px-4 md:px-8 pb-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="pt-4 flex flex-col lg:flex-row gap-6 items-start">
-            <div className="w-full lg:max-w-md shrink-0">
-              <ScheduleControls
-                users={users}
-                rounds={rounds}
-                activeUserId={userId}
-                activeRoundId={schedule.found ? schedule.round.round_id : null}
-                matches={schedule.matches}
-              />
-            </div>
-
-            {/* Summary Section */}
-            {(schedule.userPlayers?.length > 0 || allActivePlayers.length > 0) && (
-              <div className="w-full lg:flex-1 min-w-0">
-                <RoundSummary
-                  players={schedule.userPlayers || allActivePlayers}
-                  activeUserId={userId}
-                  colorIndex={users.find((u) => String(u.id) === String(userId))?.color_index}
-                />
-              </div>
-            )}
-
-            {/* Automation Section: Dedicated Column */}
-            {schedule.found && schedule.matches?.length > 0 && (
-              <div className="w-full lg:w-48 shrink-0">
-                <div className="flex flex-col gap-4 w-full h-full">
-                  <div className="flex items-center px-1">
-                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                      Acciones
-                    </span>
-                  </div>
-                  <div className="relative z-20 flex-1 p-4 bg-zinc-950 border border-white/10 rounded-xl shadow-2xl shadow-black/50 flex flex-col items-center justify-center min-h-[88px]">
-                    <AutoAlignButton
-                      key={`${userId}-${schedule.round.round_id}`}
-                      userId={userId}
-                      matches={schedule.matches}
-                      userName={users.find((u) => String(u.id) === String(userId))?.name}
-                      discrete={true}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
+    <div className={styles.screen} data-schedule-desktop>
+      <PageCanvas className={styles.canvas}>
+        <PageHeader
+          title="Horario Jugadores"
+          description="Organiza tu plantilla por horario de partido."
+        />
+        <div className={styles.toolbar}>
+          <ScheduleControls
+            users={users}
+            rounds={rounds}
+            activeUserId={userId}
+            activeRoundId={schedule.found ? schedule.round.round_id : null}
+          />
+          <div className={styles.toolbarSummary}>
+            <RoundSummary players={players} />
+            <Link
+              href={`/matches${schedule.found && schedule.round.round_id != null ? `?roundId=${schedule.round.round_id}` : ''}#mapa-de-sedes`}
+              className={styles.mapLink}
+            >
+              <MapPinned size={18} aria-hidden="true" />
+              Mapa
+            </Link>
           </div>
         </div>
-      </div>
-
-      {/* Main Content Area */}
+        {schedule.found && matches.length > 0 && (
+          <ScheduleLineupAction
+            key={`${userId}-${schedule.round.round_id}`}
+            matches={matches}
+            userName={manager?.name}
+            desktop
+          />
+        )}
+      </PageCanvas>
       {schedule.found ? (
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-          {Object.entries(groupedMatches).map(([dateKey, matches], index) => (
-            <Section
-              key={dateKey}
-              title={dateKey}
-              background={index % 2 === 0 ? 'section-base' : 'section-raised'}
-              delay={index * 100}
-            >
-              <div className="grid gap-2">
-                {matches.map((match) => (
+        Object.entries(groupedMatches).length ? (
+          Object.entries(groupedMatches).map(([day, dayMatches]) => (
+            <Section key={day} title={day} className={styles.daySection}>
+              <div className={styles.matchList}>
+                {dayMatches.map((match) => (
                   <MatchCard key={match.match_id} match={match} />
                 ))}
               </div>
             </Section>
-          ))}
-
-          {Object.keys(groupedMatches).length === 0 && (
-            <div className="py-20 text-center text-zinc-500">
-              No hay partidos programados para esta fecha.
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="container mx-auto px-4 md:px-8">
-          <div className="flex flex-col items-center justify-center py-32 text-zinc-500 bg-zinc-900/20 rounded-2xl border border-dashed border-zinc-800">
-            <AlertCircle size={40} className="mb-4 text-zinc-600" />
-            <p className="font-medium text-zinc-400">{schedule.message}</p>
+          ))
+        ) : (
+          <div className={styles.empty}>
+            <EmptyState role="status">No hay partidos programados para esta fecha.</EmptyState>
           </div>
+        )
+      ) : (
+        <div className={styles.empty}>
+          <EmptyState role="status">
+            {schedule.message || 'Selecciona una jornada para ver los partidos.'}
+          </EmptyState>
         </div>
       )}
     </div>
