@@ -249,11 +249,7 @@ export interface SimulationDimensionScores {
 }
 
 export type SimulationRankingProfileId =
-  | 'equality'
-  | 'competitive-balance'
-  | 'resilience'
-  | 'merit'
-  | 'balanced';
+  'equality' | 'competitive-balance' | 'resilience' | 'merit' | 'balanced';
 
 export interface SimulationRankingEntry {
   rank: number;

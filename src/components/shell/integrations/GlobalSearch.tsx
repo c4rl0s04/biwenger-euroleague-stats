@@ -39,9 +39,7 @@ interface SearchApiResponse {
 }
 
 type SearchResultItem =
-  | ({ type: 'player' } & PlayerItem)
-  | ({ type: 'team' } & TeamItem)
-  | ({ type: 'user' } & UserItem);
+  ({ type: 'player' } & PlayerItem) | ({ type: 'team' } & TeamItem) | ({ type: 'user' } & UserItem);
 
 export function GlobalSearch({
   onClose,
