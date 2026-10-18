@@ -1,42 +1,18 @@
-import { getColorForUser } from '@/lib/constants/colors';
+import styles from './schedule-desktop.module.css';
 
-/** @param {{players?: import('../models/schedule').SchedulePlayer[], activeUserId?: string, colorIndex?: number}} props */
-export default function RoundSummary({ players = [], activeUserId, colorIndex }) {
-  if (players.length === 0) return null;
-
-  // Calculate total points
-  const totalPoints = players.reduce((sum, p) => sum + (p.puntos || 0), 0);
-
-  // Theme color for the active manager - now using the proper DB index
-  const activeColor = activeUserId
-    ? getColorForUser(activeUserId, null, colorIndex)
-    : { text: 'text-primary' };
-
+/** @param {{players?: import('../models/schedule').SchedulePlayer[]}} props */
+export default function RoundSummary({ players = [] }) {
+  if (!players.length) return null;
   return (
-    <div className="flex flex-col gap-4 w-full h-full">
-      <div className="flex items-center justify-between px-1">
-        <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-          Resumen
-        </span>
+    <dl className={styles.summary} aria-label="Resumen de la plantilla">
+      <div>
+        <dt>Jugadores</dt>
+        <dd>{players.length}</dd>
       </div>
-
-      <div className="relative z-20 flex-1 p-4 bg-zinc-950 border border-white/10 rounded-xl shadow-2xl shadow-black/50 flex items-center justify-around min-h-[88px]">
-        <div className="flex flex-col items-center">
-          <span className="text-3xl font-black text-white">{players.length}</span>
-          <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">
-            Jugadores
-          </span>
-        </div>
-
-        <div className="w-px h-10 bg-white/10"></div>
-
-        <div className="flex flex-col items-center">
-          <span className={`text-3xl font-black ${activeColor.text}`}>{totalPoints}</span>
-          <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">
-            Puntos
-          </span>
-        </div>
+      <div>
+        <dt>Puntos</dt>
+        <dd>{players.reduce((sum, player) => sum + (player.puntos ?? 0), 0)}</dd>
       </div>
-    </div>
+    </dl>
   );
 }

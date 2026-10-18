@@ -23,6 +23,7 @@ export default function AutoAlignButton({
   userName,
   discrete = false,
   mobile = false,
+  desktop = false,
   excludedPlayerIds = /** @type {Array<string | number>} */ ([]),
   onLoadingChange,
   disabled = false,
@@ -78,6 +79,33 @@ export default function AutoAlignButton({
       returnFocusRef={buttonRef}
     />
   );
+
+  if (desktop) {
+    return (
+      <>
+        <Button
+          ref={buttonRef}
+          onClick={handleAutoAlign}
+          disabled={loading || disabled}
+          aria-busy={loading}
+          variant="primary"
+          className="shrink-0 gap-2"
+        >
+          {loading ? (
+            <Loader2
+              size={18}
+              className="animate-spin motion-reduce:animate-none"
+              aria-hidden="true"
+            />
+          ) : (
+            <ListChecks size={18} aria-hidden="true" />
+          )}
+          {loading ? 'Alineando…' : 'Auto-Alinear'}
+        </Button>
+        {modal}
+      </>
+    );
+  }
 
   if (mobile) {
     return (
