@@ -22,8 +22,12 @@ export const LIVE_BIDDING_POLICY = Object.freeze({
 } as const);
 
 export class LiveBidCountUnavailableError extends Error {
-  constructor() {
-    super('El contador de pujas no está disponible sin gastar créditos en esta liga.');
+  constructor(readonly reason: 'own_listing' | 'not_included' = 'not_included') {
+    super(
+      reason === 'own_listing'
+        ? 'Biwenger no muestra el contador de pujas de tus propios anuncios.'
+        : 'El contador de pujas no está disponible sin gastar créditos en esta liga.'
+    );
     this.name = 'LiveBidCountUnavailableError';
   }
 }
@@ -59,20 +63,20 @@ export async function readLiveBidMarket(
   const actor = getLiveBidActor(userId, context);
   const accountRaw: unknown = await client.query(
     '/account',
-    { skipVersionCheck: true, cache: 'no-store' },
+    { skipVersionCheck: true, cache: 'no-store', delayMs: 0 },
     actor.providerContext
   );
   const access = parseAccountAccess(accountRaw, actor.leagueId, actor.actorId);
   const marketRaw: unknown = await client.query(
     '/market',
-    { cache: 'no-store' },
+    { cache: 'no-store', delayMs: 0 },
     actor.providerContext
   );
   const names = includeNames
     ? parsePlayerNames(
         await client.query(
           '/competitions/euroleague/data?lang=es',
-          { cache: 'no-store' },
+          { cache: 'no-store', delayMs: 0 },
           actor.providerContext
         )
       )
@@ -113,9 +117,8 @@ export async function getLivePlayerBidCount(
   return executeUserProviderQuery(userId, 'market.bids.count', async (client, context) => {
     const { market, access, providerContext } = await readLiveBidMarket(client, context, userId);
     const listing = requireLiveListing(market, playerId);
-    if (listing.isOwnListing || !access.canViewFreeBidCount) {
-      throw new LiveBidCountUnavailableError();
-    }
+    if (listing.isOwnListing) throw new LiveBidCountUnavailableError('own_listing');
+    if (!access.canViewFreeBidCount) throw new LiveBidCountUnavailableError('not_included');
     // Biwenger uses POST for this read. It can consume credits outside Premium leagues,
     // so the capability check above is mandatory and the request is never retried.
     const result = await client.command(
@@ -124,6 +127,7 @@ export async function getLivePlayerBidCount(
         method: 'POST',
         body: { player: playerId, ...(listing.sellerId ? { user: listing.sellerId } : {}) },
         retries: 0,
+        delayMs: 0,
       },
       providerContext
     );

@@ -64,7 +64,9 @@ export function parseAccountAccess(raw: unknown, leagueId: number, userId: numbe
     );
   }
   return {
-    canViewFreeBidCount: league.type === 'premium' && league.settings.marketShowBids === true,
+    canViewFreeBidCount:
+      (league.type === 'premium' || league.type === 'ultra') &&
+      league.settings.marketShowBids === true,
   };
 }
 
