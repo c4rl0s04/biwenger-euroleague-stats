@@ -3,6 +3,7 @@ import {
   getExistingPlayerIdentities,
   getExistingPlayerSeasonMap,
   getLiveRounds,
+  getFantasyPointLiveRounds,
   getOfficialTeamMappings,
   getPlayerDirectoryMap,
   getRoundScheduleState,
@@ -176,6 +177,12 @@ describe('sync-queries repository', () => {
   });
 
   describe('hasActiveMatchesInWindow', () => {
+    it.each([0, 10])('reads count %i through the raw PostgreSQL adapter', async (count) => {
+      const query = vi.fn().mockResolvedValue({ rows: [{ count }], rowCount: 1 });
+      expect(await hasActiveMatchesInWindow('2026-27', 5136, { query })).toBe(count > 0);
+      expect(query.mock.calls[0][1]).toEqual(['2026-27', 5136]);
+    });
+
     it('returns true when count > 0', async () => {
       const mockDb = {
         select: vi.fn().mockReturnValue({
@@ -223,4 +230,16 @@ describe('sync-queries repository', () => {
       ]);
     });
   });
+});
+
+it('selects fantasy live rounds through the raw adapter without excluding finished matches', async () => {
+  const query = vi.fn().mockResolvedValue({ rows: [{ id: 5136, name: 'Jornada 1' }] });
+  expect(await getFantasyPointLiveRounds('2026-27', { query })).toEqual([
+    { id: 5136, name: 'Jornada 1' },
+  ]);
+  const [sql, params] = query.mock.calls[0];
+  expect(params).toEqual(['2026-27']);
+  expect(sql).toContain("INTERVAL '24 hours'");
+  expect(sql).toContain("INTERVAL '1 hour'");
+  expect(sql).not.toContain("<> 'finished'");
 });

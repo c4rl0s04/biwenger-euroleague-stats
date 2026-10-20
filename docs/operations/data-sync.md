@@ -38,7 +38,7 @@ accidentally enabling sync for a frozen season.
 | ----------------------------------------------------------- | -------------------------------------------------------------------- |
 | `npm run sync`                                              | Routine ordered refresh.                                             |
 | `npm run sync:bootstrap`                                    | Routine pipeline plus one-time initial squads and user colors.       |
-| `npm run sync:live`                                         | Official game data and missing Biwenger lineups only.                |
+| `npm run sync:live`                                         | Official data, live fantasy points and missing Biwenger lineups.     |
 | `npm run sync:playoffs`                                     | Apply custom playoff metadata and results from checked-in JSON.      |
 | `npm run sync:euroleague`                                   | Preview EuroLeague official website bio data & photoshoot portraits. |
 | `npm run sync:euroleague:apply`                             | Commit EuroLeague official website photoshoot portraits & bio data.  |
@@ -63,7 +63,7 @@ The declarative pipeline is:
 |     4 | `match-linking`           | Biwenger + database | `matches` links and official sporting fields                           | routine, bootstrap |
 |     5 | `biwenger-users`          | Biwenger            | `users`, `user_seasons`                                                | routine, bootstrap |
 |     6 | `euroleague-games`        | EuroLeague          | game state, boxscores, events, shots, sporting round statistics        | all                |
-|     7 | `biwenger-fantasy-points` | Biwenger            | only `player_round_stats.fantasy_points`                               | routine, bootstrap |
+|     7 | `biwenger-fantasy-points` | Biwenger            | only `player_round_stats.fantasy_points`                               | all                |
 |     8 | `biwenger-lineups`        | Biwenger            | `lineups`, `user_rounds`                                               | all                |
 |     9 | `biwenger-board`          | Biwenger            | transfers, bids, finances, and prediction pools in one pagination pass | routine, bootstrap |
 |    10 | `biwenger-squads`         | Biwenger            | current `player_seasons.owner_id`                                      | routine, bootstrap |
@@ -165,3 +165,39 @@ domain. A zero exit code does not prove that the provider supplied every optiona
 
 See [troubleshooting](troubleshooting.md) for symptom-oriented diagnosis and
 [external API reference](../reference/external-apis/README.md) for provider boundaries.
+
+## Fantasy-point refresh and recovery
+
+Biwenger round reports (`/rounds/euroleague/{id}?score=1`) own fantasy scores;
+EuroLeague sporting ingestion preserves them. Routine and bootstrap fantasy refreshes
+include active/finished rounds and rounds with local matches that have started or start
+within one hour. Future-only rounds are skipped. Routine refreshes retain historical
+coverage to pick up corrections; bootstrap is available for explicit recovery.
+
+Live refresh selects rounds with a local live match or a match scheduled between
+24 hours ago and one hour ahead, including finished matches. This keeps the final
+fantasy update eligible after official ingestion finishes a match. The existing live
+workflow runs every five minutes during its configured Tuesday–Friday UTC window;
+it is not a guarantee of round-the-clock coverage. Routine refreshes catch later corrections.
+
+Each nonempty fantasy run validates the first competition round's dates against the
+writable season before any fantasy writes, including single-step recovery. Numeric
+integer scores (including zero and negatives) replace older values; absent/null scores
+preserve known values. Invalid reports fail the round before any of its scores are written.
+The summary reports selected/fetched rounds, reports, writes and missing scores. A completed
+round without usable scores emits a warning. Idle live runs are quiet.
+
+After releasing the fix, follow the database target/backup safeguards above, record
+per-round coverage, and run only the fantasy step for the intended writable season:
+
+```bash
+npm run sync:bootstrap -- --step=biwenger-fantasy-points --season=2026-27
+```
+
+This does not run other bootstrap steps. It shares the pipeline advisory lock and refuses
+frozen seasons. Compare stored scores with published Biwenger player reports per round,
+including zero/negative examples; official-stat rows without a report may remain null.
+Rerun to confirm safe repetition. Verify the standings draft cards after existing HTTP
+caches expire (analytics may be cached for 15 minutes). Sync clears only its process-local
+cache, not existing web-process or browser caches. Production writes require explicit
+authorization; no deployment or repair is implied by local verification.
