@@ -17,6 +17,14 @@ If newer code/history contradicts this checkpoint, refresh the evidence before a
 
 Tasks 01 through 19 are integrated in `main` (closing all read domains, sensitive-operation inventory, lineup commands, market commands, accounts/settings, and hoopgrid). In parallel, the UI migration track has integrated UI-00, UI-01A, UI-01T, UI-01B, and UI-01H (`Button`, `IconButton`, `Input`, `Badge`, `Avatar`, `Skeleton`, rollout hardening). Task 23 / UI-SHELL is integrated via PR #49 at `9cfb84e5`. No current implementation, cleanup, parallel dispatch, security change or release is authorized merely by a planned row.
 
+## Current presentation ownership follow-up
+
+The 2026-10-20 [closure candidate](reports/feature-presentation-ownership.md) addresses the later
+repository audit: Lineup/Schedule presentation placement, explicit mobile rows, shared competition UI,
+feature helper/artifact ownership, obsolete shims and complete framework-entrypoint coverage.
+It preserves existing feature appearance and contracts. Integration and CI remain pending; broader
+feature-by-feature UI redesign remains in the independent UI track below.
+
 ## How to read status
 
 - **Planned:** bounded scope identified, not dispatched or implemented.
