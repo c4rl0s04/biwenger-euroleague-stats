@@ -27,6 +27,8 @@ export default function Drawer({
 
   // Handle Escape key and body scroll lock
   useEffect(() => {
+    if (!isOpen) return undefined;
+    const previousOverflow = document.body.style.overflow;
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && isOpen) onClose();
       if (e.key !== 'Tab' || !isOpen || !panelRef.current) return;
@@ -51,12 +53,10 @@ export default function Drawer({
       document.body.style.overflow = 'hidden';
       window.addEventListener('keydown', handleKeyDown);
       requestAnimationFrame(() => closeRef.current?.focus());
-    } else {
-      document.body.style.overflow = 'auto';
     }
 
     return () => {
-      document.body.style.overflow = 'auto';
+      document.body.style.overflow = previousOverflow;
       window.removeEventListener('keydown', handleKeyDown);
       if (isOpen) previousFocusRef.current?.focus?.();
     };
