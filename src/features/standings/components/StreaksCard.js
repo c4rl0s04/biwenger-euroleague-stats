@@ -3,7 +3,7 @@
 import { Flame } from 'lucide-react';
 import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
-import StatsList from '@/components/ui/StatsList';
+import { StatsList } from '@/lib/competition/ui';
 
 export default function StreaksCard() {
   const { data = [], loading } = useApiData('/api/standings/streaks');

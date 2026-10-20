@@ -5,7 +5,7 @@ import { Card } from '@/components/ui';
 import { ArrowUpDown } from 'lucide-react';
 import { ResponsiveContainer, ComposedChart, Bar, XAxis, YAxis, Tooltip, Scatter } from 'recharts';
 import Link from 'next/link';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 
 import { GlassTooltip, TooltipHeader } from '@/components/ui/Tooltip';
 

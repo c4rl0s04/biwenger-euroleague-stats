@@ -11,7 +11,7 @@ const inputDirectory = resolve(
 );
 const output = resolve(
   process.cwd(),
-  process.env.SIMULATION_OUTPUT || 'src/data/season-simulation-results.json'
+  process.env.SIMULATION_OUTPUT || 'src/features/season-review/data/season-simulation-results.json'
 );
 
 const keyOf = (entry: SeasonSimulationArtifactEntry) =>

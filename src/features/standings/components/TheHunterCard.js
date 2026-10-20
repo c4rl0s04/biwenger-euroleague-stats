@@ -1,7 +1,7 @@
 import { useApiData } from '@/lib/hooks/useApiData';
 import { Card } from '@/components/ui';
 import { Crosshair } from 'lucide-react';
-import StatsList from '@/components/ui/StatsList';
+import { StatsList } from '@/lib/competition/ui';
 
 export default function TheHunterCard() {
   const { data = [], loading } = useApiData('/api/standings/advanced?type=hunter');

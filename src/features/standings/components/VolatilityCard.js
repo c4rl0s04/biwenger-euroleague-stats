@@ -3,7 +3,7 @@
 import { useApiData } from '@/lib/hooks/useApiData';
 import { Card } from '@/components/ui';
 import { Waves } from 'lucide-react';
-import StatsList from '@/components/ui/StatsList';
+import { StatsList } from '@/lib/competition/ui';
 
 export default function VolatilityCard() {
   const { data = [], loading } = useApiData('/api/standings/advanced?type=volatility');

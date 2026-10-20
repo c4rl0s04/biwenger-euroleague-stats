@@ -7,7 +7,7 @@ import { User, Medal, ListOrdered, ArrowUpDown } from 'lucide-react';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { cn } from '@/lib/utils';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 import { calcEfficiency } from '@/lib/competition/public';
 
 export default function RoundStandings({

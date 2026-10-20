@@ -12,7 +12,7 @@ import {
   TableRow,
   TableCell,
 } from '@/components/ui/StatsTable';
-import { getScoreColor } from '@/lib/utils/format';
+import { getScoreColor } from '@/lib/competition/public';
 import { cn } from '@/lib/utils';
 
 function SortIcon({ columnKey, sortConfig }) {

@@ -1,8 +1,8 @@
 'use client';
 
 import { Trophy } from 'lucide-react';
-import { getColorForUser } from '@/lib/constants/colors';
-import StatsTable from '@/components/ui/StatsTable';
+import { getColorForUser } from '@/lib/competition/public';
+import { StatsTable } from '@/lib/competition/ui';
 
 export default function StandingsTable({ standings }) {
   const columns = [

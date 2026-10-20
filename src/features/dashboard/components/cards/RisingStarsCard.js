@@ -2,8 +2,9 @@
 
 import { Sparkles, TrendingUp, ArrowUp } from 'lucide-react';
 import Link from 'next/link';
-import { getShortTeamName } from '@/lib/utils/format';
-import { Card, AnimatedNumber, StatsList } from '@/components/ui';
+import { getShortTeamName } from '@/lib/competition/public';
+import { Card, AnimatedNumber } from '@/components/ui';
+import { StatsList } from '@/lib/competition/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function RisingStarsCard() {

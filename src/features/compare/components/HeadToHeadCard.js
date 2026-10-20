@@ -15,7 +15,7 @@ import {
   Flame,
   MapPin,
 } from 'lucide-react';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 
 /**

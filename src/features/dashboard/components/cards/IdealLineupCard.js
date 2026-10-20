@@ -1,7 +1,7 @@
 'use client';
 
 import { Crown } from 'lucide-react';
-import { getScoreColor } from '@/lib/utils/format';
+import { getScoreColor } from '@/lib/competition/public';
 import { Card, AnimatedNumber } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 import DashboardPlayerRow from './shared/DashboardPlayerRow';

@@ -6,8 +6,8 @@ import type {
   MarketMetricDefinition,
   MarketBaseRowProps,
 } from '../../models/market-metric';
-vi.mock('@/components/ui/BaseRow', () => ({
-  default: (props: MarketBaseRowProps) => (
+vi.mock('@/lib/competition/ui', () => ({
+  BaseRow: (props: MarketBaseRowProps) => (
     <div
       data-rank={props.rank}
       data-index={props.idx}
@@ -23,7 +23,7 @@ vi.mock('@/components/ui/BaseRow', () => ({
   ),
 }));
 import BaseRow from './BaseRow';
-import SharedBaseRow from '@/components/ui/BaseRow';
+import { BaseRow as SharedBaseRow } from '@/lib/competition/ui';
 import PlayerStatRow from './PlayerStatRow';
 import UserStatRow from './UserStatRow';
 import TransactionStatRow from './TransactionStatRow';

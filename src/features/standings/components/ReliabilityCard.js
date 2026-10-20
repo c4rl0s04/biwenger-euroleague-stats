@@ -3,7 +3,7 @@
 import { Activity } from 'lucide-react';
 import Link from 'next/link';
 import { Card } from '@/components/ui';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function ReliabilityCard() {

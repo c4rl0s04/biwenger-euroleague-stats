@@ -3,7 +3,7 @@
 import { Trophy } from 'lucide-react';
 import Link from 'next/link';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 import { cn } from '@/lib/utils';
 
 export function HallOfFame({ winners }) {

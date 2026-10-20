@@ -2,7 +2,8 @@
 import PropTypes from 'prop-types';
 import { Flame, Snowflake, TrendingUp, TrendingDown } from 'lucide-react';
 import Link from 'next/link';
-import { Card, AnimatedNumber, StatsList } from '@/components/ui';
+import { Card, AnimatedNumber } from '@/components/ui';
+import { StatsList } from '@/lib/competition/ui';
 import { InfoTooltip, TooltipHeader } from '@/components/ui/Tooltip';
 import { useApiData } from '@/lib/hooks/useApiData';
 

@@ -221,18 +221,18 @@ jobs:
         env:
           SIMULATION_STAGE: final
           SIMULATION_INPUT: artifacts/final-shards
-          SIMULATION_OUTPUT: src/data/season-simulation-analysis.json
+          SIMULATION_OUTPUT: src/features/season-review/data/season-simulation-analysis.json
           SIMULATION_SHORTLIST_LIMIT: '24'
         run: npm run simulation:analysis:merge
       - name: Calibrate against the observed season
         env:
-          SIMULATION_OUTPUT: src/data/season-simulation-analysis.json
+          SIMULATION_OUTPUT: src/features/season-review/data/season-simulation-analysis.json
         run: npm run simulation:analysis:calibrate
       - name: Commit generated analysis
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/data/season-simulation-analysis.json
+          git add src/features/season-review/data/season-simulation-analysis.json
           if git diff --cached --quiet; then
             echo "Simulation analysis is unchanged"
           else

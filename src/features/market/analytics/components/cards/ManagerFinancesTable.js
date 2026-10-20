@@ -1,7 +1,7 @@
 'use client';
 
 import { Landmark } from 'lucide-react';
-import { StatsTable } from '@/components/ui';
+import { StatsTable } from '@/lib/competition/ui';
 
 export default function ManagerFinancesTable({ data }) {
   const columns = [

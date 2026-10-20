@@ -15,7 +15,7 @@ import {
   ReferenceLine,
   Legend,
 } from 'recharts';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 import { GlassTooltip, TooltipHeader } from '@/components/ui/Tooltip';
 
 // --- Custom Tooltip ---

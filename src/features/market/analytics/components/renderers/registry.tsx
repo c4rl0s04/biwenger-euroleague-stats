@@ -2,9 +2,9 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { formatEuro, formatProfit } from '@/lib/utils/currency';
+import { formatEuro, formatProfit } from '../../lib/currency';
 import { Timer, Hourglass, ArrowRight } from 'lucide-react';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 import type {
   MarketMetricFields,
   MarketMetricDefinition,

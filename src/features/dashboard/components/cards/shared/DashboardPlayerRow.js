@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { getShortTeamName } from '@/lib/utils/format';
+import { getShortTeamName } from '@/lib/competition/public';
 import { User } from 'lucide-react';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 
 export default function DashboardPlayerRow({
   playerId,

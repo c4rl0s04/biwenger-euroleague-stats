@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { Map as MapComponent, MapControls, MarkerContent } from '@/components/ui/map';
-import { getTeamColor } from '@/lib/constants/teamColors';
+import { getTeamColor } from '@/lib/competition/public';
 import { cn } from '@/lib/utils';
 import { TeamMarker } from './TeamMarker';
 import { formatMatchDateShort, formatMatchTime } from '@/lib/utils/date';

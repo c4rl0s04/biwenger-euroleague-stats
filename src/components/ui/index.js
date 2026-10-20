@@ -38,10 +38,7 @@ export { default as PageHeader } from './PageHeader';
 
 // Layout & Structure
 export { default as Drawer } from './Drawer';
-export { default as BaseRow } from './BaseRow';
-export { default as StatsList } from './StatsList';
 export {
-  default as StatsTable,
   Table,
   TableHeader,
   TableHeaderCell,

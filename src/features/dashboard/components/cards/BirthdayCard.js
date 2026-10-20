@@ -2,9 +2,10 @@
 
 import { Cake, Sparkles } from 'lucide-react';
 import Link from 'next/link';
-import { Card, StatsList } from '@/components/ui';
+import { Card } from '@/components/ui';
+import { StatsList } from '@/lib/competition/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 
 export default function BirthdayCard() {
   const { data: birthdays = [], loading } = useApiData('/api/dashboard/birthdays');

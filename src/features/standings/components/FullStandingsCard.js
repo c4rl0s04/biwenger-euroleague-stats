@@ -1,7 +1,7 @@
 'use client';
 
 import { Trophy, Medal, TrendingUp, TrendingDown, Minus } from 'lucide-react';
-import { StatsTable } from '@/components/ui';
+import { StatsTable } from '@/lib/competition/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function FullStandingsCard() {

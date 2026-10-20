@@ -7,7 +7,8 @@ import { isSecurityContract, checkSecurityBoundaries } from './security-boundari
 const normalize = (value) => value.split(path.sep).join('/');
 const featureOf = (file) => /^src\/features\/([^/]+)\//.exec(file)?.[1];
 const isCompetition = (file) => file.startsWith('src/lib/competition/');
-const isCompetitionContract = (file) => /^src\/lib\/competition\/(public|server)\.ts$/.test(file);
+const isCompetitionContract = (file) =>
+  /^src\/lib\/competition\/(public|server|ui)\.ts$/.test(file);
 const retiredDomainPaths =
   /^(src\/lib\/logic\/(standings|match-scores|ideal-lineup)|src\/lib\/utils\/(lineup-logic|player-finance|efficiency)|src\/lib\/db\/queries\/core\/(users|playerForm|manager-directory))(?:\.[cm]?[jt]sx?)?$/;
 const isSeasonContract = (file) => file === 'src/lib/seasons/server.ts';
@@ -134,6 +135,12 @@ export function checkGraph(graph, policy) {
   }
   for (const [file, node] of graph) {
     const owner = featureOf(file);
+    if (
+      file.startsWith('src/components/') &&
+      (!/^src\/components\/(ui|shell|mobile|pwa|layout)\//.test(file) ||
+        file.startsWith('src/components/mobile/screens/'))
+    )
+      report('global-domain-presentation', file, 'feature-owned presentation required');
     if (isCompetition(file)) {
       if (node.computedImports)
         report('competition-computed-import', file, 'nonliteral module target');
@@ -184,9 +191,25 @@ export function checkGraph(graph, policy) {
       if (target && isCompetition(target) && !isCompetition(file) && !isCompetitionContract(target))
         report('competition-deep-import', file, target);
       if (isCompetition(file)) {
+        if (
+          (file.endsWith('/public.ts') ||
+            file.includes('/logic/') ||
+            file.includes('/presentation/')) &&
+          target &&
+          (target.includes('/components/') || target === 'src/lib/competition/ui.ts')
+        )
+          report('competition-pure-ui', file, target);
         if ((file.includes('/logic/') || file.endsWith('/public.ts')) && target && isServer(target))
           report('competition-pure-server', file, target);
         const query = file.startsWith('src/lib/competition/server/queries/');
+        const sharedDomainUi = file.startsWith('src/lib/competition/components/');
+        const permittedUiDependency =
+          sharedDomainUi &&
+          ((target &&
+            (target.startsWith('src/components/ui/') || target === 'src/lib/utils/index.ts')) ||
+            ['react', 'lucide-react', 'next/link', 'next/image', 'framer-motion'].includes(
+              edge.specifier
+            ));
         const permittedInfrastructure =
           query &&
           target &&
@@ -194,6 +217,7 @@ export function checkGraph(graph, policy) {
         if (
           !(target && isCompetition(target)) &&
           !permittedInfrastructure &&
+          !permittedUiDependency &&
           !(edge.specifier === 'server-only' && (query || file.endsWith('/server.ts')))
         )
           report('competition-dependency', file, target ?? edge.specifier);
@@ -231,7 +255,7 @@ export function checkGraph(graph, policy) {
             file.includes('/models/')));
       if (
         file.startsWith('src/components/ui/') &&
-        (other || target.startsWith('src/components/shell/'))
+        (other || isCompetition(target) || target.startsWith('src/components/shell/'))
       )
         report('primitive-ownership', file, target);
       if (
@@ -290,6 +314,7 @@ export function checkGraph(graph, policy) {
       !node.client &&
       !isSharedPresentation(start) &&
       start !== 'src/lib/competition/public.ts' &&
+      start !== 'src/lib/competition/ui.ts' &&
       (!featureOf(start) ||
         !(node.client || start.endsWith('/public.ts') || start.includes('/components/')))
     )
@@ -322,12 +347,21 @@ export function checkGraph(graph, policy) {
   return [...errors].sort();
 }
 
+export function checkEntrypointCoverage(graph, policy) {
+  // Health deliberately reaches database infrastructure rather than a product feature.
+  return [...graph.keys()]
+    .filter((file) => /^src\/app\/(?:.*\/)?(?:page|route|layout)\.[jt]sx?$/.test(file))
+    .filter((file) => file !== 'src/app/api/health/route.ts')
+    .filter((file) => !policy.entrypoints.includes(file))
+    .map((file) => `Unprotected framework entrypoint: ${file}`);
+}
+
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const root = path.resolve(import.meta.dirname, '../..');
   const policy = JSON.parse(readFileSync(path.join(import.meta.dirname, 'policy.json'), 'utf8'));
   if (!existsSync(path.join(root, 'src/features'))) throw new Error('Missing features directory');
   const graph = readGraph(root);
-  const errors = checkGraph(graph, policy);
+  const errors = [...checkGraph(graph, policy), ...checkEntrypointCoverage(graph, policy)];
   if (errors.length) {
     console.error(errors.join('\n'));
     process.exitCode = 1;

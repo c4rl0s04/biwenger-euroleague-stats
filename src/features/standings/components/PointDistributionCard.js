@@ -4,7 +4,7 @@ import { useApiData } from '@/lib/hooks/useApiData';
 import { Card } from '@/components/ui';
 import { BarChart2 } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from 'recharts';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 import Link from 'next/link';
 
 // 1. Define the items exactly in the order you want them to appear

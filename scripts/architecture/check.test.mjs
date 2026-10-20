@@ -2,7 +2,18 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, it, expect } from 'vitest';
-import { readGraph, checkGraph } from './check.mjs';
+import { readGraph, checkGraph, checkEntrypointCoverage } from './check.mjs';
+
+it('requires coverage for new framework adapters and exempts only database health', () => {
+  const page = 'src/app/(app)/personal/bids/page.tsx';
+  const route = 'src/app/api/season-predictions/submission/route.ts';
+  const graph = new Map([page, route, 'src/app/api/health/route.ts'].map((file) => [file, {}]));
+  expect(checkEntrypointCoverage(graph, { entrypoints: [] })).toEqual([
+    `Unprotected framework entrypoint: ${page}`,
+    `Unprotected framework entrypoint: ${route}`,
+  ]);
+  expect(checkEntrypointCoverage(graph, { entrypoints: [page, route] })).toEqual([]);
+});
 
 function check(files, policy = { entrypoints: [], exceptions: [] }) {
   const root = mkdtempSync(path.join(tmpdir(), 'feature-graph-'));
@@ -334,4 +345,37 @@ describe('Hoopgrid operational ownership', () => {
       })
     ).toEqual([]);
   });
+});
+
+it('allows shared competition UI while keeping generic primitives and pure helpers independent', () => {
+  const ui = 'src/lib/competition/ui.ts';
+  const component = 'src/lib/competition/components/StatsList.tsx';
+  const files = {
+    [ui]: "export { default as StatsList } from './components/StatsList';",
+    [component]:
+      "import { Table } from '@/components/ui/Table'; export default function StatsList() {}",
+    'src/components/ui/Table.tsx': 'export const Table = 1;',
+    'src/features/example/public.ts': "export { StatsList } from '@/lib/competition/ui';",
+  };
+  expect(check(files)).toEqual([]);
+  expect(
+    check({ ...files, 'src/components/ui/Table.tsx': "import '@/lib/competition/ui';" })
+  ).toContain(`primitive-ownership: src/components/ui/Table.tsx -> ${ui}`);
+  expect(check({ ...files, 'src/lib/competition/public.ts': "export * from './ui';" })).toContain(
+    `competition-pure-ui: src/lib/competition/public.ts -> ${ui}`
+  );
+  expect(check({ ...files, [component]: "import '@/features/example/public';" })).toContain(
+    `competition-dependency: ${component} -> src/features/example/public.ts`
+  );
+  expect(
+    check({ ...files, [component]: "import 'server-only';" }).some((error) =>
+      error.startsWith('client-leak:')
+    )
+  ).toBe(true);
+});
+
+it('rejects domain screens returning to global component folders', () => {
+  expect(check({ 'src/components/mobile/screens/MobileLineup.tsx': 'export {};' })).toContain(
+    'global-domain-presentation: src/components/mobile/screens/MobileLineup.tsx -> feature-owned presentation required'
+  );
 });

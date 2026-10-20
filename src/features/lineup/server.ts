@@ -42,3 +42,8 @@ export type {
   BiwengerUserMarketData,
   BiwengerUserOfferData,
 } from './models/lineup';
+
+export {
+  getLineupSectionData,
+  LINEUP_SECTION_POLICY,
+} from './server/services/lineup-section.service';

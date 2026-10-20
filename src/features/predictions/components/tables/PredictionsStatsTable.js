@@ -1,7 +1,7 @@
 'use client';
 
 import { Trophy } from 'lucide-react';
-import { StatsTable } from '@/components/ui';
+import { StatsTable } from '@/lib/competition/ui';
 
 export function PredictionsStatsTable({ data }) {
   const columns = [

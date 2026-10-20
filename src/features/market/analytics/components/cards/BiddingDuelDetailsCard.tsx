@@ -5,7 +5,7 @@ import Link from 'next/link';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import PlayerImage from '@/components/ui/PlayerImage';
 import { useApiData } from '@/lib/hooks/useApiData';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 import type { MarketDuelSelection } from '../../models/market-duel-selection';
 import type { MarketDuelDetail } from '../../../trends/models/market-transfers';
 
@@ -21,7 +21,7 @@ type UseDuelDetailsData = (
   options: { dependencies: (number | undefined)[]; skip: boolean; cacheKey: string | null }
 ) => { data?: MarketDuelDetail[]; loading: boolean; error: string | null };
 
-import { formatEuro } from '@/lib/utils/currency';
+import { formatEuro } from '../../lib/currency';
 
 function formatDate(value: string | null) {
   if (!value) return 'Fecha no disponible';

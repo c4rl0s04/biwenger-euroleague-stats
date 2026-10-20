@@ -5,8 +5,8 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
-import { getColorForUser } from '@/lib/constants/colors';
-import { formatEuro } from '@/lib/utils/currency';
+import { getColorForUser } from '@/lib/competition/public';
+import { formatEuro } from '../../lib/currency';
 
 /**
  * MarketStatCard - Harmonized with Cleaner List Structure & Bigger Fonts

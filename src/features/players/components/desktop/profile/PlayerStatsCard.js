@@ -2,7 +2,7 @@
 
 import { Activity, HeartPulse, Flame } from 'lucide-react';
 import { ElegantCard } from '@/components/ui';
-import { getScoreColor, getShortRoundName } from '@/lib/utils/format';
+import { getScoreColor, getShortRoundName } from '@/lib/competition/public';
 
 export default function PlayerStatsCard({ player, className = '' }) {
   const matches = player.recentMatches || [];

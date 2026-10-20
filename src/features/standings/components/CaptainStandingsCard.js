@@ -2,7 +2,7 @@
 
 import { Crown, Target, Layers, TrendingUp, TrendingDown, Star } from 'lucide-react';
 import Link from 'next/link';
-import { StatsTable } from '@/components/ui';
+import { StatsTable } from '@/lib/competition/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function CaptainStandingsCard() {

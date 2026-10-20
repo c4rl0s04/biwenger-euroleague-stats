@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import { TrendingUp } from 'lucide-react';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 
 import { GlassTooltip, TooltipHeader } from '@/components/ui/Tooltip';
 

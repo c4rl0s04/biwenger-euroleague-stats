@@ -8,7 +8,7 @@ import { db, pgClient } from '@/lib/db/client';
 import { fetchAllPlayAllStats } from '../services/all-play-all.service';
 import type { AllPlayAllEntry } from '../../models/all-play-all';
 import { cached, CACHE_TTL } from '@/lib/utils/cache';
-import { getShortRoundName } from '@/lib/utils/format';
+import { getShortRoundName } from '@/lib/competition/public';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
 
 export interface HeatCheckStat {

@@ -3,7 +3,7 @@
 import { useApiData } from '@/lib/hooks/useApiData';
 import { Card } from '@/components/ui';
 import { Flame, Snowflake } from 'lucide-react';
-import StatsList from '@/components/ui/StatsList';
+import { StatsList } from '@/lib/competition/ui';
 
 export default function HeatCheckCard() {
   const { data = [], loading } = useApiData('/api/standings/advanced?type=heat-check');

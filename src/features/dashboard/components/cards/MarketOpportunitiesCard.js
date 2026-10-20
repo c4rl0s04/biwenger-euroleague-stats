@@ -2,8 +2,9 @@
 
 import { ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
-import { getScoreColor, getShortTeamName } from '@/lib/utils/format';
-import { Card, AnimatedNumber, StatsList } from '@/components/ui';
+import { getScoreColor, getShortTeamName } from '@/lib/competition/public';
+import { Card, AnimatedNumber } from '@/components/ui';
+import { StatsList } from '@/lib/competition/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function MarketOpportunitiesCard() {

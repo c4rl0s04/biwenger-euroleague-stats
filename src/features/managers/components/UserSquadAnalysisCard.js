@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ElegantCard } from '@/components/ui';
-import { getScoreColor } from '@/lib/utils/format';
+import { getScoreColor } from '@/lib/competition/public';
 
 /** @param {{ squad: import('../models/manager-reads').ManagerSquadViewModel | null }} props */
 export default function UserSquadAnalysisCard({ squad }) {

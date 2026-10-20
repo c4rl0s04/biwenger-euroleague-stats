@@ -5,9 +5,10 @@
 import { useState, useMemo, useCallback } from 'react';
 import { BarChart2 } from 'lucide-react';
 import Link from 'next/link';
-import { Card, AnimatedNumber, StatsList } from '@/components/ui';
+import { Card, AnimatedNumber } from '@/components/ui';
+import { StatsList } from '@/lib/competition/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 
 export default function StatsLeadersCard() {
   const [statType, setStatType] = useState('points');

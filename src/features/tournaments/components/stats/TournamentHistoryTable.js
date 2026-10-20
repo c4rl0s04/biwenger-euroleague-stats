@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import { ArrowUpDown } from 'lucide-react';
-import { StatsTable } from '@/components/ui';
+import { StatsTable } from '@/lib/competition/ui';
 import { cn } from '@/lib/utils';
 
 export function TournamentHistoryTable({ data, title, type = 'global' }) {

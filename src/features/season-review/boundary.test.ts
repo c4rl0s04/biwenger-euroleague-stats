@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
@@ -73,14 +73,9 @@ describe('Season Review feature boundary', () => {
     expect(policy.exceptions).toEqual([]);
   });
 
-  it('provides thin backward compatibility shims', () => {
-    const clientShim = read('src/components/season-review/SeasonReviewClient.tsx');
-    expect(clientShim).toContain('@/features/season-review/public');
-
-    const mobileScreenShim = read('src/components/mobile/screens/MobileSeasonReviewScreen.tsx');
-    expect(mobileScreenShim).toContain('@/features/season-review/public');
-
-    const mobileDetailShim = read('src/components/mobile/screens/MobileSeasonReviewDetail.tsx');
-    expect(mobileDetailShim).toContain('@/features/season-review/public');
+  it('retires unused compatibility shims', () => {
+    expect(existsSync('src/components/season-review/SeasonReviewClient.tsx')).toBe(false);
+    expect(existsSync('src/components/mobile/screens/MobileSeasonReviewScreen.tsx')).toBe(false);
+    expect(existsSync('src/components/mobile/screens/MobileSeasonReviewDetail.tsx')).toBe(false);
   });
 });

@@ -1,9 +1,9 @@
 'use client';
 
 import { TrendingUp } from 'lucide-react';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 import MarketPodiumCard from './MarketPodiumCard';
-import { formatEuro } from '@/lib/utils/currency';
+import { formatEuro } from '../../lib/currency';
 import { TooltipHeader } from '@/components/ui/Tooltip';
 import { HeroStatGroup, ManagerPill, ManagerName } from '../StatUIComponents';
 

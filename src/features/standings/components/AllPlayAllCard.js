@@ -4,7 +4,7 @@ import { useApiData } from '@/lib/hooks/useApiData';
 import { Card } from '@/components/ui';
 import { Swords } from 'lucide-react';
 import Link from 'next/link';
-import StatsList from '@/components/ui/StatsList';
+import { StatsList } from '@/lib/competition/ui';
 
 export default function AllPlayAllCard() {
   const { data = [], loading } = useApiData('/api/standings/advanced?type=all-play-all');

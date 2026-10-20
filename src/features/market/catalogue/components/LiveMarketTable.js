@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useApiData } from '@/lib/hooks/useApiData';
-import { formatEuro } from '@/lib/utils/currency';
+import { formatEuro } from '../../analytics/lib/currency';
 import {
   ArrowRight,
   Search,
@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 import {
   Table,
   TableHeader,

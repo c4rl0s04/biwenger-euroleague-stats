@@ -3,8 +3,9 @@
 import { useClientUser } from '@/lib/hooks/useClientUser';
 import { Star } from 'lucide-react';
 import Link from 'next/link';
-import { getScoreColor, getShortTeamName } from '@/lib/utils/format';
-import { Card, StatsList } from '@/components/ui';
+import { getScoreColor, getShortTeamName } from '@/lib/competition/public';
+import { Card } from '@/components/ui';
+import { StatsList } from '@/lib/competition/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function CaptainSuggestCard() {

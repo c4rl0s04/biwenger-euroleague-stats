@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useApiData } from '@/lib/hooks/useApiData';
-import { getShortTeamName } from '@/lib/utils/format';
+import { getShortTeamName } from '@/lib/competition/public';
 import { getCorrectedMatchDate, formatMatchTime } from '@/lib/utils/date';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import { Subheading } from '@/components/ui';

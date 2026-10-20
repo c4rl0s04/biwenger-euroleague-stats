@@ -1,3 +1,4 @@
+import { mapCatalogueRows, catalogueInsightRows } from '../../models/mobile-rows';
 import MobileDetailScaffold from '@/components/mobile/MobileDetailScaffold';
 import MobileRecordList from '@/components/mobile/MobileRecordList';
 import { MobileSectionHeading } from '@/components/mobile/MobileScreen';
@@ -12,17 +13,13 @@ export function PlayerCatalogueSectionScreen({
   section,
   title,
   players,
-  insights,
 }: {
   section: PlayerCatalogueSection;
   title: string;
   players?: PlayerCatalogueItemViewModel[];
   insights?: PlayerCatalogueInsightsViewModel;
 }) {
-  const data =
-    section === 'insights'
-      ? [insights?.topPerformers ?? [], insights?.streaks ?? { hot: [], cold: [] }]
-      : (players ?? []);
+  const rows = section === 'insights' ? catalogueInsightRows : mapCatalogueRows(players ?? []);
   return (
     <MobileDetailScaffold
       title={title}
@@ -35,7 +32,7 @@ export function PlayerCatalogueSectionScreen({
       }
     >
       <MobileSectionHeading>Detalle</MobileSectionHeading>
-      <MobileRecordList data={data} linkPrefix="/player" />
+      <MobileRecordList rows={rows} />
     </MobileDetailScaffold>
   );
 }

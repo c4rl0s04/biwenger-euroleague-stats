@@ -125,7 +125,12 @@
     "src/app/(auth)/login/page.js",
     "src/app/install/page.js",
     "src/app/offline/page.js",
-    "src/app/api/auth/[...nextauth]/route.ts"
+    "src/app/api/auth/[...nextauth]/route.ts",
+    "src/app/(app)/personal/bids/page.tsx",
+    "src/app/api/personal/bids/count/route.ts",
+    "src/app/api/personal/bids/market/route.ts",
+    "src/app/api/personal/bids/place/route.ts",
+    "src/app/api/season-predictions/submission/route.ts"
   ],
   "exceptions": []
 }

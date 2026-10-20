@@ -1,6 +1,6 @@
 import type { ScheduleFixture, ScheduleRoundOption } from '@/features/matches/public';
 import type { OwnedPlayer } from '@/features/managers/public';
-import { getTeamColor } from '@/lib/constants/teamColors';
+import { getTeamColor } from '@/lib/competition/public';
 import type { ScheduleRound, SchedulePlayer, ScheduleMatch } from '../../models/schedule';
 
 export function mapScheduleRound(round: ScheduleRoundOption): ScheduleRound {

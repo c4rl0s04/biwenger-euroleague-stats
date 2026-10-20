@@ -3,7 +3,7 @@
 import { Coins } from 'lucide-react';
 import MarketPodiumCard from './MarketPodiumCard';
 import { TooltipHeader } from '@/components/ui/Tooltip';
-import { formatEuro } from '@/lib/utils/currency';
+import { formatEuro } from '../../lib/currency';
 import { HeroStatGroup, ManagerPill, ManagerName } from '../StatUIComponents';
 
 /** @param {{ data?: import('../../models/market-analytics').MarketAnalytics['overpayerManager'], onViewAll?: () => void }} props */
