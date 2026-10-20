@@ -93,7 +93,7 @@ export const PIPELINE: readonly SyncStepDefinition[] = [
     title: 'Authoritative fantasy points',
     source: 'biwenger',
     writes: ['player_round_stats:fantasy_points'],
-    modes: ['routine', 'bootstrap'],
+    modes: ['routine', 'bootstrap', 'live'],
     dependencies: ['match-linking'],
     run: syncBiwengerFantasyPoints,
   },

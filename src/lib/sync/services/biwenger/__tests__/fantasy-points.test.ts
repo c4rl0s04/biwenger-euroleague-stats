@@ -52,7 +52,7 @@ describe('Biwenger Fantasy Points Service', () => {
       }
     );
 
-    expect(updated).toBe(3);
+    expect(updated).toEqual({ reports: 3, playerScores: 3, missingScores: 0 });
     expect(mockUpdateFantasyPoints).toHaveBeenCalledTimes(3);
     expect(mockUpdateFantasyPoints).toHaveBeenCalledWith({
       playerId: 101,

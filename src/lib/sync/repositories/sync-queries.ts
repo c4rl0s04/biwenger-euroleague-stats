@@ -304,7 +304,7 @@ export async function getLiveRounds(seasonId: string, client?: SyncDb): Promise<
 }
 
 /**
- * Returns whether a round has upcoming or live matches within the 1-hour window.
+ * Returns whether a round has started, finished or starts within one hour.
  */
 export async function hasActiveMatchesInWindow(
   seasonId: string,
@@ -314,7 +314,7 @@ export async function hasActiveMatchesInWindow(
   const db = resolveDrizzle(client);
   const rows = await db
     .select({
-      count: sql<number>`COUNT(*)::int`,
+      count: sql<number>`COUNT(*)::int`.as('count'),
     })
     .from(matches)
     .where(
@@ -350,4 +350,26 @@ export async function getOfficialTeamMappings(
     );
 
   return rows;
+}
+
+/** Includes finished games so official ingestion cannot hide the final fantasy update. */
+export async function getFantasyPointLiveRounds(
+  seasonId: string,
+  client?: SyncDb
+): Promise<BiwengerRound[]> {
+  const rows = await resolveDrizzle(client)
+    .selectDistinct({
+      id: sql<number>`${matches.roundId}`.as('id'),
+      name: sql<string>`${matches.roundName}`.as('name'),
+    })
+    .from(matches)
+    .where(
+      and(
+        eq(matches.seasonId, seasonId),
+        isNotNull(matches.roundId),
+        sql`(${matches.status} = 'live' OR ${matches.date} BETWEEN NOW() - INTERVAL '24 hours' AND NOW() + INTERVAL '1 hour')`
+      )
+    )
+    .orderBy(asc(matches.roundId));
+  return rows.map((row) => ({ id: row.id, name: row.name ?? `Round ${row.id}` }));
 }
