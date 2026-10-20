@@ -39,9 +39,11 @@ export default function ExpandedPlayerModal({
   }, []);
 
   useEffect(() => {
-    if (player) document.body.style.overflow = 'hidden';
+    if (!player) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
     return () => {
-      document.body.style.overflow = 'auto';
+      document.body.style.overflow = previousOverflow;
     };
   }, [player]);
 
