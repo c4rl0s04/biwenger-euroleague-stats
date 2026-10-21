@@ -3,7 +3,7 @@
 import { FadeIn } from '@/components/ui';
 import LineupBench from './LineupBench';
 
-export default function LineupBenchSection({ benchPlayers, onPlayerClick }) {
+export default function LineupBenchSection({ benchPlayers, onSlotClick }) {
   return (
     <div className="h-full">
       <FadeIn delay={200}>
@@ -15,7 +15,7 @@ export default function LineupBenchSection({ benchPlayers, onPlayerClick }) {
 
         <LineupBench
           players={benchPlayers}
-          onPlayerClick={onPlayerClick}
+          onSlotClick={onSlotClick}
           className="h-auto min-h-44 lg:h-[650px]"
         />
       </FadeIn>

@@ -126,3 +126,18 @@ describe('lineupCommandService', () => {
     }
   });
 });
+
+it('submits null slots unchanged through the validated provider command', async () => {
+  const command = vi.fn().mockResolvedValue({ status: 'completed', httpStatus: 200 });
+  vi.mocked(executeUserProviderCommand).mockImplementation(async (_userId, _operation, run) =>
+    run({ command } as never, { userId: 'actor', token: 'test-credential' })
+  );
+  const lineup = {
+    type: '2-2-1',
+    playersID: [1, 2, 3, null, 5, 6, null, 8, 9, 10],
+    reservesID: [null, 11, null],
+  };
+  await lineupCommandService.updateLineup('actor', lineup);
+  expect(command.mock.calls[0][1].body.lineup.playersID).toEqual(lineup.playersID);
+  expect(command.mock.calls[0][1].body.lineup.reservesID).toEqual(lineup.reservesID);
+});

@@ -125,3 +125,14 @@ describe('lineup-read.mapper', () => {
     ]);
   });
 });
+
+it('scrubs invalid slot values without moving subsequent players or leaking their fields', () => {
+  const result = mapLineup({
+    type: '2-2-1',
+    playersID: [1, null, { token: CANARY_TOKEN }, 4, 5],
+    reservesID: [null, 6, null],
+  });
+  expect(result?.playersID).toEqual([1, null, null, 4, 5]);
+  expect(result?.reservesID).toEqual([null, 6, null]);
+  expect(JSON.stringify(result)).not.toContain(CANARY_TOKEN);
+});

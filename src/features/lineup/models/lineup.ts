@@ -1,9 +1,10 @@
 export type SafeIdentifier = string | number;
+export type LineupSlotIdentifier = SafeIdentifier | null;
 
 export interface SafeLineupConfig {
   type?: string;
-  playersID: SafeIdentifier[];
-  reservesID: SafeIdentifier[];
+  playersID: LineupSlotIdentifier[];
+  reservesID: LineupSlotIdentifier[];
   captain?: SafeIdentifier;
   striker?: SafeIdentifier;
   coach?: SafeIdentifier;
@@ -93,8 +94,8 @@ export interface BiwengerUserData {
 
 export interface LineupCommandInput {
   type?: string;
-  playersID: SafeIdentifier[];
-  reservesID?: SafeIdentifier[];
+  playersID: LineupSlotIdentifier[];
+  reservesID?: LineupSlotIdentifier[];
   captain?: SafeIdentifier | null;
   striker?: SafeIdentifier | null;
   coach?: SafeIdentifier | null;

@@ -1,5 +1,6 @@
 import type {
   SafeIdentifier,
+  LineupSlotIdentifier,
   SafeLineupConfig,
   SafeLineupPlayer,
   SafeMarketListing,
@@ -27,13 +28,17 @@ function safeNumber(value: unknown): number | undefined {
   return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
 }
 
+function safeLineupSlots(value: unknown): LineupSlotIdentifier[] {
+  return Array.isArray(value) ? Array.from(value, (id) => safeIdentifier(id) ?? null) : [];
+}
+
 export function mapLineup(value: unknown): SafeLineupConfig | null {
   if (!isRecord(value)) return null;
 
   return {
     type: typeof value.type === 'string' ? value.type : undefined,
-    playersID: safeIdentifiers(value.playersID),
-    reservesID: safeIdentifiers(value.reservesID),
+    playersID: safeLineupSlots(value.playersID),
+    reservesID: safeLineupSlots(value.reservesID),
     captain: safeIdentifier(value.captain),
     striker: safeIdentifier(value.striker),
     coach: safeIdentifier(value.coach),

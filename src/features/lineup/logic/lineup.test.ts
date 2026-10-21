@@ -31,7 +31,7 @@ describe('lineup rules', () => {
   it('promotes a reserve, returns the old player and deduplicates identifiers', () => {
     expect(performSwap(1, 3, { playersID: [1, 2, 2], reservesID: [3, 4, 4], captain: 2 })).toEqual({
       playersID: ['3', '2'],
-      reservesID: ['4', '1'],
+      reservesID: ['1', '4'],
       captain: 2,
     });
   });
@@ -61,13 +61,26 @@ describe('lineup rules', () => {
   });
   it('handles insufficient squads and missing selections without manufacturing players', () => {
     expect(realignTactics('2-2-1', [{ id: 1, position: 'Base' }], { playersID: [1, 999] })).toEqual(
-      { playersID: ['1'], reservesID: [] }
+      { playersID: ['1', null, null, null, null, null, null, null, null, null], reservesID: [] }
     );
     const rotation = deriveRotation({ playersID: [1, 999, 2, 3, 4, 5], captain: '1' }, [
       { id: 1 },
       { id: 5 },
     ]);
-    expect(rotation).toEqual({ starters: [{ id: 1, is_captain: true }], bench: [{ id: 5 }] });
-    expect(deriveRotation({}, null)).toEqual({ starters: [], bench: [] });
+    expect(rotation.starters.map((slot) => slot.player)).toEqual([
+      { id: 1, is_captain: true },
+      null,
+      null,
+      null,
+      null,
+    ]);
+    expect(rotation.bench.map((slot) => slot.player)).toEqual([
+      { id: 5, is_captain: false },
+      null,
+      null,
+      null,
+      null,
+    ]);
+    expect(deriveRotation({}, null).starters.every((slot) => slot.playerId === null)).toBe(true);
   });
 });

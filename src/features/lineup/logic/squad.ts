@@ -16,7 +16,7 @@ interface SwapPlayer extends SquadIdentity {
 
 export function rankSwapCandidates<T extends SwapPlayer>(
   squad: T[],
-  target: T,
+  target: { id?: SafeIdentifier | null; position?: string | null },
   isStarter: boolean,
   activeIds: ReadonlySet<string>
 ): T[] {
