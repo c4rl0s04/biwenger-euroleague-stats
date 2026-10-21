@@ -10,9 +10,9 @@ export const lineupCommandSchema = z
   .object({
     type: z.string().min(1).optional(),
     playersID: z
-      .array(safeIdentifierSchema)
+      .array(safeIdentifierSchema.nullable())
       .min(1, 'Se requiere al menos un jugador en la alineación'),
-    reservesID: z.array(safeIdentifierSchema).optional().default([]),
+    reservesID: z.array(safeIdentifierSchema.nullable()).optional().default([]),
     captain: safeIdentifierSchema.nullable().optional(),
     striker: safeIdentifierSchema.nullable().optional(),
     coach: safeIdentifierSchema.nullable().optional(),

@@ -178,7 +178,13 @@ export default function LineupClient({ userId }) {
   const handlePlayerSelect = (newPlayer) => {
     if (!swapTarget) return;
 
-    const updatedLineup = performSwap(swapTarget.player.id, newPlayer.id, lineupConfig);
+    const updatedLineup = performSwap(
+      swapTarget.slotIndex !== undefined
+        ? { slotIndex: swapTarget.slotIndex }
+        : swapTarget.player.id,
+      newPlayer.id,
+      lineupConfig
+    );
     setLineupConfig(updatedLineup);
     setIsSwapOpen(false);
     setSwapTarget(null);
@@ -264,7 +270,7 @@ export default function LineupClient({ userId }) {
 
   // ── Derived State ───────────────────────────────────────────────────────
   const { starters, bench } = deriveRotation(lineupConfig, squad);
-  const captainName = starters.find((p) => p.is_captain)?.name;
+  const captainName = starters.find((slot) => slot.player?.is_captain)?.player?.name;
 
   // ── Loading State ───────────────────────────────────────────────────────
   if (loading && squad.length === 0) {
@@ -332,12 +338,18 @@ export default function LineupClient({ userId }) {
               <LineupCourtSection
                 starters={starters}
                 captainName={captainName}
-                onPlayerClick={(p) => handlePlayerClick(p, true)}
+                onSlotClick={(slot) => {
+                  setSwapTarget({ ...slot, isStarter: true });
+                  setIsSwapOpen(true);
+                }}
               />
 
               <LineupBenchSection
                 benchPlayers={bench}
-                onPlayerClick={(p) => handlePlayerClick(p, false)}
+                onSlotClick={(slot) => {
+                  setSwapTarget({ ...slot, isStarter: false });
+                  setIsSwapOpen(true);
+                }}
               />
             </div>
           </div>
@@ -391,6 +403,7 @@ export default function LineupClient({ userId }) {
         isOpen={isSwapOpen}
         onClose={() => setIsSwapOpen(false)}
         targetPlayer={swapTarget?.player}
+        targetSlot={swapTarget?.slotIndex !== undefined ? swapTarget : null}
         isStarter={swapTarget?.isStarter}
         squad={squad}
         activeIds={new Set(lineupConfig.playersID)}

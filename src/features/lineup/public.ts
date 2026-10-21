@@ -1,5 +1,6 @@
 export type {
   SafeIdentifier,
+  LineupSlotIdentifier,
   SafeLineupConfig,
   SafeLineupPlayerOwner,
   SafeLineupPlayer,
@@ -21,6 +22,7 @@ export {
 } from './logic/lineup';
 export type {
   TacticalPlayer,
+  LineupRotationSlot,
   TacticalLineup,
   NormalizedLineup,
   LineupNormalizationInput,
@@ -36,3 +38,5 @@ export type {
   LineupOfferPrice,
   LineupOfferProjection,
 } from './logic/offer-projection';
+
+export { LineupSlotPlaceholder } from './components/LineupSlotPlaceholder';
