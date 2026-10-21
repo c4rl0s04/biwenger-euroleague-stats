@@ -28,7 +28,7 @@ test('Lineup preserves an Alero gap, fills that exact slot and saves without mov
     points: 100,
     average: 10,
     recent_scores: '10,10',
-    img: '/icons/icon-192.png',
+    img: '/icons/icon-512.png',
   }));
   const ids = players.slice(0, 10).map((p, i) => (i === 3 ? null : p.id));
   const submitted: Array<{ playersID: (string | null)[]; reservesID: (string | null)[] }> = [];
@@ -49,7 +49,7 @@ test('Lineup preserves an Alero gap, fills that exact slot and saves without mov
             },
             players: [],
             market: [],
-            offers: [],
+            offers: [{ id: 1, requestedPlayers: [99101], amount: 1200000, until: 4102444800 }],
           },
         },
       });
@@ -65,6 +65,18 @@ test('Lineup preserves an Alero gap, fills that exact slot and saves without mov
   const court = page.locator('[aria-label="Quinteto titular"]');
   await expect(court.getByText('Alero vacío', { exact: true })).toBeVisible();
   await expect(court.getByText('Slot Player 6', { exact: true })).toHaveCount(0);
+  if (info.project.name === 'desktop-1440') {
+    const portraits = page.getByRole('img', { name: 'Slot Player 1', exact: true });
+    await expect(portraits).toHaveCount(3);
+    for (const portrait of await portraits.all()) {
+      await expect(portrait).toHaveAttribute('src', /icon-512/);
+    }
+    await page.getByTitle('Vista de Tabla', { exact: true }).click();
+    await expect(portraits).toHaveCount(3);
+    for (const portrait of await portraits.all()) {
+      await expect(portrait).toHaveAttribute('src', /icon-512/);
+    }
+  }
   const save = page.getByRole('button', {
     name: info.project.name === 'iphone-13' ? 'Guardar alineación' : 'Guardar cambios',
   });
@@ -73,6 +85,7 @@ test('Lineup preserves an Alero gap, fills that exact slot and saves without mov
   expect(submitted[0].playersID).toEqual(ids.map((id) => (id === null ? null : String(id))));
   expect(submitted[0].reservesID).toEqual([null, '99111', null]);
   const gap = court.getByRole('button', { name: /Alero vacío/ });
+  if (info.project.name === 'desktop-1440') await expect(gap).toHaveCSS('cursor', 'pointer');
   await gap.click();
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.keyboard.press('Escape');

@@ -17,10 +17,13 @@ export async function readManagerSquad(userId: number | string) {
       ps.price_increment AS price_increment,
       ps.puntos as points,
       ROUND(CAST(ps.puntos AS NUMERIC) / NULLIF(ps.partidos_jugados, 0), 1) as average,
-      p.img
+      COALESCE(opm.image_url, p.img) AS img
     FROM player_seasons ps
     JOIN players p ON ps.player_id = p.id
     LEFT JOIN teams t ON ps.team_id = t.id
+    LEFT JOIN official_player_mappings opm
+      ON opm.player_id = p.id AND opm.season_id = ps.season_id
+     AND opm.provider = 'euroleague_advanced' AND opm.status = 'matched'
     WHERE ps.season_id = $1 AND ps.owner_id = $2
     ORDER BY ps.puntos DESC NULLS LAST
   `;

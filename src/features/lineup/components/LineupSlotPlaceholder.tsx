@@ -17,7 +17,7 @@ export function LineupSlotPlaceholder({
       type="button"
       onClick={() => onSelect(slot)}
       aria-label={`${label}, posición ${slot.slotIndex + 1}`}
-      className="flex min-h-20 w-24 flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-border-default bg-surface-card/80 p-2 text-content-muted hover:text-action-primary focus-visible:outline-2 focus-visible:outline-action-primary"
+      className="cursor-pointer flex min-h-20 w-24 flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-border-default bg-surface-card/80 p-2 text-content-muted hover:text-action-primary focus-visible:outline-2 focus-visible:outline-action-primary"
     >
       <UserPlus size={24} aria-hidden="true" />
       <span className="text-center text-xs">{label}</span>
