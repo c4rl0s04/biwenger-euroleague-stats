@@ -81,3 +81,30 @@ The full unit suite, full lint, production build and browser matrix are deferred
 request for focused local validation. No local browser comparison has run; actual layout/bundling still
 needs CI acceptance. No provider writes, database/schema mutations, credential operations or deployment
 changes were performed. Legacy visual tokens, cards and theme compatibility remain for later UI adoption.
+
+## Detailed re-audit (2026-10-21)
+
+The independent standards and specification source reviews found no additional ownership or behavior
+defects in the agreed closure scope. The remaining global modules serve shared UI, application shell,
+framework, authentication, database/sync, season, provider or competition contracts. The shared
+competition presentation contract is the ownership option explicitly approved by the user.
+
+CI for candidate `c0f1a177` passed full unit validation (3,025 tests passed, eight skipped), lint,
+type checking, architecture, documentation, formatting and schema metadata/consistency checks.
+However, its production build and all five browser jobs failed at compilation: TeamDistributionTable
+still used a mixed default/named import from the now primitive-only table module. Browser assertions
+never ran. The earlier focused checks therefore did not establish release readiness.
+
+The follow-up imports StatsTable through the approved competition UI contract and keeps TableIdentity
+on the generic primitive contract. A TypeScript AST scan of all 1,474 source files found six primitive
+table imports and no remaining default imports. `npm run architecture:check` passed again with 1,100
+modules and 131 protected entrypoints, and `git diff --check` passed. A read-only
+`git merge-tree --write-tree HEAD main` check found no conflicts with current main.
+
+`SKIP_DB=true npx --yes --package=node@24.20.0 --call 'npm run build'` passed, including production
+compilation, TypeScript and static-page generation. The credential-free build emitted existing missing
+Biwenger environment-variable warnings; no credentials or live database connection were needed.
+
+PR #109 remains a draft and is not integrated into main. Fresh CI, browser and deployment acceptance
+are still required before claiming the migration is released. No full unit rerun or local browser
+suite was added for this import-only correction.
