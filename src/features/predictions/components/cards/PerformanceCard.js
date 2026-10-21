@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 import { TrendingUp, AlertCircle } from 'lucide-react';
 import { Card } from '@/components/ui';
 import {

@@ -25,7 +25,7 @@ rejecting offers.
 ## Implementation map
 
 - Pages: [`lineup`](<../../src/app/(app)/lineup>) and [`market`](<../../src/app/(app)/market>).
-- UI: [`src/components/lineup`](../../src/components/lineup) and
+- UI: [`src/features/lineup/components`](../../src/features/lineup/components) and
   [`src/features/market`](../../src/features/market) sub-domains (`catalogue`, `analytics`, `trends`, `screens`).
 - Services: [Lineup reads and commands](../../src/features/lineup/server.ts) and
   [Market reads and commands](../../src/features/market/server.ts).

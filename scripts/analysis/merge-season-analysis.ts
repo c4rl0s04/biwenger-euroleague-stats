@@ -13,7 +13,7 @@ const inputDirectory = resolve(
 );
 const output = resolve(
   process.cwd(),
-  process.env.SIMULATION_OUTPUT || 'src/data/season-simulation-analysis.json'
+  process.env.SIMULATION_OUTPUT || 'src/features/season-review/data/season-simulation-analysis.json'
 );
 
 function stage(value: string | undefined): SimulationAnalysisStage {

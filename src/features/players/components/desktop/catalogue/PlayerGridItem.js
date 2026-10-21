@@ -3,8 +3,8 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { User, TrendingUp, TrendingDown, Minus } from 'lucide-react';
-import { getColorForUser } from '@/lib/constants/colors';
-import { getScoreColor } from '@/lib/utils/format';
+import { getColorForUser } from '@/lib/competition/public';
+import { getScoreColor } from '@/lib/competition/public';
 
 export default function PlayerGridItem({ player, sortConfig }) {
   // Helper: Format currency

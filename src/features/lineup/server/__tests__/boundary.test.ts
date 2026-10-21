@@ -1,6 +1,13 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+// Legacy .js JSX is compiled by Next; isolate presentation from this service export check.
+vi.mock('../../components/LineupClient', () => ({ default: () => null }));
+vi.mock('../../components/AutoAlignButton', () => ({ default: () => null }));
+vi.mock('../../screens/MobileLineupClient', () => ({ default: () => null }));
+vi.mock('../../screens/MobileOffersClient', () => ({ default: () => null }));
+vi.mock('@/components/shell/mobile/MobileHeaderActions', () => ({ default: () => null }));
 
 describe('Lineup feature boundary contracts', () => {
   const root = path.resolve(__dirname, '../../..');

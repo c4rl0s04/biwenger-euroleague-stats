@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 vi.mock('server-only', () => ({}));
 // Header actions are unrelated to the real MobileListRow used in both render paths.
 vi.mock('@/components/shell/mobile/MobileHeaderActions', () => ({ default: () => null }));
-import MobileRecordList from '@/components/mobile/MobileRecordList';
+import MobileRecordList from '@/tests/fixtures/LegacyMobileRecordList';
 import MarketSectionRows from '../components/MarketSectionRows';
 import {
   mapMarketTransferRows,

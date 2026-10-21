@@ -5,7 +5,7 @@ import { Card } from '@/components/ui';
 import { Grid } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 import { useState } from 'react';
 import { GlassTooltip, TooltipHeader } from '@/components/ui/Tooltip';
 

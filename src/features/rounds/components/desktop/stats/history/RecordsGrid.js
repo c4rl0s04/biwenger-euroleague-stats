@@ -2,7 +2,7 @@
 
 import { Trophy, Star, TrendingDown, Target, Skull } from 'lucide-react';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
-import { StatsList } from '@/components/ui';
+import { StatsList } from '@/lib/competition/ui';
 
 /**
  * RecordsGrid - Displays league-wide records in a grid of cards.

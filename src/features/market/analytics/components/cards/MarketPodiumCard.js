@@ -5,8 +5,8 @@ import { ChevronDown, ChevronUp, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import PlayerImage from '@/components/ui/PlayerImage';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
-import { getTeamColor } from '@/lib/constants/teamColors';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getTeamColor } from '@/lib/competition/public';
+import { getColorForUser } from '@/lib/competition/public';
 
 /**
  * MarketPodiumCard - A premium template for market statistics featuring:

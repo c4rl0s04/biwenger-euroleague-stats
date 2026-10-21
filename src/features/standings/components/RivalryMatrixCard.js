@@ -3,7 +3,7 @@
 import { Swords } from 'lucide-react';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { Card } from '@/components/ui';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 import React from 'react';
 
 export default function RivalryMatrixCard() {

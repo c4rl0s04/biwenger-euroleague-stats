@@ -6,7 +6,7 @@ import { Users, Shield, Award, TrendingUp, DollarSign, Info, User, Activity } fr
 import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 
 const POSITION_MAP = {
   Base: { label: 'B', styles: 'text-blue-400 bg-blue-400/10 border-blue-400/20 shadow-blue-400/5' },

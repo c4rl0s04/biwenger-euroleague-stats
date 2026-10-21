@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 
 /**
  * A premium, standardized bubble for manager profiles.

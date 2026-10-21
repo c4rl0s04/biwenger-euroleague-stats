@@ -54,16 +54,8 @@ export function classifyModule(file) {
       owner: 'shared competition domain',
       disposition: 'shared domain logic',
       contract:
-        'public pure calculations; server-only season-scoped projections; no feature dependencies or cycle',
+        'public pure helpers; ui shared competition presentation; server-only season-scoped projections; no feature dependencies or cycle',
       verification: 'competition, consuming feature and architecture suites',
-      blocker: null,
-    };
-  if (file === 'src/lib/utils/fantasy-scoring.ts')
-    return {
-      owner: 'competition reference formula',
-      disposition: 'reference only',
-      contract: 'test-covered reference formula with no runtime consumers',
-      verification: 'fantasy-scoring tests',
       blocker: null,
     };
   if (file === 'src/lib/seasons/server.ts')
@@ -96,18 +88,6 @@ export function classifyModule(file) {
       verification: 'architecture domain CLI rule and Hoopgrid service tests',
       blocker: null,
     };
-  if (file.startsWith('src/components/lineup/') || file.startsWith('src/components/schedule/'))
-    return {
-      owner: file.startsWith('src/components/lineup/')
-        ? 'Lineup presentation'
-        : 'Schedule presentation',
-      disposition: 'UI-owned',
-      contract:
-        'legacy presentation; extracted selection, ranking, squad enrichment and form rules use Lineup public contract',
-      verification:
-        'Lineup logic tests; import checks do not prove absence of inline business rules',
-      blocker: 'presentation migration remains separate; semantic ownership requires manual review',
-    };
   if (file.startsWith('scripts/') || file.startsWith('src/lib/sync/'))
     return {
       owner: file.startsWith('src/lib/sync/')
@@ -133,7 +113,6 @@ export function classifyModule(file) {
     file.startsWith('src/app/') ||
     file.startsWith('src/styles/') ||
     file.startsWith('src/contexts/') ||
-    file === 'src/lib/utils/analytics.ts' ||
     file.startsWith('src/lib/constants/') ||
     /^src\/lib\/(mobile|theme|pwa|hooks)\//.test(file)
   )

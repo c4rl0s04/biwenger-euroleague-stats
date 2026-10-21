@@ -3,7 +3,7 @@
 import React from 'react';
 import BaseRow from './BaseRow';
 import { resolveIdentity } from './utils';
-import { formatEuro } from '@/lib/utils/currency';
+import { formatEuro } from '../../lib/currency';
 import { getMetricConfig } from './registry';
 import type { MarketMetricRowProps } from '../../models/market-metric';
 

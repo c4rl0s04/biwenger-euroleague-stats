@@ -1,7 +1,7 @@
 'use client';
 
 import { Trophy, TrendingUp, Wallet, Medal, Calendar, Award } from 'lucide-react';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 import { ElegantCard } from '@/components/ui';
 import Image from 'next/image';
 import { cloneElement } from 'react';

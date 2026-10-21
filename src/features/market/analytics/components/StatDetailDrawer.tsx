@@ -6,9 +6,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { X, TrendingUp } from 'lucide-react';
 import PlayerImage from '@/components/ui/PlayerImage';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 
-import { formatEuro, formatProfit } from '@/lib/utils/currency';
+import { formatEuro, formatProfit } from '../lib/currency';
 import { TooltipHeader } from '@/components/ui/Tooltip';
 
 // Import strategy-based renderers

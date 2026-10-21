@@ -19,7 +19,7 @@ user.
 ## Implementation map
 
 - Page and UI: [`src/app/(app)/assistant`](<../../src/app/(app)/assistant>) and
-  [`src/components/assistant`](../../src/components/assistant).
+  [`src/features/assistant/components`](../../src/features/assistant/components).
 - Services: assistant generation, context, and player-context modules under
   [`src/features/assistant/server/services`](../../src/features/assistant/server/services).
 - HTTP: `/api/assistant` and `/api/assistant/conversations/*`.

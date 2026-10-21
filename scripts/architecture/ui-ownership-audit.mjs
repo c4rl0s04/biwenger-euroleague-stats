@@ -12,8 +12,6 @@ const retained = [...graph.keys()].filter(
       'src/components/mobile/MobileHeaderActions.tsx',
       'src/components/ui/UserAvatar.js',
       'src/contexts/CardThemeContext.js',
-      'src/lib/utils/analytics.ts',
-      'src/lib/constants/thresholds.js',
       'src/lib/mobile/screen-state.ts',
     ].includes(file)
 );

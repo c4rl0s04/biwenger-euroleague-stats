@@ -2,8 +2,9 @@
 
 import React from 'react';
 import { Zap, Trophy } from 'lucide-react';
-import { getColorForUser } from '@/lib/constants/colors';
-import { Drawer, BaseRow } from '@/components/ui';
+import { getColorForUser } from '@/lib/competition/public';
+import { Drawer } from '@/components/ui';
+import { BaseRow } from '@/lib/competition/ui';
 
 /**
  * PredictionsDrawer

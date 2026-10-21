@@ -2,7 +2,7 @@
 
 import { TrendingDown } from 'lucide-react';
 import MarketPodiumCard from './MarketPodiumCard';
-import { formatEuro } from '@/lib/utils/currency';
+import { formatEuro } from '../../lib/currency';
 import { TooltipHeader } from '@/components/ui/Tooltip';
 import { HeroStatGroup, ManagerPill, ManagerName } from '../StatUIComponents';
 

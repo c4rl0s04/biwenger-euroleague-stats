@@ -5,8 +5,7 @@ import Image from 'next/image';
 import { AlertCircle } from 'lucide-react';
 import { Avatar, Button } from '@/components/ui/foundation';
 import styles from './schedule-desktop.module.css';
-import { buildAutoLineup } from '@/features/lineup/public';
-import AutoAlignButton from '@/components/schedule/AutoAlignButton';
+import { buildAutoLineup, AutoAlignButton } from '@/features/lineup/public';
 import type { ScheduleMatch } from '../models/schedule';
 
 /** Presentation adapter; automatic selection rules belong to the Lineup public contract. */

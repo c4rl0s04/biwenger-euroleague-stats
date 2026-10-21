@@ -1,3 +1,4 @@
+import { mapTournamentRows } from '../../models/mobile-rows';
 import { Brackets, ListChecks, Trophy } from 'lucide-react';
 import type { TournamentStanding, TournamentFixture } from '../../models/tournaments';
 
@@ -46,7 +47,7 @@ export default function MobileTournamentDetailScreen({
         <MobileMetric label="Participantes" value={standings.length} tone="positive" />
       </MobileMetricGrid>
       <MobileSectionHeading>Situación</MobileSectionHeading>
-      <MobileRecordList data={standings.slice(0, 4)} linkPrefix="/user" />
+      <MobileRecordList rows={mapTournamentRows(standings.slice(0, 4), true)} />
       <MobileSectionHeading>Explorar</MobileSectionHeading>
       <div>
         <MobileSectionLink

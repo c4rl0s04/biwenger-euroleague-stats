@@ -2,7 +2,7 @@
 
 import { X, Trophy } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { getShortRoundName } from '@/lib/utils/format';
+import { getShortRoundName } from '@/lib/competition/public';
 
 export default function BestValueDetailModal({ transferId, isOpen, onClose }) {
   const [loading, setLoading] = useState(true);

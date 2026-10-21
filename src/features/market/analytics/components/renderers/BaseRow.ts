@@ -5,7 +5,7 @@
  * This ensures compatibility with existing market renderers while centralizing
  * the visual template in the global UI library.
  */
-import BaseRow from '@/components/ui/BaseRow';
+import { BaseRow } from '@/lib/competition/ui';
 import type { ComponentType } from 'react';
 import type { MarketBaseRowProps } from '../../models/market-metric';
 

@@ -2,7 +2,7 @@
 
 import { History, ArrowRight, ShoppingCart, User, Wallet } from 'lucide-react';
 import { ElegantCard } from '@/components/ui';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 import Image from 'next/image';
 import Link from 'next/link';
 

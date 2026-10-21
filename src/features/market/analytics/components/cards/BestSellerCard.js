@@ -2,7 +2,7 @@
 
 import { Briefcase } from 'lucide-react';
 import MarketPodiumCard from './MarketPodiumCard';
-import { formatProfit } from '@/lib/utils/currency';
+import { formatProfit } from '../../lib/currency';
 import { TooltipHeader } from '@/components/ui/Tooltip';
 import { HeroStatGroup, ManagerPill, ManagerName } from '../StatUIComponents';
 

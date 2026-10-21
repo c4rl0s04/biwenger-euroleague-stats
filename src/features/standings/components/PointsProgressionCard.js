@@ -13,9 +13,9 @@ import {
   Legend,
 } from 'recharts';
 import { Card } from '@/components/ui';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 import { useApiData } from '@/lib/hooks/useApiData';
-import { getShortRoundName } from '@/lib/utils/format';
+import { getShortRoundName } from '@/lib/competition/public';
 import { GlassTooltip, TooltipHeader } from '@/components/ui/Tooltip';
 
 // Custom tooltip - defined outside component to avoid recreation on each render

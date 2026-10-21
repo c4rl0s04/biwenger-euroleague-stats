@@ -5,9 +5,9 @@ import Image from 'next/image';
 import { Trophy } from 'lucide-react';
 import { useMemo } from 'react';
 import { Card } from '@/components/ui';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 import { useApiData } from '@/lib/hooks/useApiData';
-import { getShortRoundName } from '@/lib/utils/format';
+import { getShortRoundName } from '@/lib/competition/public';
 
 export default function RoundWinnersCard() {
   const { data: winners = [], loading } = useApiData('/api/standings/round-winners?limit=100');

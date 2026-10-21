@@ -11,7 +11,8 @@ import type { SimulationAnalysisArtifact } from '@/features/season-review/public
 async function main() {
   const file = resolve(
     process.cwd(),
-    process.env.SIMULATION_OUTPUT || 'src/data/season-simulation-analysis.json'
+    process.env.SIMULATION_OUTPUT ||
+      'src/features/season-review/data/season-simulation-analysis.json'
   );
   const artifact = JSON.parse(await readFile(file, 'utf8')) as SimulationAnalysisArtifact;
   if (artifact.version !== 4 || artifact.kind !== 'analysis' || artifact.status !== 'ready')

@@ -1,3 +1,4 @@
+import { mapRecentMatchRows, mapPlayerTransferRows } from '../../models/mobile-rows';
 import MobileDetailScaffold from '@/components/mobile/MobileDetailScaffold';
 import MobileRecordList from '@/components/mobile/MobileRecordList';
 import {
@@ -41,7 +42,7 @@ export function PlayerProfileSectionScreen({
           />
         </MobileMetricGrid>
         <MobileSectionHeading>Partidos recientes</MobileSectionHeading>
-        <MobileRecordList data={player.recentMatches} />
+        <MobileRecordList rows={mapRecentMatchRows(player.recentMatches)} />
       </>
     );
   } else if (section === 'market') {
@@ -59,14 +60,14 @@ export function PlayerProfileSectionScreen({
           />
         </MobileMetricGrid>
         <MobileSectionHeading>Traspasos</MobileSectionHeading>
-        <MobileRecordList data={player.transfers} />
+        <MobileRecordList rows={mapPlayerTransferRows(player.transfers)} />
       </>
     );
   } else {
     content = (
       <>
         <MobileSectionHeading>Jornadas</MobileSectionHeading>
-        <MobileRecordList data={player.recentMatches} />
+        <MobileRecordList rows={mapRecentMatchRows(player.recentMatches)} />
       </>
     );
   }

@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import PlayerCourtCard from './PlayerCourtCard';
-import { getFormation, toPct, COURT_WIDTH, COURT_HEIGHT } from '@/lib/constants/courtPositions';
+import { getFormation, toPct, COURT_WIDTH, COURT_HEIGHT } from '@/lib/competition/public';
 
 // --- COMPONENT: GEOMETRIC LAYER (The Floor Markings) ---
 const GeometricLayer = () => {

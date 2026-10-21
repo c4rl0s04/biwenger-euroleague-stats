@@ -2,7 +2,7 @@ import 'server-only';
 
 import type { Pool, PoolClient } from 'pg';
 import { pool } from '@/lib/db/client';
-import { POSITIONS } from '@/lib/constants/thresholds';
+import { POSITIONS } from '../../models/positions';
 import type { PredictionChoice, SeasonPredictionOptions } from '../../models/options';
 
 const database = pool as Pool;

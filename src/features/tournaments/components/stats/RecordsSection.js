@@ -4,7 +4,7 @@ import { TrendingUp, Zap, Scale } from 'lucide-react';
 import Link from 'next/link';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import { UserAvatar } from '@/components/ui';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 import { cn } from '@/lib/utils';
 
 const UserRecordInfo = ({ user, score, isWinner = false, className = '' }) => {

@@ -3,8 +3,8 @@
 import { Wine } from 'lucide-react';
 import Link from 'next/link';
 import { Card } from '@/components/ui';
-import StatsList from '@/components/ui/StatsList';
-import { getColorForUser } from '@/lib/constants/colors';
+import { StatsList } from '@/lib/competition/ui';
+import { getColorForUser } from '@/lib/competition/public';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function BottlerCard() {

@@ -26,7 +26,7 @@ each stage. The defaults execute the production analysis:
 The grid contains every squad limit from 10–25, every daily market size from 1–20, and direct or
 inverse bonuses at €5,000, €7,500, or €10,000 per point. Shards use the same seed manifest so a rule
 is never favoured by receiving easier random seasons. The final job commits
-[`season-simulation-analysis.json`](../../src/data/season-simulation-analysis.json); this is the
+[`season-simulation-analysis.json`](../../src/features/season-review/data/season-simulation-analysis.json); this is the
 backend contract for the future ranking interface.
 
 The workflow needs the same read-only database connection secrets used by scheduled sync. It does

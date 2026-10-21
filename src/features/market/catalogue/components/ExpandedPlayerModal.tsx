@@ -17,7 +17,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { useApiData } from '@/lib/hooks/useApiData';
-import { getTeamColor } from '@/lib/constants/teamColors';
+import { getTeamColor } from '@/lib/competition/public';
 import { calculateTargetPrice } from '../lib/player-finance';
 import type {
   MarketListingPresentation,

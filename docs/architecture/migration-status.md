@@ -14,6 +14,15 @@ For current tasks and states, use the [master tracker](../migration/tracker.md);
 [migration overview](migration-overview.md) summarizes scope. This ledger preserves dated evidence,
 including superseded pre-merge states. Do not treat historical checkpoints as active assignments.
 
+## Presentation ownership closure — 2026-10-20
+
+Branch `refactor/feature-ownership-closure`, based on main `f1555d42`, closes the live global
+Lineup/Schedule presentation, raw mobile-record inference, unused compatibility paths and missing
+entrypoint coverage. Reused competition presentation has a separate client-safe `ui.ts` contract;
+feature-specific formatters and Season Review artifacts have explicit owners. See the
+[closure receipt](../migration/reports/feature-presentation-ownership.md) for checks and limitations.
+This is an implementation candidate pending integration and CI, not a new deployment acceptance.
+
 ## Domain ownership follow-up — 2026-09-27
 
 Branch `refactor/domain-ownership`, based on main `4d9b2ba3`, closes global Lineup/bidding

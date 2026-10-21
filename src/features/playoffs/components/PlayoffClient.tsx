@@ -23,8 +23,8 @@ import {
   FadeIn as FadeInAny,
   AnimatedNumber as AnimatedNumberAny,
   UserAvatar as UserAvatarAny,
-  StatsTable as StatsTableAny,
 } from '@/components/ui';
+import { StatsTable as StatsTableAny } from '@/lib/competition/ui';
 import SectionAny from '@/components/layout/Section';
 
 const ElegantCard = ElegantCardAny as any;
@@ -33,7 +33,7 @@ const AnimatedNumber = AnimatedNumberAny as any;
 const UserAvatar = UserAvatarAny as any;
 const StatsTable = StatsTableAny as any;
 const Section = SectionAny as any;
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 import { clsx } from 'clsx';
 import Link from 'next/link';
 

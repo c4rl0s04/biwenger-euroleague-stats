@@ -3,8 +3,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { User, TrendingUp, TrendingDown } from 'lucide-react';
-import { getColorForUser } from '@/lib/constants/colors';
-import { getScoreColor } from '@/lib/utils/format';
+import { getColorForUser } from '@/lib/competition/public';
+import { getScoreColor } from '@/lib/competition/public';
 
 export default function PlayerRow({ player, sortConfig }) {
   const formatMoney = (amount) => {

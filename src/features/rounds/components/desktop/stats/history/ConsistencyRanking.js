@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Ruler } from 'lucide-react';
-import StatsList from '@/components/ui/StatsList';
+import { StatsList } from '@/lib/competition/ui';
 
 /**
  * ConsistencyRanking - Shows users ranked by consistency using StatsList

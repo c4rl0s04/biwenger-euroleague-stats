@@ -5,7 +5,7 @@ import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
-import StatsList from '@/components/ui/StatsList';
+import { StatsList } from '@/lib/competition/ui';
 import { GlassTooltip, TooltipHeader } from '@/components/ui/Tooltip';
 
 export default function DraftFidelityCard() {

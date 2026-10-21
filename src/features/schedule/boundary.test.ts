@@ -33,8 +33,8 @@ it('keeps explicit private freshness and client/server separation', () => {
 it('delegates automatic selection to Lineup while retaining the existing command endpoint', () => {
   // Whole-file freezing no longer applies to this intentionally extracted domain algorithm.
   // Payload, selection, ordering and errors are covered by Lineup logic tests.
-  const source = readFileSync('src/components/schedule/AutoAlignButton.js', 'utf8');
-  expect(source).toContain("import { buildAutoLineup } from '@/features/lineup/public'");
+  const source = readFileSync('src/features/lineup/components/AutoAlignButton.js', 'utf8');
+  expect(source).toContain("import { buildAutoLineup } from '../logic/auto-lineup'");
   expect(source).toContain('apiClient.saveLineup(lineupPayload)');
   expect(source).not.toContain('posCount');
 });

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { User, Globe, Activity, Ruler, Weight } from 'lucide-react';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 import { ElegantCard } from '@/components/ui';
 
 function calculateAge(birthDate) {

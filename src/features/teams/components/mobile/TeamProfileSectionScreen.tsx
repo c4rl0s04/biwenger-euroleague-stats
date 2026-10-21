@@ -1,23 +1,9 @@
+import { mapTeamSectionRows } from '../../models/mobile-rows';
 import MobileDetailScaffold from '@/components/mobile/MobileDetailScaffold';
 import MobileRecordList from '@/components/mobile/MobileRecordList';
 import { MobileSectionHeading } from '@/components/mobile/MobileScreen';
 
-import type {
-  TeamProfileMatchViewModel,
-  TeamProfileSection,
-  TeamProfileViewModel,
-} from '../../models/team-profile';
-
-function toMobileMatchRecord(match: TeamProfileMatchViewModel) {
-  return {
-    round_name: match.roundName,
-    date: match.date,
-    home_team: match.home.name,
-    away_team: match.away.name,
-    home_score: match.home.score,
-    away_score: match.away.score,
-  };
-}
+import type { TeamProfileSection, TeamProfileViewModel } from '../../models/team-profile';
 
 export function TeamProfileSectionScreen({
   model,
@@ -28,17 +14,12 @@ export function TeamProfileSectionScreen({
   section: TeamProfileSection;
   title: string;
 }) {
-  const data =
-    section === 'roster'
-      ? model.roster
-      : [...model.upcomingMatches, ...model.recentMatches].map(toMobileMatchRecord);
-
   return (
     <MobileDetailScaffold title={title} context={model.name} backHref={`/team/${model.id}`}>
       <MobileSectionHeading>
         {section === 'roster' ? 'Jugadores' : 'Calendario y resultados'}
       </MobileSectionHeading>
-      <MobileRecordList data={data} linkPrefix={section === 'roster' ? '/player' : undefined} />
+      <MobileRecordList rows={mapTeamSectionRows(model, section)} />
     </MobileDetailScaffold>
   );
 }

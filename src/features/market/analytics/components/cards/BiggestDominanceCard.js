@@ -4,7 +4,7 @@ import { Crown } from 'lucide-react';
 import Link from 'next/link';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import { TooltipHeader } from '@/components/ui/Tooltip';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 
 export default function BiggestDominanceCard({ data }) {
   if (!data || !data.leader_id || !data.trailer_id) return null;

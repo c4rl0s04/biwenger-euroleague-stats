@@ -1,3 +1,4 @@
+import { mapTournamentRows } from '../../models/mobile-rows';
 import MobileDetailScaffold from '@/components/mobile/MobileDetailScaffold';
 import MobileRecordList from '@/components/mobile/MobileRecordList';
 import { MobileSectionHeading } from '@/components/mobile/MobileScreen';
@@ -15,10 +16,7 @@ export default function TournamentSectionScreen({ id, section, title, model }: P
       <MobileSectionHeading>
         {section === 'standings' ? 'Clasificación' : 'Enfrentamientos'}
       </MobileSectionHeading>
-      <MobileRecordList
-        data={model.data}
-        linkPrefix={section === 'standings' ? '/user' : undefined}
-      />
+      <MobileRecordList rows={mapTournamentRows(model.data, section === 'standings')} />
     </MobileDetailScaffold>
   );
 }

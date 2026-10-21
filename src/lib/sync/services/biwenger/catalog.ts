@@ -1,7 +1,7 @@
 import { fetchAllPlayers, fetchPlayerDetails, fetchRoundGames } from '../../../api/biwenger-client';
 import { CONFIG } from '../../../config';
 import { preparePlayerMutations } from '../../../db/mutations/players';
-import { getShortTeamName } from '../../../utils/format';
+import { getShortTeamName } from '@/lib/competition/public';
 import type { SyncManager } from '../../manager';
 import { validateBiwengerRoundSeason } from '../../preflight';
 import {

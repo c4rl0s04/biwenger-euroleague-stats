@@ -39,4 +39,10 @@ export type {
   LineupOfferProjection,
 } from './logic/offer-projection';
 
+export { default as LineupClient } from './components/LineupClient';
+export { default as MobileLineupClient } from './screens/MobileLineupClient';
+export { default as MobileOffersClient } from './screens/MobileOffersClient';
+export { default as AutoAlignButton } from './components/AutoAlignButton';
+export { default as LineupSectionScreen } from './screens/LineupSectionScreen';
+export type { LineupSectionModel } from './models/section';
 export { LineupSlotPlaceholder } from './components/LineupSlotPlaceholder';

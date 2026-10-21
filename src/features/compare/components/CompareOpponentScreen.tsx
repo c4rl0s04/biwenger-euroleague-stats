@@ -1,3 +1,4 @@
+import { mapCompareHistoryRows } from '../models/mobile-rows';
 import MobileDetailScaffold from '@/components/mobile/MobileDetailScaffold';
 import MobileRecordList from '@/components/mobile/MobileRecordList';
 import {
@@ -45,7 +46,7 @@ export default function CompareOpponentScreen({
         />
       </MobileMetricGrid>
       <MobileSectionHeading>Últimas jornadas</MobileSectionHeading>
-      <MobileRecordList data={model.recentHistory} />
+      <MobileRecordList rows={mapCompareHistoryRows(model.recentHistory)} />
     </MobileDetailScaffold>
   );
 }

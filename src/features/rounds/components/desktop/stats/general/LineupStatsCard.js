@@ -1,7 +1,7 @@
 'use client';
 
 import { BarChart3, User, Trophy, Medal } from 'lucide-react';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 import Image from 'next/image';
 
 /**

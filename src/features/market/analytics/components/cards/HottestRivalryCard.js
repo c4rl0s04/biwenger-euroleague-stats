@@ -4,8 +4,8 @@ import { Flame } from 'lucide-react';
 import Link from 'next/link';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import { TooltipHeader } from '@/components/ui/Tooltip';
-import { getColorForUser } from '@/lib/constants/colors';
-import { formatEuro } from '@/lib/utils/currency';
+import { getColorForUser } from '@/lib/competition/public';
+import { formatEuro } from '../../lib/currency';
 
 export default function HottestRivalryCard({ data }) {
   if (!data) return null;

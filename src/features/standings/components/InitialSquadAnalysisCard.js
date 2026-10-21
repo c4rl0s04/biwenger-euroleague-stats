@@ -3,7 +3,7 @@
 import { Target, TrendingUp } from 'lucide-react';
 import { Card } from '@/components/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
-import StatsList from '@/components/ui/StatsList';
+import { StatsList } from '@/lib/competition/ui';
 
 export default function InitialSquadAnalysisCard() {
   const { data = [], loading, error } = useApiData('/api/standings/analytics');

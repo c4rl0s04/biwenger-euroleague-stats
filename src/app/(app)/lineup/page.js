@@ -1,8 +1,6 @@
-import { PageHeader } from '@/components/ui';
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
-import LineupClient from '@/components/lineup/LineupClient';
-import MobileLineupClient from '@/components/mobile/screens/MobileLineupClient';
+import { LineupClient, MobileLineupClient } from '@/features/lineup/public';
 import { isPhonePresentation } from '@/lib/mobile/presentation-server';
 
 export const metadata = {

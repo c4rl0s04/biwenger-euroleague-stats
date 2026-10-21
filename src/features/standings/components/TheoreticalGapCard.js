@@ -14,7 +14,7 @@ import {
   LabelList,
 } from 'recharts';
 
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 import Link from 'next/link';
 
 import { GlassTooltip, TooltipHeader } from '@/components/ui/Tooltip';

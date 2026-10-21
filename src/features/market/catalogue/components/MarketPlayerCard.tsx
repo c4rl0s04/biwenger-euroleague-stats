@@ -5,8 +5,8 @@ import Link from 'next/link';
 import { TrendingUp, TrendingDown, Star, Activity, Calendar, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useApiData } from '@/lib/hooks/useApiData';
-import { getShortTeamName } from '@/lib/utils/format';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getShortTeamName } from '@/lib/competition/public';
+import { getColorForUser } from '@/lib/competition/public';
 import type { CSSProperties, ReactNode } from 'react';
 import type {
   MarketListingPresentation,

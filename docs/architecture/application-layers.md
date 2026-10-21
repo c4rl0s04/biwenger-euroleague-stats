@@ -78,7 +78,7 @@ infrastructure.
 ## Shared competition domain
 
 `src/lib/competition` owns reused competition rules and season-scoped projections without depending
-on application features. Consume pure calculations through `public.ts`; consume player-form and
+on application features. Consume pure calculations and shared identity/formatting helpers through `public.ts`; consume player-form and
 active-manager directory queries through the server-only `server.ts`. Database access is restricted
 to its server query layer. These are shared domain capabilities, not generic infrastructure or
 compatibility adapters. Keeping this dependency below features avoids Players/Teams and manager
@@ -87,3 +87,17 @@ read cycles. Do not add feature-specific behavior to this module merely to bypas
 Lineup tactics belong to Lineup; bidding recommendations belong to Market; account password
 persistence belongs to Accounts. The remaining shared user mutation factory serves synchronization.
 The unused fantasy-scoring helper is a test-covered reference formula, not a runtime dependency.
+
+## Shared competition presentation
+
+`src/lib/competition/ui.ts` exposes the existing StatsTable, StatsList and BaseRow compositions.
+Their manager identity, ranking and market presentation is reused across several features; placing
+it in Managers would create a Managers/Standings dependency cycle. This shared domain owner depends
+only on neutral UI primitives, pure competition helpers and browser presentation libraries.
+`public.ts` remains free of React components; generic `src/components/ui` cannot import competition.
+The existing table primitives and entity identity renderer remain domain-independent UI.
+
+Lineup owns its desktop/phone screens and automatic-lineup controls. Schedule consumes its public
+control. Phone record lists accept explicit display rows; feature projections own labels, links,
+values and existing limits. The architecture command requires every app page, layout and route to
+be registered, except the documented database-health infrastructure adapter.

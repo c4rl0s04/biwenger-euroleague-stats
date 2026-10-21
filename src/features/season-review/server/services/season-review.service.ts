@@ -4,7 +4,7 @@ import { readFile } from 'fs/promises';
 import { join } from 'path';
 import { cache } from 'react';
 
-import generatedSimulationResults from '@/data/season-simulation-results.json';
+import generatedSimulationResults from '../../data/season-simulation-results.json';
 import { cached, CACHE_TTL } from '@/lib/utils/cache';
 
 import type {
@@ -725,7 +725,10 @@ export const getSeasonResilienceOverview = () =>
   cached('season-review:resilience-overview:2025-26:v3', CACHE_TTL.VERY_LONG, buildOverview);
 
 export const readSeasonSimulationAnalysis = cache(async (): Promise<SimulationAnalysisArtifact> => {
-  const jsonPath = join(process.cwd(), 'src/data/season-simulation-analysis.json');
+  const jsonPath = join(
+    process.cwd(),
+    'src/features/season-review/data/season-simulation-analysis.json'
+  );
   return JSON.parse(await readFile(jsonPath, 'utf8')) as SimulationAnalysisArtifact;
 });
 

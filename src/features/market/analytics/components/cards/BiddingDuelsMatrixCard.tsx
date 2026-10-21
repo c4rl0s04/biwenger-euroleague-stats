@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Swords, Sparkles } from 'lucide-react';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 import type { BiddingDuelsStats, BidDuelRecord } from '../../models/market-overview';
 import type { MarketDuelSelection } from '../../models/market-duel-selection';
 
@@ -21,7 +21,7 @@ function getCellColor(record: BidDuelRecord | undefined) {
   return 'bg-zinc-700/30 text-zinc-200 border-zinc-700/40';
 }
 
-import { formatEuro } from '@/lib/utils/currency';
+import { formatEuro } from '../../lib/currency';
 
 export default function BiddingDuelsMatrixCard({
   data,

@@ -51,7 +51,7 @@ describe('players feature boundaries', () => {
   });
 
   it('preserves the Lineup squad URL while the route reuses the Managers contract', () => {
-    const lineupSource = source('../../components/mobile/screens/MobileLineupClient.tsx');
+    const lineupSource = source('../lineup/screens/MobileLineupClient.tsx');
     const routeSource = source('../../app/api/player/squad/route.ts');
     expect(lineupSource).toContain('/api/player/squad?userId=${userId}');
     expect(routeSource).toContain('getRequestUserId(request)');

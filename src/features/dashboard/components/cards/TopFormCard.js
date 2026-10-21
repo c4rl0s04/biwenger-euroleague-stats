@@ -2,10 +2,11 @@
 
 import { TrendingUp, User as UserIcon } from 'lucide-react';
 import Link from 'next/link';
-import { getScoreColor, getShortTeamName } from '@/lib/utils/format';
-import { Card, StatsList } from '@/components/ui';
+import { getScoreColor, getShortTeamName } from '@/lib/competition/public';
+import { Card } from '@/components/ui';
+import { StatsList } from '@/lib/competition/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 
 export default function TopFormCard() {
   const { data: players = [], loading } = useApiData('/api/dashboard/top-form');

@@ -15,7 +15,7 @@ import {
 import { useMemo, useState } from 'react';
 import { ElegantCard } from '@/components/ui';
 import { House, Plane, TrendingUp, Trophy, Ban } from 'lucide-react';
-import { getShortRoundName } from '@/lib/utils/format';
+import { getShortRoundName } from '@/lib/competition/public';
 
 // Recharts colors - using consistent premium palette
 const HOME_COLOR = '#60a5fa'; // blue-400

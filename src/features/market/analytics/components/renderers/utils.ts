@@ -1,4 +1,4 @@
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 import type { MarketMetricFields, MarketRowIdentity } from '../../models/market-metric';
 import type { MarketDrawerType } from '../../models/market-drawer';
 

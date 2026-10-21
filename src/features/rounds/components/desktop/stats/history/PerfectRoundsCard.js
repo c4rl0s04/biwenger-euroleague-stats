@@ -1,7 +1,7 @@
 // ... imports
 import { useMemo } from 'react';
 import { Star } from 'lucide-react';
-import StatsList from '@/components/ui/StatsList';
+import { StatsList } from '@/lib/competition/ui';
 
 /**
  * PerfectRoundsCard - Efficiency range distribution using StatsList

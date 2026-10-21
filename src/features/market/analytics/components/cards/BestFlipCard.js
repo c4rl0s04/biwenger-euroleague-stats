@@ -1,7 +1,7 @@
 'use client';
 
 import { Rocket } from 'lucide-react';
-import { formatEuro } from '@/lib/utils/currency';
+import { formatEuro } from '../../lib/currency';
 import MarketPodiumCard from './MarketPodiumCard';
 import { HeroStatGroup, ManagerPill, ManagerName } from '../StatUIComponents';
 import { TooltipHeader } from '@/components/ui/Tooltip';

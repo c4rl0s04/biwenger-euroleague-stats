@@ -2,8 +2,9 @@
 
 import { useMemo } from 'react';
 import { Shield } from 'lucide-react';
-import StatsTable, { TableIdentity } from '@/components/ui/StatsTable';
-import { getColorForUser } from '@/lib/constants/colors';
+import { TableIdentity } from '@/components/ui/StatsTable';
+import { StatsTable } from '@/lib/competition/ui';
+import { getColorForUser } from '@/lib/competition/public';
 
 export default function TeamDistributionTable({ initialPlayers = [], owners = [] }) {
   const tableData = useMemo(() => {

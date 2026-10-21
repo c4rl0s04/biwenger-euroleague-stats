@@ -3,10 +3,10 @@
 import { useState } from 'react';
 import { CalendarDays } from 'lucide-react';
 import { Card } from '@/components/ui';
-import { getColorForUser } from '@/lib/constants/colors';
+import { getColorForUser } from '@/lib/competition/public';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { getShortRoundName } from '@/lib/utils/format';
+import { getShortRoundName } from '@/lib/competition/public';
 
 export function HistoryTable({ history }) {
   const [hoveredCell, setHoveredCell] = useState(null);

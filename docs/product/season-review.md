@@ -41,7 +41,7 @@ background unavailability, voluntary sales, market exposure, bids, and forced ro
 The laboratory also shows calibration against the observed number of transfers and the closing
 resource and squad Gini. The current page remains on the interactive v3 presentation until the
 separate frontend phase consumes
-[`season-simulation-analysis.json`](../../src/data/season-simulation-analysis.json). That v4 artifact
+[`season-simulation-analysis.json`](../../src/features/season-review/data/season-simulation-analysis.json). That v4 artifact
 already exposes rankings, Pareto membership, intervals, percentiles, histograms, and breakdowns by
 shock, severity, and season phase.
 

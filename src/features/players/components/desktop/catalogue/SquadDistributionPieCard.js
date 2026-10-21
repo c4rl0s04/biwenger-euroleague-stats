@@ -5,7 +5,7 @@ import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recha
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { GlassTooltip, TooltipHeader } from '@/components/ui/Tooltip';
-import { getTeamColor } from '@/lib/constants/teamColors';
+import { getTeamColor } from '@/lib/competition/public';
 
 // Fixed colors for positions
 const POSITION_COLORS = {
