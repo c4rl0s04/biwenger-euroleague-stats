@@ -111,6 +111,7 @@
     "src/app/api/user/change-password/route.ts",
     "src/app/api/user/link-biwenger/route.ts",
     "src/app/api/users/lineup/route.ts",
+    "src/app/api/users/lineup/workspace/route.ts",
     "src/app/(app)/lineup/[section]/page.tsx",
     "src/app/(app)/lineup/page.js",
     "src/app/(app)/player/[id]/[section]/page.tsx",

@@ -12,6 +12,10 @@ vi.mock('@/features/provider/server/client', () => ({
   biwengerProviderClient: { command: vi.fn(), query: vi.fn() },
 }));
 
+vi.mock('@/features/lineup/server/queries/workspace.query', () => ({
+  readWorkspacePlayers: vi.fn().mockResolvedValue([{ id: 7, position: 'Base' }]),
+}));
+
 vi.mock('@/lib/db', () => ({
   db: {
     update: vi.fn(),
@@ -35,7 +39,10 @@ describe('market and lineup credential adoption', () => {
       status: 'completed',
       httpStatus: 200,
     });
-    vi.mocked(biwengerProviderClient.query).mockResolvedValue({ lineup: {} });
+    vi.mocked(biwengerProviderClient.query).mockResolvedValue({
+      lineup: { type: '2-2-1', playersID: [7] },
+      players: [{ id: 7 }],
+    });
   });
 
   it('uses the authenticated actor boundary for market commands', async () => {

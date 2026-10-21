@@ -141,6 +141,10 @@ const ROUTE_CONTRACT_MANIFEST: Record<string, RouteContractEntry> = {
   '/api/user/change-password': { status: 'covered', reason: 'handler contract tests' },
   '/api/user/link-biwenger': { status: 'covered', reason: 'handler contract tests' },
   '/api/users': { status: 'covered', reason: 'handler contract tests' },
+  '/api/users/lineup/workspace': {
+    status: 'covered',
+    reason: 'authenticated workspace handler contract tests',
+  },
   '/api/users/lineup': { status: 'covered', reason: 'handler contract tests' },
 };
 
