@@ -54,29 +54,33 @@ test('Desktop Lineup offer table and confirmation preserve financial projections
     recent_scores: '10,10',
     img: '/icons/icon-192.png',
   };
-  await page.route('**/api/player/squad?*', (route) =>
-    route.fulfill({ json: { success: true, data: { players: [player] } } })
-  );
-  await page.route('**/api/users/lineup', (route) => {
-    expect(route.request().method()).toBe('GET');
-    return route.fulfill({
+  await page.route('**/api/users/lineup/workspace', (route) =>
+    route.fulfill({
       json: {
         success: true,
         data: {
-          lineup: { type: '2-2-1', playersID: [], reservesID: [], captain: null },
-          players: [{ id: 99101, owner: { price: 80 } }],
-          market: [],
-          offers: [
-            {
-              id: 99199,
-              amount: 100,
-              requestedPlayers: [99101],
-              until: Math.floor(Date.now() / 1000) + 86400,
-            },
-          ],
+          players: [player],
+          baseline: 'fixture-baseline',
+          checkedAt: new Date().toISOString(),
+          provider: {
+            lineup: { type: '2-2-1', playersID: [], reservesID: [], captain: null },
+            players: [{ id: 99101, owner: { price: 80 } }],
+            market: [],
+            offers: [
+              {
+                id: 99199,
+                amount: 100,
+                requestedPlayers: [99101],
+                until: Math.floor(Date.now() / 1000) + 86400,
+              },
+            ],
+          },
         },
       },
-    });
+    })
+  );
+  await page.route('**/api/users/lineup', () => {
+    throw new Error('Offer projection verification must never save a lineup');
   });
   await page.route('**/api/market/**', (route) => {
     if (route.request().method() !== 'GET')

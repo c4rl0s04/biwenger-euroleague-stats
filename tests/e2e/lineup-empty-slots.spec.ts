@@ -32,28 +32,28 @@ test('Lineup preserves an Alero gap, fills that exact slot and saves without mov
   }));
   const ids = players.slice(0, 10).map((p, i) => (i === 3 ? null : p.id));
   const submitted: Array<{ playersID: (string | null)[]; reservesID: (string | null)[] }> = [];
-  await page.route('**/api/player/squad?*', (route) =>
-    route.fulfill({ json: { success: true, data: { players } } })
+  const provider = {
+    lineup: { type: '2-2-1', playersID: ids, reservesID: [null, 99111, null], captain: 99101 },
+    players: players.map((p) => ({ id: p.id })),
+    market: [],
+    offers: [{ id: 1, requestedPlayers: [99101], amount: 1200000, until: 4102444800 }],
+  };
+  await page.route('**/api/users/lineup/workspace', (route) =>
+    route.fulfill({
+      json: {
+        success: true,
+        data: {
+          provider,
+          players,
+          baseline: 'fixture-baseline',
+          checkedAt: new Date().toISOString(),
+        },
+      },
+    })
   );
   await page.route('**/api/users/lineup', async (route) => {
-    if (route.request().method() === 'GET')
-      return route.fulfill({
-        json: {
-          success: true,
-          data: {
-            lineup: {
-              type: '2-2-1',
-              playersID: ids,
-              reservesID: [null, 99111, null],
-              captain: 99101,
-            },
-            players: [],
-            market: [],
-            offers: [{ id: 1, requestedPlayers: [99101], amount: 1200000, until: 4102444800 }],
-          },
-        },
-      });
     expect(route.request().method()).toBe('POST');
+    expect(typeof route.request().postDataJSON().baseline).toBe('string');
     submitted.push(route.request().postDataJSON().lineup);
     await route.fulfill({ json: { success: true, data: { status: 'completed' } } });
   });
@@ -93,9 +93,9 @@ test('Lineup preserves an Alero gap, fills that exact slot and saves without mov
   await expect(gap).toBeFocused();
   await gap.press('Enter');
   await expect(page.getByRole('dialog')).toBeVisible();
-  await expect(page.getByRole('dialog').getByRole('button', { name: /Slot Player 5/ })).toHaveCount(
-    0
-  );
+  await expect(
+    page.getByRole('dialog').getByRole('button', { name: /Slot Player 5/ })
+  ).toBeEnabled();
   await expect(page.getByRole('button', { name: /Hacer Capitán/i })).toHaveCount(0);
   await page.getByRole('button', { name: /Reserve Alero/ }).click();
   await expect(court.getByText('Alero vacío', { exact: true })).toHaveCount(0);

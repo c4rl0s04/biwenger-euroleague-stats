@@ -2,6 +2,7 @@
 
 import { ModalDialog } from '@/components/ui/foundation';
 import { rankSwapCandidates } from '../logic/squad';
+import { planReplacement } from '../logic/draft';
 import { useState } from 'react';
 import { X, Search, UserPlus, ArrowLeftRight, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -18,6 +19,8 @@ export default function LineupPlayerSwapModal({
   onSelect,
   captainId,
   onSetCaptain,
+  lineupConfig,
+  onClear,
 }) {
   const [search, setSearch] = useState('');
 
@@ -29,8 +32,13 @@ export default function LineupPlayerSwapModal({
   const searchedPlayers = squad.filter(
     (p) => !search || p.name.toLowerCase().includes(search.toLowerCase())
   );
-  const sortedPlayers = rankSwapCandidates(searchedPlayers, target, isStarter, activeIds);
+  const sortedPlayers = rankSwapCandidates(searchedPlayers, target, false, activeIds).sort(
+    (a, b) => Number(b.position === target.position) - Number(a.position === target.position)
+  );
 
+  const slotIndex =
+    targetSlot?.slotIndex ??
+    lineupConfig.playersID.findIndex((id) => String(id) === String(targetPlayer?.id));
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -65,7 +73,7 @@ export default function LineupPlayerSwapModal({
                   </h2>
                   <p className="text-xs text-zinc-500 mt-1">
                     {isStarter
-                      ? `Mostrando solo ${target.position}s disponibles.`
+                      ? 'Selecciona un jugador. Verás si requiere cambiar la formación.'
                       : 'Selecciona un jugador para entrar en la rotación.'}
                   </p>
                 </div>
@@ -115,15 +123,26 @@ export default function LineupPlayerSwapModal({
               </div>
             </div>
 
+            {(targetSlot?.playerId != null || targetPlayer?.id != null) && (
+              <button
+                type="button"
+                onClick={onClear}
+                className="m-2 cursor-pointer rounded border p-2 text-content-primary"
+              >
+                Dejar posición vacía
+              </button>
+            )}
             {/* List */}
             <div className="flex-1 overflow-y-auto p-2 custom-scrollbar">
               <div className="space-y-1">
                 {sortedPlayers.map((player) => {
                   const isActive = activeIds.has(String(player.id));
+                  const plan = planReplacement(lineupConfig, slotIndex, player.id, squad);
 
                   return (
                     <button
                       key={player.id}
+                      disabled={!plan.ok}
                       onClick={() => onSelect(player)}
                       className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-all group border border-transparent hover:border-white/5"
                     >
@@ -152,7 +171,11 @@ export default function LineupPlayerSwapModal({
                           </span>
                         </div>
                         <p className="text-[11px] text-zinc-500">
-                          {player.average || 0} pts avg • {player.points || 0} total
+                          {!plan.ok
+                            ? plan.reason
+                            : plan.formationChanged
+                              ? `Cambiar formación: ${lineupConfig.type} → ${plan.lineup.type}`
+                              : `${player.average || 0} pts avg • ${player.points || 0} total`}
                         </p>
                       </div>
 

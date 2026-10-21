@@ -1,6 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useLineupWorkspace } from '../hooks/useLineupWorkspace';
+import { LineupWorkspaceFeedback } from './LineupWorkspaceFeedback';
+import { clearLineupSlot, planReplacement } from '../logic/draft';
 import { apiClient } from '@/lib/api-client';
 import LineupControlBar from './LineupControlBar';
 import LineupCourtSection from './LineupCourtSection';
@@ -15,28 +18,25 @@ import LineupPutAllOnMarketModal from './LineupPutAllOnMarketModal';
 import { PageHeader } from '@/components/ui';
 import { LayoutGrid, HandCoins, TrendingUp } from 'lucide-react';
 import Section from '@/components/layout/Section';
-import {
-  realignTactics,
-  normalizeLineupConfig,
-  deriveRotation,
-  performSwap,
-} from '../logic/lineup';
-import { enrichLineupSquad } from '../logic/squad';
+import { realignTactics, deriveRotation } from '../logic/lineup';
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function LineupClient({ userId }) {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(false);
+  const workspace = useLineupWorkspace(userId);
+  const {
+    loading,
+    setLoading,
+    error,
+    setError,
+    success,
+    setSuccess,
+    squad,
+    setSquad,
+    lineupConfig,
+    setLineupConfig,
+  } = workspace;
   const [isTacticsOpen, setIsTacticsOpen] = useState(false);
-  const [squad, setSquad] = useState([]);
-  const [lineupConfig, setLineupConfig] = useState({
-    playersID: [],
-    reservesID: [],
-    captain: null,
-    type: '2-2-1',
-  });
 
   // ── Swap State ──────────────────────────────────────────────────────────
   const [swapTarget, setSwapTarget] = useState(null); // { player, isStarter }
@@ -50,42 +50,6 @@ export default function LineupClient({ userId }) {
   const [isOfferOpen, setIsOfferOpen] = useState(false);
   const [offerTarget, setOfferTarget] = useState(null);
   const [offerActionType, setOfferActionType] = useState('accept'); // 'accept' or 'reject'
-
-  // ── Data Loading ────────────────────────────────────────────────────────
-  useEffect(() => {
-    if (!userId) return;
-
-    async function loadData() {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const [squadRes, lineupRes] = await Promise.all([
-          apiClient.get(`/api/player/squad?userId=${userId}`).catch(() => ({ success: false })),
-          apiClient.get('/api/users/lineup').catch(() => ({ success: false })),
-        ]);
-
-        if (lineupRes.success && lineupRes.data) {
-          setLineupConfig(normalizeLineupConfig(lineupRes.data.lineup));
-        }
-        if (squadRes.success && squadRes.data) {
-          setSquad(
-            enrichLineupSquad(
-              squadRes.data.players || [],
-              lineupRes.success ? lineupRes.data : null
-            )
-          );
-        }
-      } catch (err) {
-        console.error('Error loading lineup data:', err);
-        setError('No se pudo cargar la información de tu equipo.');
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadData();
-  }, [userId]);
 
   // ── Handlers ────────────────────────────────────────────────────────────
   const handleWithdrawConfirm = async (player) => {
@@ -178,14 +142,15 @@ export default function LineupClient({ userId }) {
   const handlePlayerSelect = (newPlayer) => {
     if (!swapTarget) return;
 
-    const updatedLineup = performSwap(
-      swapTarget.slotIndex !== undefined
-        ? { slotIndex: swapTarget.slotIndex }
-        : swapTarget.player.id,
-      newPlayer.id,
-      lineupConfig
-    );
-    setLineupConfig(updatedLineup);
+    const index =
+      swapTarget.slotIndex ??
+      lineupConfig.playersID.findIndex((id) => String(id) === String(swapTarget.player.id));
+    const plan = planReplacement(lineupConfig, index, newPlayer.id, squad);
+    if (!plan.ok) {
+      setError(plan.reason);
+      return;
+    }
+    setLineupConfig(plan.lineup);
     setIsSwapOpen(false);
     setSwapTarget(null);
   };
@@ -247,26 +212,7 @@ export default function LineupClient({ userId }) {
   };
 
   // ── Save Handler ────────────────────────────────────────────────────────
-  const handleSave = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      setSuccess(false);
-
-      const res = await apiClient.saveLineup(lineupConfig);
-
-      if (res.success) {
-        setSuccess(true);
-        setTimeout(() => setSuccess(false), 3000);
-      } else {
-        throw new Error(res.message || 'Error al guardar');
-      }
-    } catch (err) {
-      setError(err.message || 'Error al conectar con Biwenger');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const handleSave = workspace.save;
 
   // ── Derived State ───────────────────────────────────────────────────────
   const { starters, bench } = deriveRotation(lineupConfig, squad);
@@ -316,6 +262,17 @@ export default function LineupClient({ userId }) {
   return (
     <div className="min-h-screen">
       <PageHeader title="Alineación" description="Configura tu equipo para las próximas jornadas" />
+      <LineupWorkspaceFeedback
+        checkedAt={workspace.checkedAt}
+        error={error}
+        success={success}
+        issue={workspace.issue}
+        review={Boolean(workspace.review)}
+        loading={loading || workspace.saving}
+        dirty={workspace.dirty}
+        onRefresh={workspace.refresh}
+        onReview={workspace.applyReview}
+      />
 
       <div className="space-y-12">
         {/* Main Lineup Visualization */}
@@ -324,12 +281,13 @@ export default function LineupClient({ userId }) {
             {/* Action Controls */}
             <div className="flex justify-center">
               <LineupControlBar
-                loading={loading}
-                error={error}
-                success={success}
+                loading={loading || workspace.saving}
+                saveDisabled={!workspace.canSave}
+                error={null}
+                success={false}
                 currentType={lineupConfig.type}
                 onSave={handleSave}
-                onReset={() => window.location.reload()}
+                onReset={workspace.refresh}
                 onChangeType={() => setIsTacticsOpen(true)}
               />
             </div>
@@ -361,7 +319,7 @@ export default function LineupClient({ userId }) {
             onAccept={handleAcceptOffer}
             onReject={handleRejectOffer}
             onPutAllOnMarket={handlePutAllOnMarket}
-            loading={loading}
+            loading={loading || workspace.saving}
           />
         </Section>
 
@@ -407,6 +365,14 @@ export default function LineupClient({ userId }) {
         isStarter={swapTarget?.isStarter}
         squad={squad}
         activeIds={new Set(lineupConfig.playersID)}
+        lineupConfig={lineupConfig}
+        onClear={() => {
+          const index =
+            swapTarget?.slotIndex ??
+            lineupConfig.playersID.findIndex((id) => String(id) === String(swapTarget?.player?.id));
+          setLineupConfig(clearLineupSlot(lineupConfig, index));
+          setIsSwapOpen(false);
+        }}
         onSelect={handlePlayerSelect}
         captainId={lineupConfig.captain}
         onSetCaptain={handleSetCaptain}
@@ -422,14 +388,14 @@ export default function LineupClient({ userId }) {
         offer={offerTarget?.offer}
         actionType={offerActionType}
         onConfirm={handleOfferConfirm}
-        loading={loading}
+        loading={loading || workspace.saving}
       />
 
       <LineupPutAllOnMarketModal
         isOpen={isBulkSellOpen}
         onClose={() => setIsBulkSellOpen(false)}
         onConfirm={confirmBulkSell}
-        loading={loading}
+        loading={loading || workspace.saving}
       />
     </div>
   );
