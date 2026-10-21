@@ -3,7 +3,7 @@
 import { FadeIn } from '@/components/ui';
 import LineupCourt from './LineupCourt';
 
-export default function LineupCourtSection({ starters, captainName, onPlayerClick }) {
+export default function LineupCourtSection({ starters, captainName, onSlotClick }) {
   return (
     <div className="lg:col-span-3">
       <FadeIn delay={100}>
@@ -17,8 +17,8 @@ export default function LineupCourtSection({ starters, captainName, onPlayerClic
 
         {/* Court */}
         <LineupCourt
-          players={starters}
-          onPlayerClick={onPlayerClick}
+          slots={starters}
+          onSlotClick={onSlotClick}
           className="h-[440px] sm:h-[560px] lg:h-[650px]"
           playerSize="large"
         />

@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import LineupPlayerCard from './LineupPlayerCard';
+import { LineupSlotPlaceholder } from './LineupSlotPlaceholder';
 import { getFormation, toPct, COURT_WIDTH, COURT_HEIGHT } from '@/lib/competition/public';
 
 const GeometricLayer = () => {
@@ -93,17 +94,13 @@ const GeometricLayer = () => {
   );
 };
 
-export default function LineupCourt({
-  players = [],
-  onPlayerClick,
-  className,
-  playerSize = 'large',
-}) {
-  const starters = players.slice(0, 5);
+export default function LineupCourt({ slots = [], onSlotClick, className, playerSize = 'large' }) {
+  const starters = slots.slice(0, 5);
   const positions = getFormation(starters);
 
   return (
     <div
+      aria-label="Quinteto titular"
       className={`w-full flex items-center justify-center bg-zinc-950/40 rounded-2xl border border-white/5 backdrop-blur-sm shadow-xl overflow-hidden relative ${className || 'h-[650px]'}`}
     >
       <div className="relative h-full w-full overflow-hidden bg-zinc-950/20">
@@ -114,12 +111,12 @@ export default function LineupCourt({
         <GeometricLayer />
 
         <div className="absolute inset-0 z-10">
-          {starters.map((player, index) => {
+          {starters.map((slot, index) => {
             const pos = positions[index] || { x: 25, y: 25 };
 
             return (
               <motion.div
-                key={player.id || index}
+                key={slot.slotIndex}
                 className="absolute w-0 h-0 flex items-center justify-center"
                 style={{
                   left: toPct(pos.x, COURT_WIDTH),
@@ -135,7 +132,15 @@ export default function LineupCourt({
                 }}
               >
                 <div className="hover:z-50 transition-all">
-                  <LineupPlayerCard player={player} onClick={onPlayerClick} size={playerSize} />
+                  {slot.player ? (
+                    <LineupPlayerCard
+                      player={slot.player}
+                      onClick={() => onSlotClick(slot)}
+                      size={playerSize}
+                    />
+                  ) : (
+                    <LineupSlotPlaceholder slot={slot} onSelect={onSlotClick} />
+                  )}
                 </div>
               </motion.div>
             );

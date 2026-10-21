@@ -1,5 +1,6 @@
 export type {
   SafeIdentifier,
+  LineupSlotIdentifier,
   SafeLineupConfig,
   SafeLineupPlayerOwner,
   SafeLineupPlayer,
@@ -21,6 +22,7 @@ export {
 } from './logic/lineup';
 export type {
   TacticalPlayer,
+  LineupRotationSlot,
   TacticalLineup,
   NormalizedLineup,
   LineupNormalizationInput,
@@ -43,3 +45,4 @@ export { default as MobileOffersClient } from './screens/MobileOffersClient';
 export { default as AutoAlignButton } from './components/AutoAlignButton';
 export { default as LineupSectionScreen } from './screens/LineupSectionScreen';
 export type { LineupSectionModel } from './models/section';
+export { LineupSlotPlaceholder } from './components/LineupSlotPlaceholder';
