@@ -3,20 +3,7 @@
 import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const FORMATIONS = [
-  '2-2-1',
-  '1-2-2',
-  '2-1-2',
-  '1-3-1',
-  '3-1-1',
-  '2-3-0',
-  '3-2-0',
-  '1-1-3',
-  '2-0-3',
-  '0-2-3',
-  '0-3-2',
-  '3-0-2',
-];
+import { FORMATIONS } from '../logic/draft';
 
 export default function LineupTacticsModal({ isOpen, onClose, currentType, onSelect }) {
   if (!isOpen) return null;

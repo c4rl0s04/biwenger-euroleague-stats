@@ -142,12 +142,16 @@ describe('user and lineup route contracts', () => {
     expect(JSON.stringify(postJson)).not.toContain('privateProviderPayload');
     expect(postResponse.headers.get('cache-control')).toContain('private');
     expect(postResponse.headers.get('cache-control')).toContain('no-store');
-    expect(lineupMocks.updateLineup).toHaveBeenCalledWith('42', {
-      type: '1-2-2',
-      playersID: [1],
-      reservesID: [],
-      captain: 1,
-    });
+    expect(lineupMocks.updateLineup).toHaveBeenCalledWith(
+      '42',
+      {
+        type: '1-2-2',
+        playersID: [1],
+        reservesID: [],
+        captain: 1,
+      },
+      undefined
+    );
 
     const missingPost = await POST(jsonRequest('http://localhost/api/users/lineup', {}));
     expect(missingPost.status).toBe(400);

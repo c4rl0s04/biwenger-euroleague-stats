@@ -49,8 +49,10 @@ export default function LineupPlayerCard({ player, onClick, size = 'base', isSel
   const s = sizes[size] || sizes.base;
 
   return (
-    <motion.div
-      className="relative group cursor-pointer"
+    <motion.button
+      type="button"
+      aria-label={player.name}
+      className="relative group cursor-pointer focus-visible:outline-2 focus-visible:outline-action-primary"
       onClick={() => onClick && onClick(player)}
       whileHover={{ scale: 1.05, zIndex: 50 }}
       whileTap={{ scale: 0.95 }}
@@ -97,6 +99,6 @@ export default function LineupPlayerCard({ player, onClick, size = 'base', isSel
           transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
         />
       )}
-    </motion.div>
+    </motion.button>
   );
 }

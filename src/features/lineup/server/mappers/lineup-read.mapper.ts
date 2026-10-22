@@ -39,7 +39,7 @@ export function mapLineup(value: unknown): SafeLineupConfig | null {
     type: typeof value.type === 'string' ? value.type : undefined,
     playersID: safeLineupSlots(value.playersID),
     reservesID: safeLineupSlots(value.reservesID),
-    captain: safeIdentifier(value.captain),
+    captain: safeIdentifier(isRecord(value.captain) ? value.captain.id : value.captain),
     striker: safeIdentifier(value.striker),
     coach: safeIdentifier(value.coach),
     date: safeIdentifier(value.date),

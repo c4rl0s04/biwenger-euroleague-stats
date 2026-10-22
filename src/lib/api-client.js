@@ -1,3 +1,5 @@
+import { responseError } from './api-error';
+
 /**
  * Client-side API Wrapper
  * Centralizes all API calls from Client Components.
@@ -8,17 +10,18 @@ export const apiClient = {
   /**
    * Generic GET request
    * @param {string} endpoint - API endpoint (e.g., '/users')
+   * @param {RequestInit} [options]
    * @returns {Promise<any>} Response data
    */
-  async get(endpoint) {
+  async get(endpoint, options = undefined) {
     // Ensure endpoint starts with /api if not provided (optional convenience)
     const url = endpoint.startsWith('/') ? endpoint : `/api/${endpoint}`;
 
     try {
-      const res = await fetch(url);
+      const res = await fetch(url, options);
 
       if (!res.ok) {
-        throw new Error(`API ${res.status} on ${url}`);
+        throw await responseError(res);
       }
 
       const json = await res.json();
@@ -48,7 +51,7 @@ export const apiClient = {
       });
 
       if (!res.ok) {
-        throw new Error(`API Error: ${res.status} ${res.statusText}`);
+        throw await responseError(res);
       }
 
       return await res.json();
@@ -70,7 +73,7 @@ export const apiClient = {
       });
 
       if (!res.ok) {
-        throw new Error(`API Error: ${res.status} ${res.statusText}`);
+        throw await responseError(res);
       }
 
       return await res.json();
@@ -83,9 +86,13 @@ export const apiClient = {
   /**
    * Sends a lineup object to the backend to be saved on Biwenger
    * @param {Object} lineup - The lineup payload { type, playersID, reservesID, captain }
+   * @param {string} [baseline]
    */
-  async saveLineup(lineup) {
-    return this.post('/api/users/lineup', { lineup });
+  async saveLineup(lineup, baseline = undefined) {
+    return this.post('/api/users/lineup', {
+      lineup,
+      ...(baseline !== undefined ? { baseline } : {}),
+    });
   },
 
   /**

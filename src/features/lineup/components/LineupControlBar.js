@@ -4,6 +4,7 @@ import { Save, RotateCcw, AlertCircle, CheckCircle2, Layout } from 'lucide-react
 
 export default function LineupControlBar({
   loading,
+  saveDisabled,
   error,
   success,
   currentType,
@@ -54,7 +55,7 @@ export default function LineupControlBar({
 
         <button
           onClick={onSave}
-          disabled={loading}
+          disabled={loading || saveDisabled}
           className="flex items-center gap-3 bg-primary text-white px-8 py-3 rounded-xl font-bold hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:hover:scale-100 shadow-xl shadow-primary/20 cursor-pointer"
         >
           {loading ? (

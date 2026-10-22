@@ -46,3 +46,5 @@ export { default as AutoAlignButton } from './components/AutoAlignButton';
 export { default as LineupSectionScreen } from './screens/LineupSectionScreen';
 export type { LineupSectionModel } from './models/section';
 export { LineupSlotPlaceholder } from './components/LineupSlotPlaceholder';
+
+export type { LineupWorkspace, LineupWorkspacePlayer } from './models/workspace';

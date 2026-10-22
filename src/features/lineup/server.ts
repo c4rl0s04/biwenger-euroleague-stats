@@ -47,3 +47,9 @@ export {
   getLineupSectionData,
   LINEUP_SECTION_POLICY,
 } from './server/services/lineup-section.service';
+
+export {
+  getLineupWorkspace,
+  LINEUP_WORKSPACE_POLICY,
+} from './server/services/lineup-workspace.service';
+export { lineupErrorResponse, LineupOperationError } from './server/errors';

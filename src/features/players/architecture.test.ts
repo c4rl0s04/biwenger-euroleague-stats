@@ -50,10 +50,14 @@ describe('players feature boundaries', () => {
     );
   });
 
-  it('preserves the Lineup squad URL while the route reuses the Managers contract', () => {
+  it('preserves the Managers squad URL while the editor uses the live Lineup workspace', () => {
     const lineupSource = source('../lineup/screens/MobileLineupClient.tsx');
     const routeSource = source('../../app/api/player/squad/route.ts');
-    expect(lineupSource).toContain('/api/player/squad?userId=${userId}');
+    expect(lineupSource).toContain('useLineupWorkspace(userId)');
+    expect(source('../lineup/hooks/useLineupWorkspace.ts')).toContain(
+      '/api/users/lineup/workspace'
+    );
+    expect(lineupSource).not.toContain('/api/player/squad');
     expect(routeSource).toContain('getRequestUserId(request)');
     expect(routeSource).toContain('getManagerSquadData(userIdValidation.value)');
   });

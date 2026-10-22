@@ -1,14 +1,16 @@
 'use client';
 
 import { Check, LoaderCircle, Save, Star, Users } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
+import { useLineupWorkspace } from '../hooks/useLineupWorkspace';
+import { LineupWorkspaceFeedback } from '../components/LineupWorkspaceFeedback';
+import { clearLineupSlot, planReplacement } from '../logic/draft';
 
-import { apiClient } from '@/lib/api-client';
-import { deriveRotation, normalizeLineupConfig, performSwap } from '../logic/lineup';
+import { deriveRotation } from '../logic/lineup';
 import { rankSwapCandidates } from '../logic/squad';
 
-import type { ManagerSquadPlayerViewModel } from '@/features/managers/public';
-import type { LineupRotationSlot, TacticalLineup } from '../logic/lineup';
+import type { LineupRotationSlot } from '../logic/lineup';
+import type { LineupWorkspacePlayer } from '../models/workspace';
 
 import MobileBottomSheet from '@/components/mobile/MobileBottomSheet';
 import {
@@ -18,50 +20,24 @@ import {
   MobileSectionLink,
 } from '@/components/mobile/MobileScreen';
 
-type Player = Pick<ManagerSquadPlayerViewModel, 'id' | 'name' | 'position'> & {
-  team_name?: string;
-};
+type Player = LineupWorkspacePlayer;
 
 export default function MobileLineupClient({ userId }: { userId: string | number }) {
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState('');
-  const [squad, setSquad] = useState<Player[]>([]);
+  const workspace = useLineupWorkspace(userId);
+  const { loading, saving, squad, lineupConfig, setLineupConfig } = workspace;
   const returnFocusRef = useRef<HTMLButtonElement>(null);
   const [selected, setSelected] = useState<LineupRotationSlot<Player> | null>(null);
-  const [lineupConfig, setLineupConfig] = useState<TacticalLineup>({
-    playersID: [],
-    reservesID: [],
-    captain: null,
-    type: '2-2-1',
-  });
-
-  useEffect(() => {
-    let active = true;
-    Promise.all([
-      apiClient.get(`/api/player/squad?userId=${userId}`),
-      apiClient.get('/api/users/lineup'),
-    ])
-      .then(([squadResponse, lineupResponse]) => {
-        if (!active) return;
-        if (squadResponse.success) setSquad(squadResponse.data?.players ?? []);
-        if (lineupResponse.success)
-          setLineupConfig(normalizeLineupConfig(lineupResponse.data?.lineup));
-      })
-      .catch(() => active && setMessage('No se pudo cargar tu alineación.'))
-      .finally(() => active && setLoading(false));
-    return () => {
-      active = false;
-    };
-  }, [userId]);
 
   const rotation = useMemo(() => deriveRotation(lineupConfig, squad), [lineupConfig, squad]);
 
   const swapWith = (player: Player) => {
     if (!selected) return;
-    setLineupConfig((current) =>
-      performSwap({ slotIndex: selected.slotIndex }, player.id, current)
-    );
+    const plan = planReplacement(lineupConfig, selected.slotIndex, player.id, squad);
+    if (!plan.ok) {
+      workspace.setError(plan.reason);
+      return;
+    }
+    setLineupConfig(plan.lineup);
     setSelected(null);
   };
 
@@ -72,31 +48,21 @@ export default function MobileLineupClient({ userId }: { userId: string | number
     setSelected(null);
   };
 
-  const save = async () => {
-    setSaving(true);
-    setMessage('');
-    try {
-      const result = await apiClient.saveLineup(lineupConfig);
-      setMessage(
-        result.success ? 'Alineación guardada.' : (result.message ?? 'No se pudo guardar.')
-      );
-    } catch {
-      setMessage('No se pudo guardar la alineación.');
-    } finally {
-      setSaving(false);
-    }
-  };
+  const save = workspace.save;
 
   const candidates = selected
     ? rankSwapCandidates(
         squad,
         { id: selected.playerId, position: selected.position },
-        selected.slotIndex < 5,
+        false,
         new Set((lineupConfig.playersID ?? []).filter((id) => id !== null).map(String))
+      ).sort(
+        (a, b) =>
+          Number(b.position === selected.position) - Number(a.position === selected.position)
       )
     : [];
 
-  if (loading)
+  if (loading && !workspace.checkedAt)
     return (
       <div className="mobile-lineup-loading">
         <LoaderCircle className="animate-spin" aria-hidden="true" /> Cargando alineación
@@ -106,11 +72,17 @@ export default function MobileLineupClient({ userId }: { userId: string | number
   return (
     <MobileScreen labelledBy="mobile-screen-title" className="mobile-has-sticky-action">
       <MobileScreenHeader eyebrow="Tu equipo" title="Alineación" />
-      {message && (
-        <p className="mobile-lineup-message" role="status">
-          {message}
-        </p>
-      )}
+      <LineupWorkspaceFeedback
+        checkedAt={workspace.checkedAt}
+        error={workspace.error}
+        success={workspace.success}
+        issue={workspace.issue}
+        review={Boolean(workspace.review)}
+        loading={loading || saving}
+        dirty={workspace.dirty}
+        onRefresh={workspace.refresh}
+        onReview={workspace.applyReview}
+      />
       <MobileSectionHeading>Quinteto</MobileSectionHeading>
       <div className="mobile-lineup-court" aria-label="Quinteto titular">
         {rotation.starters.map((slot, index: number) => (
@@ -183,7 +155,7 @@ export default function MobileLineupClient({ userId }: { userId: string | number
           type="button"
           className="mobile-primary-action mobile-save-lineup"
           onClick={save}
-          disabled={saving}
+          disabled={!workspace.canSave}
         >
           {saving ? (
             <LoaderCircle className="animate-spin" size={18} aria-hidden="true" />
@@ -212,18 +184,39 @@ export default function MobileLineupClient({ userId }: { userId: string | number
                 <Star size={18} aria-hidden="true" /> Hacer capitán
               </button>
             )}
-            <p>Cambiar por</p>
-            {candidates.map((player: Player) => (
+            {selected.playerId !== null && (
               <button
-                key={String(player.id)}
                 type="button"
-                onClick={() => swapWith(player)}
-                className="mobile-lineup-swap"
+                onClick={() => {
+                  setLineupConfig(clearLineupSlot(lineupConfig, selected.slotIndex));
+                  setSelected(null);
+                }}
               >
-                <span>{player.name}</span>
-                <small>{player.position ?? 'Jugador'}</small>
+                Dejar posición vacía
               </button>
-            ))}
+            )}
+            <p>Cambiar por</p>
+            {candidates.map((player) => {
+              const plan = planReplacement(lineupConfig, selected.slotIndex, player.id, squad);
+              return (
+                <button
+                  key={String(player.id)}
+                  type="button"
+                  disabled={!plan.ok}
+                  onClick={() => swapWith(player)}
+                  className="mobile-lineup-swap"
+                >
+                  <span>{player.name}</span>
+                  <small>
+                    {!plan.ok
+                      ? plan.reason
+                      : plan.formationChanged
+                        ? `Cambiar formación: ${lineupConfig.type} → ${plan.lineup.type}`
+                        : (player.position ?? 'Jugador')}
+                  </small>
+                </button>
+              );
+            })}
           </div>
         )}
       </MobileBottomSheet>
