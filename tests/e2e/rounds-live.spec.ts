@@ -1,4 +1,5 @@
 import { test, expect } from './fixtures';
+import { waitForScreenshotPaint } from './screenshot-ready';
 import type { Page } from 'playwright/test';
 
 const manager = {
@@ -82,7 +83,18 @@ test('live squad survives incomplete background analysis and selector has no scr
   await selector.getByRole('button', { name: 'Mi Ideal', exact: true }).focus();
   await page.keyboard.press('Enter');
   await expect(page.getByText('Mi Alineación Perfecta', { exact: true })).toBeVisible();
+  const green = await selector
+    .getByRole('button', { name: 'Mi Ideal', exact: true })
+    .evaluate((button) => getComputedStyle(button).backgroundColor);
+  await selector.getByRole('button', { name: 'Global', exact: true }).click();
+  const purple = await selector
+    .getByRole('button', { name: 'Global', exact: true })
+    .evaluate((button) => getComputedStyle(button).backgroundColor);
   await selector.getByRole('button', { name: 'Alineación', exact: true }).click();
+  const orange = await selector
+    .getByRole('button', { name: 'Alineación', exact: true })
+    .evaluate((button) => getComputedStyle(button).backgroundColor);
+  expect(new Set([orange, green, purple]).size).toBe(3);
   await expect(page.getByText('Live Player', { exact: true })).toBeVisible();
 });
 
@@ -183,4 +195,145 @@ test('unavailable squad offers an application-data retry', async ({ page }) => {
   ready = true;
   await page.getByRole('button', { name: 'Reintentar', exact: true }).click();
   await expect(page.getByText('Live Player', { exact: true })).toBeVisible();
+});
+
+test('one global ideal keeps scored court and bench players when the selected manager changes', async ({
+  page,
+}, info) => {
+  const other = { ...manager, id: '8', name: 'Other Manager' };
+  const idealLineup = [36, 35, 34, 33, 32, 31, 30, 29, 28, 0].map((points, index) => ({
+    player_id: 201 + index,
+    name: `Global ${index + 1}`,
+    img: null,
+    points,
+    stats_points: points,
+    position: index % 5 < 2 ? 'Base' : index % 5 < 4 ? 'Alero' : 'Pivot',
+    role: index < 5 ? 'titular' : index === 5 ? '6th_man' : 'bench',
+    is_captain: index === 0,
+    multiplier: index === 0 ? 2 : index < 5 ? 1 : index === 5 ? 0.75 : 0.5,
+  }));
+  await page.route('**/api/rounds/stats?**', (route) =>
+    route.fulfill({
+      json: {
+        success: true,
+        data: { ...data([manager, other]), idealLineup, globalIdealPoints: 273 },
+      },
+    })
+  );
+  await login(page);
+  await expect(page.getByText('Panel de Jornada', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Global', exact: true }).click();
+  const court = page.getByRole('region', { name: 'Alineación de la jornada' });
+  await expect(court.getByText('36 pts', { exact: true })).toBeVisible();
+  await expect(page.getByText('31 pts', { exact: true })).toBeVisible();
+  await expect(page.getByText('0 pts', { exact: true })).toBeVisible();
+  await expect(page.getByText('273', { exact: true })).toBeVisible();
+  await expect(court.getByText('Pendiente', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('null pts', { exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Ver alineación de Other Manager' }).click();
+  await expect(court.getByText('Global 1', { exact: true })).toBeVisible();
+  await expect(page.getByText('Global 10', { exact: true })).toBeVisible();
+  await expect(page.getByText('273', { exact: true })).toBeVisible();
+  await waitForScreenshotPaint(page);
+  await page
+    .locator('#estadisticas-de-la-ronda')
+    .screenshot({ path: info.outputPath('rounds-global-scored.png') });
+});
+
+test('round controls, empty state and standings stay compact as the bench changes', async ({
+  page,
+}, info) => {
+  let available = false;
+  const users = Array.from({ length: 6 }, (_, index) => ({
+    ...manager,
+    id: String(7 + index),
+    name: `Round Manager ${index + 1}`,
+  }));
+  const backgroundLoaded = page.waitForResponse(
+    (response) =>
+      response.url().includes('/api/rounds/stats?') && response.url().includes('mode=full')
+  );
+  await page.route('**/api/rounds/stats?**', (route) =>
+    route.fulfill({
+      json: {
+        success: true,
+        data: data(
+          users.map((user) => ({
+            ...user,
+            lineupStatus: available ? 'available' : 'missing',
+            lineup: {
+              players: available
+                ? Array.from({ length: 10 }, (_, index) => ({
+                    ...player,
+                    player_id: 101 + index,
+                    name: index === 0 ? 'Live Player' : `Player ${index + 1}`,
+                    position: index % 5 < 2 ? 'Base' : index % 5 < 4 ? 'Alero' : 'Pivot',
+                    role: index < 5 ? 'titular' : index === 5 ? '6th_man' : 'suplente',
+                  }))
+                : [],
+            },
+          }))
+        ),
+      },
+    })
+  );
+  await login(page);
+  await backgroundLoaded;
+  const standings = page.getByRole('region', { name: 'Clasificación de la jornada' });
+  const court = page.getByRole('region', { name: 'Alineación de la jornada' });
+  await expect(standings.getByRole('button', { name: /^Ver alineación/ })).toHaveCount(6);
+  await expect(
+    page.getByText('Alineación pendiente de sincronización.', { exact: true })
+  ).toBeVisible();
+  const before = await standings.boundingBox();
+  expect(before!.height).toBeLessThan(520);
+  expect((await court.boundingBox())!.height).toBeLessThan(430);
+  const select = page.getByRole('button', { name: 'Jornada', exact: true });
+  await expect(select).toHaveText('Jornada 7');
+  expect((await select.boundingBox())!.height).toBeLessThanOrEqual(48);
+  await page
+    .locator('#estadisticas-de-la-ronda')
+    .screenshot({ path: info.outputPath('rounds-empty.png') });
+  await page.locator('html').evaluate((element) => element.setAttribute('data-theme', 'light'));
+  await page
+    .locator('#estadisticas-de-la-ronda')
+    .screenshot({ path: info.outputPath('rounds-empty-light.png') });
+  await page.locator('html').evaluate((element) => element.setAttribute('data-theme', 'dark'));
+
+  available = true;
+  await page.getByRole('button', { name: 'Reintentar', exact: true }).click();
+  await expect(page.getByText('Live Player', { exact: true })).toBeVisible();
+  await expect(page.getByText('Player 10', { exact: true })).toBeVisible();
+  const after = await standings.boundingBox();
+  expect(Math.abs(after!.height - before!.height)).toBeLessThan(2);
+  const rowHeights = await standings
+    .getByRole('button', { name: /^Ver alineación/ })
+    .evaluateAll((rows) => rows.map((row) => row.getBoundingClientRect().height));
+  expect(Math.max(...rowHeights) - Math.min(...rowHeights)).toBeLessThan(1);
+  await waitForScreenshotPaint(page);
+  await page
+    .locator('#estadisticas-de-la-ronda')
+    .screenshot({ path: info.outputPath('rounds-populated.png') });
+  await select.focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('listbox')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('listbox')).toHaveCount(0);
+  await expect(select).toHaveText('Jornada 7');
+  await select.click();
+  const nextRound = page.getByRole('option', { name: 'Jornada 8', exact: true });
+  await expect(nextRound).toBeVisible();
+  expect(
+    await nextRound
+      .locator('span')
+      .first()
+      .evaluate((el) => getComputedStyle(el).fontSize)
+  ).toBe('14px');
+  await page
+    .locator('#estadisticas-de-la-ronda')
+    .screenshot({ path: info.outputPath('rounds-dropdown.png') });
+  await nextRound.click();
+  await expect(select).toHaveText('Jornada 8');
+  await page.getByRole('button', { name: 'Jornada anterior' }).click();
+  await expect(select).toHaveText('Jornada 7');
 });

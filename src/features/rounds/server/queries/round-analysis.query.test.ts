@@ -186,7 +186,7 @@ describe('Rounds read query compatibility', () => {
     });
   });
 
-  it('retains global ideal object envelope, top-50 query and rounded total', async () => {
+  it('selects one scored global ideal with deterministic ties and no truncated candidate pool', async () => {
     rows([
       {
         player_id: 1,
@@ -209,7 +209,26 @@ describe('Rounds read query compatibility', () => {
       stats_points: 3,
       multiplier: 2,
     });
-    expect(mocks.query.mock.calls[0][0]).toContain('LIMIT 50');
+    const sql = mocks.query.mock.calls[0][0];
+    expect(sql).toContain('prs.fantasy_points IS NOT NULL');
+    expect(sql).toContain('ORDER BY prs.fantasy_points DESC NULLS LAST, p.id ASC');
+    expect(sql).not.toContain('LIMIT 50');
+  });
+
+  it('uses season-scoped official portraits throughout lineup, global leaders and global ideal', async () => {
+    await getUserLineup('7', 1);
+    await getRoundGlobalStats(1);
+    await getIdealLineup(1);
+    const mediaQueries = mocks.query.mock.calls
+      .map(([sql]) => sql)
+      .filter((sql) => /AS img/i.test(sql));
+    expect(mediaQueries).toHaveLength(6);
+    for (const sql of mediaQueries) {
+      expect(sql).toContain('opm.image_url AS img');
+      expect(sql).toContain('opm.season_id=ps.season_id');
+      expect(sql).toContain("opm.provider='euroleague_advanced' AND opm.status='matched'");
+      expect(sql).not.toMatch(/\bp\.img\b|\bt\.img\b/);
+    }
   });
 
   it('replays ownership backward at the inherited one-hour buffer and excludes the actual lineup', async () => {
@@ -239,6 +258,8 @@ describe('Rounds read query compatibility', () => {
     expect(mocks.query.mock.calls[3][1]).toEqual(['Fixture Manager', 1735736400, 'fixture-season']);
     expect(mocks.query.mock.calls[3][0]).toContain('ORDER BY timestamp DESC');
     expect(mocks.query.mock.calls[5][1]).toEqual([3, [3], 'fixture-season']);
+    expect(mocks.query.mock.calls[5][0]).toContain('opm.image_url AS img');
+    expect(mocks.query.mock.calls[5][0]).toContain('otm.crest_url as team_img');
     expect(mocks.season).toHaveBeenCalledTimes(2);
   });
 

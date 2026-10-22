@@ -41,7 +41,15 @@ import PerfectRoundsCard from './stats/history/PerfectRoundsCard';
 import RecordsGrid from './stats/history/RecordsGrid';
 import LineupStatsCard from './stats/general/LineupStatsCard';
 import Section from '@/components/layout/Section';
-import { Button, EmptyState } from '@/components/ui/foundation';
+import {
+  Button,
+  EmptyState,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from '@/components/ui/foundation';
+import { cn } from '@/lib/utils';
 import { useRoundStatsData } from '../../hooks/useRoundStatsData';
 import { selectRoundManager, hasPendingRoundPoints } from '../../logic/desktop-round';
 import { usePerformanceStats } from '../../hooks/usePerformanceStats';
@@ -221,7 +229,7 @@ export default function RoundsPageClient() {
   const statsData = {
     global: roundData?.global,
     idealLineup: fullRoundData?.idealLineup || roundData?.idealLineup,
-    globalIdealPoints: fullRoundData?.globalIdealPoints || roundData?.globalIdealPoints,
+    globalIdealPoints: fullRoundData?.globalIdealPoints ?? roundData?.globalIdealPoints,
     user: currentUserStats
       ? {
           ...currentUserStats, // points, ideal_points
@@ -298,6 +306,8 @@ export default function RoundsPageClient() {
   if (currentSummary && roundStatus === 'live')
     currentSummary = { ...currentSummary, provisional: true };
 
+  const CourtIcon = icon;
+
   return (
     <div>
       {/* SECTION: ESTADISTICAS DE LA RONDA */}
@@ -306,20 +316,19 @@ export default function RoundsPageClient() {
         <ElegantCard
           title="Panel de Jornada"
           icon={Settings}
-          className="relative z-20"
           color="zinc"
+          className="relative z-20 h-fit"
         >
           <RoundControls
             lists={lists}
             selectedRoundId={selectedRoundId}
             onChangeRound={setSelectedRoundId}
-            lineupSummary={currentSummary}
           />
         </ElegantCard>
 
-        {/* MAIN LAYOUT - 2 COLUMNS ON XL (Flexbox for equal height) */}
+        {/* Independent standings and court columns keep row spacing stable. */}
         {roundStatus === 'live' && (
-          <p className="my-4 text-sm text-zinc-400" role="status">
+          <p className="my-4 text-sm text-muted-foreground" role="status">
             Jornada en directo · Puntuaciones y alineaciones ideales provisionales.
           </p>
         )}
@@ -338,9 +347,9 @@ export default function RoundsPageClient() {
             </p>
           </div>
         ) : (
-          <div className="flex flex-col xl:flex-row gap-6">
+          <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
             {/* LEFT COLUMN: STANDINGS + STATS (1/3 width) */}
-            <div className="xl:w-1/3 flex flex-col justify-start gap-6">
+            <div className="min-w-0 flex flex-col gap-6">
               <RoundStandings
                 roundId={selectedRoundId}
                 selectedUserId={selectedUserId}
@@ -366,22 +375,49 @@ export default function RoundsPageClient() {
             </div>
 
             {/* RIGHT COLUMN: COURT + BENCH (2/3 width) */}
-            <div className="xl:w-2/3 flex flex-col gap-4">
+            <div className="min-w-0 flex flex-col gap-4">
               {/* View Toggles */}
               <RoundViewSwitcher value={viewMode} onChange={setViewMode} />
 
-              <ElegantCard title={title} icon={icon} color={color} className="w-full">
-                <div className="aspect-[3/4] min-h-[360px] w-full sm:aspect-[4/3] sm:min-h-[500px] lg:aspect-[16/10] xl:min-h-[600px]">
+              <Card role="region" aria-label="Alineación de la jornada">
+                <CardHeader
+                  icon={
+                    <CourtIcon
+                      size={20}
+                      className={cn(
+                        color === 'emerald'
+                          ? 'text-emerald-500'
+                          : color === 'purple'
+                            ? 'text-purple-500'
+                            : 'text-primary'
+                      )}
+                      aria-hidden="true"
+                    />
+                  }
+                >
+                  <CardTitle>{title}</CardTitle>
+                </CardHeader>
+                <CardContent
+                  className={
+                    hasCourtPlayers
+                      ? 'aspect-[3/4] min-h-[360px] sm:aspect-[4/3] sm:min-h-[500px] lg:aspect-[16/10] xl:min-h-[520px]'
+                      : 'min-h-64'
+                  }
+                >
                   {isCourtLoading ? (
-                    <div className="w-full h-full flex items-center justify-center animate-pulse bg-white/5 rounded-xl">
+                    <div
+                      className="min-h-64 h-full flex items-center justify-center animate-pulse rounded-xl text-muted-foreground"
+                      role="status"
+                    >
                       Cargando datos...
                     </div>
                   ) : !hasCourtPlayers ? (
                     <EmptyState
-                      className="flex h-full flex-col items-center justify-center gap-4 p-6"
+                      className="flex min-h-64 flex-col items-center justify-center gap-3 px-4 py-8"
                       role="status"
                     >
-                      <p>
+                      <Calendar size={28} aria-hidden="true" className="text-muted-foreground" />
+                      <p className="font-semibold text-foreground">
                         {courtError
                           ? 'No se ha podido cargar la alineación.'
                           : roundStatus === 'upcoming'
@@ -389,6 +425,15 @@ export default function RoundsPageClient() {
                             : viewMode !== 'user'
                               ? 'Alineación ideal pendiente de puntuaciones.'
                               : 'Alineación pendiente de sincronización.'}
+                      </p>
+                      <p className="max-w-sm leading-relaxed">
+                        {courtError
+                          ? 'No se han podido recuperar los datos guardados. Puedes volver a intentarlo.'
+                          : roundStatus === 'upcoming'
+                            ? 'Las alineaciones y puntuaciones estarán disponibles cuando comience la jornada.'
+                            : viewMode !== 'user'
+                              ? 'El equipo ideal se calculará cuando haya puntuaciones disponibles.'
+                              : 'Aún no hemos recibido la alineación de este mánager para esta jornada. Reintentar solo vuelve a consultar los datos disponibles.'}
                       </p>
                       <Button
                         variant="secondary"
@@ -407,11 +452,11 @@ export default function RoundsPageClient() {
                       className="h-full w-full"
                     />
                   )}
-                </div>
-              </ElegantCard>
+                </CardContent>
+              </Card>
 
               {/* Bench */}
-              {isBenchVisible && hasCourtPlayers && (
+              {isBenchVisible && currentBench.length > 0 && (
                 <div className="mt-4">
                   <ElegantCard
                     title="Banquillo"

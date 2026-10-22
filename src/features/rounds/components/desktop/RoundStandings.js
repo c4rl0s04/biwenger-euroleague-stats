@@ -4,11 +4,12 @@ import { useState, useMemo } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { User, Medal, ListOrdered, ArrowUpDown } from 'lucide-react';
-import ElegantCard from '@/components/ui/card-variants/ElegantCard';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/foundation';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { cn } from '@/lib/utils';
 import { getColorForUser } from '@/lib/competition/public';
 import { calcEfficiency } from '@/lib/competition/public';
+import styles from './RoundStandings.module.css';
 
 export default function RoundStandings({
   roundId,
@@ -81,13 +82,16 @@ export default function RoundStandings({
   if (!standings || standings.length === 0) return null;
 
   return (
-    <ElegantCard
-      title="Clasificación"
-      icon={ListOrdered}
-      color="orange"
-      className="h-full flex flex-col overflow-hidden"
+    <Card
+      density="compact"
+      role="region"
+      aria-label="Clasificación de la jornada"
+      className={styles.standings}
     >
-      <div className="w-full mx-auto px-1 flex-1 flex flex-col min-h-0">
+      <CardHeader icon={<ListOrdered size={20} className="text-primary" aria-hidden="true" />}>
+        <CardTitle>Clasificación</CardTitle>
+      </CardHeader>
+      <CardContent className="tabular-nums">
         {/* Table Header - Updated Widths: Manager fixed, stats fill space */}
         <div className="grid grid-cols-[1.5rem_3rem_1fr_1fr_1fr_1fr] gap-1 items-center text-[10px] font-bold uppercase tracking-widest px-2 mb-2 select-none">
           <div className="text-center text-muted-foreground">#</div>
@@ -99,8 +103,8 @@ export default function RoundStandings({
             className={cn(
               'flex items-center justify-center relative transition-all cursor-pointer group',
               sortBy === 'efficiency'
-                ? 'text-blue-400 opacity-100'
-                : 'text-muted-foreground hover:text-blue-400 opacity-50 hover:opacity-100'
+                ? 'text-[var(--round-good-content)] opacity-100'
+                : 'text-muted-foreground hover:text-[var(--round-good-content)] opacity-50 hover:opacity-100'
             )}
             title="Ordenar por Eficiencia"
           >
@@ -120,8 +124,8 @@ export default function RoundStandings({
             className={cn(
               'flex items-center justify-center relative transition-all cursor-pointer group',
               sortBy === 'round'
-                ? 'text-orange-400 opacity-100'
-                : 'text-muted-foreground hover:text-orange-400 opacity-50 hover:opacity-100'
+                ? 'text-primary opacity-100'
+                : 'text-muted-foreground hover:text-primary opacity-50 hover:opacity-100'
             )}
             title="Ordenar por Puntos Jornada"
           >
@@ -141,8 +145,8 @@ export default function RoundStandings({
             className={cn(
               'flex items-center justify-center relative transition-all cursor-pointer group',
               sortBy === 'ideal'
-                ? 'text-emerald-400 opacity-100'
-                : 'text-muted-foreground hover:text-emerald-400 opacity-50 hover:opacity-100'
+                ? 'text-[var(--round-ideal-content)] opacity-100'
+                : 'text-muted-foreground hover:text-[var(--round-ideal-content)] opacity-50 hover:opacity-100'
             )}
             title="Ordenar por Puntos Ideales"
           >
@@ -162,8 +166,8 @@ export default function RoundStandings({
             className={cn(
               'flex items-center justify-center relative transition-all cursor-pointer group',
               sortBy === 'total'
-                ? 'text-yellow-400 opacity-100'
-                : 'text-muted-foreground hover:text-yellow-400 opacity-50 hover:opacity-100'
+                ? 'text-[var(--round-total-content)] opacity-100'
+                : 'text-muted-foreground hover:text-[var(--round-total-content)] opacity-50 hover:opacity-100'
             )}
             title="Ordenar por Puntos Totales"
           >
@@ -177,15 +181,16 @@ export default function RoundStandings({
             />
           </button>
         </div>
-        <div className="flex-1 w-full overflow-y-auto custom-scrollbar relative">
-          <div className="flex flex-col justify-between min-h-full py-2">
+        <div className="max-h-[26rem] w-full overflow-y-auto custom-scrollbar relative">
+          <div className="flex flex-col gap-2 px-1 py-1">
             {sortedStandings.map((user, index) => {
               const isSelected = String(user.id) === String(selectedUserId);
               const rank = index + 1;
 
               // Dynamic Styling for Top 3
-              let rankColor = 'text-zinc-500';
-              let rowBg = 'hover:bg-zinc-800/40 bg-zinc-900/40 rounded-lg'; // Added default bg and rounding
+              let rankColor = 'text-muted-foreground';
+              const rowBg =
+                'bg-[hsl(var(--surface-secondary)/0.5)] hover:bg-[hsl(var(--surface-muted))] rounded-lg';
               let icon = null;
 
               if (rank === 1) {
@@ -205,10 +210,10 @@ export default function RoundStandings({
               const eff = calcEfficiency(actual, ideal);
 
               // Color Coding for Efficiency
-              let effColor = 'text-red-400';
-              if (eff >= 90) effColor = 'text-emerald-400';
-              else if (eff >= 80) effColor = 'text-blue-400';
-              else if (eff >= 70) effColor = 'text-orange-400';
+              let effColor = 'text-[hsl(var(--status-danger))]';
+              if (eff >= 90) effColor = 'text-[var(--round-ideal-content)]';
+              else if (eff >= 80) effColor = 'text-[var(--round-good-content)]';
+              else if (eff >= 70) effColor = 'text-primary';
 
               return (
                 <button
@@ -218,7 +223,7 @@ export default function RoundStandings({
                   aria-pressed={isSelected}
                   // Updated Row Widths to match Header
                   className={cn(
-                    'relative group grid grid-cols-[1.5rem_3rem_1fr_1fr_1fr_1fr] gap-1 items-center w-full px-2 py-2 transition-all duration-200 cursor-pointer text-left',
+                    'relative group grid min-h-14 shrink-0 grid-cols-[1.5rem_3rem_1fr_1fr_1fr_1fr] gap-1 items-center w-full px-2 py-2 transition-colors duration-200 cursor-pointer text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                     rowBg,
                     isSelected &&
                       'bg-primary/10 ring-1 ring-primary/50 shadow-[0_0_20px_rgba(var(--primary-rgb),0.2)] z-10'
@@ -263,36 +268,21 @@ export default function RoundStandings({
 
                   {/* 4. Actual Points */}
                   <div className="flex justify-center shrink-0 w-full">
-                    <span
-                      className={cn(
-                        'text-sm font-bold tracking-tight',
-                        isSelected ? 'text-orange-300' : 'text-orange-400'
-                      )}
-                    >
+                    <span className="text-sm font-bold tracking-tight text-primary">
                       {Math.round(actual)}
                     </span>
                   </div>
 
                   {/* 5. Ideal Points */}
                   <div className="flex justify-center shrink-0 w-full">
-                    <span
-                      className={cn(
-                        'text-sm font-bold tracking-tight',
-                        isSelected ? 'text-emerald-300' : 'text-emerald-400'
-                      )}
-                    >
+                    <span className="text-sm font-bold tracking-tight text-[var(--round-ideal-content)]">
                       {Math.round(ideal)}
                     </span>
                   </div>
 
                   {/* 6. Total Points */}
                   <div className="flex justify-center shrink-0 w-full">
-                    <span
-                      className={cn(
-                        'text-sm font-bold tracking-tight',
-                        isSelected ? 'text-yellow-300' : 'text-yellow-400'
-                      )}
-                    >
+                    <span className="text-sm font-bold tracking-tight text-[var(--round-total-content)]">
                       {Math.round(user.total_points || 0)}
                     </span>
                   </div>
@@ -308,7 +298,7 @@ export default function RoundStandings({
             })}
           </div>
         </div>
-      </div>
-    </ElegantCard>
+      </CardContent>
+    </Card>
   );
 }

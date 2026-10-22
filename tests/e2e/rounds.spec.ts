@@ -42,9 +42,10 @@ test('Rounds preserves historical analysis and phone section navigation', async 
       await expect(page).toHaveURL(/\/rounds\?roundId=1$/);
     }
   } else {
-    await expect(
-      page.getByRole('img', { name: 'Fixture Contributor 01', exact: true }).first()
-    ).toBeVisible({ timeout: 30000 });
+    await expect(page.getByText('Fixture Contributor 01', { exact: true }).first()).toBeVisible({
+      timeout: 30000,
+    });
+    await expect(page.getByRole('button', { name: 'Jornada', exact: true })).toBeVisible();
     await expect(page.getByText('Panel de Jornada', { exact: true })).toBeVisible();
     await capture(page, info, 'rounds-overview');
     await page.getByRole('button', { name: 'Mi Ideal', exact: true }).click();

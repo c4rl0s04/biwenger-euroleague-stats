@@ -1,0 +1,11 @@
+.standings {
+  --round-ideal-content: var(--color-emerald-400);
+  --round-total-content: var(--color-amber-300);
+  --round-good-content: var(--color-sky-400);
+}
+
+:global([data-theme='light']) .standings {
+  --round-ideal-content: var(--color-emerald-700);
+  --round-total-content: var(--color-amber-800);
+  --round-good-content: var(--color-sky-700);
+}
