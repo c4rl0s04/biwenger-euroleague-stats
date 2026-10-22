@@ -22,6 +22,7 @@ vi.mock('./server/queries/directory.query', () => ({
 }));
 vi.mock('./server/services/calendar.service', () => ({
   getRoundCalendar: vi.fn(),
+  getRoundCalendarState: async () => ({ rounds: [{ roundId: 2, status: 'live' }] }),
   getLastCompletedRoundId: vi.fn(),
   getLastCompletedCalendarRound: async () => null,
   resolveRoundIdByPolicy: async () => 2,

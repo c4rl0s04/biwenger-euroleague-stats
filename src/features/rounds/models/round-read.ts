@@ -4,6 +4,7 @@
 export interface RoundOptionViewModel {
   round_id: number | null;
   round_name: string | null;
+  status?: import('@/lib/competition/public').RoundLifecycle;
 }
 export interface RoundManagerViewModel {
   id: string;
@@ -101,6 +102,7 @@ export interface RoundGlobalStatsViewModel {
 }
 export interface RoundDetailedManagerViewModel extends RoundStandingViewModel {
   lineup?: RoundLineupViewModel;
+  lineupStatus?: 'available' | 'missing' | 'error';
   idealLineup?: RoundOptimizedPlayerViewModel[];
   coachRating?: RoundCoachRatingViewModel | null;
   leftOut?: RoundCandidateViewModel[];

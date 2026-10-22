@@ -75,24 +75,31 @@ export function createRoundResultsService(deps: RoundResultsDependencies) {
     }
     const users = await Promise.all(
       usersToFetch.map(async (user) => {
-        try {
-          const [lineup, rating, leftOut] = await Promise.all([
-            deps.lineup(String(user.id), String(roundId)),
-            deps.coach(String(user.id), String(roundId)),
-            deps.leftOut(String(user.id), String(roundId)),
-          ]);
-          const coachRating = mapRoundCoach(rating);
-          return {
-            ...user,
-            lineup: mapRoundLineup(lineup),
-            idealLineup: coachRating?.idealLineup || [],
-            coachRating,
-            leftOut: (leftOut || []).map(mapRoundCandidate),
-          };
-        } catch (e) {
-          console.error(`Error fetching details for user ${user.id}`, e);
-          return user;
+        const [lineup, rating, leftOut] = await Promise.allSettled([
+          deps.lineup(String(user.id), String(roundId)),
+          deps.coach(String(user.id), String(roundId)),
+          deps.leftOut(String(user.id), String(roundId)),
+        ]);
+        const coachRating = rating.status === 'fulfilled' ? mapRoundCoach(rating.value) : null;
+        const mappedLineup =
+          lineup.status === 'fulfilled' ? mapRoundLineup(lineup.value) : undefined;
+        if ([lineup, rating, leftOut].some((result) => result.status === 'rejected')) {
+          console.error(`Partial round details unavailable: round ${roundId}, manager ${user.id}`);
         }
+        return {
+          ...user,
+          lineup: mappedLineup,
+          lineupStatus:
+            lineup.status === 'rejected'
+              ? ('error' as const)
+              : mappedLineup?.players.length
+                ? ('available' as const)
+                : ('missing' as const),
+          idealLineup: coachRating?.idealLineup || [],
+          coachRating,
+          leftOut:
+            leftOut.status === 'fulfilled' ? (leftOut.value || []).map(mapRoundCandidate) : [],
+        };
       })
     );
     return {

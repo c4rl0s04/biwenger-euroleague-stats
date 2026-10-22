@@ -40,6 +40,9 @@ import PerfectRoundsCard from './stats/history/PerfectRoundsCard';
 import RecordsGrid from './stats/history/RecordsGrid';
 import LineupStatsCard from './stats/general/LineupStatsCard';
 import Section from '@/components/layout/Section';
+import { Button, EmptyState } from '@/components/ui/foundation';
+import { useRoundStatsData } from '../../hooks/useRoundStatsData';
+import { selectRoundManager, hasPendingRoundPoints } from '../../logic/desktop-round';
 import { usePerformanceStats } from '../../hooks/usePerformanceStats';
 import { Activity, BarChart3, Grid, Ruler, Layout } from 'lucide-react';
 
@@ -97,21 +100,10 @@ export default function RoundsPageClient() {
     }
   }, [selectedUserId, comparisonUserIds]);
 
-  // --- 2. QUICK FETCH (Only selected user's data) ---
-  const { data: quickRoundData, loading: quickDataLoading } = useApiData(
-    selectedRoundId && selectedUserId
-      ? `/api/rounds/stats?roundId=${selectedRoundId}&userId=${selectedUserId}&mode=quick`
-      : null,
-    { dependencies: [selectedRoundId, selectedUserId] }
-  );
-
-  // --- 2b. FULL FETCH (All users - Background load) ---
-  const { data: fullRoundData, loading: fullDataLoading } = useApiData(
-    selectedRoundId && loadBackgroundData
-      ? `/api/rounds/stats?roundId=${selectedRoundId}&mode=full`
-      : null,
-    { skip: !loadBackgroundData, dependencies: [selectedRoundId] }
-  );
+  const { quick, full } = useRoundStatsData(selectedRoundId, selectedUserId, loadBackgroundData);
+  const quickRoundData = quick.data;
+  const fullRoundData = full.data;
+  const quickDataLoading = quick.loading;
 
   // --- 3. FETCH HISTORY (Primary User - For Stats Cards) ---
   const { data: historyData, loading: historyLoading } = useApiData(
@@ -202,8 +194,14 @@ export default function RoundsPageClient() {
 
   // A. Current User Context
   // Use quick data first (priority), fall back to full data when available
-  const roundData = fullRoundData || quickRoundData;
-  const currentUserStats = roundData?.users?.find((u) => String(u.id) === String(selectedUserId));
+  const roundData = quickRoundData || fullRoundData;
+  const currentUserStats = selectRoundManager(quickRoundData, fullRoundData, selectedUserId);
+  const roundStatus = lists?.rounds?.find(
+    (round) => String(round.round_id) === String(selectedRoundId)
+  )?.status;
+  const pointsPending =
+    !currentUserStats?.lineup?.players.length ||
+    currentUserStats.lineup.players.every(hasPendingRoundPoints);
 
   // B. Construct props expected by children
   // Lineup Data (For Court)
@@ -211,7 +209,8 @@ export default function RoundsPageClient() {
     ? {
         players: currentUserStats.lineup?.players || [], // Use lineup from quick or full payload
         summary: {
-          total_points: currentUserStats.points,
+          total_points: pointsPending ? null : currentUserStats.points,
+          provisional: roundStatus === 'live',
           round_rank: null, // We could calculate rank dynamically from the list if needed
         },
       }
@@ -274,7 +273,11 @@ export default function RoundsPageClient() {
     color = 'emerald';
   }
 
-  const isCourtLoading = quickDataLoading; // Use quick data loading state
+  const hasCourtPlayers = currentStarters.length + currentBench.length > 0;
+  const isCourtLoading = !hasCourtPlayers && (quick.loading || full.loading);
+  const courtError =
+    (viewMode === 'user' && currentUserStats?.lineupStatus === 'error') ||
+    (!roundData && (quick.error || full.error));
 
   // 3. Dynamic Summary for Header
   let currentSummary = lineupData?.summary; // Default to User Actual
@@ -290,6 +293,9 @@ export default function RoundsPageClient() {
       round_rank: null,
     };
   }
+
+  if (currentSummary && roundStatus === 'live')
+    currentSummary = { ...currentSummary, provisional: true };
 
   return (
     <div>
@@ -311,6 +317,11 @@ export default function RoundsPageClient() {
         </ElegantCard>
 
         {/* MAIN LAYOUT - 2 COLUMNS ON XL (Flexbox for equal height) */}
+        {roundStatus === 'live' && (
+          <p className="my-4 text-sm text-zinc-400" role="status">
+            Jornada en directo · Puntuaciones y alineaciones ideales provisionales.
+          </p>
+        )}
         {!selectedRoundId ? (
           <div className="mt-8 rounded-2xl border border-white/10 bg-secondary/20 p-8 text-center backdrop-blur-md">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-4">
@@ -383,6 +394,30 @@ export default function RoundsPageClient() {
                     <div className="w-full h-full flex items-center justify-center animate-pulse bg-white/5 rounded-xl">
                       Cargando datos...
                     </div>
+                  ) : !hasCourtPlayers ? (
+                    <EmptyState
+                      className="flex h-full flex-col items-center justify-center gap-4 p-6"
+                      role="status"
+                    >
+                      <p>
+                        {courtError
+                          ? 'No se ha podido cargar la alineación.'
+                          : roundStatus === 'upcoming'
+                            ? 'La jornada aún no ha comenzado.'
+                            : viewMode !== 'user'
+                              ? 'Alineación ideal pendiente de puntuaciones.'
+                              : 'Alineación pendiente de sincronización.'}
+                      </p>
+                      <Button
+                        variant="secondary"
+                        onClick={() => {
+                          quick.retry();
+                          full.retry();
+                        }}
+                      >
+                        Reintentar
+                      </Button>
+                    </EmptyState>
                   ) : (
                     <BasketballCourt
                       players={currentStarters}
@@ -394,7 +429,7 @@ export default function RoundsPageClient() {
               </ElegantCard>
 
               {/* Bench */}
-              {isBenchVisible && (
+              {isBenchVisible && hasCourtPlayers && (
                 <div className="mt-4">
                   <ElegantCard
                     title="Banquillo"
