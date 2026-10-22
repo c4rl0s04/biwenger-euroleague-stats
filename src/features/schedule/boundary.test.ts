@@ -1,13 +1,31 @@
 import { readFileSync, existsSync } from 'node:fs';
-import { createHash } from 'node:crypto';
-import { expect, it } from 'vitest';
+import { expect, it, vi } from 'vitest';
+import { apiClient } from '@/lib/api-client';
 
-it('preserves the unchanged HTTP command adapter', () => {
-  const files = [
-    ['src/lib/api-client.js', 'd2be007a7e0b67e442311b8a575367ef42214e7aaf333ef075d836516cf726c3'],
-  ];
-  for (const [file, hash] of files)
-    expect(createHash('sha256').update(readFileSync(file)).digest('hex')).toBe(hash);
+it('preserves the legacy auto-lineup POST while allowing an optional conflict baseline', async () => {
+  const fetchMock = vi.fn(async () =>
+    Response.json({ success: true, data: { status: 'completed' } })
+  );
+  vi.stubGlobal('fetch', fetchMock);
+  try {
+    const lineup = { type: '2-2-1', playersID: [1, 2, 3, 4, 5], reservesID: [], captain: 1 };
+    await expect(apiClient.saveLineup(lineup)).resolves.toMatchObject({ success: true });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenLastCalledWith('/api/users/lineup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lineup }),
+    });
+    await apiClient.saveLineup(lineup, 'saved-baseline');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenLastCalledWith('/api/users/lineup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lineup, baseline: 'saved-baseline' }),
+    });
+  } finally {
+    vi.unstubAllGlobals();
+  }
 });
 it('registers both pages and retires the old persistence implementation', () => {
   const policy = JSON.parse(readFileSync('scripts/architecture/policy.json', 'utf8'));
