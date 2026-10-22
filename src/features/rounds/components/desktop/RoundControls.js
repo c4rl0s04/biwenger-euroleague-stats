@@ -1,12 +1,17 @@
 'use client';
 
+import { useId } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import CustomSelect from '@/components/ui/CustomSelect';
+import { Badge, IconButton } from '@/components/ui/foundation';
 
-export default function RoundControls({ lists, selectedRoundId, onChangeRound, lineupSummary }) {
+export default function RoundControls({ lists, selectedRoundId, onChangeRound }) {
+  const selectId = useId();
   if (!lists?.rounds) return null;
 
-  const currentRoundIndex = lists.rounds.findIndex((r) => r.round_id === selectedRoundId);
+  const currentRoundIndex = lists.rounds.findIndex(
+    (r) => String(r.round_id) === String(selectedRoundId)
+  );
+  const status = lists.rounds[currentRoundIndex]?.status;
   const isFirst = currentRoundIndex <= 0;
   const isLast = currentRoundIndex >= lists.rounds.length - 1;
 
@@ -24,44 +29,58 @@ export default function RoundControls({ lists, selectedRoundId, onChangeRound, l
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-border pb-5">
       {/* Round Selector */}
-      <div className="flex items-center justify-center gap-4">
-        <button
-          onClick={handlePrev}
-          className="p-3 rounded-full hover:bg-secondary/50 text-zinc-400 hover:text-primary transition-all disabled:opacity-20 cursor-pointer"
-          disabled={isFirst}
-          aria-label="Jornada anterior"
-        >
-          <ChevronLeft size={28} />
-        </button>
+      <div className="flex min-w-0 flex-wrap items-center gap-3">
+        <label htmlFor={selectId} className="text-sm font-semibold text-foreground">
+          Jornada
+        </label>
+        <div className="flex min-w-0 items-center gap-2">
+          <IconButton
+            variant="ghost"
+            onClick={handlePrev}
+            disabled={isFirst}
+            aria-label="Jornada anterior"
+          >
+            <ChevronLeft size={20} aria-hidden="true" />
+          </IconButton>
 
-        <div className="text-center">
-          <CustomSelect
-            value={selectedRoundId}
-            onChange={onChangeRound}
-            options={
-              lists.rounds.map((r) => ({
-                value: r.round_id,
-                label: (r.round_name || `Jornada ${r.round_id}`).replace(/\s*\(aplazada\)/i, ''),
-              })) || []
-            }
-            className="w-fit mx-auto"
-            buttonClassName="h-16 text-5xl md:text-6xl font-black font-display justify-center bg-transparent border-none hover:text-primary transition-all cursor-pointer px-6"
-            placeholder="Selecciona Jornada"
-          />
-          {/* Points display moved to Sidebar ScoreOverviewCard */}
+          <select
+            id={selectId}
+            value={selectedRoundId ?? ''}
+            onChange={(event) => {
+              const round = lists.rounds.find(
+                (entry) => String(entry.round_id) === event.target.value
+              );
+              if (round) onChangeRound(round.round_id);
+            }}
+            className="h-11 min-w-0 max-w-56 rounded-[var(--radius-control)] border border-[hsl(var(--control-border))] bg-[hsl(var(--control-surface))] px-3 font-sans text-base font-semibold text-[hsl(var(--control-content))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--focus-ring))]"
+          >
+            <option value="" disabled>
+              Selecciona jornada
+            </option>
+            {lists.rounds.map((round) => (
+              <option key={round.round_id} value={round.round_id}>
+                {(round.round_name || `Jornada ${round.round_id}`).replace(/\s*\(aplazada\)/i, '')}
+              </option>
+            ))}
+          </select>
+
+          <IconButton
+            variant="ghost"
+            onClick={handleNext}
+            disabled={isLast || lists.rounds.length === 0}
+            aria-label="Jornada siguiente"
+          >
+            <ChevronRight size={20} aria-hidden="true" />
+          </IconButton>
         </div>
-
-        <button
-          onClick={handleNext}
-          className="p-3 rounded-full hover:bg-secondary/50 text-zinc-400 hover:text-primary transition-all disabled:opacity-20 cursor-pointer"
-          disabled={isLast}
-          aria-label="Jornada siguiente"
-        >
-          <ChevronRight size={28} />
-        </button>
       </div>
+      {status && (
+        <Badge variant={status === 'live' ? 'accent' : 'neutral'}>
+          {status === 'live' ? 'En directo' : status === 'finished' ? 'Finalizada' : 'Próximamente'}
+        </Badge>
+      )}
     </div>
   );
 }

@@ -45,7 +45,7 @@ test('Rounds preserves historical analysis and phone section navigation', async 
     await expect(
       page.getByRole('img', { name: 'Fixture Contributor 01', exact: true }).first()
     ).toBeVisible({ timeout: 30000 });
-    await expect(page.getByText('Panel de Jornada', { exact: true })).toBeVisible();
+    await expect(page.getByRole('combobox', { name: 'Jornada', exact: true })).toBeVisible();
     await capture(page, info, 'rounds-overview');
     await page.getByRole('button', { name: 'Mi Ideal', exact: true }).click();
     await expect(page.getByText('Mi Alineación Perfecta', { exact: true })).toBeVisible();
