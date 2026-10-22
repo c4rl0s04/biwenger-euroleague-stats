@@ -8,24 +8,23 @@ function useRoundRequest(url: string | null) {
   const [revision, setRevision] = useState(0);
   const [result, setResult] = useState<{
     url: string | null;
+    revision: number;
     data?: RoundCompleteViewModel;
     error?: boolean;
-    loading: boolean;
-  }>({ url: null, loading: false });
+  }>({ url: null, revision: -1 });
 
   useEffect(() => {
     if (!url) return;
     let current = true;
-    setResult({ url, loading: true });
     apiClient
       .get(url)
       .then((response) => {
         if (!current) return;
         if (response.success === false || !response.data) throw new Error('Round unavailable');
-        setResult({ url, data: response.data, loading: false });
+        setResult({ url, revision, data: response.data });
       })
       .catch(() => {
-        if (current) setResult({ url, error: true, loading: false });
+        if (current) setResult({ url, revision, error: true });
       });
     return () => {
       current = false;
@@ -33,10 +32,11 @@ function useRoundRequest(url: string | null) {
   }, [url, revision]);
 
   // State from the previous selection must never reach the new round's court.
+  const matches = result.url === url && result.revision === revision;
   return {
-    data: result.url === url ? result.data : undefined,
-    error: result.url === url && result.error,
-    loading: Boolean(url) && (result.url !== url || result.loading),
+    data: matches ? result.data : undefined,
+    error: matches && result.error,
+    loading: Boolean(url) && !matches,
     retry: () => setRevision((value) => value + 1),
   };
 }

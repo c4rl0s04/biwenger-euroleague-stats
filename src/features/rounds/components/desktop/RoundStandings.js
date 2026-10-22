@@ -214,6 +214,8 @@ export default function RoundStandings({
                 <button
                   key={user.id}
                   onClick={() => onSelectUser(user.id)}
+                  aria-label={`Ver alineación de ${user.name}`}
+                  aria-pressed={isSelected}
                   // Updated Row Widths to match Header
                   className={cn(
                     'relative group grid grid-cols-[1.5rem_3rem_1fr_1fr_1fr_1fr] gap-1 items-center w-full px-2 py-2 transition-all duration-200 cursor-pointer text-left',

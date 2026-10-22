@@ -62,6 +62,21 @@ describe('round chronology compatibility', () => {
     expect(selectRoundId(state, 'active_or_upcoming')).toBe(2);
     expect(selectRoundId(state, 'active_or_finished')).toBe(2);
   });
+  it('keeps round seven live between game days instead of selecting round six or eight', () => {
+    const matches = [
+      match(1, 6, past, 'finished'),
+      match(2, 7, past, 'finished'),
+      match(3, 7, future),
+      match(4, 8, '2026-01-12T12:00:00.000Z'),
+    ];
+    for (const calendar of [
+      deriveRoundCalendar(matches, now),
+      deriveRoundCalendarState(matches, now),
+    ]) {
+      expect(selectRoundId(calendar, 'active_or_last')).toBe(7);
+      expect(selectRoundId(calendar, 'active_or_next')).toBe(7);
+    }
+  });
   it('selects last finished round for both policies in postseason', () => {
     const matches = [match(1, 1, past, 'finished'), match(2, 2, past, 'finished')];
     const state = deriveRoundCalendar(matches, now);
