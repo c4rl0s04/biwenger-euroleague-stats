@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useLineupWorkspace } from '../hooks/useLineupWorkspace';
 import { LineupWorkspaceFeedback } from './LineupWorkspaceFeedback';
 import { clearLineupSlot, planReplacement } from '../logic/draft';
@@ -24,6 +24,7 @@ import { realignTactics, deriveRotation } from '../logic/lineup';
 
 export default function LineupClient({ userId }) {
   const workspace = useLineupWorkspace(userId);
+  const toastAnchorRef = useRef(null);
   const {
     loading,
     setLoading,
@@ -266,7 +267,7 @@ export default function LineupClient({ userId }) {
         <Section title="Tu Alineación" delay={100} background="section-base">
           <div className="max-w-5xl mx-auto space-y-2">
             {/* Action Controls */}
-            <div className="flex justify-center">
+            <div ref={toastAnchorRef} className="flex justify-center">
               <LineupControlBar
                 loading={loading || workspace.saving}
                 saveDisabled={!workspace.canSave}
@@ -278,7 +279,7 @@ export default function LineupClient({ userId }) {
               />
             </div>
 
-            <LineupWorkspaceFeedback workspace={workspace} />
+            <LineupWorkspaceFeedback workspace={workspace} toastAnchorRef={toastAnchorRef} />
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
               <LineupCourtSection
