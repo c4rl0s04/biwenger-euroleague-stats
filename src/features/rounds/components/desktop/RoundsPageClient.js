@@ -25,6 +25,7 @@ import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import { Subheading } from '@/components/ui';
 import RoundStandings from './RoundStandings';
 import RoundControls from './RoundControls';
+import { RoundViewSwitcher } from './RoundViewSwitcher';
 import BasketballCourt from './BasketballCourt';
 import Bench from './Bench';
 import RoundStatsSidebar from './RoundStatsSidebar';
@@ -40,6 +41,9 @@ import PerfectRoundsCard from './stats/history/PerfectRoundsCard';
 import RecordsGrid from './stats/history/RecordsGrid';
 import LineupStatsCard from './stats/general/LineupStatsCard';
 import Section from '@/components/layout/Section';
+import { Button, EmptyState } from '@/components/ui/foundation';
+import { useRoundStatsData } from '../../hooks/useRoundStatsData';
+import { selectRoundManager, hasPendingRoundPoints } from '../../logic/desktop-round';
 import { usePerformanceStats } from '../../hooks/usePerformanceStats';
 import { Activity, BarChart3, Grid, Ruler, Layout } from 'lucide-react';
 
@@ -97,21 +101,10 @@ export default function RoundsPageClient() {
     }
   }, [selectedUserId, comparisonUserIds]);
 
-  // --- 2. QUICK FETCH (Only selected user's data) ---
-  const { data: quickRoundData, loading: quickDataLoading } = useApiData(
-    selectedRoundId && selectedUserId
-      ? `/api/rounds/stats?roundId=${selectedRoundId}&userId=${selectedUserId}&mode=quick`
-      : null,
-    { dependencies: [selectedRoundId, selectedUserId] }
-  );
-
-  // --- 2b. FULL FETCH (All users - Background load) ---
-  const { data: fullRoundData, loading: fullDataLoading } = useApiData(
-    selectedRoundId && loadBackgroundData
-      ? `/api/rounds/stats?roundId=${selectedRoundId}&mode=full`
-      : null,
-    { skip: !loadBackgroundData, dependencies: [selectedRoundId] }
-  );
+  const { quick, full } = useRoundStatsData(selectedRoundId, selectedUserId, loadBackgroundData);
+  const quickRoundData = quick.data;
+  const fullRoundData = full.data;
+  const quickDataLoading = quick.loading;
 
   // --- 3. FETCH HISTORY (Primary User - For Stats Cards) ---
   const { data: historyData, loading: historyLoading } = useApiData(
@@ -202,8 +195,14 @@ export default function RoundsPageClient() {
 
   // A. Current User Context
   // Use quick data first (priority), fall back to full data when available
-  const roundData = fullRoundData || quickRoundData;
-  const currentUserStats = roundData?.users?.find((u) => String(u.id) === String(selectedUserId));
+  const roundData = quickRoundData || fullRoundData;
+  const currentUserStats = selectRoundManager(quickRoundData, fullRoundData, selectedUserId);
+  const roundStatus = lists?.rounds?.find(
+    (round) => String(round.round_id) === String(selectedRoundId)
+  )?.status;
+  const pointsPending =
+    !currentUserStats?.lineup?.players.length ||
+    currentUserStats.lineup.players.every(hasPendingRoundPoints);
 
   // B. Construct props expected by children
   // Lineup Data (For Court)
@@ -211,7 +210,8 @@ export default function RoundsPageClient() {
     ? {
         players: currentUserStats.lineup?.players || [], // Use lineup from quick or full payload
         summary: {
-          total_points: currentUserStats.points,
+          total_points: pointsPending ? null : currentUserStats.points,
+          provisional: roundStatus === 'live',
           round_rank: null, // We could calculate rank dynamically from the list if needed
         },
       }
@@ -274,7 +274,11 @@ export default function RoundsPageClient() {
     color = 'emerald';
   }
 
-  const isCourtLoading = quickDataLoading; // Use quick data loading state
+  const hasCourtPlayers = currentStarters.length + currentBench.length > 0;
+  const isCourtLoading = !hasCourtPlayers && (quick.loading || full.loading);
+  const courtError =
+    (viewMode === 'user' && currentUserStats?.lineupStatus === 'error') ||
+    (!roundData && (quick.error || full.error));
 
   // 3. Dynamic Summary for Header
   let currentSummary = lineupData?.summary; // Default to User Actual
@@ -290,6 +294,9 @@ export default function RoundsPageClient() {
       round_rank: null,
     };
   }
+
+  if (currentSummary && roundStatus === 'live')
+    currentSummary = { ...currentSummary, provisional: true };
 
   return (
     <div>
@@ -311,6 +318,11 @@ export default function RoundsPageClient() {
         </ElegantCard>
 
         {/* MAIN LAYOUT - 2 COLUMNS ON XL (Flexbox for equal height) */}
+        {roundStatus === 'live' && (
+          <p className="my-4 text-sm text-zinc-400" role="status">
+            Jornada en directo · Puntuaciones y alineaciones ideales provisionales.
+          </p>
+        )}
         {!selectedRoundId ? (
           <div className="mt-8 rounded-2xl border border-white/10 bg-secondary/20 p-8 text-center backdrop-blur-md">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-4">
@@ -356,26 +368,7 @@ export default function RoundsPageClient() {
             {/* RIGHT COLUMN: COURT + BENCH (2/3 width) */}
             <div className="xl:w-2/3 flex flex-col gap-4">
               {/* View Toggles */}
-              <div className="mx-auto flex w-full max-w-full overflow-x-auto rounded-xl border border-white/5 bg-secondary/30 p-1 shadow-inner backdrop-blur-md transition-all duration-300 hover:border-white/10 sm:w-fit">
-                <button
-                  onClick={() => setViewMode('user')}
-                  className={`flex min-h-11 shrink-0 items-center gap-2 rounded-lg px-5 py-2 text-xs font-black uppercase tracking-tighter transition-all cursor-pointer ${viewMode === 'user' ? 'bg-primary text-white shadow-[0_0_15px_rgba(250,80,1,0.4)]' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
-                >
-                  <User size={14} /> Alineación
-                </button>
-                <button
-                  onClick={() => setViewMode('user_ideal')}
-                  className={`flex min-h-11 shrink-0 items-center gap-2 rounded-lg px-5 py-2 text-xs font-black uppercase tracking-tighter transition-all cursor-pointer ${viewMode === 'user_ideal' ? 'bg-emerald-600 text-white shadow-[0_0_15px_rgba(5,150,105,0.4)]' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
-                >
-                  <BrainCircuit size={14} /> Mi Ideal
-                </button>
-                <button
-                  onClick={() => setViewMode('ideal')}
-                  className={`flex min-h-11 shrink-0 items-center gap-2 rounded-lg px-5 py-2 text-xs font-black uppercase tracking-tighter transition-all cursor-pointer ${viewMode === 'ideal' ? 'bg-purple-600 text-white shadow-[0_0_15px_rgba(147,51,234,0.4)]' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
-                >
-                  <Star size={14} /> Global
-                </button>
-              </div>
+              <RoundViewSwitcher value={viewMode} onChange={setViewMode} />
 
               <ElegantCard title={title} icon={icon} color={color} className="w-full">
                 <div className="aspect-[3/4] min-h-[360px] w-full sm:aspect-[4/3] sm:min-h-[500px] lg:aspect-[16/10] xl:min-h-[600px]">
@@ -383,6 +376,30 @@ export default function RoundsPageClient() {
                     <div className="w-full h-full flex items-center justify-center animate-pulse bg-white/5 rounded-xl">
                       Cargando datos...
                     </div>
+                  ) : !hasCourtPlayers ? (
+                    <EmptyState
+                      className="flex h-full flex-col items-center justify-center gap-4 p-6"
+                      role="status"
+                    >
+                      <p>
+                        {courtError
+                          ? 'No se ha podido cargar la alineación.'
+                          : roundStatus === 'upcoming'
+                            ? 'La jornada aún no ha comenzado.'
+                            : viewMode !== 'user'
+                              ? 'Alineación ideal pendiente de puntuaciones.'
+                              : 'Alineación pendiente de sincronización.'}
+                      </p>
+                      <Button
+                        variant="secondary"
+                        onClick={() => {
+                          quick.retry();
+                          full.retry();
+                        }}
+                      >
+                        Reintentar
+                      </Button>
+                    </EmptyState>
                   ) : (
                     <BasketballCourt
                       players={currentStarters}
@@ -394,7 +411,7 @@ export default function RoundsPageClient() {
               </ElegantCard>
 
               {/* Bench */}
-              {isBenchVisible && (
+              {isBenchVisible && hasCourtPlayers && (
                 <div className="mt-4">
                   <ElegantCard
                     title="Banquillo"

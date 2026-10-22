@@ -114,6 +114,8 @@ export interface RoundScheduleState {
   lastMatchDate: Date | null;
   firstMatchDate: Date | null;
   allFinished: boolean;
+  finishedMatches?: number;
+  hasLiveMatch?: boolean;
   matchCount: number;
   hasLineups?: boolean;
 }
@@ -240,6 +242,10 @@ export async function getRoundScheduleState(
       lastMatchDate: sql<string | null>`MAX(${matches.date})`.as('last_match_date'),
       firstMatchDate: sql<string | null>`MIN(${matches.date})`.as('first_match_date'),
       allFinished: sql<boolean>`BOOL_AND(${matches.status} = 'finished')`.as('all_finished'),
+      finishedMatches: sql<number>`COUNT(*) FILTER (WHERE ${matches.status} = 'finished')::int`.as(
+        'finished_matches'
+      ),
+      hasLiveMatch: sql<boolean>`BOOL_OR(${matches.status} = 'live')`.as('has_live_match'),
       matchCount: sql<number>`COUNT(*)::int`.as('match_count'),
       hasLineups: hasLineupsSql.as('has_lineups'),
     })
@@ -267,6 +273,8 @@ export async function getRoundScheduleState(
     lastMatchDate: lastMatch ? new Date(lastMatch) : null,
     firstMatchDate: firstMatch ? new Date(firstMatch) : null,
     allFinished: Boolean(allFinished),
+    finishedMatches: Number(row.finishedMatches ?? (row as any).finished_matches) || 0,
+    hasLiveMatch: Boolean(row.hasLiveMatch ?? (row as any).has_live_match),
     matchCount: Number(matchCount) || 0,
     hasLineups: Boolean(hasLineups),
   };

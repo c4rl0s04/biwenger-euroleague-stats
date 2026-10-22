@@ -1,46 +1,69 @@
 import type { SyncManager } from '../manager';
-import {
-  getLiveRounds,
-  getPlayerDirectoryMap,
-  getRoundScheduleState,
-} from '../repositories/sync-queries';
+import { getPlayerDirectoryMap, getRoundScheduleState } from '../repositories/sync-queries';
 import { relevantRounds } from '../rounds';
+import { deriveRoundLifecycle } from '../../competition/public';
 import * as lineups from '../services/biwenger/lineups';
-
-async function playerMap(manager: SyncManager): Promise<Record<string, any>> {
-  if (manager.context.biwenger) return manager.context.biwenger.players;
-  return getPlayerDirectoryMap(manager.context.db);
-}
 
 export async function run(manager: SyncManager) {
   const seasonId = manager.context.seasonId;
   if (!seasonId) throw new Error('The writable season was not resolved.');
-
-  const rounds =
-    manager.mode === 'live'
-      ? await getLiveRounds(seasonId, manager.context.db)
-      : relevantRounds((await manager.getBiwengerCompetition()).rounds);
-  const players = await playerMap(manager);
+  const rounds = relevantRounds((await manager.getBiwengerCompetition()).rounds);
+  const players =
+    manager.context.biwenger?.players || (await getPlayerDirectoryMap(manager.context.db));
   let inserted = 0;
   let synchronizedRounds = 0;
-
+  const now = new Date();
+  if (
+    manager.forceRound &&
+    !rounds.some((round) => manager.resolveRoundId(round) === manager.forceRound)
+  )
+    throw new Error('Requested canonical round is not in the provider calendar.');
   for (const round of rounds) {
-    const roundId = manager.resolveRoundId(round);
-    const row = await getRoundScheduleState(seasonId, roundId, true, manager.context.db);
-    const now = new Date();
-
-    if (manager.mode === 'live' && row.hasLineups) continue;
-    if (manager.mode === 'routine' && row.matchCount > 0) {
-      const lastMatch = row.lastMatchDate ? row.lastMatchDate.getTime() : 0;
-      if (row.allFinished && now.getTime() - lastMatch >= 24 * 60 * 60 * 1000) continue;
-      if (row.firstMatchDate && row.firstMatchDate > now) continue;
+    const dbId = manager.resolveRoundId(round);
+    if (manager.forceRound && dbId !== manager.forceRound) continue;
+    const row = await getRoundScheduleState(seasonId, dbId, false, manager.context.db);
+    const lifecycle = deriveRoundLifecycle(
+      {
+        firstMatchDate: row.firstMatchDate,
+        matchCount: row.matchCount,
+        finishedMatches: row.allFinished ? row.matchCount : row.finishedMatches || 0,
+        hasLiveMatch: row.hasLiveMatch,
+      },
+      now
+    );
+    const effective = row.matchCount
+      ? lifecycle
+      : round.status === 'finished'
+        ? 'finished'
+        : round.status === 'active'
+          ? 'live'
+          : 'upcoming';
+    const oldFinished =
+      effective === 'finished' &&
+      row.lastMatchDate &&
+      now.getTime() - row.lastMatchDate.getTime() >= 86400000;
+    if (
+      effective === 'upcoming' ||
+      (oldFinished && manager.mode !== 'bootstrap' && !manager.forceRound)
+    ) {
+      manager.log(`Lineup round ${dbId}: skipped (${effective}).`);
+      continue;
     }
-
-    const result = await lineups.run(manager, { ...round, id: roundId }, players);
+    manager.log(
+      `Lineup round ${dbId}: ${effective}; provider status ${round.status || 'unknown'}.`
+    );
+    // Live snapshots are useful before manager results are final; never finalize them from schedule alone.
+    const result = await lineups.run(
+      manager,
+      {
+        ...round,
+        status: effective === 'finished' && round.status === 'finished' ? 'finished' : 'active',
+      },
+      players
+    );
     inserted += result.insertedCount || 0;
     synchronizedRounds++;
   }
-
   return {
     summary: 'Biwenger lineups and manager round results synchronized.',
     counts: { rounds: synchronizedRounds, lineups: inserted },

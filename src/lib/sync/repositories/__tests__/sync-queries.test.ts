@@ -104,7 +104,10 @@ describe('sync-queries repository', () => {
   });
 
   describe('getRoundScheduleState', () => {
-    it('returns formatted schedule state when records exist', async () => {
+    it.each([
+      { allFinished: true, finishedMatches: 9, hasLiveMatch: false },
+      { allFinished: false, finishedMatches: 2, hasLiveMatch: true },
+    ])('returns formatted schedule state when records exist: %j', async (lifecycle) => {
       const lastDate = '2026-03-20T20:00:00.000Z';
       const firstDate = '2026-03-19T18:00:00.000Z';
       const mockDb = {
@@ -114,7 +117,7 @@ describe('sync-queries repository', () => {
               {
                 lastMatchDate: lastDate,
                 firstMatchDate: firstDate,
-                allFinished: true,
+                ...lifecycle,
                 matchCount: 9,
                 hasLineups: true,
               },
@@ -127,7 +130,7 @@ describe('sync-queries repository', () => {
       expect(result).toEqual({
         lastMatchDate: new Date(lastDate),
         firstMatchDate: new Date(firstDate),
-        allFinished: true,
+        ...lifecycle,
         matchCount: 9,
         hasLineups: true,
       });

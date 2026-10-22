@@ -1,7 +1,8 @@
 export type RoundSelectionPolicy =
   'active_or_upcoming' | 'active_or_finished' | 'active_or_next' | 'active_or_last';
 
-export type CalendarStatus = 'upcoming' | 'live' | 'finished';
+export type { RoundLifecycle as CalendarStatus } from '@/lib/competition/public';
+import type { RoundLifecycle as CalendarStatus } from '@/lib/competition/public';
 
 export type SeasonPhase = 'preseason' | 'in_season' | 'postseason';
 

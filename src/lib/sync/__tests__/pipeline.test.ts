@@ -40,6 +40,16 @@ describe('declarative sync pipeline', () => {
     expect(() => selectPipeline('live', 'biwenger-price-history')).toThrow(/not available/);
   });
 
+  it('restricts targeted lineup repair to its canonical round and step', () => {
+    expect(() => parseSyncArgs(['--force-round=7'])).toThrow(/requires --step=biwenger-lineups/);
+    expect(() => parseSyncArgs(['--step=biwenger-lineups', '--force-round=0'])).toThrow(
+      /positive canonical/
+    );
+    expect(parseSyncArgs(['--step=biwenger-lineups', '--force-round=5142'])).toMatchObject({
+      forceRound: 5142,
+    });
+  });
+
   it('rejects numeric steps and unsafe force-game combinations', () => {
     expect(() => selectPipeline('routine', '5')).toThrow(/Unknown sync step/);
     expect(() => parseSyncArgs(['--force-game=10'])).toThrow(/requires --step=euroleague-games/);

@@ -17,6 +17,7 @@ vi.mock('../queries/round-analysis.query', () => ({
 vi.mock('../queries/directory.query', () => ({ readManagerDirectory: vi.fn() }));
 vi.mock('./calendar.service', () => ({
   getLastCompletedCalendarRound: vi.fn(),
+  getRoundCalendarState: vi.fn(),
   resolveRoundIdByPolicy: vi.fn(),
 }));
 import { createRoundResultsService } from './round-results.service';
@@ -28,6 +29,7 @@ import {
   standing,
   globalStats,
   lineup,
+  lineupPlayer,
   ideal,
   coach,
   historyRow,
@@ -89,8 +91,20 @@ describe('Rounds result services', () => {
     deps.officialStandings.mockResolvedValue([standing, { ...standing, id: '8' }]);
     deps.lineup.mockRejectedValue(new Error('fixture failure'));
     const result = await createRoundResultsService(deps).fetchRoundCompleteData(2, undefined, 7);
-    expect(result?.users).toEqual([{ ...standing, id: '8', ideal_points: 40 }]);
-    expect(result?.users[0]).not.toHaveProperty('lineup');
+    expect(result?.users[0]).toMatchObject({ id: '8', lineupStatus: 'error', coachRating: coach });
+    expect(result?.users[0].lineup).toBeUndefined();
+  });
+  it('retains a valid squad when optional coach analysis fails', async () => {
+    const deps = resultsDeps();
+    deps.coach.mockRejectedValue(new Error('fixture'));
+    const squad = { ...lineup, players: [lineupPlayer] };
+    deps.lineup.mockResolvedValue(squad);
+    const result = await createRoundResultsService(deps).fetchRoundCompleteData(5142);
+    expect(result?.users[0]).toMatchObject({
+      lineup: squad,
+      lineupStatus: 'available',
+      coachRating: null,
+    });
   });
   it('legacy details retain the nested ideal object and omit undefined user ideal fields in JSON', async () => {
     const deps = resultsDeps();
@@ -175,6 +189,13 @@ describe('Rounds lists and formations', () => {
   it('retains discarded last-completed read, delayed policy and null default in preseason', async () => {
     const calls: string[] = [];
     const service = createRoundsListService({
+      calendar: async () => ({
+        rounds: [],
+        liveRound: null,
+        lastFinishedRound: null,
+        nextUpcomingRound: null,
+        seasonPhase: 'preseason',
+      }),
       rounds: async () => {
         calls.push('rounds');
         return [{ round_id: 4, round_name: null }];
@@ -193,7 +214,7 @@ describe('Rounds lists and formations', () => {
       },
     });
     expect(await service.fetchRoundsList()).toEqual({
-      rounds: [{ round_id: 4, round_name: null }],
+      rounds: [{ round_id: 4, round_name: null, status: 'upcoming' }],
       users: [manager],
       defaultRoundId: null,
     });
@@ -203,6 +224,13 @@ describe('Rounds lists and formations', () => {
     const failure = new Error('fixture');
     const resolveRound = vi.fn(async () => null);
     const service = createRoundsListService({
+      calendar: async () => ({
+        rounds: [],
+        liveRound: null,
+        lastFinishedRound: null,
+        nextUpcomingRound: null,
+        seasonPhase: 'preseason',
+      }),
       rounds: async () => [],
       managers: async () => [],
       lastCompleted: async () => {

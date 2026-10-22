@@ -7,3 +7,5 @@ export * from './presentation/colors';
 export * from './presentation/teamColors';
 export * from './presentation/courtPositions';
 export * from './presentation/format';
+
+export { deriveRoundLifecycle, type RoundLifecycle } from './logic/round-lifecycle';

@@ -24,6 +24,28 @@ export const globalStats: RoundGlobalStats = {
   avgScore: 0,
   winner: null,
 };
+export const lineupPlayer: UserLineup['players'][number] = {
+  player_id: 101,
+  name: 'Fixture Player',
+  position: 'Base',
+  img: null,
+  team: 'Fixture Team',
+  team_short: 'FIX',
+  team_img: null,
+  is_captain: true,
+  role: 'titular',
+  raw_points: 0,
+  valuation: 0,
+  stats_points: 0,
+  stats_rebounds: 0,
+  stats_assists: 0,
+  minutes: null,
+  current_status: null,
+  player_exists: 1,
+  points: 0,
+  is_missing: false,
+  calculated: false,
+};
 export const lineup: UserLineup = {
   players: [],
   summary: { total_points: 24, round_rank: 2, participated: false },

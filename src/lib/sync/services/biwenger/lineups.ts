@@ -1,3 +1,4 @@
+import { replaceLineupSnapshot } from '../../repositories/lineup-snapshot';
 import {
   fetchPlayerDetails as defaultFetchPlayerDetails,
   fetchRoundsLeague as defaultFetchRoundsLeague,
@@ -8,6 +9,7 @@ import { prepareUserMutations, type UserMutations } from '../../../db/mutations/
 import type { SyncManager } from '../../manager';
 
 export interface LineupsDependencies {
+  replaceSnapshot?: typeof replaceLineupSnapshot;
   fetchRoundsLeague?: (roundId: number) => Promise<any>;
   fetchPlayerDetails?: (playerId: number) => Promise<any>;
   prepareUserMutations?: (db: unknown, options: { seasonId?: string }) => UserMutations;
@@ -15,7 +17,7 @@ export interface LineupsDependencies {
 }
 
 /**
- * Syncs lineups for finished rounds.
+ * Syncs validated round-specific snapshots for live or finished rounds.
  * @param manager
  * @param round - Round object
  * @param playersListInput - Map of player IDs to player objects
@@ -59,6 +61,10 @@ export async function syncBiwengerLineups(
       throw new Error(`Failed to fetch Biwenger round ${roundId}.`, { cause: e });
     }
 
+    if (!Array.isArray(standings))
+      throw new Error(
+        `Round ${roundId} returned no usable standings; existing snapshots retained.`
+      );
     if (standings) {
       const mutations = userMutationsFactory(db as any, { seasonId: manager.context.seasonId });
       const playerMutations = playerMutationsFactory(db as any, {
@@ -67,6 +73,30 @@ export async function syncBiwengerLineups(
       const positions: any = CONFIG.POSITIONS;
 
       for (const user of standings) {
+        if (!user || !/^[1-9]\d*$/.test(String(user.id)) || typeof user.name !== 'string')
+          throw new Error('Invalid manager in round snapshot.');
+        const snapshot = user.lineup?.players;
+        // Missing snapshots are unavailable, not an instruction to erase the saved squad.
+        if (!Array.isArray(snapshot)) {
+          manager.log(`Lineup round ${dbRoundId}: manager ${user.id} unavailable; retained.`);
+          continue;
+        }
+        const present = snapshot.filter((id: unknown) => id !== null && id !== 0);
+        if (
+          snapshot.length > 10 ||
+          present.some((id: unknown) => !/^[1-9]\d*$/.test(String(id))) ||
+          new Set(present.map(String)).size !== present.length
+        )
+          throw new Error(`Invalid lineup snapshot for manager ${user.id}; retained.`);
+        const rawCaptain = user.lineup.captain;
+        const captain = rawCaptain && typeof rawCaptain === 'object' ? rawCaptain.id : rawCaptain;
+        if (
+          captain != null &&
+          !snapshot.slice(0, 5).some((id: unknown) => id != null && String(id) === String(captain))
+        )
+          throw new Error(`Invalid captain in round snapshot for manager ${user.id}.`);
+        const rows = [];
+
         await mutations.upsertUser({
           id: user.id.toString(),
           name: user.name,
@@ -91,14 +121,7 @@ export async function syncBiwengerLineups(
         }
 
         if (user.lineup && user.lineup.players) {
-          if (mutations.deleteUserLineup) {
-            await mutations.deleteUserLineup({
-              user_id: user.id.toString(),
-              round_id: dbRoundId,
-            });
-          }
-
-          const captainId = user.lineup.captain ? user.lineup.captain.id : null;
+          const captainId = captain == null ? null : String(captain);
 
           for (let index = 0; index < user.lineup.players.length; index++) {
             const playerId = user.lineup.players[index];
@@ -141,19 +164,26 @@ export async function syncBiwengerLineups(
                 }
               }
 
-              await mutations.upsertLineup({
+              rows.push({
                 user_id: user.id.toString(),
                 round_id: dbRoundId,
                 round_name: roundName,
                 player_id: playerId,
-                is_captain: playerId === captainId,
+                is_captain: String(playerId) === captainId,
                 role: role,
               });
-              insertedCount++;
             } catch (e) {
               throw new Error(`Failed to store lineup player ${playerId}.`, { cause: e });
             }
           }
+          await (dependencies.replaceSnapshot || replaceLineupSnapshot)(
+            db as never,
+            manager.context.seasonId!,
+            String(user.id),
+            dbRoundId,
+            rows
+          );
+          insertedCount += rows.length;
         }
       }
       manager.log(`Synced standings/lineups for ${standings.length} users`);
