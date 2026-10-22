@@ -7,6 +7,7 @@ import {
   type Dispatch,
   type SetStateAction,
 } from 'react';
+import { useToast } from '@/components/ui/Toast';
 import { apiClient } from '@/lib/api-client';
 import { ApiError } from '@/lib/api-error';
 import { normalizeLineupConfig, type TacticalLineup } from '../logic/lineup';
@@ -15,11 +16,32 @@ import { enrichLineupSquad } from '../logic/squad';
 import type { LineupWorkspace } from '../models/workspace';
 
 export function useLineupWorkspace(userId: string | number) {
+  const { toast, notify, dismissToast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, storeError] = useState<string | null>(null);
   const [issue, setIssue] = useState<ApiError | null>(null);
-  const [success, setSuccess] = useState<string | boolean>(false);
+  const [success, storeSuccess] = useState<string | boolean>(false);
+  const setError = useCallback(
+    (message: string | null) => {
+      storeError(message);
+      if (message) notify('Algo ha salido mal', 'error');
+    },
+    [notify]
+  );
+  const setSuccess = useCallback(
+    (message: string | boolean) => {
+      storeSuccess(message);
+      if (message)
+        notify(
+          message === 'Guardado correctamente' || message === 'Plantilla actualizada'
+            ? message
+            : 'Operación completada',
+          'success'
+        );
+    },
+    [notify]
+  );
   const [workspace, setWorkspace] = useState<LineupWorkspace | null>(null);
   const [review, setReview] = useState<LineupWorkspace | null>(null);
   const [squad, setSquad] = useState<
@@ -32,42 +54,48 @@ export function useLineupWorkspace(userId: string | number) {
   draftRef.current = lineupConfig;
   const dirty = Boolean(workspace && lineupFingerprint(lineupConfig) !== workspace.baseline);
 
-  const apply = useCallback((next: LineupWorkspace, keepDraft = false) => {
-    setWorkspace(next);
-    setSquad(enrichLineupSquad(next.players, next.provider));
-    setReview(null);
-    setIssue(null);
-    setError(null);
-    if (keepDraft) {
-      const owned = new Set(next.players.map((p) => String(p.id)));
-      setLineupConfig((current) => {
-        const draft = normalizeLineupConfig(current);
-        draft.playersID = draft.playersID.map((id) => (id !== null && !owned.has(id) ? null : id));
-        draft.reservesID = draft.reservesID.map((id) =>
-          id !== null && !owned.has(id) ? null : id
-        );
-        if (draft.captain && !draft.playersID.slice(0, 5).includes(draft.captain))
-          draft.captain = null;
-        return draft;
-      });
-      setSuccess(
-        'Plantilla actualizada. Se han vaciado los puestos de jugadores que ya no tienes. Revisa tu borrador antes de guardar.'
-      );
-    } else {
-      setLineupConfig(normalizeLineupConfig(next.provider.lineup));
-      setSuccess(false);
-    }
-  }, []);
+  const apply = useCallback(
+    (next: LineupWorkspace, keepDraft = false) => {
+      setWorkspace(next);
+      setSquad(enrichLineupSquad(next.players, next.provider));
+      setReview(null);
+      setIssue(null);
+      setError(null);
+      if (keepDraft) {
+        const owned = new Set(next.players.map((p) => String(p.id)));
+        setLineupConfig((current) => {
+          const draft = normalizeLineupConfig(current);
+          draft.playersID = draft.playersID.map((id) =>
+            id !== null && !owned.has(id) ? null : id
+          );
+          draft.reservesID = draft.reservesID.map((id) =>
+            id !== null && !owned.has(id) ? null : id
+          );
+          if (draft.captain && !draft.playersID.slice(0, 5).includes(draft.captain))
+            draft.captain = null;
+          return draft;
+        });
+        setSuccess('Plantilla actualizada');
+      } else {
+        setLineupConfig(normalizeLineupConfig(next.provider.lineup));
+        setSuccess(false);
+      }
+    },
+    [setError, setSuccess]
+  );
 
-  const fail = (cause: unknown) => {
-    setSuccess(false);
-    setIssue(cause instanceof ApiError ? cause : null);
-    setError(
-      cause instanceof Error
-        ? cause.message
-        : 'No se pudo conectar con Biwenger. Conservamos tus cambios.'
-    );
-  };
+  const fail = useCallback(
+    (cause: unknown) => {
+      setSuccess(false);
+      setIssue(cause instanceof ApiError ? cause : null);
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : 'No se pudo conectar con Biwenger. Conservamos tus cambios.'
+      );
+    },
+    [setError, setSuccess]
+  );
 
   useEffect(() => {
     const controller = new AbortController();
@@ -94,7 +122,7 @@ export function useLineupWorkspace(userId: string | number) {
       controller.abort();
       operation.current = epoch + 1;
     };
-  }, [userId, apply]);
+  }, [userId, apply, fail, setError]);
 
   const refresh = async () => {
     if (busy.current || loading) return;
@@ -106,7 +134,10 @@ export function useLineupWorkspace(userId: string | number) {
       if (epoch !== operation.current) return;
       const next = response.data as LineupWorkspace;
       if (dirty && lineupFingerprint(draftRef.current) !== next.baseline) setReview(next);
-      else apply(next);
+      else {
+        apply(next);
+        setSuccess('Plantilla actualizada');
+      }
     } catch (cause) {
       if (epoch === operation.current) fail(cause);
     } finally {
@@ -129,7 +160,7 @@ export function useLineupWorkspace(userId: string | number) {
       setWorkspace((current) =>
         current ? { ...current, baseline: lineupFingerprint(submitted) } : current
       );
-      setSuccess('Alineación guardada en Biwenger.');
+      setSuccess('Guardado correctamente');
     } catch (cause) {
       if (epoch !== operation.current) return;
       if (!(cause instanceof ApiError))
@@ -141,6 +172,7 @@ export function useLineupWorkspace(userId: string | number) {
           )
         );
       else fail(cause);
+      notify('No se pudo guardar', 'error');
     } finally {
       busy.current = false;
       if (epoch === operation.current) setSaving(false);
@@ -155,6 +187,8 @@ export function useLineupWorkspace(userId: string | number) {
     }
   };
   return {
+    toast,
+    dismissToast,
     loading,
     setLoading,
     saving,
@@ -171,7 +205,12 @@ export function useLineupWorkspace(userId: string | number) {
     save,
     refresh,
     review,
-    applyReview: (keep: boolean) => review && apply(review, keep),
+    applyReview: (keep: boolean) => {
+      if (!review) return;
+      apply(review, keep);
+      if (!keep) setSuccess('Plantilla actualizada');
+    },
+    dismissReview: () => setReview(null),
     checkedAt: workspace?.checkedAt,
     canSave: Boolean(workspace && !loading && !saving && !review && !issue),
   };

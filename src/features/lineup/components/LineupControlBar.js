@@ -1,12 +1,11 @@
 'use client';
 
-import { Save, RotateCcw, AlertCircle, CheckCircle2, Layout } from 'lucide-react';
+import { Save, RotateCcw, Layout } from 'lucide-react';
 
 export default function LineupControlBar({
   loading,
   saveDisabled,
-  error,
-  success,
+  dirty,
   currentType,
   onSave,
   onReset,
@@ -14,31 +13,14 @@ export default function LineupControlBar({
 }) {
   return (
     <div className="flex flex-col items-center gap-2 w-full">
-      {/* Status Messages (Centered) */}
-      {(error || success) && (
-        <div className="flex flex-col items-center gap-2">
-          {error && (
-            <div className="flex items-center gap-2 text-rose-500 bg-rose-500/10 px-4 py-1.5 rounded-full text-xs font-medium border border-rose-500/20 animate-in fade-in zoom-in duration-300">
-              <AlertCircle size={14} />
-              {error}
-            </div>
-          )}
-
-          {success && (
-            <div className="flex items-center gap-2 text-emerald-500 bg-emerald-500/10 px-4 py-1.5 rounded-full text-xs font-medium border border-emerald-500/20 animate-in fade-in zoom-in duration-300">
-              <CheckCircle2 size={14} />
-              Guardado correctamente
-            </div>
-          )}
-        </div>
-      )}
-
       {/* Buttons (Centered) */}
       <div className="flex items-center justify-center gap-4 w-full">
         <button
           onClick={onReset}
           className="p-3 rounded-xl bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white transition-all cursor-pointer border border-white/5 shadow-lg active:scale-95"
-          title="Restablecer"
+          title="Actualizar plantilla"
+          aria-label="Actualizar plantilla"
+          disabled={loading}
         >
           <RotateCcw size={20} />
         </button>
@@ -66,6 +48,7 @@ export default function LineupControlBar({
           <span className="text-sm uppercase tracking-wider">Guardar cambios</span>
         </button>
       </div>
+      {dirty && <span className="text-xs text-content-secondary">Cambios sin guardar</span>}
     </div>
   );
 }

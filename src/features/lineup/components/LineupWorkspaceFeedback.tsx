@@ -1,86 +1,82 @@
 'use client';
 import Link from 'next/link';
-import type { ApiError } from '@/lib/api-error';
+import { createPortal } from 'react-dom';
+import { ModalDialog } from '@/components/ui/controls/ModalDialog';
+import { Toast } from '@/components/ui/Toast';
+import type { useLineupWorkspace } from '../hooks/useLineupWorkspace';
 
 export function LineupWorkspaceFeedback({
-  checkedAt,
-  error,
-  success,
-  issue,
-  review,
-  loading,
-  dirty,
-  onRefresh,
-  onReview,
+  workspace,
 }: {
-  checkedAt?: string;
-  error: string | null;
-  success: string | boolean;
-  issue: ApiError | null;
-  review: boolean;
-  loading: boolean;
-  dirty: boolean;
-  onRefresh: () => void;
-  onReview: (keep: boolean) => void;
+  workspace: ReturnType<typeof useLineupWorkspace>;
 }) {
+  const { issue, review } = workspace;
+  const reconnect = issue?.code === 'BIWENGER_RECONNECT_REQUIRED';
+  const unconfirmed = issue?.code === 'LINEUP_SAVE_UNCONFIRMED';
   return (
-    <div className="space-y-3 rounded-xl border border-border-default bg-surface-card p-4 text-sm text-content-primary">
-      {error && <p role="alert">{error}</p>}
-      {issue?.reference && <p>Referencia: {issue.reference}</p>}
-      {issue?.details?.affectedSlotIndexes?.length ? (
-        <p>
-          Posiciones afectadas: {issue.details.affectedSlotIndexes.map((i) => i + 1).join(', ')}.
-        </p>
-      ) : null}
-      {success && (
-        <p role="status">{typeof success === 'string' ? success : 'Operación completada.'}</p>
-      )}
-      {checkedAt && (
-        <p>
-          Plantilla comprobada en Biwenger a las {new Date(checkedAt).toLocaleTimeString('es-ES')}.
-        </p>
-      )}
-      {dirty && <p>Cambios sin guardar.</p>}
-      {review && (
-        <div role="region" aria-label="Revisar plantilla actualizada" className="space-y-2">
+    <>
+      <Toast notification={workspace.toast} onDismiss={workspace.dismissToast} />
+      {issue && !review && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border-default bg-surface-card p-3 text-sm text-content-primary">
           <p>
-            Hay una nueva versión de tu plantilla. Elige cómo continuar; no se guardará ningún
-            cambio automáticamente.
+            {issue.status === 401
+              ? 'Inicia sesión para continuar'
+              : reconnect
+                ? 'Renueva tu conexión'
+                : unconfirmed
+                  ? 'Comprueba tu alineación'
+                  : 'Actualiza tu plantilla'}
           </p>
-          <button
-            type="button"
-            className="cursor-pointer rounded border p-2"
-            onClick={() => onReview(false)}
-          >
-            Cargar última alineación
-          </button>{' '}
-          <button
-            type="button"
-            className="cursor-pointer rounded border p-2"
-            onClick={() => onReview(true)}
-          >
-            Conservar cambios y actualizar plantilla
-          </button>
+          {issue.status === 401 ? (
+            <Link href="/login" className="underline">
+              Iniciar sesión
+            </Link>
+          ) : reconnect ? (
+            <Link href="/settings/biwenger" className="underline">
+              Renovar conexión con Biwenger
+            </Link>
+          ) : (
+            <span className="text-content-secondary">Usa Actualizar plantilla para continuar</span>
+          )}
         </div>
       )}
-      {issue?.code === 'BIWENGER_RECONNECT_REQUIRED' ? (
-        <Link href="/settings/biwenger" className="underline">
-          Renovar conexión con Biwenger
-        </Link>
-      ) : null}
-      {issue?.status === 401 && (
-        <Link href="/login" className="underline">
-          Iniciar sesión
-        </Link>
-      )}
-      <button
-        type="button"
-        disabled={loading}
-        onClick={onRefresh}
-        className="cursor-pointer rounded border p-2 disabled:opacity-50"
-      >
-        Actualizar plantilla
-      </button>
-    </div>
+      {review &&
+        createPortal(
+          <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 p-4">
+            <ModalDialog
+              aria-label="Revisar plantilla actualizada"
+              onClose={workspace.dismissReview}
+              className="w-full max-w-md space-y-4 rounded-xl border border-border-default bg-surface-card p-5 text-content-primary"
+            >
+              <h2 className="text-lg font-semibold">Tu plantilla ha cambiado</h2>
+              <p className="text-sm">Elige cómo continuar con tus cambios sin guardar.</p>
+              <div className="flex flex-col gap-2">
+                <button
+                  type="button"
+                  className="cursor-pointer rounded-lg border border-border-default p-3"
+                  onClick={() => workspace.applyReview(false)}
+                >
+                  Cargar última alineación
+                </button>
+                <button
+                  type="button"
+                  className="cursor-pointer rounded-lg bg-primary p-3 text-white"
+                  onClick={() => workspace.applyReview(true)}
+                >
+                  Conservar mis cambios
+                </button>
+                <button
+                  type="button"
+                  className="cursor-pointer p-2"
+                  onClick={workspace.dismissReview}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </ModalDialog>
+          </div>,
+          document.body
+        )}
+    </>
   );
 }
