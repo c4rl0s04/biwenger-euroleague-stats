@@ -70,13 +70,12 @@ function resolveDrizzle(client?: any): NodePgDatabase<typeof schema> {
           const text = queryTextOrConfig.text || '';
           const match = text.match(/select\s+(?:distinct\s+)?(.*?)\s+from/i);
           if (match) {
-            const cols = splitTopLevelCommas(match[1]).map(
-              (c: string) =>
-                c
-                  .trim()
-                  .replace(/"/g, '')
-                  .split(/\s+as\s+/i)
-                  .pop()!
+            const cols = splitTopLevelCommas(match[1]).map((c: string) =>
+              c
+                .trim()
+                .replace(/"/g, '')
+                .split(/\s+as\s+/i)
+                .pop()!
             );
             return {
               ...res,
