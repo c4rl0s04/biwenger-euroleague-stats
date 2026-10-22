@@ -1,17 +1,14 @@
 'use client';
 
-import { useId } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Badge, IconButton } from '@/components/ui/foundation';
+import CustomSelect from '@/components/ui/CustomSelect';
 
 export default function RoundControls({ lists, selectedRoundId, onChangeRound }) {
-  const selectId = useId();
   if (!lists?.rounds) return null;
 
   const currentRoundIndex = lists.rounds.findIndex(
     (r) => String(r.round_id) === String(selectedRoundId)
   );
-  const status = lists.rounds[currentRoundIndex]?.status;
   const isFirst = currentRoundIndex <= 0;
   const isLast = currentRoundIndex >= lists.rounds.length - 1;
 
@@ -29,58 +26,43 @@ export default function RoundControls({ lists, selectedRoundId, onChangeRound })
   };
 
   return (
-    <div className="flex flex-wrap items-center justify-center gap-4">
-      {/* Round Selector */}
-      <div className="flex min-w-0 flex-wrap items-center gap-3">
-        <label htmlFor={selectId} className="sr-only">
-          Jornada
-        </label>
-        <div className="flex min-w-0 items-center gap-2">
-          <IconButton
-            variant="ghost"
-            onClick={handlePrev}
-            disabled={isFirst}
-            aria-label="Jornada anterior"
-          >
-            <ChevronLeft size={20} aria-hidden="true" />
-          </IconButton>
-
-          <select
-            id={selectId}
-            value={selectedRoundId ?? ''}
-            onChange={(event) => {
-              const round = lists.rounds.find(
-                (entry) => String(entry.round_id) === event.target.value
-              );
-              if (round) onChangeRound(round.round_id);
-            }}
-            className="h-11 min-w-0 max-w-56 rounded-[var(--radius-control)] border border-[hsl(var(--control-border))] bg-[hsl(var(--control-surface))] px-3 font-sans text-base font-semibold text-[hsl(var(--control-content))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--focus-ring))]"
-          >
-            <option value="" disabled>
-              Selecciona jornada
-            </option>
-            {lists.rounds.map((round) => (
-              <option key={round.round_id} value={round.round_id}>
-                {(round.round_name || `Jornada ${round.round_id}`).replace(/\s*\(aplazada\)/i, '')}
-              </option>
-            ))}
-          </select>
-
-          <IconButton
-            variant="ghost"
-            onClick={handleNext}
-            disabled={isLast || lists.rounds.length === 0}
-            aria-label="Jornada siguiente"
-          >
-            <ChevronRight size={20} aria-hidden="true" />
-          </IconButton>
-        </div>
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center justify-center gap-4">
+        <button
+          type="button"
+          onClick={handlePrev}
+          className="p-3 rounded-full hover:bg-secondary/50 text-muted-foreground hover:text-primary transition-colors disabled:opacity-20 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          disabled={isFirst}
+          aria-label="Jornada anterior"
+        >
+          <ChevronLeft size={28} aria-hidden="true" />
+        </button>
+        <CustomSelect
+          value={lists.rounds[currentRoundIndex]?.round_id}
+          onChange={onChangeRound}
+          options={lists.rounds.map((round) => ({
+            value: round.round_id,
+            label: (round.round_name || `Jornada ${round.round_id}`).replace(
+              /\s*\(aplazada\)/i,
+              ''
+            ),
+          }))}
+          className="w-48 min-w-0"
+          buttonClassName="h-11! text-base font-sans"
+          placeholder="Selecciona jornada"
+          label="Jornada"
+          compact
+        />
+        <button
+          type="button"
+          onClick={handleNext}
+          className="p-3 rounded-full hover:bg-secondary/50 text-muted-foreground hover:text-primary transition-colors disabled:opacity-20 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          disabled={isLast || lists.rounds.length === 0}
+          aria-label="Jornada siguiente"
+        >
+          <ChevronRight size={28} aria-hidden="true" />
+        </button>
       </div>
-      {status && (
-        <Badge variant={status === 'live' ? 'accent' : 'neutral'}>
-          {status === 'live' ? 'En directo' : status === 'finished' ? 'Finalizada' : 'Próximamente'}
-        </Badge>
-      )}
     </div>
   );
 }

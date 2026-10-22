@@ -10,6 +10,8 @@ export default function CustomSelect({
   placeholder = 'Seleccionar...',
   className = '',
   buttonClassName = '',
+  label = '',
+  compact = false,
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -45,6 +47,7 @@ export default function CustomSelect({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
+        aria-label={label || undefined}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         className={`w-full h-[38px] appearance-none bg-secondary/50 border border-border/50 rounded-lg px-3 py-2 text-left focus:outline-none focus:ring-1 focus:ring-primary/50 hover:bg-secondary/70 transition-colors flex items-center cursor-pointer ${isCentered ? 'justify-center' : 'justify-between'} ${buttonClassName}`}
@@ -77,14 +80,16 @@ export default function CustomSelect({
                   onChange(option.value);
                   setIsOpen(false);
                 }}
-                className={`w-full text-left px-4 py-3.5 rounded-lg transition-colors flex items-center justify-between group cursor-pointer ${
+                className={`w-full text-left ${compact ? 'px-3 py-2.5' : 'px-4 py-3.5'} rounded-lg transition-colors flex items-center justify-between group cursor-pointer ${
                   value === option.value
                     ? 'bg-primary/10 text-primary font-medium'
                     : 'text-muted-foreground hover:bg-secondary/80 hover:text-foreground'
                 }`}
               >
                 <div className="flex-1 flex flex-col min-w-0 pr-6">
-                  <span className="font-bold text-xl md:text-2xl tracking-normal truncate">
+                  <span
+                    className={`font-bold ${compact ? 'text-sm' : 'text-xl md:text-2xl'} tracking-normal truncate`}
+                  >
                     {option.label}
                   </span>
                   {option.sublabel && (

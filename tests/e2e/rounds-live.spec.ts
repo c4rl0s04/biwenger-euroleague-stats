@@ -288,8 +288,8 @@ test('round controls, empty state and standings stay compact as the bench change
   const before = await standings.boundingBox();
   expect(before!.height).toBeLessThan(520);
   expect((await court.boundingBox())!.height).toBeLessThan(430);
-  const select = page.getByRole('combobox', { name: 'Jornada', exact: true });
-  await expect(select).toHaveValue('5142');
+  const select = page.getByRole('button', { name: 'Jornada', exact: true });
+  await expect(select).toHaveText('Jornada 7');
   expect((await select.boundingBox())!.height).toBeLessThanOrEqual(48);
   await page
     .locator('#estadisticas-de-la-ronda')
@@ -314,8 +314,26 @@ test('round controls, empty state and standings stay compact as the bench change
   await page
     .locator('#estadisticas-de-la-ronda')
     .screenshot({ path: info.outputPath('rounds-populated.png') });
-  await select.selectOption('5143');
-  await expect(page.getByText('Próximamente', { exact: true })).toBeVisible();
+  await select.focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('listbox')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('listbox')).toHaveCount(0);
+  await expect(select).toHaveText('Jornada 7');
+  await select.click();
+  const nextRound = page.getByRole('option', { name: 'Jornada 8', exact: true });
+  await expect(nextRound).toBeVisible();
+  expect(
+    await nextRound
+      .locator('span')
+      .first()
+      .evaluate((el) => getComputedStyle(el).fontSize)
+  ).toBe('14px');
+  await page
+    .locator('#estadisticas-de-la-ronda')
+    .screenshot({ path: info.outputPath('rounds-dropdown.png') });
+  await nextRound.click();
+  await expect(select).toHaveText('Jornada 8');
   await page.getByRole('button', { name: 'Jornada anterior' }).click();
-  await expect(select).toHaveValue('5142');
+  await expect(select).toHaveText('Jornada 7');
 });
