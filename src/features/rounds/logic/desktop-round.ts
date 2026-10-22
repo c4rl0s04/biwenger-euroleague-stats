@@ -1,4 +1,4 @@
-import type { RoundCompleteViewModel, RoundLineupPlayerViewModel } from '../models/round-read';
+import type { RoundCompleteViewModel } from '../models/round-read';
 
 export function selectRoundManager(
   quick: RoundCompleteViewModel | undefined,
@@ -16,8 +16,11 @@ export function selectRoundManager(
       : primary || background;
 }
 
-export function hasPendingRoundPoints(
-  player: Pick<RoundLineupPlayerViewModel, 'raw_points' | 'calculated'>
-) {
-  return player.raw_points === null && !player.calculated;
+export function hasPendingRoundPoints(player: {
+  raw_points?: number | null;
+  points?: number | null;
+  calculated?: boolean;
+}) {
+  const points = 'raw_points' in player ? player.raw_points : player.points;
+  return points == null && !player.calculated;
 }

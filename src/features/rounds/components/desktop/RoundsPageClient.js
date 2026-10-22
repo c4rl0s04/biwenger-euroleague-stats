@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
+  Settings,
   Star,
   User,
   Users,
@@ -228,7 +229,7 @@ export default function RoundsPageClient() {
   const statsData = {
     global: roundData?.global,
     idealLineup: fullRoundData?.idealLineup || roundData?.idealLineup,
-    globalIdealPoints: fullRoundData?.globalIdealPoints || roundData?.globalIdealPoints,
+    globalIdealPoints: fullRoundData?.globalIdealPoints ?? roundData?.globalIdealPoints,
     user: currentUserStats
       ? {
           ...currentUserStats, // points, ideal_points
@@ -312,11 +313,18 @@ export default function RoundsPageClient() {
       {/* SECTION: ESTADISTICAS DE LA RONDA */}
       <Section title="Estadísticas de la Ronda" delay={0} background="section-base">
         {/* HEADER & CONTROLS */}
-        <RoundControls
-          lists={lists}
-          selectedRoundId={selectedRoundId}
-          onChangeRound={setSelectedRoundId}
-        />
+        <ElegantCard
+          title="Panel de Jornada"
+          icon={Settings}
+          color="zinc"
+          className="relative z-20 h-fit"
+        >
+          <RoundControls
+            lists={lists}
+            selectedRoundId={selectedRoundId}
+            onChangeRound={setSelectedRoundId}
+          />
+        </ElegantCard>
 
         {/* Independent standings and court columns keep row spacing stable. */}
         {roundStatus === 'live' && (

@@ -59,10 +59,10 @@ export async function getUserLineup(userId: string, roundId: string | number): P
       l.player_id,
       COALESCE(p.name, 'Unknown Player') as name,
       COALESCE(ps.position, 'Bench') as position,
-      p.img,
+      opm.image_url AS img,
       COALESCE(t.name, 'Unknown Team') as team,
       t.short_name as team_short,
-      t.img as team_img,
+      otm.crest_url as team_img,
       l.is_captain,
       l.role,
       prs.fantasy_points as raw_points,
@@ -77,6 +77,11 @@ export async function getUserLineup(userId: string, roundId: string | number): P
     LEFT JOIN players p ON l.player_id = p.id
     LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = l.season_id
     LEFT JOIN teams t ON ps.team_id = t.id
+    LEFT JOIN official_player_mappings opm
+      ON opm.player_id=p.id AND opm.season_id=ps.season_id
+     AND opm.provider='euroleague_advanced' AND opm.status='matched'
+    LEFT JOIN official_team_mappings otm
+      ON otm.team_id=t.id AND otm.season_id=ps.season_id AND otm.provider='euroleague_advanced'
     LEFT JOIN player_round_stats prs ON l.player_id = prs.player_id AND l.round_id = prs.round_id AND prs.season_id = l.season_id
     WHERE l.season_id = $3 AND l.user_id = $1 AND l.round_id = $2
     ORDER BY
@@ -276,12 +281,15 @@ export async function getRoundGlobalStats(roundId: string | number): Promise<Rou
   // 1. Round MVP (Fantasy Points Leader)
   const mvpQuery = `
     SELECT
-      p.id, p.name, p.img, ps.position, t.short_name as team_name,
+      p.id, p.name, opm.image_url AS img, ps.position, t.short_name as team_name,
       prs.fantasy_points as points, prs.valuation
     FROM player_round_stats prs
     JOIN players p ON prs.player_id = p.id
     LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = prs.season_id
     LEFT JOIN teams t ON ps.team_id = t.id
+    LEFT JOIN official_player_mappings opm
+      ON opm.player_id=p.id AND opm.season_id=ps.season_id
+     AND opm.provider='euroleague_advanced' AND opm.status='matched'
     WHERE prs.season_id = $2 AND prs.round_id = $1
     ORDER BY prs.fantasy_points DESC NULLS LAST
     LIMIT 1
@@ -290,12 +298,15 @@ export async function getRoundGlobalStats(roundId: string | number): Promise<Rou
   // 2. Top Scorer (Real Points Leader)
   const topScorerQuery = `
     SELECT
-      p.id, p.name, p.img, ps.position, t.short_name as team_name,
+      p.id, p.name, opm.image_url AS img, ps.position, t.short_name as team_name,
       prs.points as stat_value
     FROM player_round_stats prs
     JOIN players p ON prs.player_id = p.id
     LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = prs.season_id
     LEFT JOIN teams t ON ps.team_id = t.id
+    LEFT JOIN official_player_mappings opm
+      ON opm.player_id=p.id AND opm.season_id=ps.season_id
+     AND opm.provider='euroleague_advanced' AND opm.status='matched'
     WHERE prs.season_id = $2 AND prs.round_id = $1
     ORDER BY prs.points DESC NULLS LAST
     LIMIT 1
@@ -304,12 +315,15 @@ export async function getRoundGlobalStats(roundId: string | number): Promise<Rou
   // 3. Top Rebounder
   const topRebounderQuery = `
     SELECT
-      p.id, p.name, p.img, ps.position, t.short_name as team_name,
+      p.id, p.name, opm.image_url AS img, ps.position, t.short_name as team_name,
       prs.rebounds as stat_value
     FROM player_round_stats prs
     JOIN players p ON prs.player_id = p.id
     LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = prs.season_id
     LEFT JOIN teams t ON ps.team_id = t.id
+    LEFT JOIN official_player_mappings opm
+      ON opm.player_id=p.id AND opm.season_id=ps.season_id
+     AND opm.provider='euroleague_advanced' AND opm.status='matched'
     WHERE prs.season_id = $2 AND prs.round_id = $1
     ORDER BY prs.rebounds DESC NULLS LAST
     LIMIT 1
@@ -318,12 +332,15 @@ export async function getRoundGlobalStats(roundId: string | number): Promise<Rou
   // 4. Top Assister
   const topAssisterQuery = `
     SELECT
-      p.id, p.name, p.img, ps.position, t.short_name as team_name,
+      p.id, p.name, opm.image_url AS img, ps.position, t.short_name as team_name,
       prs.assists as stat_value
     FROM player_round_stats prs
     JOIN players p ON prs.player_id = p.id
     LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = prs.season_id
     LEFT JOIN teams t ON ps.team_id = t.id
+    LEFT JOIN official_player_mappings opm
+      ON opm.player_id=p.id AND opm.season_id=ps.season_id
+     AND opm.provider='euroleague_advanced' AND opm.status='matched'
     WHERE prs.season_id = $2 AND prs.round_id = $1
     ORDER BY prs.assists DESC NULLS LAST
     LIMIT 1
@@ -367,23 +384,27 @@ export async function getRoundGlobalStats(roundId: string | number): Promise<Rou
 }
 
 /**
- * Get the Ideal Lineup (Best 5 players) for a round
+ * Get the highest-scoring valid starters and bench for a round
  */
 export async function getIdealLineup(roundId: string | number): Promise<IdealLineupResult> {
   const seasonId = await resolveReadSeasonId();
-  // Fetch top 50 to ensure we have enough for valid formations
+  // Unplayed scores cannot outrank scored players; retain the full pool for valid formations.
   const query = `
     SELECT
-      p.id as player_id, p.name, ps.position, p.img, ps.team_id as team_id,
-      t.short_name as team_short, t.img as team_img,
+      p.id as player_id, p.name, ps.position, opm.image_url AS img, ps.team_id as team_id,
+      t.short_name as team_short, otm.crest_url as team_img,
       prs.fantasy_points as points, prs.valuation
     FROM player_round_stats prs
     JOIN players p ON prs.player_id = p.id
     LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = prs.season_id
     LEFT JOIN teams t ON ps.team_id = t.id
-    WHERE prs.season_id = $2 AND prs.round_id = $1
-    ORDER BY prs.fantasy_points DESC
-    LIMIT 50
+    LEFT JOIN official_player_mappings opm
+      ON opm.player_id=p.id AND opm.season_id=ps.season_id
+     AND opm.provider='euroleague_advanced' AND opm.status='matched'
+    LEFT JOIN official_team_mappings otm
+      ON otm.team_id=t.id AND otm.season_id=ps.season_id AND otm.provider='euroleague_advanced'
+    WHERE prs.season_id = $2 AND prs.round_id = $1 AND prs.fantasy_points IS NOT NULL
+    ORDER BY prs.fantasy_points DESC NULLS LAST, p.id ASC
   `;
 
   const allStats = (await pgClient.query(query, [roundId, seasonId])).rows as IdealPlayerRow[];
@@ -503,14 +524,19 @@ export async function getPlayersLeftOut(
       prs.player_id,
       p.name,
       ps.position,
-      p.img,
+      opm.image_url AS img,
       t.short_name as team_short,
-      t.img as team_img,
+      otm.crest_url as team_img,
       prs.fantasy_points as points
     FROM player_round_stats prs
     JOIN players p ON prs.player_id = p.id
     LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = prs.season_id
     LEFT JOIN teams t ON ps.team_id = t.id
+    LEFT JOIN official_player_mappings opm
+      ON opm.player_id=p.id AND opm.season_id=ps.season_id
+     AND opm.provider='euroleague_advanced' AND opm.status='matched'
+    LEFT JOIN official_team_mappings otm
+      ON otm.team_id=t.id AND otm.season_id=ps.season_id AND otm.provider='euroleague_advanced'
     WHERE prs.season_id = $3 AND prs.round_id = $1 AND prs.player_id = ANY($2)
     ORDER BY prs.fantasy_points DESC
   `;
@@ -536,15 +562,20 @@ export async function getUserOptimization(
       p.id as player_id,
       p.name,
       ps.position,
-      p.img,
+      opm.image_url AS img,
       t.short_name as team_short,
-      t.img as team_img,
+      otm.crest_url as team_img,
       COALESCE(prs.fantasy_points, 0) as points,
       COALESCE(prs.valuation, 0) as valuation
     FROM players p
     LEFT JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = $3
     LEFT JOIN player_round_stats prs ON prs.player_id = p.id AND prs.season_id = $3 AND prs.round_id = $1
     LEFT JOIN teams t ON ps.team_id = t.id
+    LEFT JOIN official_player_mappings opm
+      ON opm.player_id=p.id AND opm.season_id=ps.season_id
+     AND opm.provider='euroleague_advanced' AND opm.status='matched'
+    LEFT JOIN official_team_mappings otm
+      ON otm.team_id=t.id AND otm.season_id=ps.season_id AND otm.provider='euroleague_advanced'
     WHERE p.id = ANY($2)
     ORDER BY COALESCE(prs.fantasy_points, 0) DESC
   `;

@@ -29,10 +29,10 @@ export default function RoundControls({ lists, selectedRoundId, onChangeRound })
   };
 
   return (
-    <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-border pb-5">
+    <div className="flex flex-wrap items-center justify-center gap-4">
       {/* Round Selector */}
       <div className="flex min-w-0 flex-wrap items-center gap-3">
-        <label htmlFor={selectId} className="text-sm font-semibold text-foreground">
+        <label htmlFor={selectId} className="sr-only">
           Jornada
         </label>
         <div className="flex min-w-0 items-center gap-2">

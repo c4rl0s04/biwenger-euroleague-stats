@@ -23,3 +23,9 @@ it('distinguishes pending points from a genuine zero or calculated result', () =
   expect(hasPendingRoundPoints({ raw_points: 0, calculated: false })).toBe(false);
   expect(hasPendingRoundPoints({ raw_points: null, calculated: true })).toBe(false);
 });
+
+it('distinguishes missing ideal scores from scored players and genuine zeroes', () => {
+  expect(hasPendingRoundPoints({ points: null })).toBe(true);
+  expect(hasPendingRoundPoints({ points: 0 })).toBe(false);
+  expect(hasPendingRoundPoints({ points: 36 })).toBe(false);
+});
