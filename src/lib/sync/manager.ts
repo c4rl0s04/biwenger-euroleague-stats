@@ -45,6 +45,7 @@ export class SyncManager {
   readonly useAdvisoryLock: boolean;
   readonly lockKey: number;
   readonly forceGame?: number;
+  readonly forceRound?: number;
   readonly targetSeasonId?: string;
   readonly reporter: SyncReporter;
   hasErrors = false;
@@ -59,6 +60,7 @@ export class SyncManager {
       useAdvisoryLock?: boolean;
       lockKey?: number;
       forceGame?: number;
+      forceRound?: number;
       seasonId?: string;
       reporter?: SyncReporter;
       writer?: ReporterWriter;
@@ -68,6 +70,7 @@ export class SyncManager {
     this.useAdvisoryLock = options.useAdvisoryLock ?? true;
     this.lockKey = options.lockKey ?? 823744;
     this.forceGame = options.forceGame;
+    this.forceRound = options.forceRound;
     this.targetSeasonId = options.seasonId;
     this.context = { db: null, euroleague: getEuroleagueClient() };
     this.reporter = options.reporter ?? new SyncReporter({ writer: options.writer });

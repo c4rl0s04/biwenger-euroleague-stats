@@ -8,6 +8,7 @@ interface SyncCliOptions {
   mode: 'routine' | 'bootstrap' | 'live';
   step?: string;
   forceGame?: number;
+  forceRound?: number;
   season?: string;
 }
 
@@ -15,6 +16,7 @@ export function parseSyncArgs(args: string[]): SyncCliOptions {
   let mode: SyncCliOptions['mode'] = 'routine';
   let step: string | undefined;
   let forceGame: number | undefined;
+  let forceRound: number | undefined;
   let season: string | undefined;
 
   for (const argument of args) {
@@ -36,6 +38,12 @@ export function parseSyncArgs(args: string[]): SyncCliOptions {
       if (!season) throw new Error('--season requires a season id (e.g. 2026-27).');
       continue;
     }
+    if (argument.startsWith('--force-round=')) {
+      forceRound = Number(argument.slice('--force-round='.length));
+      if (!Number.isSafeInteger(forceRound) || forceRound <= 0)
+        throw new Error('--force-round must be a positive canonical round ID.');
+      continue;
+    }
     if (argument.startsWith('--force-game=')) {
       forceGame = Number(argument.slice('--force-game='.length));
       if (!Number.isInteger(forceGame) || forceGame <= 0) {
@@ -49,7 +57,9 @@ export function parseSyncArgs(args: string[]): SyncCliOptions {
   if (forceGame !== undefined && step !== 'euroleague-games') {
     throw new Error('--force-game requires --step=euroleague-games.');
   }
-  return { mode, step, forceGame, season };
+  if (forceRound !== undefined && step !== 'biwenger-lineups')
+    throw new Error('--force-round requires --step=biwenger-lineups.');
+  return { mode, step, forceGame, season, ...(forceRound !== undefined ? { forceRound } : {}) };
 }
 
 export async function syncData(args = process.argv.slice(2)): Promise<number> {
@@ -67,6 +77,7 @@ export async function syncData(args = process.argv.slice(2)): Promise<number> {
   const manager = new SyncManager({
     mode: options.mode,
     forceGame: options.forceGame,
+    forceRound: options.forceRound,
     seasonId: options.season,
   });
   for (const step of selectPipeline(options.mode, options.step)) manager.addStep(step);

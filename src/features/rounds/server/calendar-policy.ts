@@ -1,3 +1,4 @@
+import { deriveRoundLifecycle } from '@/lib/competition/public';
 import type {
   CalendarMatch,
   CalendarRound,
@@ -36,11 +37,15 @@ export function deriveRoundCalendarState(matches: CalendarMatch[], now: Date): R
 
   const rounds = Array.from(groups.values());
   for (const round of rounds) {
-    if (round.startDate && now >= new Date(round.startDate)) {
-      round.status = round.finishedMatches >= round.totalMatches ? 'finished' : 'live';
-    } else {
-      round.status = 'upcoming';
-    }
+    round.status = deriveRoundLifecycle(
+      {
+        firstMatchDate: round.startDate,
+        matchCount: round.totalMatches,
+        finishedMatches: round.finishedMatches,
+        hasLiveMatch: round.matches.some((m) => m.status === 'live'),
+      },
+      now
+    );
   }
 
   const liveRound = rounds.find((r) => r.status === 'live') ?? null;
