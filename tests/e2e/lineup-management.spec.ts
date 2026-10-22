@@ -110,6 +110,7 @@ test('Lineup recovers stale ownership without losing the draft, clears slots, ch
   await page.locator('#login-password').fill(process.env.E2E_PASSWORD!);
   await page.getByRole('button', { name: 'Entrar' }).click();
   await expect(page).toHaveURL(/\/lineup$/);
+  await page.clock.install();
   const save = page.getByRole('button', { name: phone ? 'Guardar alineación' : 'Guardar cambios' });
   const court = page.locator('[aria-label="Quinteto titular"]');
   const player = (name: string) =>
@@ -143,13 +144,16 @@ test('Lineup recovers stale ownership without losing the draft, clears slots, ch
     });
   const courtBeforeSave = await courtPosition();
   await save.click();
-  await player('Live Player 1').focus();
+  await player('Live Player 1').evaluate((element) =>
+    (element as HTMLElement).focus({ preventScroll: true })
+  );
   await expect(page.getByText('Guardado correctamente', { exact: true })).toBeVisible();
   await expect(player('Live Player 1')).toBeFocused();
   expect(await courtPosition()).toEqual(courtBeforeSave);
   const toastBox = await page
     .getByRole('status')
     .filter({ hasText: 'Guardado correctamente' })
+    .locator('..')
     .boundingBox();
   expect(toastBox).not.toBeNull();
   expect(toastBox!.x).toBeGreaterThanOrEqual(0);
@@ -157,15 +161,27 @@ test('Lineup recovers stale ownership without losing the draft, clears slots, ch
   if (phone) {
     const actions = await page.locator('.mobile-sticky-action-bar').boundingBox();
     expect(toastBox!.y + toastBox!.height).toBeLessThan(actions!.y);
+    expect(actions!.y - (toastBox!.y + toastBox!.height)).toBeLessThan(40);
+  } else {
+    const controls = await save.locator('..').boundingBox();
+    expect(toastBox!.y + toastBox!.height).toBeLessThan(controls!.y);
+    expect(
+      Math.abs(toastBox!.x + toastBox!.width / 2 - (controls!.x + controls!.width / 2))
+    ).toBeLessThan(2);
   }
-  await page.waitForTimeout(2200);
+  await page.mouse.move(0, 0);
+  await page.clock.fastForward(2200);
+  await expect(page.getByText('Guardado correctamente', { exact: true })).toBeVisible();
+  await page.clock.fastForward(2000);
   await expect(page.getByText('Guardado correctamente', { exact: true })).toHaveCount(0);
   // Failed saves disappear, while their required recovery action remains accessible.
   await save.click();
   await expect(page.getByRole('alert').filter({ hasText: 'No se pudo guardar' })).toHaveText(
     'No se pudo guardar'
   );
-  await page.waitForTimeout(2200);
+  await page.clock.fastForward(4200);
+  await expect(page.getByRole('alert').filter({ hasText: 'No se pudo guardar' })).toBeVisible();
+  await page.clock.fastForward(2000);
   await expect(page.getByRole('alert').filter({ hasText: 'No se pudo guardar' })).toHaveCount(0);
   await expect(page.getByText('Comprueba tu alineación', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Actualizar plantilla', exact: true }).click();
@@ -182,11 +198,30 @@ test('Lineup recovers stale ownership without losing the draft, clears slots, ch
   await page.getByRole('button', { name: 'Actualizar plantilla', exact: true }).click();
   await expect(save).toBeEnabled();
   await expect(page.getByText('Plantilla actualizada', { exact: true })).toBeVisible();
-  await page.waitForTimeout(2200);
+  await page.clock.fastForward(4200);
   await expect(page.getByText('Plantilla actualizada', { exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'Actualizar plantilla', exact: true }).click();
   await expect(page.getByText('Plantilla actualizada', { exact: true })).toBeVisible();
-  expect(reads).toBe(5);
+  const refreshToast = page.getByRole('status').filter({ hasText: 'Plantilla actualizada' });
+  const closeToast = page.getByRole('button', { name: 'Cerrar aviso' });
+  if (!phone) {
+    await refreshToast.hover();
+    await page.clock.fastForward(5000);
+    await expect(refreshToast).toBeVisible();
+  }
+  await closeToast.focus();
+  await page.mouse.move(0, 0);
+  await page.clock.fastForward(5000);
+  await expect(refreshToast).toBeVisible();
+  await save.focus();
+  await page.clock.fastForward(4200);
+  await expect(refreshToast).toHaveCount(0);
+  await page.getByRole('button', { name: 'Actualizar plantilla', exact: true }).click();
+  await expect(refreshToast).toBeVisible();
+  await page.screenshot({ path: info.outputPath('toast-near-save.png') });
+  await closeToast.click();
+  await expect(refreshToast).toHaveCount(0);
+  expect(reads).toBe(6);
   expect(writes).toBe(4);
   expect(current.captain).toBeNull();
   expect(errors).toEqual([]);

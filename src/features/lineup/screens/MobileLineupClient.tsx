@@ -24,6 +24,7 @@ type Player = LineupWorkspacePlayer;
 
 export default function MobileLineupClient({ userId }: { userId: string | number }) {
   const workspace = useLineupWorkspace(userId);
+  const toastAnchorRef = useRef<HTMLDivElement>(null);
   const { loading, saving, squad, lineupConfig, setLineupConfig } = workspace;
   const returnFocusRef = useRef<HTMLButtonElement>(null);
   const [selected, setSelected] = useState<LineupRotationSlot<Player> | null>(null);
@@ -85,7 +86,7 @@ export default function MobileLineupClient({ userId }: { userId: string | number
           <span className="text-xs text-content-secondary">Cambios sin guardar</span>
         )}
       </div>
-      <LineupWorkspaceFeedback workspace={workspace} />
+      <LineupWorkspaceFeedback workspace={workspace} toastAnchorRef={toastAnchorRef} />
       <MobileSectionHeading>Quinteto</MobileSectionHeading>
       <div className="mobile-lineup-court" aria-label="Quinteto titular">
         {rotation.starters.map((slot, index: number) => (
@@ -153,7 +154,7 @@ export default function MobileLineupClient({ userId }: { userId: string | number
           accent="violet"
         />
       </div>
-      <div className="mobile-sticky-action-bar">
+      <div ref={toastAnchorRef} className="mobile-sticky-action-bar">
         <button
           type="button"
           className="mobile-primary-action mobile-save-lineup"

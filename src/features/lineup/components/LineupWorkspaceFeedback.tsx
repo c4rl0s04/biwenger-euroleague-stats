@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import type { RefObject } from 'react';
 import { createPortal } from 'react-dom';
 import { ModalDialog } from '@/components/ui/controls/ModalDialog';
 import { Toast } from '@/components/ui/Toast';
@@ -7,15 +8,21 @@ import type { useLineupWorkspace } from '../hooks/useLineupWorkspace';
 
 export function LineupWorkspaceFeedback({
   workspace,
+  toastAnchorRef,
 }: {
   workspace: ReturnType<typeof useLineupWorkspace>;
+  toastAnchorRef: RefObject<HTMLElement | null>;
 }) {
   const { issue, review } = workspace;
   const reconnect = issue?.code === 'BIWENGER_RECONNECT_REQUIRED';
   const unconfirmed = issue?.code === 'LINEUP_SAVE_UNCONFIRMED';
   return (
     <>
-      <Toast notification={workspace.toast} onDismiss={workspace.dismissToast} />
+      <Toast
+        notification={workspace.toast}
+        onDismiss={workspace.dismissToast}
+        anchorRef={toastAnchorRef}
+      />
       {issue && !review && (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border-default bg-surface-card p-3 text-sm text-content-primary">
           <p>
