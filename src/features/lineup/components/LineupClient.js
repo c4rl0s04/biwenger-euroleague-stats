@@ -27,9 +27,7 @@ export default function LineupClient({ userId }) {
   const {
     loading,
     setLoading,
-    error,
     setError,
-    success,
     setSuccess,
     squad,
     setSquad,
@@ -262,17 +260,6 @@ export default function LineupClient({ userId }) {
   return (
     <div className="min-h-screen">
       <PageHeader title="Alineación" description="Configura tu equipo para las próximas jornadas" />
-      <LineupWorkspaceFeedback
-        checkedAt={workspace.checkedAt}
-        error={error}
-        success={success}
-        issue={workspace.issue}
-        review={Boolean(workspace.review)}
-        loading={loading || workspace.saving}
-        dirty={workspace.dirty}
-        onRefresh={workspace.refresh}
-        onReview={workspace.applyReview}
-      />
 
       <div className="space-y-12">
         {/* Main Lineup Visualization */}
@@ -283,14 +270,15 @@ export default function LineupClient({ userId }) {
               <LineupControlBar
                 loading={loading || workspace.saving}
                 saveDisabled={!workspace.canSave}
-                error={null}
-                success={false}
+                dirty={workspace.dirty}
                 currentType={lineupConfig.type}
                 onSave={handleSave}
                 onReset={workspace.refresh}
                 onChangeType={() => setIsTacticsOpen(true)}
               />
             </div>
+
+            <LineupWorkspaceFeedback workspace={workspace} />
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
               <LineupCourtSection

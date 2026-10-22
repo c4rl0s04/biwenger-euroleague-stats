@@ -89,6 +89,7 @@ test('Lineup recovers stale ownership without losing the draft, clears slots, ch
       });
     }
     if (writes === 2) {
+      await new Promise((resolve) => setTimeout(resolve, 300));
       current = body.lineup;
       return route.fulfill({ json: { success: true, data: { status: 'completed' } } });
     }
@@ -120,32 +121,73 @@ test('Lineup recovers stale ownership without losing the draft, clears slots, ch
   await forward.click();
   await expect(court.getByText('Live Player 11', { exact: true })).toBeVisible();
   await save.dblclick();
-  await expect(
-    page.getByRole('alert').filter({ hasText: 'Tu plantilla ha cambiado' })
-  ).toContainText('Tu plantilla ha cambiado');
+  await expect(page.getByRole('alert').filter({ hasText: 'No se pudo guardar' })).toContainText(
+    'No se pudo guardar'
+  );
   await expect(save).toBeDisabled();
   await page.getByRole('button', { name: 'Actualizar plantilla', exact: true }).click();
-  await expect(page.getByRole('region', { name: 'Revisar plantilla actualizada' })).toBeVisible();
+  await expect(page.getByRole('dialog', { name: 'Revisar plantilla actualizada' })).toBeVisible();
   await expect(court.getByText('Live Player 11', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Conservar cambios y actualizar plantilla' }).click();
+  await page.getByRole('button', { name: 'Conservar mis cambios' }).click();
   await expect(court.getByText('Live Player 3', { exact: true })).toHaveCount(0);
   await expect(court.getByText('Live Player 11', { exact: true })).toBeVisible();
+  const courtPosition = () =>
+    court.evaluate((element) => {
+      const box = element.getBoundingClientRect();
+      return {
+        x: box.x + window.scrollX,
+        y: box.y + window.scrollY,
+        width: box.width,
+        height: box.height,
+      };
+    });
+  const courtBeforeSave = await courtPosition();
   await save.click();
-  await expect(page.getByText('Alineación guardada en Biwenger.', { exact: true })).toBeVisible();
+  await player('Live Player 1').focus();
+  await expect(page.getByText('Guardado correctamente', { exact: true })).toBeVisible();
+  await expect(player('Live Player 1')).toBeFocused();
+  expect(await courtPosition()).toEqual(courtBeforeSave);
+  const toastBox = await page
+    .getByRole('status')
+    .filter({ hasText: 'Guardado correctamente' })
+    .boundingBox();
+  expect(toastBox).not.toBeNull();
+  expect(toastBox!.x).toBeGreaterThanOrEqual(0);
+  expect(toastBox!.x + toastBox!.width).toBeLessThanOrEqual(page.viewportSize()!.width);
+  if (phone) {
+    const actions = await page.locator('.mobile-sticky-action-bar').boundingBox();
+    expect(toastBox!.y + toastBox!.height).toBeLessThan(actions!.y);
+  }
+  await page.waitForTimeout(2200);
+  await expect(page.getByText('Guardado correctamente', { exact: true })).toHaveCount(0);
+  // Failed saves disappear, while their required recovery action remains accessible.
+  await save.click();
+  await expect(page.getByRole('alert').filter({ hasText: 'No se pudo guardar' })).toHaveText(
+    'No se pudo guardar'
+  );
+  await page.waitForTimeout(2200);
+  await expect(page.getByRole('alert').filter({ hasText: 'No se pudo guardar' })).toHaveCount(0);
+  await expect(page.getByText('Comprueba tu alineación', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Actualizar plantilla', exact: true }).click();
   // Clear the captain, preserving every other selection.
   await player('Live Player 1').click();
   await page.getByRole('button', { name: 'Dejar posición vacía', exact: true }).click();
   await expect(court.getByText('Base vacío', { exact: true })).toBeVisible();
   await save.click();
-  await expect(page.getByRole('alert').filter({ hasText: 'No se pudo confirmar' })).toContainText(
-    'No se pudo confirmar'
+  await expect(page.getByRole('alert').filter({ hasText: 'No se pudo guardar' })).toContainText(
+    'No se pudo guardar'
   );
   await expect(save).toBeDisabled();
-  expect(writes).toBe(3);
+  expect(writes).toBe(4);
   await page.getByRole('button', { name: 'Actualizar plantilla', exact: true }).click();
   await expect(save).toBeEnabled();
-  expect(reads).toBe(3);
-  expect(writes).toBe(3);
+  await expect(page.getByText('Plantilla actualizada', { exact: true })).toBeVisible();
+  await page.waitForTimeout(2200);
+  await expect(page.getByText('Plantilla actualizada', { exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Actualizar plantilla', exact: true }).click();
+  await expect(page.getByText('Plantilla actualizada', { exact: true })).toBeVisible();
+  expect(reads).toBe(5);
+  expect(writes).toBe(4);
   expect(current.captain).toBeNull();
   expect(errors).toEqual([]);
 });
@@ -235,15 +277,13 @@ test('Lineup shows reconnect errors and lets the user load an external lineup ex
   await court.getByRole('button', { name: /External Player 4/ }).click();
   await page.getByRole('button', { name: 'Dejar posición vacía', exact: true }).click();
   await save.click();
-  await expect(
-    page.getByText('Tu alineación ha cambiado en Biwenger.', { exact: true })
-  ).toBeVisible();
+  await expect(page.getByText('Actualiza tu plantilla', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Actualizar plantilla', exact: true }).click();
   await page.getByRole('button', { name: 'Cargar última alineación', exact: true }).click();
   await expect(court.getByText('External Player 6', { exact: true })).toBeVisible();
   await expect(court.getByText('External Player 4', { exact: true })).toBeVisible();
   await expect(court.getByText('External Player 3', { exact: true })).toHaveCount(0);
-  await expect(page.getByText('Cambios sin guardar.', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('Cambios sin guardar', { exact: true })).toHaveCount(0);
   expect(reads).toBe(3);
   expect(writes).toBe(1);
   expect(errors).toEqual([]);

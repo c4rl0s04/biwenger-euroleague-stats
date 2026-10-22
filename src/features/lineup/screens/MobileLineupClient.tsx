@@ -72,17 +72,20 @@ export default function MobileLineupClient({ userId }: { userId: string | number
   return (
     <MobileScreen labelledBy="mobile-screen-title" className="mobile-has-sticky-action">
       <MobileScreenHeader eyebrow="Tu equipo" title="Alineación" />
-      <LineupWorkspaceFeedback
-        checkedAt={workspace.checkedAt}
-        error={workspace.error}
-        success={workspace.success}
-        issue={workspace.issue}
-        review={Boolean(workspace.review)}
-        loading={loading || saving}
-        dirty={workspace.dirty}
-        onRefresh={workspace.refresh}
-        onReview={workspace.applyReview}
-      />
+      <div className="mb-3 flex items-center justify-between gap-3 text-sm">
+        <button
+          type="button"
+          disabled={loading || saving}
+          onClick={workspace.refresh}
+          className="cursor-pointer underline disabled:opacity-50"
+        >
+          Actualizar plantilla
+        </button>
+        {workspace.dirty && (
+          <span className="text-xs text-content-secondary">Cambios sin guardar</span>
+        )}
+      </div>
+      <LineupWorkspaceFeedback workspace={workspace} />
       <MobileSectionHeading>Quinteto</MobileSectionHeading>
       <div className="mobile-lineup-court" aria-label="Quinteto titular">
         {rotation.starters.map((slot, index: number) => (
