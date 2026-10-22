@@ -48,7 +48,9 @@ export default function LineupControlBar({
           <span className="text-sm uppercase tracking-wider">Guardar cambios</span>
         </button>
       </div>
-      {dirty && <span className="text-xs text-content-secondary">Cambios sin guardar</span>}
+      <span className="h-4 text-xs text-content-secondary">
+        {dirty ? 'Cambios sin guardar' : null}
+      </span>
     </div>
   );
 }

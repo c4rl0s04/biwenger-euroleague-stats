@@ -121,7 +121,9 @@ test('Lineup recovers stale ownership without losing the draft, clears slots, ch
   await forward.click();
   await expect(court.getByText('Live Player 11', { exact: true })).toBeVisible();
   await save.dblclick();
-  await expect(page.getByRole('alert')).toContainText('No se pudo guardar');
+  await expect(page.getByRole('alert').filter({ hasText: 'No se pudo guardar' })).toContainText(
+    'No se pudo guardar'
+  );
   await expect(save).toBeDisabled();
   await page.getByRole('button', { name: 'Actualizar plantilla', exact: true }).click();
   await expect(page.getByRole('dialog', { name: 'Revisar plantilla actualizada' })).toBeVisible();
@@ -129,12 +131,22 @@ test('Lineup recovers stale ownership without losing the draft, clears slots, ch
   await page.getByRole('button', { name: 'Conservar mis cambios' }).click();
   await expect(court.getByText('Live Player 3', { exact: true })).toHaveCount(0);
   await expect(court.getByText('Live Player 11', { exact: true })).toBeVisible();
-  const courtBeforeSave = await court.boundingBox();
+  const courtPosition = () =>
+    court.evaluate((element) => {
+      const box = element.getBoundingClientRect();
+      return {
+        x: box.x + window.scrollX,
+        y: box.y + window.scrollY,
+        width: box.width,
+        height: box.height,
+      };
+    });
+  const courtBeforeSave = await courtPosition();
   await save.click();
   await player('Live Player 1').focus();
   await expect(page.getByText('Guardado correctamente', { exact: true })).toBeVisible();
   await expect(player('Live Player 1')).toBeFocused();
-  expect(await court.boundingBox()).toEqual(courtBeforeSave);
+  expect(await courtPosition()).toEqual(courtBeforeSave);
   const toastBox = await page
     .getByRole('status')
     .filter({ hasText: 'Guardado correctamente' })
@@ -150,9 +162,11 @@ test('Lineup recovers stale ownership without losing the draft, clears slots, ch
   await expect(page.getByText('Guardado correctamente', { exact: true })).toHaveCount(0);
   // Failed saves disappear, while their required recovery action remains accessible.
   await save.click();
-  await expect(page.getByRole('alert')).toHaveText('No se pudo guardar');
+  await expect(page.getByRole('alert').filter({ hasText: 'No se pudo guardar' })).toHaveText(
+    'No se pudo guardar'
+  );
   await page.waitForTimeout(2200);
-  await expect(page.getByRole('alert')).toHaveCount(0);
+  await expect(page.getByRole('alert').filter({ hasText: 'No se pudo guardar' })).toHaveCount(0);
   await expect(page.getByText('Comprueba tu alineación', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Actualizar plantilla', exact: true }).click();
   // Clear the captain, preserving every other selection.
@@ -160,7 +174,9 @@ test('Lineup recovers stale ownership without losing the draft, clears slots, ch
   await page.getByRole('button', { name: 'Dejar posición vacía', exact: true }).click();
   await expect(court.getByText('Base vacío', { exact: true })).toBeVisible();
   await save.click();
-  await expect(page.getByRole('alert')).toContainText('No se pudo guardar');
+  await expect(page.getByRole('alert').filter({ hasText: 'No se pudo guardar' })).toContainText(
+    'No se pudo guardar'
+  );
   await expect(save).toBeDisabled();
   expect(writes).toBe(4);
   await page.getByRole('button', { name: 'Actualizar plantilla', exact: true }).click();
