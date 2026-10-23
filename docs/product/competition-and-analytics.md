@@ -11,6 +11,9 @@ status: active
 
 # Competition and analytics
 
+The [Rounds UI implementation plan](../migration/rounds-ui-implementation-plan.md) describes the
+planned foundation migration while preserving the page’s domain-specific cards and behavior.
+
 ## Routes
 
 - `/rounds` explores round leaderboards, manager performance, lineups, and historical details.
