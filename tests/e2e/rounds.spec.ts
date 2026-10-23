@@ -41,6 +41,30 @@ test('Rounds preserves historical analysis and phone section navigation', async 
       await page.locator('a[href="/rounds?roundId=1"]').first().click();
       await expect(page).toHaveURL(/\/rounds\?roundId=1$/);
     }
+    await page.locator('html').evaluate((element) => element.setAttribute('data-theme', 'light'));
+    await expect(page.locator('h1')).toHaveCount(1);
+    await waitForScreenshotPaint(page);
+    await expect(page.locator('.mobile-native-screen')).toHaveCSS(
+      'background-color',
+      await page.locator('.mobile-native-header').evaluate((element) => {
+        const color = getComputedStyle(element).getPropertyValue('--surface-app');
+        const probe = document.createElement('span');
+        probe.style.color = `hsl(${color})`;
+        element.append(probe);
+        const result = getComputedStyle(probe).color;
+        probe.remove();
+        return result;
+      })
+    );
+    const ideal = page.locator('.mobile-metric-default .mobile-metric-value').first();
+    expect(await ideal.evaluate((element) => getComputedStyle(element).color)).not.toBe(
+      'rgb(255, 255, 255)'
+    );
+    await page.screenshot({
+      path: info.outputPath('rounds-phone-light.png'),
+      fullPage: true,
+      style: '.mobile-list-row { content-visibility: visible !important; }',
+    });
   } else {
     await expect(page.getByText('Fixture Contributor 01', { exact: true }).first()).toBeVisible({
       timeout: 30000,

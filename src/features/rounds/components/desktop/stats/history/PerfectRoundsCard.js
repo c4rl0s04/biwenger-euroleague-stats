@@ -1,7 +1,9 @@
+import { Skeleton } from '@/components/ui/foundation';
 // ... imports
 import { useMemo } from 'react';
+import { Popover } from '@/components/ui/foundation';
 import { Star } from 'lucide-react';
-import { StatsList } from '@/lib/competition/ui';
+import { RoundRankingList } from '../../../RoundRankingList';
 
 /**
  * PerfectRoundsCard - Efficiency range distribution using StatsList
@@ -51,8 +53,8 @@ export default function PerfectRoundsCard({ allUsersHistory = [], users = [], lo
       <div className="animate-pulse space-y-4">
         {[...Array(5)].map((_, i) => (
           <div key={i} className="flex items-center gap-4">
-            <div className="w-24 h-4 bg-white/5 rounded" />
-            <div className="flex-1 h-6 bg-white/5 rounded" />
+            <Skeleton className="w-24 h-4 bg-secondary rounded" />
+            <Skeleton className="flex-1 h-6 bg-secondary rounded" />
           </div>
         ))}
       </div>
@@ -70,73 +72,47 @@ export default function PerfectRoundsCard({ allUsersHistory = [], users = [], lo
 
   return (
     <div className="flex flex-col h-full">
-      <StatsList
+      <RoundRankingList
         items={items}
         renderRight={(data) => (
-          <div className="w-48 sm:w-80 h-5 bg-zinc-900/50 rounded overflow-hidden flex relative border border-white/5">
-            {/* Elite Segment (95+) */}
-            {data.elite > 0 && (
-              <div
-                style={{ width: `${getWidth(data.elite)}%` }}
-                className="h-full bg-yellow-500/90 hover:bg-yellow-500 transition-colors flex items-center justify-center relative group/seg border-r border-black/20"
-              >
-                {getWidth(data.elite) > 8 && (
-                  <span className="text-[11px] font-black text-black/90">{data.elite}</span>
-                )}
-                {/* Tooltip */}
-                <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 bg-zinc-900 text-white text-[10px] px-2 py-1 rounded hidden group-hover/seg:block whitespace-nowrap z-20 border border-zinc-700 shadow-xl">
-                  95%+: {data.elite} jor.
+          <div className="w-32 sm:w-40 xl:w-48 h-5 bg-secondary/50 rounded overflow-hidden flex relative border border-border">
+            {[
+              { key: 'elite', label: '95%+', tone: 'bg-yellow-500 text-black' },
+              { key: 'excellent', label: '90-94%', tone: 'bg-emerald-700 text-white' },
+              { key: 'good', label: '85-89%', tone: 'bg-blue-700 text-white' },
+              { key: 'other', label: '<85%', tone: 'bg-secondary text-foreground' },
+            ]
+              .filter((segment) => data[segment.key] > 0)
+              .map((segment) => (
+                <div
+                  key={segment.key}
+                  style={{ width: `${getWidth(data[segment.key])}%` }}
+                  className="h-full"
+                >
+                  <Popover
+                    label={`${data.name}: ${segment.label}, ${data[segment.key]} jornadas`}
+                    className={`flex h-full w-full items-center justify-center text-xs font-semibold ${segment.tone}`}
+                    trigger={
+                      getWidth(data[segment.key]) > 8 ? (
+                        data[segment.key]
+                      ) : (
+                        <span className="sr-only">{segment.label}</span>
+                      )
+                    }
+                  >
+                    <p className="font-semibold">{data.name}</p>
+                    <p>
+                      {segment.label}: {data[segment.key]} jornadas
+                    </p>
+                  </Popover>
                 </div>
-              </div>
-            )}
-
-            {/* Excellent Segment (90-94) */}
-            {data.excellent > 0 && (
-              <div
-                style={{ width: `${getWidth(data.excellent)}%` }}
-                className="h-full bg-emerald-500/80 hover:bg-emerald-500 transition-colors flex items-center justify-center relative group/seg border-r border-black/10"
-              >
-                {getWidth(data.excellent) > 8 && (
-                  <span className="text-[11px] font-black text-white">{data.excellent}</span>
-                )}
-                <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 bg-zinc-900 text-white text-[10px] px-2 py-1 rounded hidden group-hover/seg:block whitespace-nowrap z-20 border border-zinc-700 shadow-xl">
-                  90-94%: {data.excellent} jor.
-                </div>
-              </div>
-            )}
-
-            {/* Good Segment (85-89) */}
-            {data.good > 0 && (
-              <div
-                style={{ width: `${getWidth(data.good)}%` }}
-                className="h-full bg-blue-500/70 hover:bg-blue-500 transition-colors flex items-center justify-center relative group/seg border-r border-black/5"
-              >
-                {getWidth(data.good) > 8 && (
-                  <span className="text-[11px] font-black text-white">{data.good}</span>
-                )}
-                <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 bg-zinc-900 text-white text-[10px] px-2 py-1 rounded hidden group-hover/seg:block whitespace-nowrap z-20 border border-zinc-700 shadow-xl">
-                  85-89%: {data.good} jor.
-                </div>
-              </div>
-            )}
-
-            {/* Other Segment (<85) */}
-            {data.other > 0 && (
-              <div
-                style={{ width: `${getWidth(data.other)}%` }}
-                className="h-full bg-zinc-800/30 hover:bg-zinc-700/50 transition-colors flex items-center justify-center relative group/seg"
-              >
-                <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 bg-zinc-900 text-white text-[10px] px-2 py-1 rounded hidden group-hover/seg:block whitespace-nowrap z-20 border border-zinc-700 shadow-xl">
-                  &lt;85%: {data.other} jor.
-                </div>
-              </div>
-            )}
+              ))}
           </div>
         )}
       />
 
       {/* Legend */}
-      <div className="flex items-center justify-center gap-x-4 gap-y-1.5 pt-3 mt-auto border-t border-white/5 text-[9px] text-muted-foreground flex-wrap uppercase font-bold tracking-tighter">
+      <div className="flex items-center justify-center gap-x-4 gap-y-1.5 pt-3 mt-auto border-t border-border text-[9px] text-muted-foreground flex-wrap uppercase font-bold tracking-tighter">
         <div className="flex items-center gap-1">
           <div className="w-2 h-2 rounded-[1px] bg-yellow-500/90" />
           <span>95%+ Elite</span>
@@ -150,7 +126,7 @@ export default function PerfectRoundsCard({ allUsersHistory = [], users = [], lo
           <span>85-89% Bueno</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="w-2 h-2 rounded-[1px] bg-zinc-800/30" />
+          <div className="w-2 h-2 rounded-[1px] bg-secondary/30" />
           <span>Resto</span>
         </div>
       </div>

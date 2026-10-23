@@ -1,8 +1,8 @@
 'use client';
 
 import { Trophy, Star, TrendingDown, Target, Skull } from 'lucide-react';
-import ElegantCard from '@/components/ui/card-variants/ElegantCard';
-import { StatsList } from '@/lib/competition/ui';
+import { RoundCard } from '../../../RoundCard';
+import { RoundRankingList } from '../../../RoundRankingList';
 
 /**
  * RecordsGrid - Displays league-wide records in a grid of cards.
@@ -88,16 +88,16 @@ export default function RecordsGrid({ leaderboardData = [], users = [] }) {
     }));
 
   const renderCard = (title, icon, color, items, valueColor, info) => (
-    <ElegantCard title={title} icon={icon} color={color} info={info}>
+    <RoundCard title={title} icon={icon} color={color} info={info}>
       <div className="flex flex-col gap-1">
-        <StatsList
+        <RoundRankingList
           items={items}
           renderRight={(item) => (
             <span className={`text-sm font-black ${valueColor}`}>{item.value}</span>
           )}
         />
       </div>
-    </ElegantCard>
+    </RoundCard>
   );
 
   return (
@@ -107,7 +107,7 @@ export default function RecordsGrid({ leaderboardData = [], users = [] }) {
         Trophy,
         'yellow',
         maxScores,
-        'text-emerald-400',
+        'text-[var(--round-ideal)]',
         'Récord de puntos conseguidos en una sola jornada.'
       )}
       {renderCard(
@@ -115,7 +115,7 @@ export default function RecordsGrid({ leaderboardData = [], users = [] }) {
         Star,
         'purple',
         maxPotential,
-        'text-purple-400',
+        'text-[var(--round-global)]',
         'La mayor puntuación que podrías haber obtenido con tu plantilla si hubieras elegido la alineación perfecta.'
       )}
       {renderCard(
@@ -123,7 +123,7 @@ export default function RecordsGrid({ leaderboardData = [], users = [] }) {
         Target,
         'emerald',
         maxEff,
-        'text-sky-400',
+        'text-[var(--round-info)]',
         'Mayor eficiencia técnica en una jornada (porcentaje de puntos reales sobre el potencial máximo).'
       )}
       {renderCard(
@@ -131,7 +131,7 @@ export default function RecordsGrid({ leaderboardData = [], users = [] }) {
         TrendingDown,
         'red',
         maxLost,
-        'text-red-500',
+        'text-[var(--round-danger)]',
         'Récord de puntos perdidos en una sola jornada por no haber alineado a los mejores jugadores.'
       )}
       {renderCard(
@@ -147,7 +147,7 @@ export default function RecordsGrid({ leaderboardData = [], users = [] }) {
         Skull,
         'zinc',
         lowestScores,
-        'text-zinc-500',
+        'text-muted-foreground',
         'Puntuación más baja obtenida en una jornada (mínimo histórico).'
       )}
     </div>

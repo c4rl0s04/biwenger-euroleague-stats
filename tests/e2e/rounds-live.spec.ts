@@ -403,3 +403,141 @@ test('foundation round picker supports keyboard selection, dismissal and boundar
   await page.getByRole('heading', { name: 'Estadísticas de la Ronda' }).click();
   await expect(page.getByRole('listbox')).toHaveCount(0);
 });
+
+test('history controls, sort headers and analytical details work with keyboard in both themes', async ({
+  page,
+}, info) => {
+  const second = { ...manager, id: '8', name: 'Comparison Manager' };
+  const history = [95, 90, 85, 50].map((efficiency, index) => ({
+    round_id: 5100 + index,
+    round_number: index + 1,
+    actual_points: efficiency,
+    ideal_points: 100,
+    efficiency,
+    participated: true,
+  }));
+  await page.route('**/api/rounds/list', (route) =>
+    route.fulfill({
+      json: {
+        success: true,
+        data: {
+          rounds: [{ round_id: 5142, round_name: 'Jornada 7', status: 'live' }],
+          users: [manager, second],
+          defaultRoundId: 5142,
+        },
+      },
+    })
+  );
+  await page.route('**/api/rounds/stats?**', (route) =>
+    route.fulfill({ json: { success: true, data: data([manager, second]) } })
+  );
+  await page.route('**/api/rounds/history?**', (route) =>
+    route.fulfill({ json: { success: true, data: { history } } })
+  );
+  await page.route('**/api/rounds/all-history', (route) =>
+    route.fulfill({
+      json: {
+        success: true,
+        data: { allUsersHistory: [manager, second].map((user) => ({ userId: user.id, history })) },
+      },
+    })
+  );
+  await page.route('**/api/rounds/leaderboard', (route) =>
+    route.fulfill({
+      json: {
+        success: true,
+        data: {
+          leaderboard: [manager, second].map((user, index) => ({
+            userId: user.id,
+            avgEfficiency: 90 - index,
+            totalLost: 10 + index,
+            bestActual: 95,
+            worstActual: 50,
+            bestIdeal: 100,
+            maxLost: 50,
+            bestEfficiency: 95,
+            worstEfficiency: 50,
+            bestActualRound: 1,
+            bestIdealRoundNum: 1,
+            maxLostRoundNum: 4,
+            bestEffRound: 1,
+            worstEffRound: 4,
+            worstActualRound: 4,
+          })),
+        },
+      },
+    })
+  );
+  await login(page);
+  for (const theme of ['dark', 'light']) {
+    await page
+      .locator('html')
+      .evaluate((element, value) => element.setAttribute('data-theme', value), theme);
+    const metric = page
+      .getByRole('group', { name: 'Métricas del historial' })
+      .getByRole('button', { name: 'Puntos Reales' });
+    await expect(metric).toHaveAttribute('aria-pressed', 'true');
+    await metric.click();
+    await expect(metric).toHaveAttribute('aria-pressed', 'false');
+    await metric.click();
+    const add = page.getByRole('button', { name: 'Añadir usuario a comparar' });
+    await add.scrollIntoViewIfNeeded();
+    await add.focus();
+    await page.keyboard.press('Enter');
+    const popover = page.locator('[popover]:popover-open');
+    await expect(popover).toBeVisible();
+    await popover.getByRole('button', { name: 'Comparison Manager' }).click();
+    await expect(
+      page.getByRole('button', { name: 'Quitar Comparison Manager de la comparación' })
+    ).toBeVisible();
+    await page.getByRole('button', { name: 'Quitar Comparison Manager de la comparación' }).click();
+    const table = page.getByRole('table', { name: 'Clasificación por eficiencia' });
+    await table.getByRole('button', { name: 'Eff', exact: true }).click();
+    await expect(table.getByRole('columnheader', { name: 'Eff', exact: true })).toHaveAttribute(
+      'aria-sort',
+      theme === 'dark' ? 'ascending' : 'descending'
+    );
+    const cell = page.getByRole('button', { name: 'Round Manager, jornada 1: 95.0%' });
+    await cell.scrollIntoViewIfNeeded();
+    await cell.focus();
+    await page.keyboard.press('Enter');
+    await expect(popover).toContainText('Real: 95 · Ideal: 100');
+    await page.keyboard.press('Escape');
+    await expect(popover).toHaveCount(0);
+    const segment = page.getByRole('button', { name: 'Round Manager: 95%+, 1 jornadas' });
+    await segment.focus();
+    await page.keyboard.press('Enter');
+    await expect(popover).toContainText('95%+: 1 jornadas');
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('table', { name: 'Desglose por jornada' })).toBeVisible();
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)
+    ).toBe(true);
+    await waitForScreenshotPaint(page);
+    await page
+      .locator('#comparativa-de-liga')
+      .screenshot({ path: info.outputPath(`rounds-analytics-${theme}.png`) });
+  }
+  for (const width of [1279, 1281]) {
+    await page.setViewportSize({ width, height: 900 });
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)
+    ).toBe(true);
+  }
+});
+
+test('section registration disappears with the conditional player section and unregisters on navigation', async ({
+  page,
+}) => {
+  await page.route('**/api/rounds/list', (route) =>
+    route.fulfill({
+      json: { success: true, data: { rounds: [], users: [manager], defaultRoundId: null } },
+    })
+  );
+  await login(page);
+  await expect(page.getByText('Temporada en preparación', { exact: true })).toBeVisible();
+  await expect(page.locator('a[href="/rounds#estadisticas-de-la-ronda"]')).toBeVisible();
+  await expect(page.locator('a[href="/rounds#estadisticas-de-jugadores"]')).toHaveCount(0);
+  await page.locator('a[href="/players"]').first().click();
+  await expect(page.locator('a[href$="#estadisticas-de-la-ronda"]')).toHaveCount(0);
+});

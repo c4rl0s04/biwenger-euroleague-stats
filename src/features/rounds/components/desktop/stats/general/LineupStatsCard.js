@@ -3,6 +3,7 @@
 import { BarChart3, User, Trophy, Medal } from 'lucide-react';
 import { getColorForUser } from '@/lib/competition/public';
 import Image from 'next/image';
+import { CardTitle, EmptyState } from '@/components/ui/foundation';
 
 /**
  * LineupStatsCard - Displays preferred lineup formations
@@ -10,7 +11,8 @@ import Image from 'next/image';
  * 2. Per-user favorite formation
  */
 export default function LineupStatsCard({ globalStats = [], userStats = [] }) {
-  if (!globalStats.length && !userStats.length) return null;
+  if (!globalStats.length && !userStats.length)
+    return <EmptyState className="py-6">No hay datos de alineaciones disponibles.</EmptyState>;
 
   const maxGlobalPct = Math.max(...globalStats.map((s) => s.percentage));
 
@@ -19,21 +21,26 @@ export default function LineupStatsCard({ globalStats = [], userStats = [] }) {
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-3 p-3.5">
         {/* LEFT: Global Trends */}
         <div className="xl:col-span-4">
-          <h4 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-purple-400 mb-3 pb-1.5 border-b border-white/5">
+          <CardTitle
+            as="h4"
+            className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-[var(--round-global)] mb-3 pb-1.5 border-b border-border"
+          >
             <BarChart3 size={14} />
             Tendencia Global
-          </h4>
+          </CardTitle>
 
           <div className="space-y-2">
             {globalStats.slice(0, 10).map((stat, idx) => (
               <div
                 key={stat.formation}
-                className="group rounded-lg border border-white/5 bg-zinc-900/40 px-2.5 py-1.5"
+                className="group rounded-lg border border-border bg-secondary/40 px-2.5 py-1.5"
               >
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-zinc-500 w-5">#{idx + 1}</span>
-                    <span className="font-black text-white tracking-widest text-sm leading-none">
+                    <span className="text-[10px] font-bold text-muted-foreground w-5">
+                      #{idx + 1}
+                    </span>
+                    <span className="font-black text-foreground tracking-widest text-sm leading-none">
                       {stat.formation}
                     </span>
                   </div>
@@ -41,7 +48,7 @@ export default function LineupStatsCard({ globalStats = [], userStats = [] }) {
                     {stat.percentage.toFixed(1)}%
                   </span>
                 </div>
-                <div className="h-1.5 w-full bg-zinc-800/70 rounded-full overflow-hidden">
+                <div className="h-1.5 w-full bg-secondary/70 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-purple-500/80 rounded-full group-hover:bg-purple-400 transition-all duration-500"
                     style={{
@@ -56,10 +63,13 @@ export default function LineupStatsCard({ globalStats = [], userStats = [] }) {
 
         {/* RIGHT: User Favorites */}
         <div className="xl:col-span-8">
-          <h4 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-purple-400 mb-3 pb-1.5 border-b border-white/5">
+          <CardTitle
+            as="h4"
+            className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-[var(--round-global)] mb-3 pb-1.5 border-b border-border"
+          >
             <User size={14} />
             Favorita por Usuario
-          </h4>
+          </CardTitle>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             {userStats.map((user) => {
@@ -71,7 +81,7 @@ export default function LineupStatsCard({ globalStats = [], userStats = [] }) {
               return (
                 <div
                   key={user.userId}
-                  className="rounded-lg border border-white/8 bg-zinc-900/35 px-2 py-2 hover:bg-white/5 transition-colors"
+                  className="rounded-lg border border-border bg-secondary/35 px-2 py-2 hover:bg-secondary transition-colors"
                 >
                   {/* Manager */}
                   <div className="flex items-center gap-2 min-w-0 mb-1.5">
@@ -88,21 +98,21 @@ export default function LineupStatsCard({ globalStats = [], userStats = [] }) {
                             alt={user.name}
                             width={28}
                             height={28}
-                            className="rounded-full w-full h-full object-cover bg-zinc-900"
+                            className="rounded-full w-full h-full object-cover bg-secondary"
                             unoptimized
                           />
                         ) : (
-                          <div className="w-full h-full rounded-full bg-zinc-800 flex items-center justify-center text-xs font-bold text-white">
+                          <div className="w-full h-full rounded-full bg-secondary flex items-center justify-center text-xs font-bold text-foreground">
                             {user.name[0]}
                           </div>
                         )}
                       </div>
                     </div>
                     <div className="min-w-0">
-                      <div className={`text-[11px] font-bold truncate ${color.text}`}>
+                      <div className={`text-[11px] font-bold truncate text-foreground`}>
                         {user.name}
                       </div>
-                      <div className="text-[9px] text-zinc-500">
+                      <div className="text-[9px] text-muted-foreground">
                         {Math.round(user.totalRounds || 0)} jornadas
                       </div>
                     </div>
@@ -112,18 +122,18 @@ export default function LineupStatsCard({ globalStats = [], userStats = [] }) {
                     {/* Primary */}
                     <div className="rounded-md border border-amber-500/25 bg-amber-500/10 px-2 py-1">
                       <div className="flex items-center justify-between mb-1">
-                        <div className="flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider text-amber-300">
+                        <div className="flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider text-[var(--round-record)]">
                           <Trophy size={10} />
                           1ª
                         </div>
-                        <div className="text-[10px] font-bold text-amber-200/90 font-mono">
+                        <div className="text-[10px] font-bold text-[var(--round-record)] font-mono">
                           {primary ? `${primary.percentage.toFixed(0)}%` : '—'}
                         </div>
                       </div>
-                      <div className="text-lg font-black text-white leading-none tracking-tight">
+                      <div className="text-lg font-black text-foreground leading-none tracking-tight">
                         {primary?.formation || '—'}
                       </div>
-                      <div className="h-1 w-full bg-amber-950/40 rounded-full overflow-hidden mt-1">
+                      <div className="h-1 w-full bg-secondary rounded-full overflow-hidden mt-1">
                         <div
                           className="h-full bg-amber-400/80 rounded-full"
                           style={{ width: `${Math.min(primary?.percentage || 0, 100)}%` }}
@@ -134,15 +144,15 @@ export default function LineupStatsCard({ globalStats = [], userStats = [] }) {
                     {/* Secondary */}
                     <div className="rounded-md border border-sky-500/20 bg-sky-500/10 px-2 py-1">
                       <div className="flex items-center justify-between mb-1">
-                        <div className="flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider text-sky-300">
+                        <div className="flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider text-[var(--round-info)]">
                           <Medal size={10} />
                           2ª
                         </div>
-                        <div className="text-[10px] font-bold text-sky-200/90 font-mono">
+                        <div className="text-[10px] font-bold text-[var(--round-info)] font-mono">
                           {secondary ? `${secondary.percentage.toFixed(0)}%` : '—'}
                         </div>
                       </div>
-                      <div className="text-base font-black text-white leading-none tracking-tight">
+                      <div className="text-base font-black text-foreground leading-none tracking-tight">
                         {secondary?.formation || '—'}
                       </div>
                       <div className="h-1 w-full bg-sky-950/40 rounded-full overflow-hidden mt-1">

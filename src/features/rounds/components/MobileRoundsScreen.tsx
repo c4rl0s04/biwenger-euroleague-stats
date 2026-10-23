@@ -1,5 +1,6 @@
 import { Activity, ChartNoAxesCombined, History, LayoutDashboard } from 'lucide-react';
 
+import styles from './rounds-ui.module.css';
 import RoundRows from './RoundRows';
 import type { RoundOverviewViewModel } from '../models/round-screen';
 import {
@@ -15,7 +16,7 @@ import MobileSegmentedControl from '@/components/mobile/MobileSegmentedControl';
 export default function MobileRoundsScreen({ data }: { data: RoundOverviewViewModel }) {
   const { rounds, activeRoundId } = data;
   return (
-    <MobileScreen labelledBy="mobile-screen-title">
+    <MobileScreen className={`${styles.root} ${styles.phone}`} labelledBy="mobile-screen-title">
       <MobileScreenHeader eyebrow="Análisis" title="Jornadas" />
       <div className="mobile-control-offset">
         <MobileSegmentedControl
@@ -28,9 +29,9 @@ export default function MobileRoundsScreen({ data }: { data: RoundOverviewViewMo
         />
       </div>
       {!activeRoundId ? (
-        <div className="rounded-2xl border border-white/10 bg-secondary/20 p-6 text-center backdrop-blur-md">
-          <p className="text-base font-semibold text-white">Temporada en preparación</p>
-          <p className="mt-2 text-sm text-zinc-400">
+        <div className="rounded-2xl border border-border bg-secondary/20 p-6 text-center backdrop-blur-md">
+          <p className="text-base font-semibold text-foreground">Temporada en preparación</p>
+          <p className="mt-2 text-sm text-muted-foreground">
             Aún no se ha disputado ninguna jornada. Selecciona una jornada en el control superior
             para consultar el calendario o verás aquí las estadísticas cuando empiece la
             competición.

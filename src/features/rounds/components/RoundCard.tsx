@@ -5,6 +5,7 @@ import {
   CardHeader,
   CardTitle,
   CardContent,
+  Popover,
   type CardDensity,
 } from '@/components/ui/foundation';
 
@@ -50,17 +51,13 @@ export function RoundCard({
         }
         action={
           info ? (
-            <details className="relative">
-              <summary
-                aria-label={`Información sobre ${title}`}
-                className="cursor-pointer list-none rounded p-1 text-muted-foreground focus-visible:outline-2 focus-visible:outline-primary"
-              >
-                <Info size={18} aria-hidden />
-              </summary>
-              <p className="absolute right-0 top-full z-30 mt-2 w-64 max-w-[70vw] rounded-lg border border-border bg-popover p-3 text-sm text-foreground shadow-lg">
-                {info}
-              </p>
-            </details>
+            <Popover
+              label={`Información sobre ${title}`}
+              trigger={<Info size={18} aria-hidden />}
+              className="inline-flex h-10 w-10 items-center justify-center text-muted-foreground"
+            >
+              {info}
+            </Popover>
           ) : undefined
         }
       >

@@ -1,7 +1,10 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { Skeleton } from '@/components/ui/foundation';
+
+import { useMemo } from 'react';
 import Image from 'next/image';
+import { Popover } from '@/components/ui/foundation';
 import Link from 'next/link';
 import { getColorForUser } from '@/lib/competition/public';
 
@@ -9,18 +12,17 @@ import { getColorForUser } from '@/lib/competition/public';
  * Get color class based on efficiency value (0-100)
  */
 function getEfficiencyColor(efficiency) {
-  if (efficiency === null || efficiency === undefined) return 'bg-zinc-800/60 text-zinc-500'; // Did not participate
+  if (efficiency === null || efficiency === undefined)
+    return 'bg-secondary/60 text-muted-foreground'; // Did not participate
 
   if (efficiency >= 95)
-    return 'bg-emerald-900/90 text-white shadow-[0_0_12px_rgba(6,78,59,0.5)] font-bold border border-emerald-700/50';
-  if (efficiency >= 90)
-    return 'bg-teal-700/85 text-white shadow-[0_0_8px_rgba(15,118,110,0.3)] font-bold border border-teal-600/50';
-  if (efficiency >= 85)
-    return 'bg-green-600/80 text-white font-semibold border border-green-500/50';
-  if (efficiency >= 80) return 'bg-lime-600/80 text-white border border-lime-500/50';
-  if (efficiency >= 75) return 'bg-yellow-500/80 text-white border border-yellow-400/50';
-  if (efficiency >= 70) return 'bg-orange-500/80 text-white border border-orange-400/50';
-  return 'bg-red-500/80 text-white border border-red-400/50';
+    return 'bg-emerald-900/90 text-white font-bold border border-emerald-700/50';
+  if (efficiency >= 90) return 'bg-teal-700/85 text-white font-bold border border-teal-600/50';
+  if (efficiency >= 85) return 'bg-green-800 text-white font-semibold border border-green-500/50';
+  if (efficiency >= 80) return 'bg-lime-600/80 text-black border border-lime-500/50';
+  if (efficiency >= 75) return 'bg-yellow-500/80 text-black border border-yellow-400/50';
+  if (efficiency >= 70) return 'bg-orange-500/80 text-black border border-orange-400/50';
+  return 'bg-red-700 text-white border border-red-400/50';
 }
 
 /**
@@ -28,8 +30,6 @@ function getEfficiencyColor(efficiency) {
  * Rows = Rounds, Columns = Users
  */
 export default function EfficiencyHeatmap({ allUsersHistory = [], users = [], loading = false }) {
-  const [hoveredCell, setHoveredCell] = useState(null);
-
   // Transform data: organize by round, then by user
   const { rounds, userData } = useMemo(() => {
     if (!allUsersHistory.length) return { rounds: [], userData: {} };
@@ -58,26 +58,11 @@ export default function EfficiencyHeatmap({ allUsersHistory = [], users = [], lo
     return { rounds, userData };
   }, [allUsersHistory]);
 
-  // Tooltip position helper
-  const getTooltipPosition = (roundIndex, userIndex, totalRounds, totalUsers) => {
-    const isTopHalf = roundIndex < 3;
-    const isLeftEdge = userIndex === 0;
-    const isRightEdge = userIndex === totalUsers - 1;
-
-    let vertical = isTopHalf ? 'top-full mt-2' : 'bottom-full mb-2';
-    let horizontal = 'left-1/2 -translate-x-1/2';
-
-    if (isLeftEdge) horizontal = 'left-0';
-    if (isRightEdge) horizontal = 'right-0';
-
-    return `${vertical} ${horizontal}`;
-  };
-
   if (loading) {
     return (
       <div className="animate-pulse space-y-2">
         {[...Array(10)].map((_, i) => (
-          <div key={i} className="h-6 bg-white/5 rounded" />
+          <div key={i} className="h-6 bg-secondary rounded" />
         ))}
       </div>
     );
@@ -124,7 +109,7 @@ export default function EfficiencyHeatmap({ allUsersHistory = [], users = [], lo
                 </div>
               )}
               <span
-                className={`text-[9px] font-bold truncate w-full text-center transition-colors px-0.5 ${userColor.text}`}
+                className={`text-[9px] font-bold truncate w-full text-center transition-colors px-0.5 text-foreground`}
               >
                 {user.name.slice(0, 4)}
               </span>
@@ -135,7 +120,7 @@ export default function EfficiencyHeatmap({ allUsersHistory = [], users = [], lo
 
       {/* Round Rows */}
       <div className="flex-1 flex flex-col gap-[1px] min-h-0 overflow-visible">
-        {rounds.map((round, roundIndex) => (
+        {rounds.map((round) => (
           <div key={round.id} className="flex w-full items-center flex-1 min-h-[1.5rem]">
             {/* Round Label */}
             <div className="w-10 flex-shrink-0 font-mono text-[9px] text-muted-foreground text-center">
@@ -143,56 +128,32 @@ export default function EfficiencyHeatmap({ allUsersHistory = [], users = [], lo
             </div>
 
             {/* User Efficiency Cells */}
-            {users.map((user, userIndex) => {
+            {users.map((user) => {
               const data = userData[user.id]?.[round.number];
               const efficiency = data?.efficiency ?? null;
               const cellId = `${round.id}-${user.id}`;
-              const isHovered = hoveredCell === cellId;
 
               return (
-                <div key={cellId} className="flex-1 h-full px-[1px] relative">
-                  <div
-                    className={`
-                      relative w-full h-full rounded-sm flex items-center justify-center text-[9px] font-medium transition-all duration-200
-                      ${getEfficiencyColor(efficiency)}
-                      ${efficiency !== null ? 'cursor-default' : 'opacity-50'}
-                      ${
-                        isHovered && efficiency !== null
-                          ? 'z-30 scale-110 shadow-[0_0_10px_rgba(0,0,0,0.5)] brightness-125'
-                          : efficiency !== null
-                            ? 'hover:brightness-110'
-                            : ''
-                      }
-                    `}
-                    onMouseEnter={() => setHoveredCell(cellId)}
-                    onMouseLeave={() => setHoveredCell(null)}
-                  >
-                    {efficiency !== null ? `${Math.round(efficiency)}` : ''}
-                  </div>
-
-                  {/* Tooltip */}
-                  {isHovered && efficiency !== null && (
-                    <div
-                      className={`
-                        absolute z-50 bg-zinc-900/95 backdrop-blur-md border border-zinc-700 shadow-xl rounded-lg px-3 py-2 text-center min-w-[110px] pointer-events-none
-                        ${getTooltipPosition(roundIndex, userIndex, rounds.length, users.length)}
-                      `}
+                <div key={cellId} className="flex-1 px-px">
+                  {efficiency == null ? (
+                    <span
+                      aria-label={`${user.name}, jornada ${round.number}: sin datos`}
+                      className="block min-h-7 rounded bg-secondary"
+                    />
+                  ) : (
+                    <Popover
+                      label={`${user.name}, jornada ${round.number}: ${efficiency.toFixed(1)}%`}
+                      className={`flex min-h-7 w-full items-center justify-center rounded-sm text-xs ${getEfficiencyColor(efficiency)}`}
+                      trigger={Math.round(efficiency)}
                     >
-                      <div className="text-[10px] font-bold text-zinc-300 mb-0.5 whitespace-nowrap">
-                        {user.name}
-                      </div>
-                      <div className="text-lg font-black leading-none my-1 text-emerald-400">
-                        {efficiency.toFixed(1)}
-                        <span className="text-[9px] font-normal text-zinc-500">%</span>
-                      </div>
-                      <div className="text-[9px] text-zinc-400 flex justify-between gap-2">
-                        <span>Real: {data?.actual?.toFixed(0)}</span>
-                        <span>Ideal: {data?.ideal?.toFixed(0)}</span>
-                      </div>
-                      <div className="text-[9px] text-zinc-500 border-t border-zinc-700/50 pt-1 mt-1">
-                        J{round.number}
-                      </div>
-                    </div>
+                      <p className="font-semibold">
+                        {user.name} · J{round.number}
+                      </p>
+                      <p className="text-lg font-bold tabular-nums">{efficiency.toFixed(1)}%</p>
+                      <p>
+                        Real: {data?.actual?.toFixed(0)} · Ideal: {data?.ideal?.toFixed(0)}
+                      </p>
+                    </Popover>
                   )}
                 </div>
               );

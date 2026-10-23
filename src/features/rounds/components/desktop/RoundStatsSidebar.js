@@ -1,5 +1,7 @@
 'use client';
 
+import { Skeleton } from '@/components/ui/foundation';
+
 import ScoreOverviewCard from './stats/ScoreOverviewCard'; // New import
 // import CoachRatingCard from './stats/CoachRatingCard'; // Removed - info in standings table
 import GradaCard from './stats/GradaCard';
@@ -9,8 +11,8 @@ export default function RoundStatsSidebar({ stats, loading, summary, viewMode })
   if (loading) {
     return (
       <div className="space-y-4 animate-pulse">
-        <div className="h-32 bg-secondary rounded-xl" />
-        <div className="h-32 bg-secondary rounded-xl" />
+        <Skeleton className="h-32 bg-secondary rounded-xl" />
+        <Skeleton className="h-32 bg-secondary rounded-xl" />
       </div>
     );
   }

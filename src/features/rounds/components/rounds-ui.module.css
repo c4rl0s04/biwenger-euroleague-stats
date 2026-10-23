@@ -12,3 +12,27 @@
   --round-info: var(--color-sky-700);
   --round-danger: var(--color-red-700);
 }
+
+/* Scope mobile compatibility fixes to Rounds; shared phone screens keep their current contracts. */
+.phone {
+  background: hsl(var(--surface-app));
+  color: hsl(var(--content-primary));
+}
+.phone :global(.mobile-native-screen) {
+  background: hsl(var(--surface-app));
+}
+.phone :global(.mobile-metric-default) :global(.mobile-metric-value) {
+  color: hsl(var(--content-primary));
+}
+:global([data-theme='light'])
+  .phone
+  :global(.mobile-metric-positive)
+  :global(.mobile-metric-value) {
+  color: var(--round-ideal);
+}
+:global([data-theme='light'])
+  .phone
+  :global(.mobile-metric-negative)
+  :global(.mobile-metric-value) {
+  color: var(--round-danger);
+}

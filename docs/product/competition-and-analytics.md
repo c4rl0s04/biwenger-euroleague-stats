@@ -11,6 +11,9 @@ status: active
 
 # Competition and analytics
 
+The [Rounds UI implementation evidence](../migration/reports/rounds-ui-foundation-implementation.md)
+records the staged foundation migration and its validation status.
+
 ## Routes
 
 - `/rounds` explores round leaderboards, manager performance, lineups, and historical details.
