@@ -47,6 +47,16 @@ test('Rounds preserves historical analysis and phone section navigation', async 
     });
     await expect(page.getByRole('button', { name: 'Jornada', exact: true })).toBeVisible();
     await expect(page.getByText('Panel de Jornada', { exact: true })).toBeVisible();
+    await expect(page.locator('h1')).toHaveCount(1);
+    for (const id of [
+      'estadisticas-de-la-ronda',
+      'estadisticas-de-jugadores',
+      'historial-de-rendimiento',
+      'comparativa-de-liga',
+    ]) {
+      await expect(page.locator(`a[href="/rounds#${id}"]`)).toBeVisible();
+      await expect(page.locator(`#${id}`)).toHaveCount(1);
+    }
     await capture(page, info, 'rounds-overview');
     await page.getByRole('button', { name: 'Mi Ideal', exact: true }).click();
     await expect(page.getByText('Mi Alineación Perfecta', { exact: true })).toBeVisible();
