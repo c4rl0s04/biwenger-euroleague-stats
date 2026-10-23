@@ -541,3 +541,22 @@ test('section registration disappears with the conditional player section and un
   await page.locator('a[href="/players"]').first().click();
   await expect(page.locator('a[href$="#estadisticas-de-la-ronda"]')).toHaveCount(0);
 });
+
+test('the whole player-leader card retains player navigation', async ({ page }) => {
+  await page.route('**/api/rounds/stats?**', (route) =>
+    route.fulfill({
+      json: {
+        success: true,
+        data: {
+          ...data([manager]),
+          global: { mvp: { id: 99201, name: 'Navigation Leader', img: null, points: 19 } },
+        },
+      },
+    })
+  );
+  await login(page);
+  const card = page.getByRole('group', { name: 'MVP de la Jornada', exact: true });
+  await expect(card).toBeVisible();
+  await card.click({ position: { x: 8, y: 8 } });
+  await expect(page).toHaveURL(/\/player\/99201(?:\/overview)?$/);
+});

@@ -63,7 +63,13 @@ export default function StatLeaderCard({ player, statType = 'mvp', statValue }) 
   const displayValue = statValue ?? player.points ?? player.stat_value ?? 0;
 
   return (
-    <Card density="compact" className="relative h-full overflow-hidden">
+    <Card
+      density="compact"
+      role="group"
+      aria-label={config.title}
+      interactive={Boolean(player.id)}
+      className="relative h-full overflow-hidden"
+    >
       <div className="flex items-start justify-between h-full gap-2">
         <div className="flex flex-col justify-between h-full flex-1 min-w-0">
           {/* Header */}
@@ -81,7 +87,7 @@ export default function StatLeaderCard({ player, statType = 'mvp', statValue }) 
               {player.id ? (
                 <a
                   href={`/player/${player.id}`}
-                  className="rounded focus-visible:outline-2 focus-visible:outline-primary hover:underline"
+                  className="after:absolute after:inset-0 after:rounded-[var(--radius-surface)] focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-primary hover:underline"
                 >
                   {player.name}
                 </a>

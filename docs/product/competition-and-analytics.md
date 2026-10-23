@@ -11,9 +11,6 @@ status: active
 
 # Competition and analytics
 
-The [Rounds UI implementation evidence](../migration/reports/rounds-ui-foundation-implementation.md)
-records the staged foundation migration and its validation status.
-
 ## Routes
 
 - `/rounds` explores round leaderboards, manager performance, lineups, and historical details.
@@ -56,3 +53,8 @@ Postponed rounds may be mapped to a canonical regular-season round. Playoff roun
 names remain distinct. Empty early-season histories, incomplete live scores, tied manager values,
 and managers without a lineup must remain valid states rather than being silently converted to
 zero-performance claims.
+
+## UI migration evidence
+
+The [Rounds UI implementation evidence](../migration/reports/rounds-ui-foundation-implementation.md)
+records the staged foundation migration and its validation status.

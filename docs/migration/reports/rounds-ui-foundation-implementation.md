@@ -81,6 +81,10 @@ Environment files and production credentials were not copied. Browser runs use d
   with `rounds.spec.ts --project=iphone-13 --project=iphone-se`, without snapshot updates, including
   build/typecheck, background/text assertions, all phone detail routes and narrow-phone light capture.
   Dark phone references remain unchanged.
+- Final player-leader navigation follow-up: the full card is a stretched semantic link with a
+  keyboard focus ring. Two additional desktop browser tests passed with
+  `rounds-live.spec.ts --project=desktop-1280 --project=desktop-1440 --grep "whole player-leader"`,
+  including build/typecheck. This protects the original full-card click target.
 - `npm run architecture:check`: 1124 modules / 132 protected entrypoints passed.
 - `npm run db:audit:schema:metadata`: 39 matching source/snapshot tables passed.
 - `npx --no-install drizzle-kit check`, `npx --no-install tsc --noEmit`, focused Prettier/ESLint,
