@@ -1,6 +1,8 @@
+import { Skeleton } from '@/components/ui/foundation';
 import { useMemo } from 'react';
+import { Popover } from '@/components/ui/foundation';
 import { Ruler } from 'lucide-react';
-import { StatsList } from '@/lib/competition/ui';
+import { RoundRankingList } from '../../../RoundRankingList';
 
 /**
  * ConsistencyRanking - Shows users ranked by consistency using StatsList
@@ -48,7 +50,7 @@ export default function ConsistencyRanking({ allUsersHistory = [], users = [], l
     return (
       <div className="animate-pulse space-y-3">
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="h-10 bg-white/5 rounded" />
+          <div key={i} className="h-10 bg-secondary rounded" />
         ))}
       </div>
     );
@@ -70,7 +72,7 @@ export default function ConsistencyRanking({ allUsersHistory = [], users = [], l
 
   return (
     <div className="flex flex-col h-full">
-      <StatsList
+      <RoundRankingList
         items={items}
         renderRight={(data) => {
           const minPos = getPos(data.min);
@@ -81,67 +83,79 @@ export default function ConsistencyRanking({ allUsersHistory = [], users = [], l
 
           // Dynamic Color based on Variation (stdDev)
           let barClass = 'bg-emerald-500';
-          let textColor = 'text-emerald-400';
+          let textColor = 'text-[var(--round-ideal)]';
           if (data.stdDev >= 5 && data.stdDev < 10) {
             barClass = 'bg-cyan-500';
             textColor = 'text-cyan-400';
           } else if (data.stdDev >= 10 && data.stdDev < 15) {
             barClass = 'bg-yellow-500';
-            textColor = 'text-yellow-400';
+            textColor = 'text-[var(--round-record)]';
           } else if (data.stdDev >= 15) {
             barClass = 'bg-orange-500';
-            textColor = 'text-orange-400';
+            textColor = 'text-primary';
           }
 
           return (
-            <div className="flex items-center gap-4">
-              {/* Visualization Container */}
-              <div className="w-48 sm:w-72 h-5 bg-zinc-900/50 rounded relative overflow-hidden border border-white/5">
-                {/* Min-Max Total Range Bar */}
-                <div
-                  className="absolute top-1/2 -translate-y-1/2 h-0.5 bg-white/10 rounded-full"
-                  style={{
-                    left: `${minPos}%`,
-                    width: `${Math.max(2, maxPos - minPos)}%`,
-                  }}
-                />
-                {/* Variation Range Bar (Avg +/- SD) */}
-                <div
-                  className={`absolute top-1/2 -translate-y-1/2 h-2 rounded-sm shadow-sm opacity-80 ${barClass}`}
-                  style={{
-                    left: `${sdLowPos}%`,
-                    width: `${Math.max(2, sdHighPos - sdLowPos)}%`,
-                  }}
-                />
-                {/* Average Marker */}
-                <div
-                  className="absolute top-1/2 -translate-y-1/2 h-3.5 w-0.5 bg-white rounded-full shadow-md z-10"
-                  style={{ left: `${avgPos}%` }}
-                />
-              </div>
+            <Popover
+              label={`${data.name}: consistencia, media ${data.avg.toFixed(1)}%`}
+              trigger={
+                <span className="flex items-center gap-4">
+                  {/* Visualization Container */}
+                  <div className="w-24 sm:w-32 xl:w-40 h-5 bg-secondary/50 rounded relative overflow-hidden border border-border">
+                    {/* Min-Max Total Range Bar */}
+                    <div
+                      className="absolute top-1/2 -translate-y-1/2 h-0.5 bg-secondary rounded-full"
+                      style={{
+                        left: `${minPos}%`,
+                        width: `${Math.max(2, maxPos - minPos)}%`,
+                      }}
+                    />
+                    {/* Variation Range Bar (Avg +/- SD) */}
+                    <div
+                      className={`absolute top-1/2 -translate-y-1/2 h-2 rounded-sm shadow-sm opacity-80 ${barClass}`}
+                      style={{
+                        left: `${sdLowPos}%`,
+                        width: `${Math.max(2, sdHighPos - sdLowPos)}%`,
+                      }}
+                    />
+                    {/* Average Marker */}
+                    <div
+                      className="absolute top-1/2 -translate-y-1/2 h-3.5 w-0.5 bg-[hsl(var(--content-primary))] rounded-full shadow-md z-10"
+                      style={{ left: `${avgPos}%` }}
+                    />
+                  </div>
 
-              {/* Numeric Stats */}
-              <div className="text-right w-16 flex-shrink-0 flex flex-col justify-center">
-                <div className="text-[11px] font-black text-white leading-none">
-                  {data.avg.toFixed(1)}%
-                </div>
-                <div className={`text-[9px] font-bold ${textColor} leading-tight pt-0.5`}>
-                  ±{data.stdDev.toFixed(1)}
-                </div>
-              </div>
-            </div>
+                  {/* Numeric Stats */}
+                  <div className="text-right w-16 flex-shrink-0 flex flex-col justify-center">
+                    <div className="text-[11px] font-black text-foreground leading-none">
+                      {data.avg.toFixed(1)}%
+                    </div>
+                    <div className={`text-[9px] font-bold ${textColor} leading-tight pt-0.5`}>
+                      ±{data.stdDev.toFixed(1)}
+                    </div>
+                  </div>
+                </span>
+              }
+            >
+              <p className="font-semibold">{data.name}</p>
+              <p>Media: {data.avg.toFixed(1)}%</p>
+              <p>
+                Mínimo: {data.min.toFixed(1)}% · Máximo: {data.max.toFixed(1)}%
+              </p>
+              <p>Desviación: ±{data.stdDev.toFixed(1)}</p>
+            </Popover>
           );
         }}
       />
 
       {/* Legend */}
-      <div className="flex items-center justify-center gap-x-4 gap-y-1.5 pt-3 mt-auto border-t border-white/5 text-[9px] text-muted-foreground flex-wrap uppercase font-bold tracking-tighter">
+      <div className="flex items-center justify-center gap-x-4 gap-y-1.5 pt-3 mt-auto border-t border-border text-[9px] text-muted-foreground flex-wrap uppercase font-bold tracking-tighter">
         <div className="flex items-center gap-1">
-          <div className="w-2.5 h-0.5 bg-white/20" />
+          <div className="w-2.5 h-0.5 bg-[hsl(var(--content-muted))]" />
           <span>Rango Min-Max</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="w-2.5 h-1.5 rounded-[1px] bg-zinc-500/50 border border-white/10" />
+          <div className="w-2.5 h-1.5 rounded-[1px] bg-zinc-500/50 border border-border" />
           <span>Var. Típica</span>
         </div>
         <div className="flex items-center gap-1">
