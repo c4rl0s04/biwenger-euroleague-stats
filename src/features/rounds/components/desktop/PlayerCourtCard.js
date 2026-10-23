@@ -70,8 +70,10 @@ export default function PlayerCourtCard({ player, onClick, size = 'base' }) {
   const s = sizes[size] || sizes.base;
 
   return (
-    <motion.div
-      className="relative group cursor-pointer"
+    <motion.button
+      type="button"
+      aria-label={`Ver jugador ${player.name || player.player_id}`}
+      className="relative group cursor-pointer rounded-full text-left focus-visible:outline-2 focus-visible:outline-primary"
       onClick={() => onClick && onClick(player)}
       whileHover={{ scale: 1.05, zIndex: 50 }}
       whileTap={{ scale: 0.95 }}
@@ -137,6 +139,6 @@ export default function PlayerCourtCard({ player, onClick, size = 'base' }) {
           transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
         />
       )}
-    </motion.div>
+    </motion.button>
   );
 }
