@@ -22,7 +22,7 @@ import { apiClient } from '@/lib/api-client';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { useClientUser } from '@/lib/hooks/useClientUser';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
-import { Subheading } from '@/components/ui';
+import { SectionHeader } from '@/components/ui/foundation';
 import RoundStandings from './RoundStandings';
 import RoundControls from './RoundControls';
 import { RoundViewSwitcher } from './RoundViewSwitcher';
@@ -40,7 +40,7 @@ import ConsistencyRanking from './stats/history/ConsistencyRanking';
 import PerfectRoundsCard from './stats/history/PerfectRoundsCard';
 import RecordsGrid from './stats/history/RecordsGrid';
 import LineupStatsCard from './stats/general/LineupStatsCard';
-import Section from '@/components/layout/Section';
+import { RoundPageSection as Section } from '../RoundPageSection';
 import {
   Button,
   EmptyState,
@@ -648,7 +648,8 @@ export default function RoundsPageClient() {
 
             {historyStats && (
               <div className="space-y-3">
-                <Subheading
+                <SectionHeader
+                  level={3}
                   title={`Estadísticas personales de ${lists?.users?.find((u) => u.id === selectedUserId)?.name || 'Usuario'}`}
                   className="mb-2"
                 />
