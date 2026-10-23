@@ -61,6 +61,26 @@ beforeEach(() => {
 });
 
 describe('Rounds read query compatibility', () => {
+  it('preserves missing raw scores in personal ideal candidates', async () => {
+    rows(
+      [{ name: 'Fixture Manager' }],
+      [{ start_date: '2025-01-01T12:00:00Z' }],
+      [{ player_id: 1 }],
+      [],
+      [{ ...row(1), points: 0, raw_points: null }],
+      [],
+      []
+    );
+    const result = await getUserOptimization('u', 7);
+    expect(result?.optimalLineup[0]).toMatchObject({ points: 0, raw_points: null });
+    expect(
+      mocks.query.mock.calls.some(
+        ([sql]) =>
+          sql.includes('prs.fantasy_points as raw_points') &&
+          sql.includes('COALESCE(prs.fantasy_points, 0) as points')
+      )
+    ).toBe(true);
+  });
   it('keeps the two-field season-scoped selector and ascending ID ordering without cache', async () => {
     await getAllRounds();
     await getAllRounds();

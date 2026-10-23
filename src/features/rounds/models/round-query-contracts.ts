@@ -85,6 +85,8 @@ export interface RoundGlobalStats {
   winner: WinnerRow | null;
 }
 export interface SquadPlayerRow {
+  raw_points?: number | null;
+  calculated?: boolean;
   player_id: number;
   name: string | null;
   position: string | null;

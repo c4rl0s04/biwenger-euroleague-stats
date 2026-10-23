@@ -53,6 +53,8 @@ export interface RoundLineupViewModel {
   summary: { total_points: number; round_rank: number; participated: boolean | null } | null;
 }
 export interface RoundCandidateViewModel {
+  raw_points?: number | null;
+  calculated?: boolean;
   player_id: number;
   name: string | null;
   position: string | null;
