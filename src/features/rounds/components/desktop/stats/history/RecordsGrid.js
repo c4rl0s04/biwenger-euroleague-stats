@@ -2,7 +2,7 @@
 
 import { Trophy, Star, TrendingDown, Target, Skull } from 'lucide-react';
 import { RoundCard } from '../../../RoundCard';
-import { RoundRankingList } from '../../../RoundRankingList';
+import { ManagerStatList } from '@/lib/competition/ui';
 
 /**
  * RecordsGrid - Displays league-wide records in a grid of cards.
@@ -90,9 +90,17 @@ export default function RecordsGrid({ leaderboardData = [], users = [] }) {
   const renderCard = (title, icon, color, items, valueColor, info) => (
     <RoundCard title={title} icon={icon} color={color} info={info}>
       <div className="flex flex-col gap-1">
-        <RoundRankingList
+        <ManagerStatList
           items={items}
-          renderRight={(item) => (
+          getKey={(item) => item.userId}
+          getIdentity={(item) => ({
+            id: item.userId,
+            name: item.name,
+            icon: item.icon,
+            colorIndex: item.color_index,
+            subtitle: item.subtitle,
+          })}
+          renderMetric={(item) => (
             <span className={`text-sm font-black ${valueColor}`}>{item.value}</span>
           )}
         />
