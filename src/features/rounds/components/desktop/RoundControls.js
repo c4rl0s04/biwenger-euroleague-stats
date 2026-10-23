@@ -1,7 +1,7 @@
 'use client';
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import CustomSelect from '@/components/ui/CustomSelect';
+import { Select, IconButton } from '@/components/ui/foundation';
 
 export default function RoundControls({ lists, selectedRoundId, onChangeRound }) {
   if (!lists?.rounds) return null;
@@ -28,7 +28,8 @@ export default function RoundControls({ lists, selectedRoundId, onChangeRound })
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-center gap-4">
-        <button
+        <IconButton
+          variant="ghost"
           type="button"
           onClick={handlePrev}
           className="p-3 rounded-full hover:bg-secondary/50 text-muted-foreground hover:text-primary transition-colors disabled:opacity-20 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
@@ -36,8 +37,8 @@ export default function RoundControls({ lists, selectedRoundId, onChangeRound })
           aria-label="Jornada anterior"
         >
           <ChevronLeft size={28} aria-hidden="true" />
-        </button>
-        <CustomSelect
+        </IconButton>
+        <Select
           value={lists.rounds[currentRoundIndex]?.round_id}
           onChange={onChangeRound}
           options={lists.rounds.map((round) => ({
@@ -48,12 +49,11 @@ export default function RoundControls({ lists, selectedRoundId, onChangeRound })
             ),
           }))}
           className="w-48 min-w-0"
-          buttonClassName="h-11! text-base font-sans"
           placeholder="Selecciona jornada"
           label="Jornada"
-          compact
         />
-        <button
+        <IconButton
+          variant="ghost"
           type="button"
           onClick={handleNext}
           className="p-3 rounded-full hover:bg-secondary/50 text-muted-foreground hover:text-primary transition-colors disabled:opacity-20 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
@@ -61,7 +61,7 @@ export default function RoundControls({ lists, selectedRoundId, onChangeRound })
           aria-label="Jornada siguiente"
         >
           <ChevronRight size={28} aria-hidden="true" />
-        </button>
+        </IconButton>
       </div>
     </div>
   );

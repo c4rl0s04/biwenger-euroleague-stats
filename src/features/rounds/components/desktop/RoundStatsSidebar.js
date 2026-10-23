@@ -9,8 +9,8 @@ export default function RoundStatsSidebar({ stats, loading, summary, viewMode })
   if (loading) {
     return (
       <div className="space-y-4 animate-pulse">
-        <div className="h-32 bg-white/5 rounded-xl" />
-        <div className="h-32 bg-white/5 rounded-xl" />
+        <div className="h-32 bg-secondary rounded-xl" />
+        <div className="h-32 bg-secondary rounded-xl" />
       </div>
     );
   }
