@@ -16,7 +16,7 @@ export function selectRoundManager(
       : primary || background;
 }
 
-export function hasPendingRoundPoints(player: {
+export function hasMissingRoundPoints(player: {
   raw_points?: number | null;
   points?: number | null;
   calculated?: boolean;

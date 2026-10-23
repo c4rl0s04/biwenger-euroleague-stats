@@ -565,6 +565,7 @@ export async function getUserOptimization(
       opm.image_url AS img,
       t.short_name as team_short,
       otm.crest_url as team_img,
+      prs.fantasy_points as raw_points,
       COALESCE(prs.fantasy_points, 0) as points,
       COALESCE(prs.valuation, 0) as valuation
     FROM players p
@@ -606,6 +607,8 @@ export async function getUserOptimization(
           team_short: player.team_short ?? null,
           team_img: player.team_img ?? null,
           points: player.points,
+          raw_points: player.raw_points,
+          calculated: player.calculated,
           valuation: player.valuation || 0,
         });
         knownIds.add(player.player_id);

@@ -52,11 +52,11 @@ export default function ScoreOverviewCard({ summary, viewMode, user }) {
           <span
             className={`text-5xl font-bold font-mono tracking-tighter ${textColor} drop-shadow-[0_0_15px_rgba(250,80,1,0.2)]`}
           >
-            {total_points == null ? '—' : Math.round(total_points)}
+            {total_points == null ? '/' : Math.round(total_points)}
           </span>
           <span className="text-[11px] text-zinc-400 font-black uppercase tracking-[0.2em] mt-1">
             {total_points == null
-              ? 'Pendiente'
+              ? 'PTS'
               : summary.provisional
                 ? 'Provisional'
                 : round_rank
