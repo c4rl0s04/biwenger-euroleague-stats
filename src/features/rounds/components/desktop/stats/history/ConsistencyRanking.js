@@ -2,10 +2,10 @@ import { Skeleton } from '@/components/ui/foundation';
 import { useMemo } from 'react';
 import { Popover } from '@/components/ui/foundation';
 import { Ruler } from 'lucide-react';
-import { RoundRankingList } from '../../../RoundRankingList';
+import { ManagerDistributionList } from '@/lib/competition/ui';
 
 /**
- * ConsistencyRanking - Shows users ranked by consistency using StatsList
+ * ConsistencyRanking - Shows users ranked by consistency using analytical manager rows
  */
 export default function ConsistencyRanking({ allUsersHistory = [], users = [], loading = false }) {
   const items = useMemo(() => {
@@ -72,9 +72,16 @@ export default function ConsistencyRanking({ allUsersHistory = [], users = [], l
 
   return (
     <div className="flex flex-col h-full">
-      <RoundRankingList
+      <ManagerDistributionList
         items={items}
-        renderRight={(data) => {
+        getKey={(item) => item.user_id}
+        getIdentity={(item) => ({
+          id: item.user_id ?? null,
+          name: item.name,
+          icon: item.icon,
+          colorIndex: item.color_index,
+        })}
+        renderVisualization={(data) => {
           const minPos = getPos(data.min);
           const maxPos = getPos(data.max);
           const avgPos = getPos(data.avg);
@@ -98,10 +105,11 @@ export default function ConsistencyRanking({ allUsersHistory = [], users = [], l
           return (
             <Popover
               label={`${data.name}: consistencia, media ${data.avg.toFixed(1)}%`}
+              className="w-full min-h-11"
               trigger={
-                <span className="flex items-center gap-4">
+                <span className="flex w-full items-center gap-4">
                   {/* Visualization Container */}
-                  <div className="w-24 sm:w-32 xl:w-40 h-5 bg-secondary/50 rounded relative overflow-hidden border border-border">
+                  <div className="min-w-0 flex-1 h-6 bg-secondary/50 rounded relative overflow-hidden border border-border">
                     {/* Min-Max Total Range Bar */}
                     <div
                       className="absolute top-1/2 -translate-y-1/2 h-0.5 bg-secondary rounded-full"
