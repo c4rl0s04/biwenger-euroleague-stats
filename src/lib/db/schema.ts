@@ -17,8 +17,6 @@ import {
   jsonb,
 } from 'drizzle-orm/pg-core';
 
-export const DEFAULT_SEASON_ID = '2025-26';
-
 // 1. Users Table
 export const users = pgTable('users', {
   id: text('id').primaryKey(),
@@ -89,7 +87,6 @@ export const teamSeasons = pgTable(
     id: serial('id').primaryKey(),
     seasonId: text('season_id')
       .notNull()
-      .default(DEFAULT_SEASON_ID)
       .references(() => seasons.id),
     teamId: integer('team_id')
       .notNull()
@@ -131,7 +128,6 @@ export const playerSeasons = pgTable(
     id: serial('id').primaryKey(),
     seasonId: text('season_id')
       .notNull()
-      .default(DEFAULT_SEASON_ID)
       .references(() => seasons.id),
     playerId: integer('player_id')
       .notNull()
@@ -172,7 +168,6 @@ export const userSeasons = pgTable(
   {
     seasonId: text('season_id')
       .notNull()
-      .default(DEFAULT_SEASON_ID)
       .references(() => seasons.id),
     userId: text('user_id')
       .notNull()
@@ -234,7 +229,6 @@ export const userRounds = pgTable(
     id: serial('id').primaryKey(),
     seasonId: text('season_id')
       .notNull()
-      .default(DEFAULT_SEASON_ID)
       .references(() => seasons.id),
     userId: text('user_id'),
     roundId: integer('round_id'),
@@ -261,7 +255,6 @@ export const fichajes = pgTable(
     id: serial('id').primaryKey(),
     seasonId: text('season_id')
       .notNull()
-      .default(DEFAULT_SEASON_ID)
       .references(() => seasons.id),
     timestamp: bigint('timestamp', { mode: 'number' }),
     fecha: text('fecha'),
@@ -290,7 +283,6 @@ export const lineups = pgTable(
     id: serial('id').primaryKey(),
     seasonId: text('season_id')
       .notNull()
-      .default(DEFAULT_SEASON_ID)
       .references(() => seasons.id),
     userId: text('user_id'),
     roundId: integer('round_id'),
@@ -317,7 +309,6 @@ export const matches = pgTable(
     id: serial('id').primaryKey(),
     seasonId: text('season_id')
       .notNull()
-      .default(DEFAULT_SEASON_ID)
       .references(() => seasons.id),
     roundId: integer('round_id'),
     roundName: text('round_name'),
@@ -364,7 +355,6 @@ export const playerRoundStats = pgTable(
     id: serial('id').primaryKey(),
     seasonId: text('season_id')
       .notNull()
-      .default(DEFAULT_SEASON_ID)
       .references(() => seasons.id),
     playerId: integer('player_id'),
     roundId: integer('round_id'),
@@ -409,7 +399,6 @@ export const porras = pgTable(
     id: serial('id').primaryKey(),
     seasonId: text('season_id')
       .notNull()
-      .default(DEFAULT_SEASON_ID)
       .references(() => seasons.id),
     userId: text('user_id'),
     roundId: integer('round_id'),
@@ -434,7 +423,6 @@ export const marketValues = pgTable(
     id: serial('id').primaryKey(),
     seasonId: text('season_id')
       .notNull()
-      .default(DEFAULT_SEASON_ID)
       .references(() => seasons.id),
     playerId: integer('player_id'),
     price: integer('price'),
@@ -453,7 +441,6 @@ export const transferBids = pgTable(
     id: serial('id').primaryKey(),
     seasonId: text('season_id')
       .notNull()
-      .default(DEFAULT_SEASON_ID)
       .references(() => seasons.id),
     transferId: integer('transfer_id').references(() => fichajes.id),
     bidderId: text('bidder_id'),
@@ -476,7 +463,6 @@ export const initialSquads = pgTable(
     id: serial('id').primaryKey(),
     seasonId: text('season_id')
       .notNull()
-      .default(DEFAULT_SEASON_ID)
       .references(() => seasons.id),
     userId: text('user_id'),
     playerId: integer('player_id'),
@@ -499,7 +485,6 @@ export const finances = pgTable(
     id: serial('id').primaryKey(),
     seasonId: text('season_id')
       .notNull()
-      .default(DEFAULT_SEASON_ID)
       .references(() => seasons.id),
     userId: text('user_id'),
     roundId: integer('round_id'),
@@ -703,7 +688,6 @@ export const tournaments = pgTable(
     id: integer('id').notNull(),
     seasonId: text('season_id')
       .notNull()
-      .default(DEFAULT_SEASON_ID)
       .references(() => seasons.id),
     leagueId: integer('league_id'),
     name: text('name'),
@@ -724,7 +708,6 @@ export const tournamentPhases = pgTable(
     id: serial('id').primaryKey(),
     seasonId: text('season_id')
       .notNull()
-      .default(DEFAULT_SEASON_ID)
       .references(() => seasons.id),
     tournamentId: integer('tournament_id'),
     name: text('name'),
@@ -753,7 +736,6 @@ export const tournamentFixtures = pgTable(
     id: integer('id').notNull(),
     seasonId: text('season_id')
       .notNull()
-      .default(DEFAULT_SEASON_ID)
       .references(() => seasons.id),
     tournamentId: integer('tournament_id'),
     phaseId: integer('phase_id').references(() => tournamentPhases.id),
@@ -798,7 +780,6 @@ export const tournamentStandings = pgTable(
     id: serial('id').primaryKey(),
     seasonId: text('season_id')
       .notNull()
-      .default(DEFAULT_SEASON_ID)
       .references(() => seasons.id),
     tournamentId: integer('tournament_id'),
     phaseName: text('phase_name'),
@@ -842,7 +823,6 @@ export const marketListings = pgTable(
     id: serial('id').primaryKey(),
     seasonId: text('season_id')
       .notNull()
-      .default(DEFAULT_SEASON_ID)
       .references(() => seasons.id),
     playerId: integer('player_id'),
     listedAt: date('listed_at'),
@@ -895,7 +875,6 @@ export const playoffPredictions = pgTable(
     id: serial('id').primaryKey(),
     seasonId: text('season_id')
       .notNull()
-      .default(DEFAULT_SEASON_ID)
       .references(() => seasons.id),
     userId: text('user_id'),
     stage: text('stage'), // 'play-in', 'quarter', 'semi', 'final'
@@ -928,7 +907,6 @@ export const playoffResults = pgTable(
     id: serial('id').primaryKey(),
     seasonId: text('season_id')
       .notNull()
-      .default(DEFAULT_SEASON_ID)
       .references(() => seasons.id),
     matchId: text('match_id'), // 'PI-1', 'QF-1', etc.
     stage: text('stage'),
@@ -949,7 +927,6 @@ export const userPlayoffMedia = pgTable(
     id: serial('id').primaryKey(),
     seasonId: text('season_id')
       .notNull()
-      .default(DEFAULT_SEASON_ID)
       .references(() => seasons.id),
     userId: text('user_id'),
     predictionImageUrl: text('prediction_image_url'),
