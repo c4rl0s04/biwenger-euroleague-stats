@@ -67,8 +67,7 @@ Object.assign(env, {
   E2E_PASSWORD: 'fixture-only-password',
   PLAYWRIGHT_BASE_URL: `http://127.0.0.1:${appPort}`,
   E2E_REQUIRED: 'true',
-  SEASON_ID: '2025-26',
-  SEASON_NAME: 'Fixture League 2025-26',
+  PERSONAL_BIDS_USER_ID: '99001',
   NEXT_TELEMETRY_DISABLED: '1',
 });
 assertFixtureTarget(connectionString, env);
@@ -165,7 +164,7 @@ try {
     E2E_DATABASE_URL: integrityConnectionString,
     DATABASE_URL: integrityConnectionString,
   });
-  await run(['scripts/e2e/seed.mjs']);
+  await run(['scripts/e2e/seed.mjs'], { E2E_ACTIVE_SEASON: '2025-26' });
   if (fixture === 'default') {
     await run(
       [

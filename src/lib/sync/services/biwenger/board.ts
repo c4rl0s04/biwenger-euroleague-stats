@@ -1,18 +1,13 @@
-import { biwengerFetch } from '../../../api/biwenger-client';
+import { createBiwengerApi } from '../../../api/biwenger-client';
 import { CONFIG } from '../../../config';
 import { prepareMarketMutations, type MarketMutations } from '../../../db/mutations/market';
 import type { SyncManager } from '../../manager';
 import { getSeasonActiveUserNames, getSeasonStartDate } from '../../repositories/sync-queries';
 
 export interface BoardDependencies {
-  fetch: typeof biwengerFetch;
+  fetch: ReturnType<typeof createBiwengerApi>['fetch'];
   leagueId?: string;
 }
-
-export const defaultBoardDependencies: BoardDependencies = {
-  fetch: biwengerFetch,
-  leagueId: CONFIG.API.LEAGUE_ID,
-};
 
 export interface BiwengerBoardSyncResult {
   summary: string;
@@ -226,7 +221,7 @@ async function processTransfers(
 
 export async function syncBiwengerBoard(
   manager: SyncManager,
-  dependencies: BoardDependencies = defaultBoardDependencies
+  dependencies: BoardDependencies = { fetch: createBiwengerApi(manager.context.provider).fetch }
 ): Promise<BiwengerBoardSyncResult> {
   const db = manager.context.db;
   const seasonId = manager.context.seasonId;
@@ -260,9 +255,9 @@ export async function syncBiwengerBoard(
   let skippedInvalidActorTransfers = 0;
   const teamNames = new Set(Object.values(teams).map((team: any) => team.name));
 
-  const leagueId = dependencies.leagueId ?? CONFIG.API.LEAGUE_ID;
+  const leagueId = dependencies.leagueId ?? manager.context.season?.sourceLeagueId;
   if (!leagueId) {
-    throw new Error('BIWENGER_LEAGUE_ID is not defined in .env');
+    throw new Error('Writable season has no Biwenger league binding');
   }
 
   const transferCtx: TransferProcessingContext = {

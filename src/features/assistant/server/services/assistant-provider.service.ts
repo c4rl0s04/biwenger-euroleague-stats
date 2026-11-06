@@ -40,14 +40,15 @@ export class AssistantProviderService {
       return {
         apiKey: process.env.GROQ_API_KEY,
         baseURL: GROQ_BASE_URL,
-        model: process.env.GROQ_MODEL || DEFAULT_MODELS.groq,
+        // shortcut: preserve deployed model aliases until the configuration cutover is confirmed.
+        model: process.env.AI_MODEL || process.env.GROQ_MODEL || DEFAULT_MODELS.groq,
       };
     }
 
     return {
       apiKey: process.env.OPENAI_API_KEY,
       baseURL: undefined,
-      model: process.env.OPENAI_MODEL || DEFAULT_MODELS.openai,
+      model: process.env.AI_MODEL || process.env.OPENAI_MODEL || DEFAULT_MODELS.openai,
     };
   }
 

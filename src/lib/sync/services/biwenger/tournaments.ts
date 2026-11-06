@@ -1,5 +1,4 @@
-import { fetchRoundsLeague, fetchTournament } from '../../../api/biwenger-client';
-import { CONFIG } from '../../../config';
+import { createBiwengerApi } from '../../../api/biwenger-client';
 import {
   prepareTournamentMutations,
   type TournamentMutations,
@@ -54,9 +53,11 @@ export async function syncBiwengerTournaments(
 
   const mutationsFactory = dependencies.prepareMutations || prepareTournamentMutations;
   const tournamentMutations = mutationsFactory(manager.context.db as any, { seasonId });
-  const getRoundDetail = dependencies.fetchRoundsLeague || fetchRoundsLeague;
-  const getTournament = dependencies.fetchTournament || fetchTournament;
-  const leagueId = Number(dependencies.leagueId || CONFIG.API.LEAGUE_ID);
+  const getRoundDetail =
+    dependencies.fetchRoundsLeague || createBiwengerApi(manager.context.provider).fetchRoundsLeague;
+  const getTournament =
+    dependencies.fetchTournament || createBiwengerApi(manager.context.provider).fetchTournament;
+  const leagueId = Number(dependencies.leagueId || manager.context.season?.sourceLeagueId);
 
   // 1. Discovery: Scan FULL SEASON to find all tournaments (Active & Finished)
   manager.log('Discovering tournaments from full season schedule');

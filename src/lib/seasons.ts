@@ -1,5 +1,4 @@
 import { desc, eq } from 'drizzle-orm';
-import { CONFIG } from './config';
 import { db } from './db/client';
 import { seasons } from './db/schema';
 
@@ -14,6 +13,7 @@ export interface SeasonRecord {
   startsAt: string | null;
   endsAt: string | null;
   frozenAt: Date | null;
+  sourceLeagueId: string | null;
 }
 
 export class SeasonError extends Error {
@@ -24,10 +24,6 @@ export class SeasonError extends Error {
     this.name = 'SeasonError';
     this.code = code;
   }
-}
-
-export function getDefaultSeasonId(): string {
-  return CONFIG.SEASON.ID;
 }
 
 export async function getSeasonById(seasonId: string): Promise<SeasonRecord | null> {
@@ -42,6 +38,7 @@ export async function getSeasonById(seasonId: string): Promise<SeasonRecord | nu
       startsAt: true,
       endsAt: true,
       frozenAt: true,
+      sourceLeagueId: true,
     },
   });
 
@@ -61,6 +58,7 @@ export async function getActiveSeason(): Promise<SeasonRecord> {
       startsAt: true,
       endsAt: true,
       frozenAt: true,
+      sourceLeagueId: true,
     },
   });
 
@@ -91,6 +89,7 @@ export async function listAvailableSeasons(): Promise<SeasonRecord[]> {
       startsAt: true,
       endsAt: true,
       frozenAt: true,
+      sourceLeagueId: true,
     },
   });
 

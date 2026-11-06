@@ -18,7 +18,10 @@ import {
   placePersonalBidNow,
 } from './services/personal-bids.service';
 
-beforeEach(() => vi.clearAllMocks());
+beforeEach(() => {
+  vi.clearAllMocks();
+  vi.stubEnv('PERSONAL_BIDS_USER_ID', '7');
+});
 
 const payload = {
   playerId: 21,
@@ -60,3 +63,12 @@ describe('personal manual bids', () => {
     expect(mocks.place).toHaveBeenCalledExactlyOnceWith('7', payload);
   });
 });
+
+it.each(['', 'not-an-id', '0'])(
+  'keeps private bidding closed for missing or malformed allowlist %s',
+  (value) => {
+    vi.stubEnv('PERSONAL_BIDS_USER_ID', value);
+    expect(() => assertPersonalBidAccess('7')).toThrow();
+    expect(() => assertPersonalBidAccess(undefined)).toThrow();
+  }
+);

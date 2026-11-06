@@ -1,7 +1,6 @@
 import 'server-only';
 
 import { z } from 'zod';
-import { CONFIG } from '@/lib/config';
 import {
   getLiveBidMarket,
   getLivePlayerBidCount,
@@ -26,7 +25,11 @@ export class PersonalBidError extends Error {
 }
 
 export function assertPersonalBidAccess(userId: string | undefined): asserts userId is string {
-  if (!userId || !CONFIG.API.USER_ID || userId !== String(CONFIG.API.USER_ID)) {
+  if (
+    !userId ||
+    !/^[1-9]\d*$/.test(process.env.PERSONAL_BIDS_USER_ID ?? '') ||
+    userId !== process.env.PERSONAL_BIDS_USER_ID
+  ) {
     throw new PersonalBidError('forbidden', 'Esta página es privada.', 403);
   }
 }

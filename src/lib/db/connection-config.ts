@@ -21,32 +21,39 @@ export function connectionHost(connectionString: string): string | undefined {
   }
 }
 
-export function isLocalDatabaseTarget(env: DatabaseEnvironment = process.env): boolean {
-  const connectionString = env.DATABASE_URL || env.POSTGRES_URL;
-  if (connectionString) {
-    const host = connectionHost(connectionString);
-    return isLocalHost(host);
+export function databaseUrl(env: DatabaseEnvironment): string {
+  const value = env.DATABASE_URL?.trim();
+  if (!value) throw new Error('DATABASE_URL is required.');
+  try {
+    if (/[\r\n]/.test(value)) throw new Error();
+    const url = new URL(value);
+    decodeURIComponent(url.username);
+    decodeURIComponent(url.password);
+    decodeURIComponent(url.pathname);
+    if (
+      !['postgres:', 'postgresql:'].includes(url.protocol) ||
+      !url.hostname ||
+      url.pathname.length < 2
+    ) {
+      throw new Error();
+    }
+  } catch {
+    throw new Error(
+      'DATABASE_URL must be a valid PostgreSQL connection URL with a host and database.'
+    );
   }
-  return isLocalHost(env.POSTGRES_HOST);
+  return value;
+}
+
+export function isLocalDatabaseTarget(env: DatabaseEnvironment = process.env): boolean {
+  return isLocalHost(connectionHost(databaseUrl(env)));
 }
 
 export function buildPoolConfig(env: DatabaseEnvironment): PoolConfig {
-  const connectionString = env.DATABASE_URL || env.POSTGRES_URL;
-  if (connectionString) {
-    const host = connectionHost(connectionString);
-    return {
-      connectionString,
-      ssl: host && !isLocalHost(host) ? { rejectUnauthorized: false } : false,
-    };
-  }
-
-  const host = env.POSTGRES_HOST;
+  const connectionString = databaseUrl(env);
+  const host = connectionHost(connectionString);
   return {
-    user: env.POSTGRES_USER,
-    password: env.POSTGRES_PASSWORD,
-    host,
-    port: env.POSTGRES_PORT ? parseInt(env.POSTGRES_PORT, 10) : 5432,
-    database: env.POSTGRES_DB,
-    ssl: !isLocalHost(host) ? { rejectUnauthorized: false } : false,
+    connectionString,
+    ssl: host && !isLocalHost(host) ? { rejectUnauthorized: false } : false,
   };
 }

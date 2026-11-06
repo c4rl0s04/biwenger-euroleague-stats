@@ -1,9 +1,6 @@
+import '../dev/load-env.mjs';
 import path from 'node:path';
-import * as dotenv from 'dotenv';
 import { createCliPool } from '../../src/lib/db/cli';
-
-dotenv.config({ path: process.env.ENV_LOCAL_FILE || '.env.local' });
-dotenv.config({ path: process.env.ENV_FILE || '.env' });
 
 async function main() {
   const mode = process.argv[2] || 'check';

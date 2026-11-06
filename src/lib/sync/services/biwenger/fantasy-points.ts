@@ -1,4 +1,4 @@
-import { fetchRoundGames as defaultFetchRoundGames } from '../../../api/biwenger-client';
+import { createBiwengerApi } from '../../../api/biwenger-client';
 import {
   preparePlayerStatMutations,
   type PlayerStatMutations,
@@ -35,7 +35,9 @@ export async function syncFantasyPoints(
   if (!seasonId) throw new Error('The writable season was not resolved.');
   if (!manager.context.db) throw new Error('The sync database was not initialized.');
   const games = fantasyGames(
-    await (dependencies.fetchRoundGames || defaultFetchRoundGames)(round.id)
+    await (
+      dependencies.fetchRoundGames || createBiwengerApi(manager.context.provider).fetchRoundGames
+    )(round.id)
   );
   const scores: Array<{ playerId: number; roundId: number; fantasyPoints: number }> = [];
   let reports = 0;

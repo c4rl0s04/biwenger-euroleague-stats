@@ -1,4 +1,4 @@
-import { fetchLeague } from '../../../api/biwenger-client';
+import { createBiwengerApi } from '../../../api/biwenger-client';
 import { prepareUserMutations, type UserMutations } from '../../../db/mutations/users';
 import type { SyncManager } from '../../manager';
 
@@ -21,7 +21,8 @@ export async function syncBiwengerUsers(
   }
 
   manager.log('Fetching standings');
-  const getLeague = dependencies.fetchLeague || fetchLeague;
+  const getLeague =
+    dependencies.fetchLeague || createBiwengerApi(manager.context.provider).fetchLeague;
   const mutationsFactory = dependencies.prepareMutations || prepareUserMutations;
 
   try {

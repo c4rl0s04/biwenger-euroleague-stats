@@ -1,6 +1,5 @@
 import 'server-only';
 
-import { CONFIG } from '@/lib/config';
 import {
   executeUserProviderQuery,
   type BiwengerProviderClient,
@@ -29,7 +28,7 @@ export class LiveBidCountUnavailableError extends Error {
 }
 
 export function getLiveBidActor(userId: string, context: BiwengerRequestContext) {
-  const leagueId = String(CONFIG.API.LEAGUE_ID ?? '');
+  const leagueId = String(context.leagueId ?? '');
   if (!/^\d+$/.test(userId) || !/^\d+$/.test(leagueId)) {
     throw new LiveMarketDataError('Invalid market account or league configuration');
   }

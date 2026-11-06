@@ -1,6 +1,6 @@
+import '../dev/load-env.mjs';
 import { readFile, writeFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
-import dotenv from 'dotenv';
 import type { PoolClient } from 'pg';
 import { createCliPool } from '../../src/lib/db/cli';
 import {
@@ -332,7 +332,6 @@ async function main() {
   const inputRaw = await readFile(values.input!, 'utf8');
   const collection = collectionSchema.parse(JSON.parse(inputRaw));
 
-  dotenv.config({ path: ['.env.local', '.env'], quiet: true });
   const pool = createCliPool({ max: 1 });
   const db = await pool.connect();
 

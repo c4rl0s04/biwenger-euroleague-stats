@@ -4,7 +4,7 @@ services:
     container_name: biwenger_db
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set the local database initialization password}
       POSTGRES_DB: ${POSTGRES_DB:-biwenger}
     ports:
       - '5432:5432'
@@ -13,67 +13,50 @@ services:
     restart: always
 
   app:
-    build: .
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_SENTRY_DSN: ${NEXT_PUBLIC_SENTRY_DSN:-}
     container_name: biwenger_web
     restart: always
     ports:
       - '3000:3000'
     environment:
-      - DATABASE_URL=${DATABASE_URL}
-      - POSTGRES_HOST=${DOCKER_POSTGRES_HOST:-postgres}
-      - POSTGRES_USER=${POSTGRES_USER:-user}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
-      - POSTGRES_DB=${POSTGRES_DB:-biwenger}
-      - BIWENGER_TOKEN=${BIWENGER_TOKEN}
-      - BIWENGER_LEAGUE_ID=${BIWENGER_LEAGUE_ID}
-      - BIWENGER_USER_ID=${BIWENGER_USER_ID}
-      - SEASON_ID=${SEASON_ID}
-      - SEASON_NAME=${SEASON_NAME}
-      - EUROLEAGUE_SEASON_CODE=${EUROLEAGUE_SEASON_CODE}
-      - LEAGUE_START_DATE=${LEAGUE_START_DATE}
-      - SEASON_AWARE_READS_CONFIRMED=${SEASON_AWARE_READS_CONFIRMED}
-      - ACCESS_PASSWORD=${ACCESS_PASSWORD}
-      - AUTH_SECRET=${AUTH_SECRET}
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL for the container network}
+      AUTH_SECRET: ${AUTH_SECRET:?Set AUTH_SECRET}
+      BIWENGER_CREDENTIAL_KEYS: ${BIWENGER_CREDENTIAL_KEYS:-}
+      BIWENGER_CREDENTIAL_ACTIVE_KEY_ID: ${BIWENGER_CREDENTIAL_ACTIVE_KEY_ID:-}
+      PERSONAL_BIDS_USER_ID: ${PERSONAL_BIDS_USER_ID:-}
+      AI_PROVIDER: ${AI_PROVIDER:-}
+      AI_MODEL: ${AI_MODEL:-}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      NEXT_PUBLIC_SENTRY_DSN: ${NEXT_PUBLIC_SENTRY_DSN:-}
+      SENTRY_DSN: ${SENTRY_DSN:-}
     depends_on:
       - postgres
 
   sync:
     build: .
     container_name: biwenger_sync
-    # Run sync on start, then loop every 6 hours (21600 seconds)
     command: >
-      sh -c "
-        if [ -n \"$DATABASE_URL\" ]; then
-          echo '[Sync] Remote Database detected (DATABASE_URL is set).'
-          echo '[Sync] Skipping automatic sync to avoid conflicts with production.'
-          echo '[Sync] Sleeping indefinitely...'
-          tail -f /dev/null
+      sh -c '
+        if ! node -e "const h = new URL(process.env.DATABASE_URL).hostname; process.exit([\"localhost\",\"127.0.0.1\",\"[::1]\",\"postgres\"].includes(h) ? 0 : 1)"; then
+          echo "Remote database: automatic sync disabled. Run an explicit approved sync command.";
+          tail -f /dev/null;
         else
-          echo 'Starting sync service...'
-          echo '[Sync] Running initial routine sync...'
-          npm run sync || echo '[Sync] Initial sync failed'
           while true; do
-            echo '[Sync] Sync complete. Sleeping for 6 hours...'
-            sleep 21600
-            echo '[Sync] Starting scheduled routine sync at $(date)'
-            npm run sync || echo '[Sync] Failed'
-          done
-        fi
-      "
+            npm run sync || echo "Sync failed";
+            sleep 21600;
+          done;
+        fi'
     environment:
-      - DATABASE_URL=${DATABASE_URL}
-      - POSTGRES_HOST=${DOCKER_POSTGRES_HOST:-postgres}
-      - POSTGRES_USER=${POSTGRES_USER:-user}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
-      - POSTGRES_DB=${POSTGRES_DB:-biwenger}
-      - BIWENGER_TOKEN=${BIWENGER_TOKEN}
-      - BIWENGER_LEAGUE_ID=${BIWENGER_LEAGUE_ID}
-      - BIWENGER_USER_ID=${BIWENGER_USER_ID}
-      - SEASON_ID=${SEASON_ID}
-      - SEASON_NAME=${SEASON_NAME}
-      - EUROLEAGUE_SEASON_CODE=${EUROLEAGUE_SEASON_CODE}
-      - LEAGUE_START_DATE=${LEAGUE_START_DATE}
-      - SEASON_AWARE_READS_CONFIRMED=${SEASON_AWARE_READS_CONFIRMED}
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL for the container network}
+      BIWENGER_TOKEN: ${BIWENGER_TOKEN:-}
+      BIWENGER_API_VERSION_FALLBACK: ${BIWENGER_API_VERSION_FALLBACK:-}
+      EUROLEAGUE_ADVANCED_API_URL: ${EUROLEAGUE_ADVANCED_API_URL:-}
+      EUROLEAGUE_ADVANCED_API_TOKEN: ${EUROLEAGUE_ADVANCED_API_TOKEN:-}
+      SENTRY_DSN: ${SENTRY_DSN:-}
     depends_on:
       - postgres
 

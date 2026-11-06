@@ -1,10 +1,7 @@
 #!/usr/bin/env tsx
-import * as dotenv from 'dotenv';
+import '../dev/load-env.mjs';
 import { writeFileSync } from 'node:fs';
 import { createCliPool } from '../../src/lib/db/cli';
-
-dotenv.config({ path: '.env.local' });
-dotenv.config();
 
 interface CliOptions {
   seasonId?: string;
@@ -162,7 +159,12 @@ async function resolveSeasonId(pool: any, requested?: string): Promise<string> {
   return '2026-27';
 }
 
-async function loadLedgerData(pool: any, seasonId: string, startDate: string, budget: number): Promise<ManagerFinanceLedger[]> {
+async function loadLedgerData(
+  pool: any,
+  seasonId: string,
+  startDate: string,
+  budget: number
+): Promise<ManagerFinanceLedger[]> {
   // 1. Fetch active users
   const usersRes = await pool.query(
     `SELECT us.user_id, us.name, us.color_index
@@ -394,10 +396,33 @@ async function loadLedgerData(pool: any, seasonId: string, startDate: string, bu
   return result;
 }
 
-function printSummaryTable(ledgers: ManagerFinanceLedger[], options: CliOptions, c: ReturnType<typeof createStyler>) {
-  console.log('\n' + c.bold(c.cyan('========================================================================================')));
-  console.log(c.bold(c.cyan(` BIWENGER MANAGER FINANCIAL LEDGER | Season: ${options.seasonId} | Anchor: ${options.startDate}`)));
-  console.log(c.bold(c.cyan('========================================================================================\n')));
+function printSummaryTable(
+  ledgers: ManagerFinanceLedger[],
+  options: CliOptions,
+  c: ReturnType<typeof createStyler>
+) {
+  console.log(
+    '\n' +
+      c.bold(
+        c.cyan(
+          '========================================================================================'
+        )
+      )
+  );
+  console.log(
+    c.bold(
+      c.cyan(
+        ` BIWENGER MANAGER FINANCIAL LEDGER | Season: ${options.seasonId} | Anchor: ${options.startDate}`
+      )
+    )
+  );
+  console.log(
+    c.bold(
+      c.cyan(
+        '========================================================================================\n'
+      )
+    )
+  );
 
   const col = {
     rank: 4,
@@ -414,7 +439,7 @@ function printSummaryTable(ledgers: ManagerFinanceLedger[], options: CliOptions,
     pnl: 11,
   };
 
-  const header = 
+  const header =
     '#'.padEnd(col.rank) +
     'Manager'.padEnd(col.name) +
     'Init Squad'.padStart(col.initRoster) +
@@ -439,7 +464,7 @@ function printSummaryTable(ledgers: ManagerFinanceLedger[], options: CliOptions,
     const buysStr = formatShortEuro(m.totalPurchases).padStart(col.buys);
     const salesStr = formatShortEuro(m.totalSales).padStart(col.sales);
     const bonusStr = formatShortEuro(m.totalBonuses).padStart(col.bonus);
-    
+
     // Liquid cash (colored based on positive / negative)
     const rawCashStr = formatEuro(m.currentCash).padStart(col.cash);
     const cashStr = m.currentCash >= 0 ? c.green(c.bold(rawCashStr)) : c.red(c.bold(rawCashStr));
@@ -447,7 +472,7 @@ function printSummaryTable(ledgers: ManagerFinanceLedger[], options: CliOptions,
     const rosterCountStr = `${m.currentSquad.length}p`.padStart(col.roster);
     const squadValStr = formatShortEuro(m.currentSquadValue).padStart(col.squadVal);
     const netWorthStr = c.bold(formatShortEuro(m.totalTeamValue).padStart(col.netWorth));
-    
+
     const pnlSign = m.netProfit >= 0 ? '+' : '';
     const rawPnl = `${pnlSign}${formatShortEuro(m.netProfit)}`.padStart(col.pnl);
     const pnlStr = m.netProfit >= 0 ? c.green(rawPnl) : c.red(rawPnl);
@@ -458,17 +483,40 @@ function printSummaryTable(ledgers: ManagerFinanceLedger[], options: CliOptions,
   });
 
   console.log(c.dim('-'.repeat(header.length)));
-  console.log(c.dim(`* Initial Squad anchored to market values on ${options.startDate} (or closest available day).`));
-  console.log(c.dim(`* Run with --manager="<name>" to see detailed itemized transaction history.\n`));
+  console.log(
+    c.dim(
+      `* Initial Squad anchored to market values on ${options.startDate} (or closest available day).`
+    )
+  );
+  console.log(
+    c.dim(`* Run with --manager="<name>" to see detailed itemized transaction history.\n`)
+  );
 }
 
 function printManagerDetails(m: ManagerFinanceLedger, c: ReturnType<typeof createStyler>) {
-  console.log('\n' + c.bold(c.yellow(`========================================================================================`)));
+  console.log(
+    '\n' +
+      c.bold(
+        c.yellow(
+          `========================================================================================`
+        )
+      )
+  );
   console.log(c.bold(c.yellow(` DETAILED AUDIT: ${m.name.toUpperCase()} (ID: ${m.userId})`)));
-  console.log(c.bold(c.yellow(`========================================================================================\n`)));
+  console.log(
+    c.bold(
+      c.yellow(
+        `========================================================================================\n`
+      )
+    )
+  );
 
   console.log(c.bold(`1. INITIAL SQUAD (Day 0 Baseline)`));
-  console.log(c.dim(`----------------------------------------------------------------------------------------`));
+  console.log(
+    c.dim(
+      `----------------------------------------------------------------------------------------`
+    )
+  );
   m.initialSquad.forEach((p, i) => {
     const num = `${i + 1}.`.padEnd(4);
     const pName = p.name.padEnd(28);
@@ -476,12 +524,24 @@ function printManagerDetails(m: ManagerFinanceLedger, c: ReturnType<typeof creat
     const pDate = `(date: ${p.priceDate})`.padStart(20);
     console.log(`  ${num}${pName}${pPrice} ${c.dim(pDate)}`);
   });
-  console.log(c.dim(`----------------------------------------------------------------------------------------`));
-  console.log(`  ${'Total Squad Value:'.padEnd(32)} ${c.bold(formatEuro(m.initialSquadValue).padStart(14))}`);
-  console.log(`  ${'Initial Liquid Cash (40M - Squad):'.padEnd(32)} ${c.bold(c.cyan(formatEuro(m.initialCash).padStart(14)))}\n`);
+  console.log(
+    c.dim(
+      `----------------------------------------------------------------------------------------`
+    )
+  );
+  console.log(
+    `  ${'Total Squad Value:'.padEnd(32)} ${c.bold(formatEuro(m.initialSquadValue).padStart(14))}`
+  );
+  console.log(
+    `  ${'Initial Liquid Cash (40M - Squad):'.padEnd(32)} ${c.bold(c.cyan(formatEuro(m.initialCash).padStart(14)))}\n`
+  );
 
   console.log(c.bold(`2. SALES TO MARKET / MANAGERS (+ CASH)`));
-  console.log(c.dim(`----------------------------------------------------------------------------------------`));
+  console.log(
+    c.dim(
+      `----------------------------------------------------------------------------------------`
+    )
+  );
   if (m.sales.length === 0) {
     console.log(c.dim('  (No sales executed)'));
   } else {
@@ -494,11 +554,21 @@ function printManagerDetails(m: ManagerFinanceLedger, c: ReturnType<typeof creat
       console.log(`  ${num}${dateStr}${pName}${to}${priceStr}`);
     });
   }
-  console.log(c.dim(`----------------------------------------------------------------------------------------`));
-  console.log(`  ${'Total Cash from Sales:'.padEnd(62)} ${c.bold(c.green(`+${formatEuro(m.totalSales)}`.padStart(16)))}\n`);
+  console.log(
+    c.dim(
+      `----------------------------------------------------------------------------------------`
+    )
+  );
+  console.log(
+    `  ${'Total Cash from Sales:'.padEnd(62)} ${c.bold(c.green(`+${formatEuro(m.totalSales)}`.padStart(16)))}\n`
+  );
 
   console.log(c.bold(`3. PURCHASES FROM MARKET / MANAGERS (- CASH)`));
-  console.log(c.dim(`----------------------------------------------------------------------------------------`));
+  console.log(
+    c.dim(
+      `----------------------------------------------------------------------------------------`
+    )
+  );
   if (m.purchases.length === 0) {
     console.log(c.dim('  (No purchases executed)'));
   } else {
@@ -511,11 +581,21 @@ function printManagerDetails(m: ManagerFinanceLedger, c: ReturnType<typeof creat
       console.log(`  ${num}${dateStr}${pName}${from}${priceStr}`);
     });
   }
-  console.log(c.dim(`----------------------------------------------------------------------------------------`));
-  console.log(`  ${'Total Cash Spent on Buys:'.padEnd(62)} ${c.bold(c.red(`-${formatEuro(m.totalPurchases)}`.padStart(16)))}\n`);
+  console.log(
+    c.dim(
+      `----------------------------------------------------------------------------------------`
+    )
+  );
+  console.log(
+    `  ${'Total Cash Spent on Buys:'.padEnd(62)} ${c.bold(c.red(`-${formatEuro(m.totalPurchases)}`.padStart(16)))}\n`
+  );
 
   console.log(c.bold(`4. BONUSES & LOAN FEES (CASH ADJUSTMENTS)`));
-  console.log(c.dim(`----------------------------------------------------------------------------------------`));
+  console.log(
+    c.dim(
+      `----------------------------------------------------------------------------------------`
+    )
+  );
   if (m.bonuses.length === 0) {
     console.log(c.dim('  (No cash adjustments recorded)'));
   } else {
@@ -527,22 +607,44 @@ function printManagerDetails(m: ManagerFinanceLedger, c: ReturnType<typeof creat
       console.log(`  ${num}${dateStr}${desc}${amountStr}`);
     });
   }
-  console.log(c.dim(`----------------------------------------------------------------------------------------`));
+  console.log(
+    c.dim(
+      `----------------------------------------------------------------------------------------`
+    )
+  );
   const adjustmentColor = m.totalBonuses < 0 ? c.red : c.green;
-  console.log(`  ${'Total Cash Adjustments:'.padEnd(62)} ${c.bold(adjustmentColor(formatSignedEuro(m.totalBonuses).padStart(16)))}\n`);
+  console.log(
+    `  ${'Total Cash Adjustments:'.padEnd(62)} ${c.bold(adjustmentColor(formatSignedEuro(m.totalBonuses).padStart(16)))}\n`
+  );
 
   console.log(c.bold(`5. CURRENT CASH CALCULATION`));
-  console.log(c.dim(`----------------------------------------------------------------------------------------`));
+  console.log(
+    c.dim(
+      `----------------------------------------------------------------------------------------`
+    )
+  );
   console.log(`  ${'Initial Cash:'.padEnd(32)} ${formatEuro(m.initialCash).padStart(16)}`);
-  console.log(`  ${'+ Total Sales:'.padEnd(32)} ${c.green(`+${formatEuro(m.totalSales)}`.padStart(16))}`);
-  console.log(`  ${'- Total Purchases:'.padEnd(32)} ${c.red(`-${formatEuro(m.totalPurchases)}`.padStart(16))}`);
-  console.log(`  ${'+ Cash Adjustments:'.padEnd(32)} ${adjustmentColor(formatSignedEuro(m.totalBonuses).padStart(16))}`);
+  console.log(
+    `  ${'+ Total Sales:'.padEnd(32)} ${c.green(`+${formatEuro(m.totalSales)}`.padStart(16))}`
+  );
+  console.log(
+    `  ${'- Total Purchases:'.padEnd(32)} ${c.red(`-${formatEuro(m.totalPurchases)}`.padStart(16))}`
+  );
+  console.log(
+    `  ${'+ Cash Adjustments:'.padEnd(32)} ${adjustmentColor(formatSignedEuro(m.totalBonuses).padStart(16))}`
+  );
   console.log(c.dim(`  ------------------------------------------------`));
   const cashColor = m.currentCash >= 0 ? c.green : c.red;
-  console.log(`  ${c.bold('CURRENT LIQUID CASH:'.padEnd(32))} ${c.bold(cashColor(formatEuro(m.currentCash).padStart(16)))}\n`);
+  console.log(
+    `  ${c.bold('CURRENT LIQUID CASH:'.padEnd(32))} ${c.bold(cashColor(formatEuro(m.currentCash).padStart(16)))}\n`
+  );
 
   console.log(c.bold(`6. CURRENT SQUAD (${m.currentSquad.length} Players)`));
-  console.log(c.dim(`----------------------------------------------------------------------------------------`));
+  console.log(
+    c.dim(
+      `----------------------------------------------------------------------------------------`
+    )
+  );
   m.currentSquad.forEach((p, i) => {
     const num = `${i + 1}.`.padEnd(4);
     const pName = p.name.padEnd(28);
@@ -550,12 +652,22 @@ function printManagerDetails(m: ManagerFinanceLedger, c: ReturnType<typeof creat
     const pPrice = formatEuro(p.currentPrice).padStart(14);
     console.log(`  ${num}${pName}${c.dim(src)}${pPrice}`);
   });
-  console.log(c.dim(`----------------------------------------------------------------------------------------`));
-  console.log(`  ${'Current Squad Market Value:'.padEnd(44)} ${c.bold(formatEuro(m.currentSquadValue).padStart(14))}`);
-  console.log(`  ${'Total Net Worth (Cash + Squad):'.padEnd(44)} ${c.bold(c.cyan(formatEuro(m.totalTeamValue).padStart(14)))}`);
+  console.log(
+    c.dim(
+      `----------------------------------------------------------------------------------------`
+    )
+  );
+  console.log(
+    `  ${'Current Squad Market Value:'.padEnd(44)} ${c.bold(formatEuro(m.currentSquadValue).padStart(14))}`
+  );
+  console.log(
+    `  ${'Total Net Worth (Cash + Squad):'.padEnd(44)} ${c.bold(c.cyan(formatEuro(m.totalTeamValue).padStart(14)))}`
+  );
   const diffSign = m.netProfit >= 0 ? '+' : '';
   const diffColor = m.netProfit >= 0 ? c.green : c.red;
-  console.log(`  ${'Net Profit vs 40M Base:'.padEnd(44)} ${c.bold(diffColor(`${diffSign}${formatEuro(m.netProfit)}`.padStart(14)))}\n`);
+  console.log(
+    `  ${'Net Profit vs 40M Base:'.padEnd(44)} ${c.bold(diffColor(`${diffSign}${formatEuro(m.netProfit)}`.padStart(14)))}\n`
+  );
 }
 
 async function main() {
@@ -578,10 +690,16 @@ async function main() {
 
     if (options.managerFilter) {
       const match = ledgers.find(
-        (m) => m.name.toLowerCase().includes(options.managerFilter!.toLowerCase()) || m.userId === options.managerFilter
+        (m) =>
+          m.name.toLowerCase().includes(options.managerFilter!.toLowerCase()) ||
+          m.userId === options.managerFilter
       );
       if (!match) {
-        console.error(c.red(`Manager matching "${options.managerFilter}" not found in season ${options.seasonId}.`));
+        console.error(
+          c.red(
+            `Manager matching "${options.managerFilter}" not found in season ${options.seasonId}.`
+          )
+        );
         console.log(`Available managers: ${ledgers.map((m) => m.name).join(', ')}`);
         process.exitCode = 1;
         return;

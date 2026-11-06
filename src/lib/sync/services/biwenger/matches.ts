@@ -1,7 +1,6 @@
-import { fetchRoundGames } from '../../../api/biwenger-client';
+import { createBiwengerApi } from '../../../api/biwenger-client';
 import { euroleagueSeasonYear } from '../../../api/euroleague/normalization';
 import type { OfficialScheduleGame } from '../../../api/euroleague/types';
-import { CONFIG } from '../../../config';
 import { prepareMatchMutations, type MatchMutations } from '../../../db/mutations/matches';
 import type { SyncManager } from '../../manager';
 import {
@@ -88,7 +87,8 @@ export async function syncBiwengerMatches(
   const mutationsFactory = dependencies.prepareMutations || prepareMatchMutations;
   const mutations = mutationsFactory(db, { seasonId });
 
-  const fetchGames = dependencies.fetchRoundGames || fetchRoundGames;
+  const fetchGames =
+    dependencies.fetchRoundGames || createBiwengerApi(manager.context.provider).fetchRoundGames;
   const getMappings = dependencies.getOfficialTeamMappings || defaultGetOfficialTeamMappings;
 
   let gamesData: any;

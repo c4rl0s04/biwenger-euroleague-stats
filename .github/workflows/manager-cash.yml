@@ -30,19 +30,15 @@ jobs:
         run: npm ci
       - name: Generate report
         env:
-          POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-          POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
           PGOPTIONS: -c default_transaction_read_only=on -c statement_timeout=60000
           MANAGER: ${{ inputs.manager }}
           ALL_DETAILS: ${{ inputs.all_details }}
         shell: bash
         run: |
           set -euo pipefail
-          if [[ -z "$POSTGRES_HOST" || -z "$POSTGRES_USER" || -z "$POSTGRES_PASSWORD" || -z "$POSTGRES_DB" ]]; then
-            echo 'Missing database secrets. Configure the POSTGRES_* secrets used by Scheduled Sync.' >&2
+          if [[ -z "$DATABASE_URL" ]]; then
+            echo 'Missing database secrets. Configure the DATABASE_URL secret.' >&2
             exit 1
           fi
           mkdir -p reports

@@ -1,8 +1,5 @@
 import { replaceLineupSnapshot } from '../../repositories/lineup-snapshot';
-import {
-  fetchPlayerDetails as defaultFetchPlayerDetails,
-  fetchRoundsLeague as defaultFetchRoundsLeague,
-} from '../../../api/biwenger-client';
+import { createBiwengerApi } from '../../../api/biwenger-client';
 import { CONFIG } from '../../../config';
 import { preparePlayerMutations, type PlayerMutations } from '../../../db/mutations/players';
 import { prepareUserMutations, type UserMutations } from '../../../db/mutations/users';
@@ -39,8 +36,11 @@ export async function syncBiwengerLineups(
   const status = round.status;
   let insertedCount = 0;
 
-  const fetchRounds = dependencies.fetchRoundsLeague || defaultFetchRoundsLeague;
-  const fetchDetails = dependencies.fetchPlayerDetails || defaultFetchPlayerDetails;
+  const fetchRounds =
+    dependencies.fetchRoundsLeague || createBiwengerApi(manager.context.provider).fetchRoundsLeague;
+  const fetchDetails =
+    dependencies.fetchPlayerDetails ||
+    createBiwengerApi(manager.context.provider).fetchPlayerDetails;
   const userMutationsFactory = dependencies.prepareUserMutations || prepareUserMutations;
   const playerMutationsFactory = dependencies.preparePlayerMutations || preparePlayerMutations;
 
