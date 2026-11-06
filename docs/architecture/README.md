@@ -19,6 +19,8 @@ status: active
 - [Migration master tracker](../migration/tracker.md) — authoritative task states, dependencies, gates and next actions.
 - [Migration overview](migration-overview.md) — feature coverage summary; historical evidence remains in the ledger.
 
+- [Configuration simplification plan](configuration-simplification-plan.md) — proposed ownership, task sequence, and compatibility gates for reducing environment configuration.
+
 Consequential choices are recorded separately in the [decision log](../decisions/README.md).
 Operational commands belong in [operations](../operations/README.md), while exact configuration,
 API contracts, and table ownership belong in [reference](../reference/README.md).
