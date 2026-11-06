@@ -25,6 +25,19 @@ This plan does not authorize production configuration changes, credential rotati
 application, provider mutations, or deployment. Each release needs a concrete reviewed cutover;
 schema changes need their own explicit implementation scope and database-safety gate.
 
+## Implementation status
+
+Implementation is prepared on `refactor/config-simplification` from this plan's audited base.
+C00–C06 have code, tests, templates and runbooks; C07 has a names-only
+[cutover checklist](../operations/configuration-cutover.md). Hosted provisioning, production schema
+application and release acceptance are pending operator review and CI, not claimed complete.
+
+The assistant deliberately retains its old model aliases and implicit selection during cutover,
+with behavioral tests and an explicit retirement gate. Existing deployments have not been inspected,
+so removing these compatibility paths now could change the provider/model without confirmation.
+Historical season-review reports and the dated EuroLeague roster collection remain pinned to the
+season represented by their artifacts; they are not runtime season-selection fallbacks.
+
 ## Decisions
 
 1. Application database access uses `DATABASE_URL` only. PostgreSQL container initialization keeps
@@ -85,7 +98,7 @@ committed migrations, season creation, and ingestion; fewer environment settings
 ## Implementation sequence
 
 Each row is a scoped pull request or a deliberately split set if consumer coverage makes it too
-large. Use dedicated worktrees. All tasks below are pending.
+large. Use dedicated worktrees. Code preparation is complete; release gates above remain pending.
 
 | Task | Owner / dependency                           | Deliverable                                                                                                |
 | ---- | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |

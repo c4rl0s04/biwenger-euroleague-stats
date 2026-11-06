@@ -32,7 +32,7 @@ database or bypass a guard merely to make a symptom disappear.
 
 ## Database connection errors
 
-- Determine whether `DATABASE_URL` is overriding individual `POSTGRES_*` values.
+- Confirm `DATABASE_URL` is present and points to the intended database; split application connection variables are no longer read.
 - Inside Docker, use the container-visible host rather than assuming `localhost` reaches PostgreSQL.
 - Run `npm run db:check`.
 - Do not delete a Docker volume to fix roles or schema until it is confirmed disposable.

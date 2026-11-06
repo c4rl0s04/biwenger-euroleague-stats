@@ -1,6 +1,6 @@
 ---
 title: Environment Variable Reference
-description: Runtime configuration and explicit safety overrides used by the repository.
+description: Deployment settings, optional capabilities, and command-scoped safety controls.
 audience:
   - contributor
   - maintainer
@@ -11,70 +11,80 @@ status: active
 
 # Environment variable reference
 
-`.env.example` is the canonical safe template. Next.js loads supported `.env*` files; standalone
-scripts load dotenv before importing shared configuration. Do not commit real values.
+[.env.example](../../.env.example) is the basic template. Next.js loads its supported `.env*` files.
+Standalone application scripts load inherited environment values first, then `.env.local`, then
+`.env`, without overriding an earlier value. `ENV_LOCAL_FILE` and `ENV_FILE` can select explicit
+files for diagnostics. Never commit real settings or use `NEXT_PUBLIC_` for credentials.
 
-## Database and build
+## Required application settings
 
-| Variable                                            | Purpose                                                                         |
-| --------------------------------------------------- | ------------------------------------------------------------------------------- |
-| `DATABASE_URL`                                      | Complete PostgreSQL connection string; takes precedence over individual values. |
-| `POSTGRES_HOST`, `POSTGRES_PORT`                    | Individual host and port configuration.                                         |
-| `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` | Individual database credentials and database name.                              |
-| `POSTGRES_URL`                                      | Alternate connection value consumed by Drizzle tooling when configured.         |
-| `DOCKER_POSTGRES_HOST`                              | Host passed to the app containers by Docker Compose.                            |
-| `SKIP_DB`                                           | Use the build-time mock pool instead of connecting to PostgreSQL.               |
-| `NODE_ENV`                                          | Standard development, test, or production mode.                                 |
+| Variable       | Purpose                                                                                                                                                           |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL` | Sole PostgreSQL connection URL, required for database-backed execution. Supports `postgres:` and `postgresql:`. Missing/malformed URLs fail without echoing them. |
+| `AUTH_SECRET`  | Existing Auth.js session encryption secret. Preserve it during configuration migration.                                                                           |
 
-## Biwenger and season
+`POSTGRES_URL` and split `POSTGRES_*` application connection settings are no longer read.
+Docker's PostgreSQL service still accepts initialization user/password/database settings; those
+configure the database container, not the application's connection parser. See [Docker](../operations/docker.md).
 
-| Variable                            | Purpose                                                                                               |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `BIWENGER_TOKEN`                    | Server-side token used by background ingestion.                                                       |
-| `BIWENGER_LEAGUE_ID`                | League bound to the selected season. Must be numeric for sync.                                        |
-| `BIWENGER_USER_ID`                  | Provider user identity used by ingestion. Must be numeric for sync.                                   |
-| `BIWENGER_API_VERSION_FALLBACK`     | Emergency version when `/account` auto-detection fails.                                               |
-| `BIWENGER_CREDENTIAL_KEYS`          | JSON array of manager-credential key objects: `[{"id":"...","key":"<32-byte base64>"}]`. Server-only. |
-| `BIWENGER_CREDENTIAL_ACTIVE_KEY_ID` | Key ID used for new manager-credential writes. Must exist exactly once in the key array.              |
-| `SEASON_ID`                         | Canonical `YYYY-YY` season identifier. Required for mutating sync.                                    |
-| `SEASON_NAME`                       | Human-readable season name.                                                                           |
-| `EUROLEAGUE_SEASON_CODE`            | Official provider code in `EYYYY` form matching the season start year.                                |
-| `EUROLEAGUE_ADVANCED_API_URL`       | Optional Advanced API base URL override.                                                              |
-| `EUROLEAGUE_ADVANCED_API_TOKEN`     | Optional bearer token; free endpoints do not require one.                                             |
-| `LEAGUE_START_DATE`                 | Season start date in `YYYY-MM-DD` form.                                                               |
-| `SEASON_AWARE_READS_CONFIRMED`      | Production operator assertion that reads isolate the activated season.                                |
+## Personal accounts and ingestion
 
-Season lifecycle scripts additionally accept `NEXT_SEASON_ID`, `NEXT_SEASON_NAME`,
-`SEASON_END_DATE`, and `SEASON_NOTES` for the record they create or close.
+| Variable                            | Purpose                                                                                                                                             |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `BIWENGER_CREDENTIAL_KEYS`          | Existing JSON keyring: array of objects with `id` and `key`; each key is 32 random bytes encoded as standard base64. Server-only.                   |
+| `BIWENGER_CREDENTIAL_ACTIVE_KEY_ID` | Selects a key already present in the keyring for new credential writes.                                                                             |
+| `PERSONAL_BIDS_USER_ID`             | Single permitted personal-bidding account. Missing/malformed configuration denies access. Copy the old permitted account explicitly during cutover. |
+| `BIWENGER_TOKEN`                    | Background ingestion credential only; not required for normal analytics or personal actions.                                                        |
+| `BIWENGER_API_VERSION_FALLBACK`     | Optional emergency version if automatic discovery fails.                                                                                            |
+| `EUROLEAGUE_ADVANCED_API_URL`       | Optional official-provider base URL override.                                                                                                       |
+| `EUROLEAGUE_ADVANCED_API_TOKEN`     | Optional bearer token for the official provider.                                                                                                    |
 
-## Authentication and assistant
+Personal credentials stay encrypted in PostgreSQL. Ingestion resolves the token's account identity
+from `/account` and requires exactly one membership matching the resolved database season's league.
+Personal provider operations use the signed-in manager's credential and the selected active season;
+live operations reject frozen/historical selections.
+
+## Seasons are database records
+
+Runtime no longer reads `SEASON_ID`, `SEASON_NAME`, `EUROLEAGUE_SEASON_CODE`, `LEAGUE_START_DATE`,
+`BIWENGER_LEAGUE_ID`, `BIWENGER_USER_ID`, or `SEASON_AWARE_READS_CONFIRMED`.
+
+Explicit read selection wins over the `NEXT_SEASON_ID` browser cookie, then the uniquely active
+season is used. Database failures do not fall back to a hard-coded season. Sync uses the active
+season or an explicit `--season` target and retains writable-season and provider-binding guards.
+Names, dates, official codes and league bindings are supplied once through the
+[season lifecycle](../operations/season-lifecycle.md) command, not redeployed each season.
+
+`ACCESS_PASSWORD` is removed. Application login still checks stored account password hashes.
+
+## Optional assistant and monitoring
 
 | Variable                         | Purpose                                                                                     |
 | -------------------------------- | ------------------------------------------------------------------------------------------- |
-| `AUTH_SECRET`                    | Auth.js JWT/session encryption secret.                                                      |
-| `ACCESS_PASSWORD`                | Legacy/bootstrap value still written by setup; not the direct current Auth.js login source. |
-| `AI_PROVIDER`                    | `groq` or `openai`; invalid explicit values make the assistant unavailable.                 |
-| `GROQ_API_KEY`, `GROQ_MODEL`     | Groq compatible-endpoint credentials and model.                                             |
-| `OPENAI_API_KEY`, `OPENAI_MODEL` | OpenAI credentials and model.                                                               |
+| `AI_PROVIDER`                    | Explicit `groq` or `openai`. Invalid selections make the assistant unavailable.             |
+| `GROQ_API_KEY`, `OPENAI_API_KEY` | Set the selected provider's key; both remain server-only.                                   |
+| `AI_MODEL`                       | Optional model override for the selected provider; otherwise use its code default.          |
+| `NEXT_PUBLIC_SENTRY_DSN`         | Optional public browser reporting destination and shared server default.                    |
+| `SENTRY_DSN`                     | Optional server-only override when server reporting intentionally uses another destination. |
 
-When `AI_PROVIDER` is unset, assistant routing prefers Groq if `GROQ_API_KEY` exists and otherwise
-selects OpenAI. Provider keys are server-only.
+During rollout only, `GROQ_MODEL`/`OPENAI_MODEL` remain fallback aliases and unset `AI_PROVIDER`
+retains previous key-based selection. `AI_MODEL` wins over aliases. Provision the same explicit
+provider/model before retiring compatibility; see the
+[cutover checklist](../operations/configuration-cutover.md). Missing AI credentials do not stop analytics.
+Browser Sentry configuration never reads the private server DSN. Error redaction remains enabled.
 
-## Explicit safety and diagnostic flags
+## Framework and command controls
 
-These flags are not normal persistent configuration:
+`NODE_ENV`, `NEXT_RUNTIME`, `CI`, `VERCEL`, `PORT`, `HOSTNAME`, and telemetry controls belong to the
+framework, hosting platform or container. They are not ordinary setup inputs. `SKIP_DB=true` selects
+a mock pool for isolated builds/checks, not a production database or season. `ANALYZE=true` enables
+bundle analysis.
 
-| Variable                              | Purpose                                                                                        |
-| ------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `BACKUP_CONFIRMED`                    | Required acknowledgement for season mutations.                                                 |
-| `ALLOW_REMOTE_SCHEMA_AUDIT`           | Permit schema audit against a remote-looking target.                                           |
-| `ALLOW_REMOTE_SEASON_AUDIT`           | Permit season audit against a remote-looking target.                                           |
-| `ALLOW_REMOTE_PRICE_REPAIR`           | Permit applying price repair to a remote-looking target.                                       |
-| `ALLOW_REMOTE_CREDENTIAL_MAINTENANCE` | Permit an explicitly applied credential migration or rotation against a remote-looking target. |
-| `ALLOW_REMOTE_TEST_DB`                | Permit optional DB tests against a remote target.                                              |
-| `ALLOW_SCHEMA_BOOTSTRAP`              | Explicitly permit transitional schema bootstrap where normally disabled.                       |
-| `ALLOW_SYNC_ON_FROZEN_SEASON`         | Non-production diagnostic override for the season guard.                                       |
-| `RUN_DB_TESTS`                        | Enable optional database-backed integration tests.                                             |
-| `ANALYZE`                             | Enable bundle-analyzer configuration during the analyze build.                                 |
-
-Review the relevant [operations runbook](../operations/README.md) before setting a safety flag.
+Maintenance keeps explicit `BACKUP_CONFIRMED`, `ALLOW_REMOTE_SCHEMA_AUDIT`,
+`ALLOW_REMOTE_SCHEMA_REPAIR`, `ALLOW_REMOTE_SEASON_AUDIT`, `ALLOW_REMOTE_PRICE_REPAIR`,
+`ALLOW_REMOTE_CREDENTIAL_MAINTENANCE`, `RUN_DB_TESTS`, and `ALLOW_REMOTE_TEST_DB` protections.
+Use them only for the relevant reviewed command, not as permanent application settings.
+`ALLOW_SYNC_ON_FROZEN_SEASON` remains a non-production diagnostic override, never effective in
+production. Browser/disposable-database harnesses own their synthetic variables and `PG_BINDIR`.
+Simulation scripts own `SIMULATION_*` controls; deployment probes use `DEPLOYMENT_URL` or
+`NEXT_PUBLIC_APP_URL`. Consult the command/runbook rather than adding these to basic setup.

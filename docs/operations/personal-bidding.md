@@ -10,7 +10,7 @@ status: active
 # Personal manual bidding
 
 The private page is `/personal/bids`. It is available only to the authenticated account matching
-`BIWENGER_USER_ID`, which must already have a linked encrypted Biwenger credential in the
+`PERSONAL_BIDS_USER_ID`, which must already have a linked encrypted Biwenger credential in the
 application. The server needs its existing credential keyring configuration. No new database
 migration or scheduling service is needed for this manual phase.
 
