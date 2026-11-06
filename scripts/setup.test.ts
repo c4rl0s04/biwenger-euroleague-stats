@@ -57,7 +57,6 @@ describe('setup creates new configuration safely', () => {
       const result = await run(root, [
         ['DATABASE_URL:', url],
         ['account linking?', 'y'],
-        ['Private bidding account ID', '7'],
         ['Background BIWENGER_TOKEN', 'synthetic-ingestion'],
         ['AI provider (', ''],
       ]);
@@ -66,7 +65,6 @@ describe('setup creates new configuration safely', () => {
       expect(result.output).not.toContain('synthetic-ingestion');
       const content = readFileSync(join(root, '.env'), 'utf8');
       expect(content).toContain('BIWENGER_CREDENTIAL_KEYS=');
-      expect(content).toContain("PERSONAL_BIDS_USER_ID='7'");
       expect(content).not.toContain('SEASON_ID');
       expect(content).not.toContain('ACCESS_PASSWORD');
       expect(statSync(join(root, '.env')).mode & 0o777).toBe(0o600);

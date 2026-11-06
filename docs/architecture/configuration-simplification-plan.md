@@ -18,7 +18,7 @@ main at `e0a28e19`. No private environment values, hosted secrets, or live datab
 inspected. Recheck consumers against the implementation base, including recently merged work.
 
 The target is fewer settings and one owner per responsibility, preserving existing functionality:
-URLs, responses, authentication, personal-bidding restrictions, credential encryption, provider
+URLs, responses, authentication, personal-bidding authentication and per-manager isolation, credential encryption, provider
 operations, cache semantics, historical browsing, and desktop/mobile information parity.
 
 This plan does not authorize production configuration changes, credential rotation, schema
@@ -44,8 +44,7 @@ season represented by their artifacts; they are not runtime season-selection fal
    its own necessary inputs; application connection settings do not duplicate those inputs.
 2. PostgreSQL owns season metadata and provider league binding. Resolve a season once per operation
    and pass its context; never infer it from today's date or silently fall back to a historical ID.
-3. The environment owns deployment secrets, optional provider settings, and the existing private
-   bidding allowlist. No generic settings table, configuration framework, or new admin UI is needed.
+3. The environment owns deployment secrets and optional provider settings. No generic settings table, configuration framework, or new admin UI is needed.
 4. Personal credentials remain encrypted in the database. Keep the existing keyring and active-key
    selection, and keep ingestion credentials separate from personal credentials.
 5. Validate each capability at its boundary. Missing AI configuration does not disable analytics;
@@ -63,7 +62,7 @@ season represented by their artifacts; they are not runtime season-selection fal
 | Season infrastructure     | `SEASON_AWARE_READS_CONFIRMED`                                                                  | Retire after season isolation, activation checks, and write guards are verified; not simply delete the guard.                                                                                  |
 | Provider infrastructure   | `BIWENGER_TOKEN`                                                                                | Keep as an ingestion secret, required only for ingestion.                                                                                                                                      |
 | Provider infrastructure   | Ingestion use of `BIWENGER_USER_ID`                                                             | Resolve account identity from the authenticated provider account and selected season league; fail on missing or ambiguous membership.                                                          |
-| Market personal bidding   | Authorization use of `BIWENGER_USER_ID`                                                         | Preserve the same single-account allowlist as `PERSONAL_BIDS_USER_ID`. Missing configuration continues to deny access.                                                                         |
+| Market personal bidding   | Authorization use of `BIWENGER_USER_ID`                                                         | Remove the former single-account restriction at the user’s request; signed-in linked managers use their own credentials.                                                                       |
 | Provider infrastructure   | `BIWENGER_API_VERSION_FALLBACK`                                                                 | Keep as an optional emergency override.                                                                                                                                                        |
 | Provider infrastructure   | `EUROLEAGUE_ADVANCED_API_URL`, `EUROLEAGUE_ADVANCED_API_TOKEN`                                  | Keep optional override/token support; move out of the basic setup path.                                                                                                                        |
 | Authentication            | `AUTH_SECRET`                                                                                   | Keep server-only; preserve session behavior.                                                                                                                                                   |
@@ -77,16 +76,14 @@ season represented by their artifacts; they are not runtime season-selection fal
 | Maintenance               | Backup confirmations, remote-target overrides, lifecycle arguments                              | Keep command-scoped; prefer existing CLI flags, without broadening authorization.                                                                                                              |
 | Documentation             | `SYNC_SEASON_ID`, `ALLOW_SCHEMA_BOOTSTRAP`, `SEASON_NOTES`                                      | Correct/remove stale documentation if a fresh consumer search still finds no active contract. The season-selection cookie named `NEXT_SEASON_ID` is distinct from lifecycle environment input. |
 
-Keeping `PERSONAL_BIDS_USER_ID` is intentional: removing the access policy or adding a role model
-would enlarge this task. The variable belongs only to the private bidding feature, not provider
-identity. Copy its current allowed account during release; never derive permission from whoever
-owns the background ingestion token.
+Personal bidding uses the existing authenticated-manager and encrypted-credential boundaries.
+The user explicitly removed the former single-account restriction; no replacement role or setting
+is introduced.
 
 ### Final basic setup
 
 - Database-backed web application: `DATABASE_URL` and `AUTH_SECRET`.
 - Personal account linking/actions: existing credential keyring settings.
-- Private personal-bid workspace: `PERSONAL_BIDS_USER_ID` with the existing allowed account.
 - Ingestion job: `DATABASE_URL` and `BIWENGER_TOKEN`; season/league metadata comes from PostgreSQL.
 - Assistant: optional `AI_PROVIDER`, matching provider key, and optional `AI_MODEL`.
 - Monitoring: optional shared Sentry DSN and optional server override.
@@ -100,16 +97,16 @@ committed migrations, season creation, and ingestion; fewer environment settings
 Each row is a scoped pull request or a deliberately split set if consumer coverage makes it too
 large. Use dedicated worktrees. Code preparation is complete; release gates above remain pending.
 
-| Task | Owner / dependency                           | Deliverable                                                                                                |
-| ---- | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| C00  | Configuration inventory / first              | Confirm consumers, freeze compatibility expectations, remove proven legacy residue.                        |
-| C01  | Database infrastructure / C00                | One database URL across app, scripts, Docker and workflows.                                                |
-| C02  | Season reads / C01                           | Database-owned season context for all normal reads.                                                        |
-| C03  | Sync and provider / C02                      | Explicit writable-season/provider context, discovered ingestion identity, separated private-bid allowlist. |
-| C04  | Database writes / C03                        | Remove implicit season values from writers, then prepare removal of schema defaults.                       |
-| C05  | Optional integrations / C00                  | Simplify assistant and monitoring settings without losing supported capabilities.                          |
-| C06  | Setup and configuration retirement / C01–C05 | Finish setup, retire global legacy configuration, and reconcile documentation and deployment inputs.       |
-| C07  | Release reconciliation / C06                 | Confirm environment cutover and focused end-to-end evidence before retiring old hosted settings.           |
+| Task | Owner / dependency                           | Deliverable                                                                                                  |
+| ---- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| C00  | Configuration inventory / first              | Confirm consumers, freeze compatibility expectations, remove proven legacy residue.                          |
+| C01  | Database infrastructure / C00                | One database URL across app, scripts, Docker and workflows.                                                  |
+| C02  | Season reads / C01                           | Database-owned season context for all normal reads.                                                          |
+| C03  | Sync and provider / C02                      | Explicit writable-season/provider context, discovered ingestion identity, authenticated per-manager bidding. |
+| C04  | Database writes / C03                        | Remove implicit season values from writers, then prepare removal of schema defaults.                         |
+| C05  | Optional integrations / C00                  | Simplify assistant and monitoring settings without losing supported capabilities.                            |
+| C06  | Setup and configuration retirement / C01–C05 | Finish setup, retire global legacy configuration, and reconcile documentation and deployment inputs.         |
+| C07  | Release reconciliation / C06                 | Confirm environment cutover and focused end-to-end evidence before retiring old hosted settings.             |
 
 C05 can be implemented independently after C00. Season reads must settle before sync and writes
 move; setup retirement follows all consumer migrations. These are code ownership boundaries, not
@@ -194,9 +191,8 @@ Primary locations: [sync manager](../../src/lib/sync/manager.ts),
 - Personal operations continue using the signed-in manager's encrypted credential and actor ID;
   they never inherit ingestion identity or credentials. Resolve the active writable league and
   reject historical-season mutations. Historical read-only browsing remains available.
-- Rename the private bidding allowlist to `PERSONAL_BIDS_USER_ID`, copying the existing allowed
-  account. Missing or malformed configuration denies access. Do not enable the workspace for all
-  linked managers or change premium/credit rules.
+- Remove the former single-account restriction. Every signed-in linked manager can access personal
+  bidding using their own credentials. Preserve anonymous denial and premium/credit rules.
 - Replace `SEASON_AWARE_READS_CONFIRMED` only after regression tests prove season-isolated reads
   and writes, while runtime guards still reject invalid activation and unwritable targets.
 
@@ -273,7 +269,7 @@ artifacts; all deployment consumers have an explicit transition path.
 - Before each behavior cutover, confirm the required new names exist and metadata is populated,
   without copying secret values into logs, docs, PRs or fixtures. Resolve conflicting old/new settings
   explicitly; do not guess. Local environment edits and provider/production actions require scope.
-- Verify login, current/historical browsing, season labels, account linked state, private-bid denial,
+- Verify login, current/historical browsing, season labels, account linked state, anonymous-bid denial,
   authorized mocked bidding, assistant disabled/enabled routing, sync preflight and CLI maintenance.
 - Remove compatibility aliases only after every consumer has migrated. Keep an explicit stop/fail
   path when requirements are missing; do not restore silent historical defaults as a rollback.

@@ -25,8 +25,8 @@ the [cutover checklist](configuration-cutover.md) defines remaining operator act
 - Explicit season IDs at seasonal write boundaries; migration 0021 removes defaults only, without
   changing records. Historical reports and dated roster artifacts retain their explicit scope.
 - Personal provider actions retain encrypted manager credentials, use the selected active league,
-  and reject historical mutations. The same private account allowlist moves to
-  `PERSONAL_BIDS_USER_ID`; it is not inferred from the ingestion token.
+  and reject historical mutations. At the user’s request, personal bidding is available to all signed-in linked managers;
+  the former single-account setting is removed. Requests still use each manager’s identity.
 - Setup masks secrets, refuses overwrites, creates mode-0600 settings and optionally generates new
   credential keys only for new setup. Existing deployments keep their original session/encryption
   secrets. The unused access password is removed.
@@ -43,7 +43,7 @@ were installed with `node scripts/dev/worktree.mjs setup`; no environment files 
 | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Focused baseline: configuration, database/season resolution, provider boundaries and bidding                                                                    | 63 passed across 14 files before edits.                                                                                                                                             |
 | Focused Vitest selection across changed owners, DB/credential safety, assistant, home/player queries, setup/loading/lifecycle parsing and seasonal architecture | 403 passed, 3 skipped across 63 files. Skips are existing opt-in DB/disabled tests, not substitutes for the disposable checks below.                                                |
-| Final URL/credential/allowlist/setup rerun after malformed-URL validation                                                                                       | 28 passed across 4 files.                                                                                                                                                           |
+| Initial URL/credential/access/setup rerun after malformed-URL validation                                                                                        | 28 passed across 4 files.                                                                                                                                                           |
 | `vitest run --maxWorkers=2 scripts/db/season-lifecycle.integration.test.ts`                                                                                     | Passed against a fresh disposable database: create, conflicting activation, freeze and concurrent sync-lock denial.                                                                 |
 | `npm run typecheck`                                                                                                                                             | Passed; rerun after final source/test edits.                                                                                                                                        |
 | `npm run architecture:check`                                                                                                                                    | Passed: 1,118 modules and 132 protected entrypoints.                                                                                                                                |
@@ -63,6 +63,30 @@ The database-disabled build inside the browser harness succeeds without provider
 speculative prerender logs an active-season lookup warning from the mock database; the server uses
 the real disposable database at runtime. A desktop chart emits a size warning during the successful
 browser test. Neither is evidence of live database/provider verification.
+
+## Personal bidding access follow-up
+
+At the user's explicit request, the single-account gate and its environment setting are removed
+from services, page access, setup, Compose and the test harness. Any signed-in linked manager uses
+their own identity and encrypted credential; anonymous requests, cross-account spoofing, active
+season validation and provider premium/credit checks remain protected.
+
+Focused follow-up command:
+
+```bash
+SKIP_DB=true npm run test:run -- --maxWorkers=2 \
+  'src/app/(app)/personal/bids/page.test.tsx' \
+  src/app/api/personal/bids/personal-bid-routes.test.ts \
+  src/features/market/personal/server/personal-bids.service.test.ts \
+  src/features/market/live/server/live-bidding.service.test.ts \
+  src/features/market/commands/__tests__/place-bid.test.ts \
+  src/features/provider/server/__tests__/credentials.test.ts scripts/setup.test.ts
+```
+
+Result: 32 passed across seven files. Typecheck, architecture, touched-file lint, documentation and
+diff checks also passed. No browser rerun or real provider calls were used for this access-only
+follow-up; page/server behavior is covered by the focused tests. The earlier browser evidence
+above belongs to the initial configuration implementation.
 
 ## Remaining release gates
 

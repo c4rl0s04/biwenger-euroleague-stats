@@ -22,8 +22,6 @@ configuration values are recorded here. Use [database safety](database-safety.md
       manager-cash and simulations. Keep `PGOPTIONS` read-only protections for finance.
 - [ ] Preserve `AUTH_SECRET`, all existing encryption keys and the active key ID. Do not generate
       replacements merely because setup changed.
-- [ ] Copy the previous private-bidding allowed account (`BIWENGER_USER_ID`) into
-      `PERSONAL_BIDS_USER_ID` on the web runtime. This value is not ingestion identity.
 - [ ] Preserve the selected AI provider and model by supplying explicit `AI_PROVIDER`, its matching
       existing key and optional `AI_MODEL`. Compatibility aliases remain until this is confirmed.
 - [ ] Confirm public/server Sentry destinations; browser reporting needs the public DSN.
@@ -38,7 +36,7 @@ configuration values are recorded here. Use [database safety](database-safety.md
 
 - [ ] CI passes for the exact candidate commit.
 - [ ] Verify login, current/historical reads, season labels, linked-account state and private bidding
-      denial/allowlist behavior. Real provider mutations require separate explicit authorization.
+      anonymous-denial and per-manager isolation behavior. Real provider mutations require separate explicit authorization.
 - [ ] Confirm sync preflight and intended provider membership before enabling scheduled ingestion.
 - [ ] Verify database/CLI/Drizzle agree on the target and monitoring redacts credentials.
 - [ ] Keep retired hosted settings until the previous release is no longer the rollback target.

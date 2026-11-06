@@ -48,14 +48,6 @@ async function main() {
     ]);
     settings.BIWENGER_CREDENTIAL_ACTIVE_KEY_ID = 'primary';
   }
-  const privateUser = await ask(
-    'Private bidding account ID (optional; blank keeps access disabled): '
-  );
-  if (privateUser) {
-    if (!/^[1-9]\d*$/.test(privateUser))
-      throw new Error('Private bidding account ID must be a positive integer.');
-    settings.PERSONAL_BIDS_USER_ID = privateUser;
-  }
   const token = await ask('Background BIWENGER_TOKEN (optional): ', true);
   if (token) settings.BIWENGER_TOKEN = token;
   const provider = await ask('AI provider (groq/openai, or blank to disable): ');

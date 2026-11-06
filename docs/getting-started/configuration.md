@@ -32,7 +32,7 @@ deployment environment. Normal reads use the selected season or the uniquely act
   while provider account discovery supplies ingestion identity.
 - Personal account linking/actions use the existing server-only credential keyring and encrypted
   credentials stored in PostgreSQL. Login passwords are checked against stored hashes.
-- Private bidding uses `PERSONAL_BIDS_USER_ID` as an explicit single-account allowlist.
+- Personal bidding is available to signed-in managers using their own linked credentials; no extra account setting is needed.
 - The assistant uses an explicit provider, its matching key and optionally `AI_MODEL`.
 - Sentry reporting is optional. Browser reporting uses only the public DSN.
 

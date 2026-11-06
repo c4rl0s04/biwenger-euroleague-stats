@@ -99,7 +99,6 @@ export {
 } from './live/server/services/live-bidding.service';
 export { LiveMarketDataError } from './live/server/mappers/live-bidding.mapper';
 export {
-  assertPersonalBidAccess,
   readPersonalBidWorkspace,
   readPersonalBidCount,
   placePersonalBidNow,

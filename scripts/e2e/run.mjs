@@ -67,7 +67,6 @@ Object.assign(env, {
   E2E_PASSWORD: 'fixture-only-password',
   PLAYWRIGHT_BASE_URL: `http://127.0.0.1:${appPort}`,
   E2E_REQUIRED: 'true',
-  PERSONAL_BIDS_USER_ID: '99001',
   NEXT_TELEMETRY_DISABLED: '1',
 });
 assertFixtureTarget(connectionString, env);

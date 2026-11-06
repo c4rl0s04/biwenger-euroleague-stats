@@ -9,7 +9,7 @@ import { marketCommandService } from '../../../commands/server/services/market-c
 import type { PersonalBidWorkspace } from '../../models/personal-bids';
 
 export const PERSONAL_BIDS_POLICY = Object.freeze({
-  access: 'configured-account-only',
+  access: 'authenticated-linked-manager',
   freshness: 'provider-no-store',
 } as const);
 
@@ -24,14 +24,8 @@ export class PersonalBidError extends Error {
   }
 }
 
-export function assertPersonalBidAccess(userId: string | undefined): asserts userId is string {
-  if (
-    !userId ||
-    !/^[1-9]\d*$/.test(process.env.PERSONAL_BIDS_USER_ID ?? '') ||
-    userId !== process.env.PERSONAL_BIDS_USER_ID
-  ) {
-    throw new PersonalBidError('forbidden', 'Esta página es privada.', 403);
-  }
+function requireSignedInUser(userId: string) {
+  if (!userId) throw new PersonalBidError('unauthorized', 'No autorizado', 401);
 }
 
 const bidSchema = z.object({
@@ -45,17 +39,17 @@ const bidSchema = z.object({
 });
 
 export async function readPersonalBidWorkspace(userId: string): Promise<PersonalBidWorkspace> {
-  assertPersonalBidAccess(userId);
+  requireSignedInUser(userId);
   return { market: await getLiveBidMarket(userId) };
 }
 
 export async function readPersonalBidCount(userId: string, playerId: number) {
-  assertPersonalBidAccess(userId);
+  requireSignedInUser(userId);
   return getLivePlayerBidCount(userId, playerId);
 }
 
 export async function placePersonalBidNow(userId: string, raw: unknown) {
-  assertPersonalBidAccess(userId);
+  requireSignedInUser(userId);
   const parsed = bidSchema.safeParse(raw);
   if (!parsed.success) throw new PersonalBidError('invalid_input', 'Datos de puja no válidos.');
   return marketCommandService.placeBid(userId, parsed.data);

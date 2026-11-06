@@ -29,15 +29,14 @@ configure the database container, not the application's connection parser. See [
 
 ## Personal accounts and ingestion
 
-| Variable                            | Purpose                                                                                                                                             |
-| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `BIWENGER_CREDENTIAL_KEYS`          | Existing JSON keyring: array of objects with `id` and `key`; each key is 32 random bytes encoded as standard base64. Server-only.                   |
-| `BIWENGER_CREDENTIAL_ACTIVE_KEY_ID` | Selects a key already present in the keyring for new credential writes.                                                                             |
-| `PERSONAL_BIDS_USER_ID`             | Single permitted personal-bidding account. Missing/malformed configuration denies access. Copy the old permitted account explicitly during cutover. |
-| `BIWENGER_TOKEN`                    | Background ingestion credential only; not required for normal analytics or personal actions.                                                        |
-| `BIWENGER_API_VERSION_FALLBACK`     | Optional emergency version if automatic discovery fails.                                                                                            |
-| `EUROLEAGUE_ADVANCED_API_URL`       | Optional official-provider base URL override.                                                                                                       |
-| `EUROLEAGUE_ADVANCED_API_TOKEN`     | Optional bearer token for the official provider.                                                                                                    |
+| Variable                            | Purpose                                                                                                                           |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `BIWENGER_CREDENTIAL_KEYS`          | Existing JSON keyring: array of objects with `id` and `key`; each key is 32 random bytes encoded as standard base64. Server-only. |
+| `BIWENGER_CREDENTIAL_ACTIVE_KEY_ID` | Selects a key already present in the keyring for new credential writes.                                                           |
+| `BIWENGER_TOKEN`                    | Background ingestion credential only; not required for normal analytics or personal actions.                                      |
+| `BIWENGER_API_VERSION_FALLBACK`     | Optional emergency version if automatic discovery fails.                                                                          |
+| `EUROLEAGUE_ADVANCED_API_URL`       | Optional official-provider base URL override.                                                                                     |
+| `EUROLEAGUE_ADVANCED_API_TOKEN`     | Optional bearer token for the official provider.                                                                                  |
 
 Personal credentials stay encrypted in PostgreSQL. Ingestion resolves the token's account identity
 from `/account` and requires exactly one membership matching the resolved database season's league.

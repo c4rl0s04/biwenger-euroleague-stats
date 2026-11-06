@@ -74,3 +74,22 @@ it('rejects invalid player IDs before querying the provider', async () => {
   expect(response.status).toBe(400);
   expect(mocks.count).not.toHaveBeenCalled();
 });
+
+it('ignores another account ID supplied by a signed-in caller', async () => {
+  vi.mocked(auth).mockResolvedValue({ user: { id: '8' } } as never);
+  mocks.workspace.mockResolvedValue({ market: { listings: [] } });
+  mocks.count.mockResolvedValue({ playerId: 21, totalBids: 2 });
+  mocks.place.mockResolvedValue({ status: 'completed' });
+  await market();
+  await count(new Request('https://example.com/api/personal/bids/count?playerId=21&userId=7'));
+  const payload = { playerId: 21, amount: 120, userId: '7' };
+  await place(
+    new Request('https://example.com/api/personal/bids/place', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    })
+  );
+  expect(mocks.workspace).toHaveBeenCalledWith('8');
+  expect(mocks.count).toHaveBeenCalledWith('8', 21);
+  expect(mocks.place).toHaveBeenCalledWith('8', payload);
+});
