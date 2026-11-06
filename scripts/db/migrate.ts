@@ -1,4 +1,4 @@
-import * as dotenv from 'dotenv';
+import '../dev/load-env.mjs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import type { Pool } from 'pg';
@@ -23,9 +23,6 @@ export async function runMigrations(
 }
 
 async function main() {
-  dotenv.config({ path: process.env.ENV_LOCAL_FILE || '.env.local' });
-  dotenv.config({ path: process.env.ENV_FILE || '.env' });
-
   console.log('🚀 Running committed Drizzle migrations...');
   const pool = createCliPool();
 

@@ -32,24 +32,13 @@ jobs:
       - name: Validate season and run sync
         env:
           # Database Connection
-          POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-          POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
           # Biwenger Credentials
           BIWENGER_TOKEN: ${{ secrets.BIWENGER_TOKEN }}
-          BIWENGER_LEAGUE_ID: ${{ secrets.BIWENGER_LEAGUE_ID }}
-          BIWENGER_USER_ID: ${{ secrets.BIWENGER_USER_ID }}
           BIWENGER_API_VERSION_FALLBACK: ${{ vars.BIWENGER_API_VERSION_FALLBACK }}
 
           # Canonical season configuration
-          SEASON_ID: ${{ vars.SEASON_ID }}
-          SEASON_NAME: ${{ vars.SEASON_NAME }}
-          EUROLEAGUE_SEASON_CODE: ${{ vars.EUROLEAGUE_SEASON_CODE }}
-          LEAGUE_START_DATE: ${{ vars.LEAGUE_START_DATE }}
-          SEASON_AWARE_READS_CONFIRMED: ${{ vars.SEASON_AWARE_READS_CONFIRMED }}
 
           # Observability
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}

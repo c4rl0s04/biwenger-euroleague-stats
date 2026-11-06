@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import '../dev/load-env.mjs';
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';

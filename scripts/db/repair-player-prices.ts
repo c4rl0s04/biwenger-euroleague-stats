@@ -1,9 +1,6 @@
-import * as dotenv from 'dotenv';
+import '../dev/load-env.mjs';
 import * as path from 'node:path';
 import { createCliPool, isLocalDatabaseTarget } from '../../src/lib/db/cli';
-
-dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
-dotenv.config();
 
 interface PriceDriftRow {
   id: number;

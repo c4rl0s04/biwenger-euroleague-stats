@@ -1,5 +1,4 @@
 import { pool as pgClient } from './client';
-import { CONFIG } from '../config';
 import { cookies } from 'next/headers';
 import { getActiveSeasonId } from '../seasons';
 
@@ -14,8 +13,6 @@ export class ReadSeasonError extends Error {
 }
 
 async function assertSeasonExists(seasonId: string): Promise<string> {
-  if (CONFIG.DB.SKIP) return seasonId;
-
   const res = await (pgClient as any).query('SELECT id FROM seasons WHERE id = $1', [seasonId]);
   if (res.rows.length === 0) {
     throw new ReadSeasonError('SEASON_NOT_FOUND', `Season ${seasonId} does not exist.`);
@@ -45,14 +42,5 @@ export async function resolveReadSeasonId(requestedSeasonId?: string | null): Pr
     return assertSeasonExists(cookieSeasonId);
   }
 
-  if (!CONFIG.DB.SKIP) {
-    try {
-      const activeId = await getActiveSeasonId();
-      if (activeId) return activeId;
-    } catch {
-      // Fallback to CONFIG.SEASON.ID if DB query fails
-    }
-  }
-
-  return assertSeasonExists(CONFIG.SEASON.ID);
+  return getActiveSeasonId();
 }

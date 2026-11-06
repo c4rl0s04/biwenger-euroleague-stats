@@ -22,9 +22,8 @@ The full text report remains under **Artifacts** for seven days.
 The [workflow](../../.github/workflows/manager-cash.yml) runs the existing
 `npm run ledger` command against the latest synced database data. It does not start
 a sync or change stored data. PostgreSQL connections default to read-only transactions
-with a 60-second statement timeout. It reuses Scheduled Sync's `POSTGRES_HOST`,
-`POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, and optional `POSTGRES_PORT`
-repository secrets; no additional secret or provider credential is needed.
+with a 60-second statement timeout. It reuses Scheduled Sync's `DATABASE_URL`
+repository secret; no additional secret or provider credential is needed.
 
 Cash adjustments include round bonuses, administrative credits, and loan fees. A
 loan fee credits the lender and charges the borrower when the loan starts; the

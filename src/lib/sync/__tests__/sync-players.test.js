@@ -1,13 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { run } from '../steps/biwenger-catalog.js';
-import * as client from '../../api/biwenger-client.js';
-
-// Mock biwenger-client
-vi.mock('../../api/biwenger-client.js', () => ({
-  biwengerFetch: vi.fn(),
+const client = vi.hoisted(() => ({
   fetchAllPlayers: vi.fn(),
   fetchPlayerDetails: vi.fn(),
   fetchRoundGames: vi.fn(),
+}));
+
+// Mock biwenger-client
+vi.mock('../../api/biwenger-client.js', () => ({
+  createBiwengerApi: () => client,
 }));
 
 // Mock config

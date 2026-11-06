@@ -1,8 +1,5 @@
-import * as dotenv from 'dotenv';
+import '../dev/load-env.mjs';
 import { createCliPool, isLocalDatabaseTarget } from '../../src/lib/db/cli';
-
-dotenv.config({ path: '.env.local' });
-dotenv.config();
 
 const SEASON_TABLES = [
   'user_rounds',

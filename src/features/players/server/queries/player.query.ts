@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { CONFIG } from '@/lib/config';
+import { getSeasonById } from '@/lib/seasons';
 import { pool as pgClient } from '@/lib/db/client';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
 import { getPlayerFormMap } from '@/lib/competition/server';
@@ -208,7 +208,7 @@ async function listPlayerTransfers(playerId: number): Promise<PlayerTransferRow[
 
   if (initialOwner) {
     let initialDate = new Date().toISOString();
-    const configuredStartDate = CONFIG.SEASON.START_DATE;
+    const configuredStartDate = (await getSeasonById(seasonId))?.startsAt;
     if (configuredStartDate) {
       const configured = new Date(configuredStartDate);
       if (!Number.isNaN(configured.getTime())) initialDate = configured.toISOString();

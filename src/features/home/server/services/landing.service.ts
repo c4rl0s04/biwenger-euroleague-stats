@@ -2,13 +2,13 @@ import 'server-only';
 
 import { getLandingStandings } from '@/features/standings/server';
 import { getRoundCalendar } from '@/features/rounds/server';
-import { CONFIG } from '@/lib/config';
+import { getRequestSeason } from '@/lib/seasons/server';
 import type { HomeLandingStats } from '../../models/landing';
 
 export function createLandingService(deps: {
   standings: typeof getLandingStandings;
   rounds: typeof getRoundCalendar;
-  seasonName: () => string;
+  seasonName: () => string | Promise<string>;
 }) {
   return async function fetchLandingStats(): Promise<HomeLandingStats> {
     // Preserve the original sequential reads and current-only (not next-round) selection.
@@ -23,7 +23,7 @@ export function createLandingService(deps: {
     const playoffStartRound = 39;
     const weeksToPlayoffs = roundNumber > 0 ? Math.max(0, playoffStartRound - roundNumber) : 0;
     return {
-      seasonName: deps.seasonName(),
+      seasonName: await deps.seasonName(),
       userCount,
       currentRound: currentRound?.roundName || 'Pre-Season',
       weeksToPlayoffs,
@@ -35,5 +35,9 @@ export function createLandingService(deps: {
 export const fetchLandingStats = createLandingService({
   standings: getLandingStandings,
   rounds: getRoundCalendar,
-  seasonName: () => CONFIG.SEASON.NAME,
+  seasonName: async () => {
+    const season = await getRequestSeason();
+    if (!season) throw new Error('Selected season does not exist.');
+    return season.name;
+  },
 });

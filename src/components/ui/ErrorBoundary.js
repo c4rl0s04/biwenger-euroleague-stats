@@ -3,7 +3,6 @@
 import { Component } from 'react';
 import PropTypes from 'prop-types';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
-import { CONFIG } from '@/lib/config';
 
 /**
  * React Error Boundary
@@ -40,7 +39,7 @@ class ErrorBoundary extends Component {
           <h3 className="text-lg font-semibold text-slate-200 mb-2">Algo salió mal</h3>
           <p className="text-sm text-slate-400 text-center mb-4 max-w-md">
             Ha ocurrido un error al cargar este componente.
-            {CONFIG.ENV.IS_DEV && this.state.error && (
+            {process.env.NODE_ENV === 'development' && this.state.error && (
               <span className="block mt-2 text-red-400 font-mono text-xs">
                 {this.state.error.message}
               </span>

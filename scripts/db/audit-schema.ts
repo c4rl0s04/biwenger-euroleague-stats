@@ -1,9 +1,6 @@
-import * as dotenv from 'dotenv';
+import '../dev/load-env.mjs';
 import { auditSchema, hasDrift, type SchemaDrift } from '../../src/lib/db/schema-audit';
 import { createCliPool, isLocalDatabaseTarget } from '../../src/lib/db/cli';
-
-dotenv.config({ path: '.env.local' });
-dotenv.config();
 
 function printDrift(title: string, drift: SchemaDrift) {
   console.log(`\n${title}`);

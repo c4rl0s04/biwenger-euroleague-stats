@@ -2,18 +2,17 @@
  * Canonical database access layer.
  *
  * Contract:
- * - pool = raw pg.Pool (or mock pool when CONFIG.DB.SKIP is set)
+ * - pool = raw pg.Pool (or mock pool when SKIP_DB is set)
  * - db   = Drizzle database instance wrapping pool with schema
  */
 import pg, { Pool, PoolConfig } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 
-import { CONFIG } from '../config.js';
 import { buildPoolConfig } from './connection-config';
 import * as schema from './schema';
 
 // Skip database connection in CI/build environment
-const skipDb = Boolean(CONFIG?.DB?.SKIP);
+const skipDb = process.env.SKIP_DB === 'true';
 
 export type PgPool =
   | Pool
@@ -34,8 +33,6 @@ if (skipDb) {
   };
 } else {
   // Connect to the POSTGRES database
-  // Defaults match docker-compose.yml
-  const connectionString = process.env.DATABASE_URL;
   const poolConfig: PoolConfig = buildPoolConfig(process.env);
 
   const realPool = new pg.Pool({
@@ -43,8 +40,6 @@ if (skipDb) {
     max: 10,
     idleTimeoutMillis: 30000,
   });
-
-  console.log(`🔌 Database connecting to: ${connectionString ? 'DATABASE_URL' : poolConfig.host}`);
 
   // Test connection
   realPool.on('error', (err: Error) => {

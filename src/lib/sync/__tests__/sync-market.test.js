@@ -47,7 +47,7 @@ describe('syncBoard', () => {
   });
 
   const manager = () => ({
-    context: { db, seasonId: '2026-27' },
+    context: { db, seasonId: '2026-27', season: { sourceLeagueId: '12345' } },
     mode: 'bootstrap',
     getBiwengerCompetition: vi.fn(async () => ({
       players: {},

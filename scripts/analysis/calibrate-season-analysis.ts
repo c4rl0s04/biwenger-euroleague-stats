@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import '../dev/load-env.mjs';
 import { readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { pgClient } from '@/lib/db';

@@ -1,16 +1,11 @@
-import * as dotenv from 'dotenv';
+import './load-env.mjs';
+import { isLocalDatabaseTarget } from '../../src/lib/db/connection-config';
 import * as path from 'node:path';
-
-dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
-dotenv.config();
 
 let closeDatabase: (() => Promise<void>) | undefined;
 
 function isRemoteDatabaseTarget(): boolean {
-  const url = process.env.DATABASE_URL || process.env.POSTGRES_URL;
-  const host = process.env.POSTGRES_HOST;
-  if (url) return !url.includes('localhost') && !url.includes('127.0.0.1');
-  return Boolean(host && host !== 'localhost' && host !== '127.0.0.1');
+  return !isLocalDatabaseTarget();
 }
 
 function parseBatchSize(args: string[]): number {

@@ -2,16 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-const requiredConfiguration = [
-  'SEASON_ID',
-  'SEASON_NAME',
-  'BIWENGER_LEAGUE_ID',
-  'BIWENGER_USER_ID',
-  'EUROLEAGUE_SEASON_CODE',
-  'LEAGUE_START_DATE',
-  'SEASON_AWARE_READS_CONFIRMED',
-  'BIWENGER_API_VERSION_FALLBACK',
-];
+const requiredConfiguration = ['DATABASE_URL', 'BIWENGER_TOKEN', 'BIWENGER_API_VERSION_FALLBACK'];
 
 describe('sync workflow season configuration', () => {
   for (const workflowName of ['sync.yml', 'sync-live.yml', 'sync-bootstrap.yml']) {
@@ -25,6 +16,16 @@ describe('sync workflow season configuration', () => {
       expect(workflow).toContain('sync:preflight');
       expect(workflow).not.toContain('E2025');
       expect(workflow).not.toContain('SYNC_SEASON_ID');
+      for (const name of [
+        'POSTGRES_HOST',
+        'BIWENGER_LEAGUE_ID',
+        'BIWENGER_USER_ID',
+        'SEASON_ID',
+        'SEASON_NAME',
+        'EUROLEAGUE_SEASON_CODE',
+        'LEAGUE_START_DATE',
+      ])
+        expect(workflow).not.toContain(`${name}:`);
     });
   }
 
