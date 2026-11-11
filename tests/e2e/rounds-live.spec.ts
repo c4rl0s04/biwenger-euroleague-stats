@@ -71,7 +71,10 @@ test('live squad survives incomplete background analysis and selector has no scr
   await login(page);
   await expect(page.getByText('Live Player', { exact: true })).toBeVisible();
   await expect(page.getByText('Jornada en directo', { exact: false })).toBeVisible();
-  await expect(page.getByText('Pendiente', { exact: true }).first()).toBeVisible();
+  await expect(
+    page.getByRole('region', { name: 'Alineación de la jornada' }).getByText('/', { exact: true })
+  ).toBeVisible();
+  await expect(page.getByText('Pendiente', { exact: true })).toHaveCount(0);
   const selector = page.getByRole('group', { name: 'Vista de alineación' });
   await expect(selector).toBeVisible();
   expect(
@@ -336,4 +339,40 @@ test('round controls, empty state and standings stay compact as the bench change
   await expect(select).toHaveText('Jornada 8');
   await page.getByRole('button', { name: 'Jornada anterior' }).click();
   await expect(select).toHaveText('Jornada 7');
+});
+
+test('finished round uses slashes for missing court and bench scores and retains zero', async ({
+  page,
+}) => {
+  await page.route('**/api/rounds/list', (route) =>
+    route.fulfill({
+      json: {
+        success: true,
+        data: {
+          rounds: [{ round_id: 5141, round_name: 'Jornada 6', status: 'finished' }],
+          users: [manager],
+          defaultRoundId: 5141,
+        },
+      },
+    })
+  );
+  const players = [
+    { ...player, player_id: 101, name: 'No recorded score', raw_points: null },
+    { ...player, player_id: 102, name: 'Recorded zero', raw_points: 0, points: 0 },
+    { ...player, player_id: 103, name: 'Bench no score', raw_points: null, role: 'bench' },
+  ];
+  await page.route('**/api/rounds/stats?**', (route) =>
+    route.fulfill({
+      json: {
+        success: true,
+        data: data([{ ...manager, lineupStatus: 'available', lineup: { players } }]),
+      },
+    })
+  );
+  await login(page);
+  const court = page.getByRole('region', { name: 'Alineación de la jornada' });
+  await expect(court.getByText('/', { exact: true })).toHaveCount(1);
+  await expect(court.getByText('0 pts', { exact: true })).toBeVisible();
+  await expect(page.getByText('/', { exact: true })).toHaveCount(2);
+  await expect(page.getByText('Pendiente', { exact: true })).toHaveCount(0);
 });

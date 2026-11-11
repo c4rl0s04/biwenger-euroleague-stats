@@ -1,5 +1,5 @@
 'use client';
-import { hasPendingRoundPoints } from '../../logic/desktop-round';
+import { hasMissingRoundPoints } from '../../logic/desktop-round';
 
 import { motion } from 'framer-motion';
 import { useState } from 'react';
@@ -120,11 +120,11 @@ export default function PlayerCourtCard({ player, onClick, size = 'base' }) {
           <span
             className={`mt-0.5 ${s.ptsText} text-white ${ptsBg} font-mono font-black px-1.5 py-0 rounded border border-white/20 shadow-sm`}
           >
-            {hasPendingRoundPoints(player)
-              ? 'Pendiente'
-              : player.points !== undefined
+            {hasMissingRoundPoints(player)
+              ? '/'
+              : player.points != null
                 ? `${player.points} pts`
-                : '-'}
+                : '/'}
           </span>
         </div>
       </div>

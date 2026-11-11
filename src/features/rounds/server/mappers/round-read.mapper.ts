@@ -57,6 +57,8 @@ export function mapRoundLineup(data: Rows.UserLineup): Models.RoundLineupViewMod
 }
 export function mapRoundCandidate(p: Rows.SquadPlayerRow): Models.RoundCandidateViewModel {
   return {
+    ...('raw_points' in p ? { raw_points: p.raw_points } : {}),
+    ...('calculated' in p ? { calculated: p.calculated } : {}),
     player_id: p.player_id,
     name: p.name,
     position: p.position,

@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { hasPendingRoundPoints, selectRoundManager } from './desktop-round';
+import { hasMissingRoundPoints, selectRoundManager } from './desktop-round';
 import {
   lineup as emptyLineup,
   lineupPlayer,
@@ -18,14 +18,14 @@ it('uses a complete background squad when the selected quick result is unavailab
   const full = { ...standing, lineup };
   expect(selectRoundManager(payload([standing]), payload([full]), 7)).toBe(full);
 });
-it('distinguishes pending points from a genuine zero or calculated result', () => {
-  expect(hasPendingRoundPoints({ raw_points: null, calculated: false })).toBe(true);
-  expect(hasPendingRoundPoints({ raw_points: 0, calculated: false })).toBe(false);
-  expect(hasPendingRoundPoints({ raw_points: null, calculated: true })).toBe(false);
+it('distinguishes missing points from a genuine zero or calculated result', () => {
+  expect(hasMissingRoundPoints({ raw_points: null, calculated: false })).toBe(true);
+  expect(hasMissingRoundPoints({ raw_points: 0, calculated: false })).toBe(false);
+  expect(hasMissingRoundPoints({ raw_points: null, calculated: true })).toBe(false);
 });
 
 it('distinguishes missing ideal scores from scored players and genuine zeroes', () => {
-  expect(hasPendingRoundPoints({ points: null })).toBe(true);
-  expect(hasPendingRoundPoints({ points: 0 })).toBe(false);
-  expect(hasPendingRoundPoints({ points: 36 })).toBe(false);
+  expect(hasMissingRoundPoints({ points: null })).toBe(true);
+  expect(hasMissingRoundPoints({ points: 0 })).toBe(false);
+  expect(hasMissingRoundPoints({ points: 36 })).toBe(false);
 });

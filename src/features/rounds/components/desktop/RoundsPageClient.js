@@ -51,7 +51,7 @@ import {
 } from '@/components/ui/foundation';
 import { cn } from '@/lib/utils';
 import { useRoundStatsData } from '../../hooks/useRoundStatsData';
-import { selectRoundManager, hasPendingRoundPoints } from '../../logic/desktop-round';
+import { selectRoundManager, hasMissingRoundPoints } from '../../logic/desktop-round';
 import { usePerformanceStats } from '../../hooks/usePerformanceStats';
 import { Activity, BarChart3, Grid, Ruler, Layout } from 'lucide-react';
 
@@ -210,7 +210,7 @@ export default function RoundsPageClient() {
   )?.status;
   const pointsPending =
     !currentUserStats?.lineup?.players.length ||
-    currentUserStats.lineup.players.every(hasPendingRoundPoints);
+    currentUserStats.lineup.players.every(hasMissingRoundPoints);
 
   // B. Construct props expected by children
   // Lineup Data (For Court)

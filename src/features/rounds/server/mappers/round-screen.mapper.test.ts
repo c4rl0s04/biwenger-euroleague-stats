@@ -31,6 +31,14 @@ describe('Rounds phone compatibility projection', () => {
     });
     expect(JSON.stringify(rows)).not.toContain('fixture-private');
   });
+  it('shows a slash for missing player scores while retaining real zeroes and reconstructed scores', () => {
+    const rows = mapRoundRows([
+      { player_id: 1, raw_points: null, points: 0, calculated: false },
+      { player_id: 2, raw_points: 0, points: 0, calculated: false },
+      { player_id: 3, raw_points: null, points: 12, calculated: true },
+    ]);
+    expect(rows.map((row) => row.value)).toEqual(['/', '0', '12']);
+  });
   it('keeps null filtering, fallback numbering and legacy nonfinite display', () => {
     expect(
       mapRoundRows([

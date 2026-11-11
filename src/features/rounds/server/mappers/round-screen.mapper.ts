@@ -31,14 +31,17 @@ export function mapRoundRows(value: unknown, linkPrefix?: string): RoundDisplayR
     .map((row, index) => {
       const title = first(row, titles) ?? `Registro ${index + 1}`;
       const subtitle = first(row, subtitles);
-      const value = first(row, values);
+      const missingPlayerScore = 'raw_points' in row && row.raw_points == null && !row.calculated;
+      const value = missingPlayerScore ? '/' : first(row, values);
       const id = row.player_id ?? row.user_id ?? row.id;
       return {
         key: String(id ?? index),
         index: index + 1,
         title: String(title),
         ...(subtitle != null ? { subtitle: String(subtitle) } : {}),
-        ...(value != null ? { value: Number(value).toLocaleString('es-ES') } : {}),
+        ...(value != null
+          ? { value: missingPlayerScore ? '/' : Number(value).toLocaleString('es-ES') }
+          : {}),
         ...(linkPrefix && id != null ? { href: `${linkPrefix}/${id}` } : {}),
       };
     });

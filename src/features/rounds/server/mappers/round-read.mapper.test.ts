@@ -63,6 +63,10 @@ describe('Round read projections', () => {
   });
   it('keeps distinct left-out, optimization and global ideal player envelopes', () => {
     expect(mapRoundCandidate({ ...candidate, ...extra })).toEqual(candidate);
+    expect(mapRoundCandidate({ ...candidate, raw_points: null, calculated: false })).toMatchObject({
+      raw_points: null,
+      calculated: false,
+    });
     expect(
       mapRoundOptimization({ optimalLineup: [{ ...optimized, ...extra }], totalPoints: 1.5 })
     ).toEqual({ optimalLineup: [optimized], totalPoints: 1.5 });
