@@ -41,9 +41,14 @@ For complete instructions, read [local development](docs/getting-started/local-d
 
 ## Common checks
 
+Run focused checks for the area you changed; GitHub Actions runs the full suite on every pull
+request. See [testing](docs/contributing/testing.md) for the available commands.
+
 ```bash
-npm run verify
+npm run typecheck
+npm run architecture:check
 npm run test:e2e:local # disposable authenticated browser tests
+npm run verify         # full local suite, only when a specific risk requires it
 ```
 
 ## Technology
