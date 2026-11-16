@@ -9,6 +9,10 @@ updates:
       day: 'monday'
       time: '09:00'
     open-pull-requests-limit: 5
+    ignore:
+      # TypeScript 7 is not yet supported by the lint/build toolchain (see PR #138).
+      - dependency-name: 'typescript'
+        update-types: ['version-update:semver-major']
     groups:
       development-dependencies:
         dependency-type: 'development'

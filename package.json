@@ -65,14 +65,14 @@
     "ledger": "tsx -r dotenv/config scripts/finance/manager-cash-ledger.ts"
   },
   "dependencies": {
-    "@sentry/nextjs": "^11.8.0",
+    "@sentry/nextjs": "^11.13.0",
     "@vercel/analytics": "^2.0.1",
-    "bcryptjs": "^2.4.3",
+    "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^4.4.0",
     "dotenv": "^18.0.5",
-    "drizzle-orm": "^0.45.2",
+    "drizzle-orm": "^0.45.4",
     "framer-motion": "^13.5.0",
     "html-to-image": "^1.11.13",
     "lucide-react": "^0.575.0",
@@ -90,7 +90,7 @@
     "remark-gfm": "^4.0.1",
     "server-only": "^0.0.1",
     "tailwind-merge": "^3.7.0",
-    "zod": "^4.6.5"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^16.4.6",
