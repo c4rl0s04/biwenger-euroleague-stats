@@ -469,6 +469,16 @@ test('history controls, sort headers and analytical details work with keyboard i
     })
   );
   await login(page);
+  const historySection = page.locator('#historial-de-rendimiento');
+  await expect(historySection.locator('[data-stat-list="manager"]')).toHaveCount(6);
+  for (const list of await historySection.locator('[data-stat-list="manager"]').all()) {
+    await expect(list.getByRole('link', { name: /Round Manager/ })).toHaveAttribute(
+      'href',
+      '/user/7'
+    );
+    await expect(list.getByRole('listitem')).toHaveCount(2);
+  }
+  await expect(historySection.locator('a[href*="undefined"]')).toHaveCount(0);
   for (const theme of ['dark', 'light']) {
     await page
       .locator('html')
