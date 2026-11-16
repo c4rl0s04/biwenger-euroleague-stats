@@ -13,9 +13,8 @@ updates:
       # TypeScript 7 is not yet supported by the lint/build toolchain (see PR #138).
       - dependency-name: 'typescript'
         update-types: ['version-update:semver-major']
+    # Minor/patch updates arrive as one weekly PR per group; majors stay separate for review.
     groups:
-      development-dependencies:
-        dependency-type: 'development'
       next-ecosystem:
         patterns:
           - 'next'
@@ -24,6 +23,14 @@ updates:
           - 'react-dom'
           - '@types/react'
           - '@types/react-dom'
+      development-dependencies:
+        dependency-type: 'development'
+        update-types: ['minor', 'patch']
+        # Playwright also needs the image pin in scripts/e2e/Dockerfile.
+        exclude-patterns: ['playwright']
+      production-dependencies:
+        dependency-type: 'production'
+        update-types: ['minor', 'patch']
 
   # GitHub Actions
   - package-ecosystem: 'github-actions'
