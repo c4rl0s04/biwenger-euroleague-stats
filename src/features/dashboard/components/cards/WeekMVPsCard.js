@@ -5,9 +5,9 @@
 import { Trophy, Award } from 'lucide-react';
 import Link from 'next/link';
 import { Card, AnimatedNumber } from '@/components/ui';
-import { StatsList } from '@/lib/competition/ui';
+import { PlayerStatList } from '@/lib/competition/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
-import { getColorForUser } from '@/lib/competition/public';
+import { getManagerTextColor } from '@/lib/competition/public';
 
 export default function WeekMVPsCard() {
   const { data: mvps = [], loading } = useApiData('/api/dashboard/mvps');
@@ -20,9 +20,11 @@ export default function WeekMVPsCard() {
   };
 
   const getTextStyles = (index) => {
-    if (index === 0) return 'text-yellow-400';
-    if (index === 1) return 'text-slate-300';
-    if (index === 2) return 'text-orange-400';
+    if (index === 0)
+      return 'text-[color-mix(in_srgb,var(--color-yellow-400)_55%,hsl(var(--content-primary)))]';
+    if (index === 1) return 'text-muted-foreground';
+    if (index === 2)
+      return 'text-[color-mix(in_srgb,var(--color-orange-400)_55%,hsl(var(--content-primary)))]';
     return 'text-foreground';
   };
 
@@ -35,49 +37,50 @@ export default function WeekMVPsCard() {
       className="card-glow"
     >
       <div className="flex flex-col flex-1 pb-1">
-        <StatsList
+        <PlayerStatList
           items={!loading && mvps && mvps.length > 0 ? mvps.slice(0, 5) : []}
           emptyMessage="No hay datos disponibles"
-          renderLeft={(player, index) => (
-            <div className="flex items-center gap-3 w-full">
-              <div
-                className={`w-10 h-10 rounded-full flex shrink-0 items-center justify-center font-bold text-sm border-2 ${getRankStyles(
-                  index
-                )}`}
-              >
-                {index <= 2 ? <Award className="w-5 h-5" /> : index + 1}
+          getKey={(player) => player.player_id}
+          getPlayer={(player) => ({
+            id: player.player_id ?? null,
+            name: player.name,
+            subtitle: (
+              <div className="text-xs text-muted-foreground truncate flex items-center gap-1">
+                <span>{player.team}</span>
+                {player.owner_name && (
+                  <>
+                    <span>·</span>
+                    {(() => {
+                      return (
+                        <span
+                          className="truncate font-medium"
+                          style={{
+                            color: getManagerTextColor(
+                              player.owner_id,
+                              player.owner_name,
+                              player.owner_color_index
+                            ),
+                          }}
+                        >
+                          👤 {player.owner_name}
+                        </span>
+                      );
+                    })()}
+                  </>
+                )}
               </div>
-              <div className="min-w-0 flex-1">
-                <Link
-                  href={`/player/${player.player_id}`}
-                  className="font-bold text-foreground text-sm truncate hover:text-yellow-500 transition-colors"
-                >
-                  {player.name}
-                </Link>
-                <div className="text-xs text-muted-foreground truncate flex items-center gap-1">
-                  <span>{player.team}</span>
-                  {player.owner_name && (
-                    <>
-                      <span>·</span>
-                      {(() => {
-                        const color = getColorForUser(
-                          player.owner_id,
-                          player.owner_name,
-                          player.owner_color_index
-                        );
-                        return (
-                          <span className={`${color.text} truncate font-medium`}>
-                            👤 {player.owner_name}
-                          </span>
-                        );
-                      })()}
-                    </>
-                  )}
-                </div>
-              </div>
+            ),
+          })}
+          renderBadge={(player, index) => (
+            <div
+              className={`w-10 h-10 rounded-full flex shrink-0 items-center justify-center font-bold text-sm border-2 ${getRankStyles(
+                index
+              )}`}
+            >
+              {index <= 2 ? <Award className="w-5 h-5" /> : index + 1}
             </div>
           )}
-          renderRight={(player, index) => (
+          renderMetric={(player, index) => (
             <div className={`font-bold text-base whitespace-nowrap ${getTextStyles(index)}`}>
               <AnimatedNumber value={Number(player.points)} duration={0.8} /> pts
             </div>

@@ -9,3 +9,4 @@ export * from './presentation/courtPositions';
 export * from './presentation/format';
 
 export { deriveRoundLifecycle, type RoundLifecycle } from './logic/round-lifecycle';
+export { getManagerTextColor } from './presentation/identity-color';

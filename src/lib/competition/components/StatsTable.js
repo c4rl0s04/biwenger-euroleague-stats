@@ -62,7 +62,7 @@ function SortableHeader({
 
 /**
  * StatsTable - A generic table template for displaying statistics.
- * This is the counterpart to StatsList for tabular data.
+ * Tabular competition statistics retain their own presentation contract.
  *
  * @param {string} title - Card title
  * @param {React.ComponentType} icon - Lucide icon component

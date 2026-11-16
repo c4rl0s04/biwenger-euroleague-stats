@@ -88,3 +88,114 @@ test('standings retains compact rankings and distinct keyboard-accessible breakd
       .screenshot({ path: info.outputPath(`manager-ranking-${theme}.png`) });
   }
 });
+
+test('dashboard keeps ranked players, contextual form and transfer activity distinct', async ({
+  page,
+}, info) => {
+  const player = {
+    id: 99101,
+    player_id: 99101,
+    name: 'List Fixture Player with a long display name',
+    team: 'Fixture Madrid',
+    position: 'Base',
+    owner_id: '99001',
+    owner_name: 'Fixture Manager',
+    owner_color_index: 1,
+    average: 0,
+    points: 0,
+    value: 0,
+    avg_value: 0,
+    games_played: 2,
+    avg_points: 0,
+    recent_scores: '0,12,-3',
+    form_label: 'En forma',
+    avg_recent_points: 0,
+  };
+  const mock = async (path: string, data: unknown) =>
+    page.route(path, (route) => route.fulfill({ json: { success: true, data } }));
+  await mock('**/api/dashboard/top-players', [player]);
+  await mock('**/api/dashboard/mvps', [player]);
+  await mock('**/api/stats/leaders?**', [player]);
+  await mock('**/api/dashboard/top-form', [player]);
+  await mock('**/api/dashboard/captain-suggest?**', [player]);
+  await mock('**/api/dashboard/recent-activity?**', {
+    recentTransfers: [
+      {
+        id: 1,
+        player_id: 99101,
+        player_name: 'Activity Fixture Player',
+        precio: 0,
+        timestamp: 1760000000,
+        vendedor_id: '99001',
+        vendedor: 'Fixture Seller',
+        vendedor_color_index: 1,
+        comprador_id: '99002',
+        comprador: 'Fixture Buyer',
+        comprador_color_index: 2,
+      },
+      {
+        id: 2,
+        player_id: 99101,
+        player_name: 'Market Fixture Player',
+        precio: 12,
+        timestamp: 1760000000,
+        vendedor_id: null,
+        vendedor: 'Mercado',
+        comprador_id: '99001',
+        comprador: 'Fixture Buyer',
+        comprador_color_index: 1,
+      },
+    ],
+    priceChanges: [],
+    recentRecords: [],
+    personalizedAlerts: [],
+  });
+  await login(page, '/dashboard');
+  for (const theme of ['dark', 'light']) {
+    await page
+      .locator('html')
+      .evaluate((element, value) => element.setAttribute('data-theme', value), theme);
+    const top = page.locator('.stat-card').filter({ hasText: 'Top Jugadores' });
+    await top.scrollIntoViewIfNeeded();
+    const ranking = top.locator('[data-stat-list="player-ranking"]');
+    await expect(ranking.getByRole('link', { name: player.name })).toHaveAttribute(
+      'href',
+      '/player/99101'
+    );
+    await expect(ranking.getByRole('listitem')).toHaveCount(1);
+    await expect(ranking).toContainText('0 pts');
+    const form = page.locator('[data-stat-list="topform"]');
+    await form.scrollIntoViewIfNeeded();
+    await expect(form).toContainText('12');
+    await expect(form).toContainText('-3');
+    await expect(form.getByRole('link', { name: 'Fixture Manager' })).toHaveAttribute(
+      'href',
+      '/user/99001'
+    );
+    const activity = page.locator('[data-stat-list="transfer-activity"]');
+    await activity.scrollIntoViewIfNeeded();
+    const transfer = activity.getByRole('listitem').first();
+    await expect(transfer.getByRole('link', { name: 'Activity Fixture Player' })).toHaveAttribute(
+      'href',
+      '/player/99101'
+    );
+    await expect(transfer.getByRole('link', { name: 'Fixture Seller' })).toHaveAttribute(
+      'href',
+      '/user/99001'
+    );
+    await expect(transfer.getByRole('link', { name: 'Fixture Buyer' })).toHaveAttribute(
+      'href',
+      '/user/99002'
+    );
+    await expect(transfer).toContainText('0€');
+    await expect(activity.getByRole('link', { name: 'Mercado' })).toHaveCount(0);
+    await transfer.getByRole('link', { name: 'Fixture Seller' }).focus();
+    await expect(transfer.getByRole('link', { name: 'Fixture Seller' })).toBeFocused();
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)
+    ).toBe(true);
+    await waitForScreenshotPaint(page);
+    await activity.screenshot({ path: info.outputPath(`transfer-activity-${theme}.png`) });
+    await ranking.screenshot({ path: info.outputPath(`player-ranking-${theme}.png`) });
+  }
+});

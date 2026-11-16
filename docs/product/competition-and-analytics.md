@@ -61,3 +61,7 @@ zero-performance claims.
 
 The [Rounds UI implementation evidence](../migration/reports/rounds-ui-foundation-implementation.md)
 records the staged foundation migration and its validation status.
+
+The [shared statistics-list migration record](../migration/reports/statistics-list-foundation-implementation.md)
+documents the distinct compact, analytical, player and activity presentations shared across Rounds,
+Standings and Dashboard.
