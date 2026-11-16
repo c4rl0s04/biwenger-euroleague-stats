@@ -5,10 +5,13 @@ audience:
   - contributor
   - maintainer
   - agent
-status: active
+status: deprecated
 ---
 
 # Agent setup implementation status
+
+> Historical record of the September 2026 agent setup task. Figures below reflect that point in time;
+> the current workflow lives in [agent workflow](agent-workflow.md) and [testing](testing.md).
 
 This task starts from main `376814b6` in `chore/agent-workflow-setup`.
 

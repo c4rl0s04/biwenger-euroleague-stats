@@ -72,13 +72,15 @@ test('Rounds preserves historical analysis and phone section navigation', async 
     await expect(page.getByRole('button', { name: 'Jornada', exact: true })).toBeVisible();
     await expect(page.getByText('Panel de Jornada', { exact: true })).toBeVisible();
     await expect(page.locator('h1')).toHaveCount(1);
+    // The desktop sidebar auto-collapses on tablet widths (768-1023px) and hides section links.
+    const sidebarExpanded = (page.viewportSize()?.width ?? 0) >= 1024;
     for (const id of [
       'estadisticas-de-la-ronda',
       'estadisticas-de-jugadores',
       'historial-de-rendimiento',
       'comparativa-de-liga',
     ]) {
-      await expect(page.locator(`a[href="/rounds#${id}"]`)).toBeVisible();
+      if (sidebarExpanded) await expect(page.locator(`a[href="/rounds#${id}"]`)).toBeVisible();
       await expect(page.locator(`#${id}`)).toHaveCount(1);
     }
     await capture(page, info, 'rounds-overview');
