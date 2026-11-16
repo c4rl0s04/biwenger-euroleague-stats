@@ -83,7 +83,7 @@ To exercise an independently configured local app, `npm run test:e2e` accepts `P
 manual mode. CI and the disposable runner require credentials and fail if they are missing.
 
 CI uses [the pinned Linux browser container](../../scripts/e2e/Dockerfile), including Node 24.20.0,
-PostgreSQL 16, and Playwright 1.58.2. Reproduce the same Linux/arm64 environment locally with Docker:
+PostgreSQL 16, and Playwright 1.65.0. Reproduce the same Linux/arm64 environment locally with Docker:
 
 Playwright is pinned exactly in `package.json` to match that image. The 1.64.1 update failed tablet
 actionability and iPhone visual checks; validate a browser upgrade separately against the retained
