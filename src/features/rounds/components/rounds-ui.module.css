@@ -1,0 +1,14 @@
+.root {
+  --round-ideal: var(--color-emerald-400);
+  --round-global: var(--color-purple-400);
+  --round-record: var(--color-amber-300);
+  --round-info: var(--color-sky-400);
+  --round-danger: var(--color-red-400);
+}
+:global([data-theme='light']) .root {
+  --round-ideal: var(--color-emerald-700);
+  --round-global: var(--color-purple-700);
+  --round-record: var(--color-amber-800);
+  --round-info: var(--color-sky-700);
+  --round-danger: var(--color-red-700);
+}

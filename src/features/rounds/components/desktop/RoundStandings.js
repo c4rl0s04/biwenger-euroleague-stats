@@ -1,10 +1,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { User, Medal, ListOrdered, ArrowUpDown } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/foundation';
+import { Card, CardHeader, CardTitle, CardContent, Avatar } from '@/components/ui/foundation';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { cn } from '@/lib/utils';
 import { getColorForUser } from '@/lib/competition/public';
@@ -17,7 +15,6 @@ export default function RoundStandings({
   onSelectUser,
   standings: propStandings,
 }) {
-  const router = useRouter();
   const [sortBy, setSortBy] = useState('round'); // 'round' or 'total'
 
   // If props provided, don't fetch. Else fetch.
@@ -216,19 +213,23 @@ export default function RoundStandings({
               else if (eff >= 70) effColor = 'text-primary';
 
               return (
-                <button
+                <div
                   key={user.id}
-                  onClick={() => onSelectUser(user.id)}
-                  aria-label={`Ver alineación de ${user.name}`}
-                  aria-pressed={isSelected}
                   // Updated Row Widths to match Header
                   className={cn(
-                    'relative group grid min-h-14 shrink-0 grid-cols-[1.5rem_3rem_1fr_1fr_1fr_1fr] gap-1 items-center w-full px-2 py-2 transition-colors duration-200 cursor-pointer text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                    'pointer-events-none relative group grid min-h-14 shrink-0 grid-cols-[1.5rem_3rem_1fr_1fr_1fr_1fr] gap-1 items-center w-full px-2 py-2 transition-colors duration-200 cursor-pointer text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                     rowBg,
                     isSelected &&
                       'bg-primary/10 ring-1 ring-primary/50 shadow-[0_0_20px_rgba(var(--primary-rgb),0.2)] z-10'
                   )}
                 >
+                  <button
+                    type="button"
+                    className="pointer-events-auto absolute inset-0 rounded-lg focus-visible:outline-2 focus-visible:outline-primary"
+                    onClick={() => onSelectUser(user.id)}
+                    aria-label={`Ver alineación de ${user.name}`}
+                    aria-pressed={isSelected}
+                  />
                   {/* 1. Rank */}
                   <div
                     className={cn(
@@ -241,24 +242,19 @@ export default function RoundStandings({
 
                   {/* 2. Manager Image (Compact Column) */}
                   <div className="flex justify-center w-full">
-                    <div
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        router.push(`/user/${user.id}`);
-                      }}
-                      className={cn(
-                        'relative w-8 h-8 rounded-full overflow-hidden border-2 shrink-0 cursor-pointer hover:scale-110 transition-transform shadow-lg z-10',
-                        isSelected ? 'border-primary' : 'border-zinc-700'
-                      )}
+                    <a
+                      href={`/user/${user.id}`}
+                      aria-label={`Ver perfil de ${user.name}`}
+                      className="pointer-events-auto relative z-10 rounded-full focus-visible:outline-2 focus-visible:outline-primary"
                     >
-                      {user.icon ? (
-                        <Image src={user.icon} alt={user.name} fill className="object-cover" />
-                      ) : (
-                        <div className="flex items-center justify-center w-full h-full bg-zinc-800 text-zinc-500">
-                          <User size={14} />
-                        </div>
-                      )}
-                    </div>
+                      <Avatar
+                        src={user.icon}
+                        alt={user.name ?? ''}
+                        fallback={<User size={14} />}
+                        size="sm"
+                        className={isSelected ? 'border-primary' : ''}
+                      />
+                    </a>
                   </div>
 
                   {/* 3. Efficiency Column */}
@@ -293,7 +289,7 @@ export default function RoundStandings({
                       <div className="w-1 h-4 bg-primary rounded-r-full shadow-[0_0_10px_rgba(var(--primary-rgb),0.8)]" />
                     </div>
                   )}
-                </button>
+                </div>
               );
             })}
           </div>

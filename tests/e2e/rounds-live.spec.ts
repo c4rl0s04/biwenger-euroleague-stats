@@ -376,3 +376,30 @@ test('finished round uses slashes for missing court and bench scores and retains
   await expect(page.getByText('/', { exact: true })).toHaveCount(2);
   await expect(page.getByText('Pendiente', { exact: true })).toHaveCount(0);
 });
+
+test('foundation round picker supports keyboard selection, dismissal and boundary navigation', async ({
+  page,
+}) => {
+  await page.route('**/api/rounds/stats?**', (route) =>
+    route.fulfill({ json: { success: true, data: data([manager]) } })
+  );
+  await login(page);
+  const picker = page.getByRole('button', { name: 'Jornada', exact: true });
+  await expect(page.getByRole('button', { name: 'Jornada anterior' })).toBeDisabled();
+  await picker.focus();
+  await page.keyboard.press('ArrowDown');
+  await expect(page.getByRole('listbox', { name: 'Jornada' })).toBeFocused();
+  await page.keyboard.press('End');
+  await page.keyboard.press('Enter');
+  await expect(picker).toHaveText('Jornada 8');
+  await expect(picker).toBeFocused();
+  await expect(page.getByRole('button', { name: 'Jornada siguiente' })).toBeDisabled();
+  await picker.press('Enter');
+  await page.keyboard.press('Home');
+  await page.keyboard.press('Escape');
+  await expect(picker).toHaveText('Jornada 8');
+  await expect(picker).toBeFocused();
+  await picker.press('Enter');
+  await page.getByRole('heading', { name: 'Estadísticas de la Ronda' }).click();
+  await expect(page.getByRole('listbox')).toHaveCount(0);
+});

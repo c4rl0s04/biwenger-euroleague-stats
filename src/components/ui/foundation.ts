@@ -37,3 +37,5 @@ export {
   type SearchableOption,
   type SearchableSelectProps,
 } from './controls/SearchableSelect';
+
+export { Select, type SelectProps, type SelectOption } from './controls/Select';

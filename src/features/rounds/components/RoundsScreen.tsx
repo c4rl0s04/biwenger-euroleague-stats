@@ -1,9 +1,10 @@
 import { PageCanvas, PageHeader } from '@/components/ui/foundation';
+import styles from './rounds-ui.module.css';
 import RoundsPageClient from './desktop/RoundsPageClient';
 
 export default function RoundsScreen() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`${styles.root} min-h-screen bg-background`}>
       <main className="w-full relative z-10">
         <PageCanvas className="pb-0!">
           <PageHeader

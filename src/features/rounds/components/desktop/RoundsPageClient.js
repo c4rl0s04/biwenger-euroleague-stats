@@ -21,7 +21,7 @@ import {
 import { apiClient } from '@/lib/api-client';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { useClientUser } from '@/lib/hooks/useClientUser';
-import ElegantCard from '@/components/ui/card-variants/ElegantCard';
+import { RoundCard } from '../RoundCard';
 import { SectionHeader } from '@/components/ui/foundation';
 import RoundStandings from './RoundStandings';
 import RoundControls from './RoundControls';
@@ -313,7 +313,7 @@ export default function RoundsPageClient() {
       {/* SECTION: ESTADISTICAS DE LA RONDA */}
       <Section title="Estadísticas de la Ronda" delay={0} background="section-base">
         {/* HEADER & CONTROLS */}
-        <ElegantCard
+        <RoundCard
           title="Panel de Jornada"
           icon={Settings}
           color="zinc"
@@ -324,7 +324,7 @@ export default function RoundsPageClient() {
             selectedRoundId={selectedRoundId}
             onChangeRound={setSelectedRoundId}
           />
-        </ElegantCard>
+        </RoundCard>
 
         {/* Independent standings and court columns keep row spacing stable. */}
         {roundStatus === 'live' && (
@@ -458,7 +458,7 @@ export default function RoundsPageClient() {
               {/* Bench */}
               {isBenchVisible && currentBench.length > 0 && (
                 <div className="mt-4">
-                  <ElegantCard
+                  <RoundCard
                     title="Banquillo"
                     icon={Users}
                     className="w-full opacity-90"
@@ -469,7 +469,7 @@ export default function RoundsPageClient() {
                       viewMode="tactical"
                       onPlayerClick={handlePlayerClick}
                     />
-                  </ElegantCard>
+                  </RoundCard>
                 </div>
               )}
             </div>
@@ -685,14 +685,14 @@ export default function RoundsPageClient() {
                 </div>
 
                 {/* Personal Breakdown Table */}
-                <ElegantCard
+                <RoundCard
                   title="Desglose por Jornada"
                   icon={BarChart3}
                   color="indigo"
                   className="mt-4"
                 >
                   <PersonalBreakdownTable history={userHistory} />
-                </ElegantCard>
+                </RoundCard>
               </div>
             )}
           </div>
@@ -702,19 +702,19 @@ export default function RoundsPageClient() {
       {/* SECTION: COMPARATIVA DE LIGA */}
       <Section title="Comparativa de Liga" delay={300} background="section-raised">
         {/* Row 1: Leaderboard full width */}
-        <ElegantCard title="Clasificación por Eficiencia" icon={Trophy} color="yellow">
+        <RoundCard title="Clasificación por Eficiencia" icon={Trophy} color="yellow">
           <LeagueLeaderboard
             leaderboardData={leaderboardData?.leaderboard || []}
             users={lists?.users || []}
             loading={leaderboardLoading}
           />
-        </ElegantCard>
+        </RoundCard>
 
         {/* Row 2: Split Layout - Heatmap & Stacked Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           {/* Left: Heatmap */}
           <div className="h-full">
-            <ElegantCard
+            <RoundCard
               title="Mapa de Calor de Eficiencia"
               icon={Grid}
               color="indigo"
@@ -725,37 +725,37 @@ export default function RoundsPageClient() {
                 users={lists?.users || []}
                 loading={allHistoryLoading}
               />
-            </ElegantCard>
+            </RoundCard>
           </div>
 
           {/* Right: Stacked Cards */}
           <div className="flex flex-col gap-6">
-            <ElegantCard title="Consistencia" icon={Ruler} color="cyan">
+            <RoundCard title="Consistencia" icon={Ruler} color="cyan">
               <ConsistencyRanking
                 allUsersHistory={allHistoryData?.allUsersHistory || []}
                 users={lists?.users || []}
                 loading={allHistoryLoading}
               />
-            </ElegantCard>
+            </RoundCard>
 
-            <ElegantCard title="Jornadas Perfectas" icon={Star} color="amber">
+            <RoundCard title="Jornadas Perfectas" icon={Star} color="amber">
               <PerfectRoundsCard
                 allUsersHistory={allHistoryData?.allUsersHistory || []}
                 users={lists?.users || []}
                 loading={allHistoryLoading}
               />
-            </ElegantCard>
+            </RoundCard>
           </div>
         </div>
 
         {/* Row 3: Lineup Stats */}
         <div className="mt-6">
-          <ElegantCard title="Alineaciones Preferidas" icon={Layout} color="purple">
+          <RoundCard title="Alineaciones Preferidas" icon={Layout} color="purple">
             <LineupStatsCard
               globalStats={lineupStatsData?.global || []}
               userStats={lineupStatsData?.users || []}
             />
-          </ElegantCard>
+          </RoundCard>
         </div>
       </Section>
     </div>

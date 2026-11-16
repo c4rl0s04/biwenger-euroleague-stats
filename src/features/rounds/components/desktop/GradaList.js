@@ -1,10 +1,7 @@
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { UserX } from 'lucide-react';
 
 export default function GradaList({ players }) {
-  const router = useRouter();
-
   if (!players || players.length === 0) return null;
 
   // Sort by points descending to highlight mistakes
@@ -15,14 +12,14 @@ export default function GradaList({ players }) {
       <div className="grid grid-cols-1 gap-1 max-h-[200px] overflow-y-auto custom-scrollbar pr-1">
         {sorted.map((player) => {
           return (
-            <div
+            <a
               key={player.player_id ?? player.id}
-              onClick={() => router.push(`/player/${player.player_id || player.id}`)}
-              className="group flex items-center justify-between p-1.5 rounded-lg bg-zinc-900/50 border border-white/5 hover:bg-zinc-800/50 transition-colors duration-200 cursor-pointer"
+              href={`/player/${player.player_id || player.id}`}
+              className="group flex items-center justify-between p-1.5 rounded-lg bg-secondary/50 border border-border hover:bg-secondary transition-colors duration-200 cursor-pointer"
             >
               <div className="flex items-center gap-3">
                 {/* Image */}
-                <div className="relative w-8 h-8 rounded-full overflow-hidden bg-zinc-800 shrink-0 group-hover:scale-105 transition-transform duration-200">
+                <div className="relative w-8 h-8 rounded-full overflow-hidden bg-secondary shrink-0 group-hover:scale-105 transition-transform duration-200">
                   {player.img ? (
                     <Image
                       src={player.img}
@@ -32,16 +29,16 @@ export default function GradaList({ players }) {
                       sizes="32px"
                     />
                   ) : (
-                    <UserX size={14} className="m-auto mt-2 text-zinc-600" />
+                    <UserX size={14} className="m-auto mt-2 text-muted-foreground" />
                   )}
                 </div>
 
                 {/* Name & Team */}
                 <div>
-                  <div className="text-sm font-medium text-zinc-200 truncate max-w-[120px] group-hover:text-white transition-colors duration-200">
+                  <div className="text-sm font-medium text-foreground truncate max-w-[120px] group-hover:text-foreground transition-colors duration-200">
                     {player.name}
                   </div>
-                  <div className="text-[10px] text-zinc-500">
+                  <div className="text-[10px] text-muted-foreground">
                     {player.team_short} · {player.position}
                   </div>
                 </div>
@@ -50,15 +47,15 @@ export default function GradaList({ players }) {
               {/* Points */}
               <div className="text-right shrink-0">
                 <span
-                  className={`text-base font-black font-mono ${player.points > 15 ? 'text-red-400' : 'text-zinc-400'} group-hover:text-white transition-colors duration-200`}
+                  className={`text-base font-black font-mono ${player.points > 15 ? 'text-[var(--round-danger)]' : 'text-muted-foreground'} group-hover:text-foreground transition-colors duration-200`}
                 >
                   {player.points ?? '/'}
                 </span>
-                <span className="text-[9px] text-zinc-500 font-bold uppercase block -mt-1 tracking-tighter group-hover:text-zinc-400">
+                <span className="text-[9px] text-muted-foreground font-bold uppercase block -mt-1 tracking-tighter group-hover:text-muted-foreground">
                   PTS
                 </span>
               </div>
-            </div>
+            </a>
           );
         })}
       </div>

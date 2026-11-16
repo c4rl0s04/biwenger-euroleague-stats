@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import React from 'react';
+import { useSelect } from './controls/useSelect';
 import { ChevronDown, Check } from 'lucide-react';
 
 export default function CustomSelect({
@@ -13,31 +14,19 @@ export default function CustomSelect({
   label = '',
   compact = false,
 }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef(null);
-
-  // Close when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    if (!isOpen) return undefined;
-    const handleEscape = (event) => {
-      if (event.key === 'Escape') setIsOpen(false);
-    };
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
-  }, [isOpen]);
-
-  const selectedOption = options.find((opt) => opt.value === value);
+  const {
+    isOpen,
+    selectedOption,
+    triggerRef,
+    menuRef,
+    dropdownRef,
+    id,
+    activeIndex,
+    onKeyDown,
+    open,
+    close,
+    choose,
+  } = useSelect({ value, onChange, options });
 
   const isCentered =
     typeof buttonClassName === 'string' && buttonClassName.includes('justify-center');
@@ -46,7 +35,9 @@ export default function CustomSelect({
     <div className={`relative ${className}`} ref={dropdownRef}>
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        ref={triggerRef}
+        onKeyDown={onKeyDown}
+        onClick={() => (isOpen ? close() : open())}
         aria-label={label || undefined}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
@@ -67,18 +58,26 @@ export default function CustomSelect({
       {isOpen && (
         <div className="absolute z-50 top-full left-0 right-0 mt-2 bg-card/95 backdrop-blur-xl border border-border/50 rounded-xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-100 origin-top">
           <div
+            ref={menuRef}
+            id={id}
+            tabIndex={-1}
+            aria-label={label || placeholder}
+            aria-activedescendant={`${id}-option-${activeIndex}`}
+            onKeyDown={onKeyDown}
             role="listbox"
             className="max-h-80 overflow-y-auto p-1 py-1.5 space-y-0.5 sidebar-scroll"
           >
-            {options.map((option) => (
+            {options.map((option, index) => (
               <button
                 type="button"
                 key={option.value}
+                id={`${id}-option-${index}`}
+                tabIndex={-1}
+                disabled={option.disabled}
                 role="option"
                 aria-selected={value === option.value}
                 onClick={() => {
-                  onChange(option.value);
-                  setIsOpen(false);
+                  choose(index);
                 }}
                 className={`w-full text-left ${compact ? 'px-3 py-2.5' : 'px-4 py-3.5'} rounded-lg transition-colors flex items-center justify-between group cursor-pointer ${
                   value === option.value

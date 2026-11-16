@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { Card, CardTitle, EmptyState } from '@/components/ui/foundation';
 import { Crown, Target, Grab, Handshake } from 'lucide-react';
 
 const STAT_CONFIGS = {
@@ -10,8 +10,8 @@ const STAT_CONFIGS = {
     icon: Crown,
     gradient: 'from-yellow-500/10 to-amber-900/20',
     border: 'border-yellow-500/20',
-    iconColor: 'text-yellow-500',
-    valueColor: 'text-yellow-400',
+    iconColor: 'text-[var(--round-record)]',
+    valueColor: 'text-[var(--round-record)]',
     unit: 'pts',
   },
   points: {
@@ -19,8 +19,8 @@ const STAT_CONFIGS = {
     icon: Target,
     gradient: 'from-orange-500/10 to-red-900/20',
     border: 'border-orange-500/20',
-    iconColor: 'text-orange-500',
-    valueColor: 'text-orange-400',
+    iconColor: 'text-primary',
+    valueColor: 'text-primary',
     unit: 'pts',
   },
   rebounds: {
@@ -28,8 +28,8 @@ const STAT_CONFIGS = {
     icon: Grab,
     gradient: 'from-blue-500/10 to-indigo-900/20',
     border: 'border-blue-500/20',
-    iconColor: 'text-blue-500',
-    valueColor: 'text-blue-400',
+    iconColor: 'text-[var(--round-info)]',
+    valueColor: 'text-[var(--round-info)]',
     unit: 'reb',
   },
   assists: {
@@ -37,62 +37,59 @@ const STAT_CONFIGS = {
     icon: Handshake,
     gradient: 'from-emerald-500/10 to-teal-900/20',
     border: 'border-emerald-500/20',
-    iconColor: 'text-emerald-500',
-    valueColor: 'text-emerald-400',
+    iconColor: 'text-[var(--round-ideal)]',
+    valueColor: 'text-[var(--round-ideal)]',
     unit: 'ast',
   },
 };
 
 export default function StatLeaderCard({ player, statType = 'mvp', statValue }) {
-  const router = useRouter();
   const config = STAT_CONFIGS[statType] || STAT_CONFIGS.mvp;
   const Icon = config.icon;
 
-  // Empty state when no player data
-  if (!player) {
+  if (!player)
     return (
-      <div
-        className={`relative overflow-hidden rounded-xl bg-gradient-to-br ${config.gradient} ${config.border} border p-3 h-full opacity-50`}
-      >
-        <div className={`flex items-center gap-2 ${config.iconColor} mb-2`}>
-          <Icon size={16} />
-          <span className="text-[10px] font-bold uppercase tracking-wider">{config.title}</span>
+      <Card density="compact" className="h-full">
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Icon size={16} aria-hidden />
+          <h3 className="font-sans! text-sm! font-semibold tracking-normal! normal-case!">
+            {config.title}
+          </h3>
         </div>
-        <div className="text-sm text-white/30 italic">Sin datos disponibles</div>
-      </div>
+        <EmptyState>Sin datos disponibles</EmptyState>
+      </Card>
     );
-  }
 
   const displayValue = statValue ?? player.points ?? player.stat_value ?? 0;
 
-  const handleClick = () => {
-    if (player.id) {
-      router.push(`/player/${player.id}`);
-    }
-  };
-
   return (
-    <div
-      onClick={handleClick}
-      className={`relative overflow-hidden rounded-xl bg-gradient-to-br ${config.gradient} ${config.border} border p-3 h-full cursor-pointer transition-all hover:scale-[1.02] hover:shadow-lg`}
-    >
+    <Card density="compact" className="relative h-full overflow-hidden">
       <div className="flex items-start justify-between h-full gap-2">
         <div className="flex flex-col justify-between h-full flex-1 min-w-0">
           {/* Header */}
           <div className={`flex items-center gap-2 ${config.iconColor} mb-1`}>
             <Icon size={14} />
-            <span className="text-[10px] font-bold uppercase tracking-wider">{config.title}</span>
+            <CardTitle className="text-xs!">{config.title}</CardTitle>
           </div>
 
           {/* Player Info */}
           <div className="flex-1 flex flex-col justify-center my-1">
             <div
-              className="text-base font-bold text-white leading-tight line-clamp-2 break-words"
+              className="text-base font-bold text-foreground leading-tight line-clamp-2 break-words"
               title={player.name}
             >
-              {player.name}
+              {player.id ? (
+                <a
+                  href={`/player/${player.id}`}
+                  className="rounded focus-visible:outline-2 focus-visible:outline-primary hover:underline"
+                >
+                  {player.name}
+                </a>
+              ) : (
+                player.name
+              )}
             </div>
-            <div className="text-[11px] text-white/50">{player.team_name}</div>
+            <div className="text-[11px] text-muted-foreground">{player.team_name}</div>
           </div>
 
           {/* Stat Value */}
@@ -104,13 +101,13 @@ export default function StatLeaderCard({ player, statType = 'mvp', statValue }) 
 
         {/* Player Image - Cropped to show head (same as PlayerCourtCard) */}
         {player.img && (
-          <div className="relative w-12 h-12 rounded-full border-2 border-white/10 overflow-hidden shrink-0 shadow-lg bg-slate-900 self-center">
+          <div className="relative w-12 h-12 rounded-full border-2 border-border overflow-hidden shrink-0 shadow-lg bg-slate-900 self-center">
             <div className="relative w-full h-full pt-1 scale-[1.7] origin-top">
               <Image src={player.img} alt={player.name} fill className="object-cover object-top" />
             </div>
           </div>
         )}
       </div>
-    </div>
+    </Card>
   );
 }
