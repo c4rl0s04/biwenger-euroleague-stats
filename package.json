@@ -79,7 +79,7 @@
     "maplibre-gl": "6.4.1",
     "next": "^16.4.6",
     "next-auth": "5.0.0-beta.32",
-    "openai": "^6.39.0",
+    "openai": "^7.57.0",
     "pg": "^8.23.1",
     "prop-types": "^15.8.1",
     "react": "^19.3.1",
