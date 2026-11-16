@@ -3,10 +3,10 @@ import { Skeleton } from '@/components/ui/foundation';
 import { useMemo } from 'react';
 import { Popover } from '@/components/ui/foundation';
 import { Star } from 'lucide-react';
-import { RoundRankingList } from '../../../RoundRankingList';
+import { ManagerDistributionList } from '@/lib/competition/ui';
 
 /**
- * PerfectRoundsCard - Efficiency range distribution using StatsList
+ * PerfectRoundsCard - Efficiency range distribution using analytical manager rows
  */
 export default function PerfectRoundsCard({ allUsersHistory = [], users = [], loading = false }) {
   const { items, maxRounds } = useMemo(() => {
@@ -52,7 +52,7 @@ export default function PerfectRoundsCard({ allUsersHistory = [], users = [], lo
     return (
       <div className="animate-pulse space-y-4">
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="flex items-center gap-4">
+          <div key={i} className="flex w-full items-center gap-4">
             <Skeleton className="w-24 h-4 bg-secondary rounded" />
             <Skeleton className="flex-1 h-6 bg-secondary rounded" />
           </div>
@@ -72,10 +72,17 @@ export default function PerfectRoundsCard({ allUsersHistory = [], users = [], lo
 
   return (
     <div className="flex flex-col h-full">
-      <RoundRankingList
+      <ManagerDistributionList
         items={items}
-        renderRight={(data) => (
-          <div className="w-32 sm:w-40 xl:w-48 h-5 bg-secondary/50 rounded overflow-hidden flex relative border border-border">
+        getKey={(item) => item.user_id}
+        getIdentity={(item) => ({
+          id: item.user_id ?? null,
+          name: item.name,
+          icon: item.icon,
+          colorIndex: item.color_index,
+        })}
+        renderVisualization={(data) => (
+          <div className="w-full h-6 bg-secondary/50 rounded overflow-hidden flex relative border border-border">
             {[
               { key: 'elite', label: '95%+', tone: 'bg-yellow-500 text-black' },
               { key: 'excellent', label: '90-94%', tone: 'bg-emerald-700 text-white' },
