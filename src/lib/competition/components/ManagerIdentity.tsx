@@ -1,7 +1,8 @@
 import Link from 'next/link';
-import type { CSSProperties, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Avatar } from '@/components/ui/foundation';
 import { getColorForUser } from '../presentation/colors';
+import { getManagerTextColor } from '../presentation/identity-color';
 
 export interface ManagerIdentityValue {
   id: string | number | null;
@@ -27,7 +28,7 @@ export function ManagerIdentity({ manager }: { manager: ManagerIdentityValue }) 
         <span
           className="block truncate text-sm font-semibold"
           style={{
-            color: 'color-mix(in srgb, var(--manager-color) 55%, hsl(var(--content-primary)))',
+            color: getManagerTextColor(manager.id, name, manager.colorIndex),
           }}
           title={name}
         >
@@ -42,7 +43,6 @@ export function ManagerIdentity({ manager }: { manager: ManagerIdentityValue }) 
   const props = {
     className:
       'flex min-w-0 items-center gap-2.5 rounded-[var(--radius-control)] focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-4',
-    style: { '--manager-color': color } as CSSProperties,
   };
   return manager.id != null ? (
     <Link {...props} href={`/user/${manager.id}`}>

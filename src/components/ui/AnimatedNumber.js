@@ -7,13 +7,14 @@ import { motion, useSpring, useTransform, useInView } from 'framer-motion';
  * AnimatedNumber - A component that animates numbers counting up/down
  * Uses framer-motion for smooth spring-based animations
  *
- * @param {number} value - The target number to animate to
- * @param {string} className - Additional CSS classes
- * @param {number} duration - Animation duration in seconds (default: 1)
- * @param {string} prefix - Text before the number (e.g., "€")
- * @param {string} suffix - Text after the number (e.g., "pts")
- * @param {number} decimals - Number of decimal places (default: 0)
- * @param {boolean} animateOnView - Only animate when visible (default: true)
+ * @param {Object} props
+ * @param {number} props.value - The target number to animate to
+ * @param {string} [props.className] - Additional CSS classes
+ * @param {number} [props.duration] - Animation duration in seconds (default: 1)
+ * @param {string} [props.prefix] - Text before the number (e.g., "€")
+ * @param {string} [props.suffix] - Text after the number (e.g., "pts")
+ * @param {number} [props.decimals] - Number of decimal places (default: 0)
+ * @param {boolean} [props.animateOnView] - Only animate when visible (default: true)
  */
 export default function AnimatedNumber({
   value,

@@ -6,9 +6,9 @@ import { useState, useMemo, useCallback } from 'react';
 import { BarChart2 } from 'lucide-react';
 import Link from 'next/link';
 import { Card, AnimatedNumber } from '@/components/ui';
-import { StatsList } from '@/lib/competition/ui';
+import { PlayerStatList } from '@/lib/competition/ui';
 import { useApiData } from '@/lib/hooks/useApiData';
-import { getColorForUser } from '@/lib/competition/public';
+import { getManagerTextColor } from '@/lib/competition/public';
 
 export default function StatsLeadersCard() {
   const [statType, setStatType] = useState('points');
@@ -23,7 +23,7 @@ export default function StatsLeadersCard() {
         label: 'Puntos Reales',
         shortLabel: 'PTS',
         unit: 'pts',
-        color: 'text-orange-400',
+        color: 'text-[color-mix(in_srgb,var(--color-orange-400)_55%,hsl(var(--content-primary)))]',
         bgActive: 'bg-orange-500/20 border-orange-500/50',
         query: 'real_points',
       },
@@ -31,7 +31,7 @@ export default function StatsLeadersCard() {
         label: 'Rebotes',
         shortLabel: 'REB',
         unit: 'reb',
-        color: 'text-blue-400',
+        color: 'text-[color-mix(in_srgb,var(--color-blue-400)_55%,hsl(var(--content-primary)))]',
         bgActive: 'bg-blue-500/20 border-blue-500/50',
         query: 'rebounds',
       },
@@ -39,7 +39,7 @@ export default function StatsLeadersCard() {
         label: 'Asistencias',
         shortLabel: 'AST',
         unit: 'ast',
-        color: 'text-green-400',
+        color: 'text-[color-mix(in_srgb,var(--color-green-400)_55%,hsl(var(--content-primary)))]',
         bgActive: 'bg-green-500/20 border-green-500/50',
         query: 'assists',
       },
@@ -47,7 +47,7 @@ export default function StatsLeadersCard() {
         label: 'Valoración',
         shortLabel: 'VAL',
         unit: 'val',
-        color: 'text-purple-400',
+        color: 'text-[color-mix(in_srgb,var(--color-purple-400)_55%,hsl(var(--content-primary)))]',
         bgActive: 'bg-purple-500/20 border-purple-500/50',
         query: 'pir',
       },
@@ -131,45 +131,46 @@ export default function StatsLeadersCard() {
           ${isAnimating ? 'opacity-0' : 'opacity-100'}
         `}
       >
-        <StatsList
+        <PlayerStatList
           items={leaders.length > 0 ? leaders : []}
           emptyMessage="No hay datos disponibles"
-          renderLeft={(player, index) => (
-            <div className="flex items-center gap-3 w-full">
-              <div className="w-10 h-10 rounded-full flex shrink-0 items-center justify-center bg-secondary border border-border font-bold text-sm text-muted-foreground">
-                {index + 1}
+          getKey={(player) => player.player_id}
+          getPlayer={(player) => ({
+            id: player.player_id ?? null,
+            name: player.name,
+            subtitle: (
+              <div className="text-xs text-muted-foreground truncate flex items-center gap-1">
+                <span>{player.team}</span>
+                {player.owner_name && (
+                  <>
+                    <span>·</span>
+                    {(() => {
+                      return (
+                        <span
+                          className="truncate font-medium"
+                          style={{
+                            color: getManagerTextColor(
+                              player.owner_id,
+                              player.owner_name,
+                              player.owner_color_index
+                            ),
+                          }}
+                        >
+                          👤 {player.owner_name}
+                        </span>
+                      );
+                    })()}
+                  </>
+                )}
               </div>
-              <div className="min-w-0 flex-1">
-                <Link
-                  href={`/player/${player.player_id}`}
-                  className="font-bold text-foreground text-sm truncate hover:text-cyan-400 transition-colors"
-                >
-                  {player.name}
-                </Link>
-                <div className="text-xs text-muted-foreground truncate flex items-center gap-1">
-                  <span>{player.team}</span>
-                  {player.owner_name && (
-                    <>
-                      <span>·</span>
-                      {(() => {
-                        const color = getColorForUser(
-                          player.owner_id,
-                          player.owner_name,
-                          player.owner_color_index
-                        );
-                        return (
-                          <span className={`${color.text} truncate font-medium`}>
-                            👤 {player.owner_name}
-                          </span>
-                        );
-                      })()}
-                    </>
-                  )}
-                </div>
-              </div>
+            ),
+          })}
+          renderBadge={(player, index) => (
+            <div className="w-10 h-10 rounded-full flex shrink-0 items-center justify-center bg-secondary border border-border font-bold text-sm text-muted-foreground">
+              {index + 1}
             </div>
           )}
-          renderRight={(player) => (
+          renderMetric={(player) => (
             <div className="flex items-center gap-4 text-right whitespace-nowrap">
               {/* Total with stat name */}
               <div>
