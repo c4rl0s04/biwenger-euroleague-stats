@@ -2,7 +2,7 @@
 
 import { useMemo, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Table, TableRow, TableCell } from '@/components/ui/StatsTable';
+import { IconButton } from '@/components/ui/foundation';
 
 /**
  * PersonalBreakdownTable - Transposed version (Horizontal Scroll) with Navigation Arrows.
@@ -27,7 +27,12 @@ export default function PersonalBreakdownTable({ history = [] }) {
   const metrics = [
     { label: 'Jornada', key: 'round_number', type: 'header' },
     { label: 'Puntos Reales', key: 'actual_points', type: 'points' },
-    { label: 'Puntos Ideales', key: 'ideal_points', type: 'points', color: 'text-zinc-400' },
+    {
+      label: 'Puntos Ideales',
+      key: 'ideal_points',
+      type: 'points',
+      color: 'text-muted-foreground',
+    },
     { label: 'Perdidos', key: 'lost', type: 'lost' },
     { label: 'Eficiencia', key: 'efficiency', type: 'efficiency' },
   ];
@@ -47,34 +52,40 @@ export default function PersonalBreakdownTable({ history = [] }) {
   };
 
   return (
-    <div className="w-full overflow-hidden rounded-xl border border-white/5 bg-zinc-950/20 flex flex-col">
+    <div className="w-full overflow-hidden rounded-xl border border-border bg-[hsl(var(--surface-card))]/20 flex flex-col">
       <div
         ref={scrollRef}
-        className="overflow-x-auto custom-scrollbar scroll-smooth w-full"
+        role="region"
+        aria-label="Historial desplazable"
+        tabIndex={0}
+        className="overflow-x-auto custom-scrollbar scroll-smooth w-full focus-visible:outline-2 focus-visible:outline-primary"
         style={{ scrollBehavior: 'smooth' }}
       >
-        <Table className="border-separate border-spacing-0 w-max min-w-full">
+        <table
+          aria-label="Desglose por jornada"
+          className="border-separate border-spacing-0 w-max min-w-full"
+        >
           <tbody>
             {metrics.map((metric, rowIndex) => (
-              <TableRow key={metric.label} hovering={rowIndex !== 0}>
+              <tr key={metric.label} className="hover:bg-secondary/50">
                 {/* Sticky Label Column */}
-                <TableCell
-                  align="left"
-                  className="sticky left-0 bg-zinc-950 z-20 min-w-[120px] border-r border-white/10 shadow-[4px_0_10px_rgba(0,0,0,0.5)] py-3"
+                <th
+                  scope="row"
+                  className="sticky left-0 bg-[hsl(var(--surface-card))] z-20 min-w-[120px] border-r border-border shadow-[4px_0_10px_rgba(0,0,0,0.5)] py-3"
                 >
                   <span
-                    className={`text-[10px] uppercase font-black tracking-widest ${rowIndex === 0 ? 'text-zinc-500' : 'text-zinc-300'}`}
+                    className={`text-[10px] uppercase font-black tracking-widest ${rowIndex === 0 ? 'text-muted-foreground' : 'text-foreground'}`}
                   >
                     {metric.label}
                   </span>
-                </TableCell>
+                </th>
 
                 {/* Data Columns (Rounds) */}
                 {sortedHistory.map((round) => {
                   const lost = Math.max(0, round.ideal_points - round.actual_points);
 
                   let content;
-                  let colorClass = metric.color || 'text-white';
+                  let colorClass = metric.color || 'text-foreground';
 
                   if (metric.type === 'header') {
                     content = (
@@ -91,7 +102,7 @@ export default function PersonalBreakdownTable({ history = [] }) {
                   } else if (metric.type === 'lost') {
                     content = (
                       <span
-                        className={`font-bold tabular-nums ${lost > 0 ? 'text-red-500/80' : 'text-zinc-600'}`}
+                        className={`font-bold tabular-nums ${lost > 0 ? 'text-[var(--round-danger)]/80' : 'text-muted-foreground'}`}
                       >
                         {lost > 0 ? `-${lost.toFixed(0)}` : '0'}
                       </span>
@@ -99,21 +110,21 @@ export default function PersonalBreakdownTable({ history = [] }) {
                   } else if (metric.type === 'efficiency') {
                     const effColor =
                       round.efficiency >= 90
-                        ? 'text-emerald-400'
+                        ? 'text-[var(--round-ideal)]'
                         : round.efficiency >= 80
-                          ? 'text-yellow-400'
+                          ? 'text-[var(--round-record)]'
                           : round.efficiency >= 70
-                            ? 'text-orange-400'
-                            : 'text-red-400';
+                            ? 'text-primary'
+                            : 'text-[var(--round-danger)]';
 
                     content = (
                       <div className="flex flex-col items-center">
                         <span className={`font-black tabular-nums ${effColor}`}>
                           {round.efficiency.toFixed(1)}%
                         </span>
-                        <div className="w-8 h-0.5 bg-zinc-800 rounded-full mt-1 overflow-hidden">
+                        <div className="w-8 h-0.5 bg-secondary rounded-full mt-1 overflow-hidden">
                           <div
-                            className={`h-full ${effColor.replace('text', 'bg')}`}
+                            className={`h-full bg-current ${effColor}`}
                             style={{ width: `${round.efficiency}%` }}
                           />
                         </div>
@@ -121,45 +132,48 @@ export default function PersonalBreakdownTable({ history = [] }) {
                     );
                   }
 
+                  const Cell = metric.type === 'header' ? 'th' : 'td';
                   return (
-                    <TableCell
+                    <Cell
+                      scope={metric.type === 'header' ? 'col' : undefined}
                       key={`${round.round_id}-${metric.label}`}
-                      align="center"
-                      className="min-w-[90px] border-r border-white/5 last:border-r-0"
+                      className="px-3 py-3 text-center min-w-[90px] border-r border-border last:border-r-0"
                     >
                       {content}
-                    </TableCell>
+                    </Cell>
                   );
                 })}
-              </TableRow>
+              </tr>
             ))}
           </tbody>
-        </Table>
+        </table>
       </div>
 
       {/* Navigation Controls */}
-      <div className="p-2 bg-zinc-950/60 flex items-center justify-between border-t border-white/5 px-6">
-        <button
+      <div className="p-2 bg-[hsl(var(--surface-card))]/60 flex items-center justify-between border-t border-border px-6">
+        <IconButton
+          variant="ghost"
           onClick={() => handleScroll('left')}
-          className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all cursor-pointer active:scale-95 border border-white/5"
-          title="Desplazar a la izquierda"
+          className="p-2 rounded-full bg-secondary hover:bg-secondary text-muted-foreground hover:text-foreground transition-all cursor-pointer active:scale-95 border border-border"
+          aria-label="Desplazar a la izquierda"
         >
           <ChevronLeft size={20} />
-        </button>
+        </IconButton>
 
-        <span className="text-[10px] uppercase font-black text-zinc-500 tracking-[0.3em] flex items-center gap-2">
+        <span className="text-[10px] uppercase font-black text-muted-foreground tracking-[0.3em] flex items-center gap-2">
           <span className="w-1.5 h-1.5 rounded-full bg-primary/40" />
           Historial
           <span className="w-1.5 h-1.5 rounded-full bg-primary/40" />
         </span>
 
-        <button
+        <IconButton
+          variant="ghost"
           onClick={() => handleScroll('right')}
-          className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all cursor-pointer active:scale-95 border border-white/5"
-          title="Desplazar a la derecha"
+          className="p-2 rounded-full bg-secondary hover:bg-secondary text-muted-foreground hover:text-foreground transition-all cursor-pointer active:scale-95 border border-border"
+          aria-label="Desplazar a la derecha"
         >
           <ChevronRight size={20} />
-        </button>
+        </IconButton>
       </div>
     </div>
   );

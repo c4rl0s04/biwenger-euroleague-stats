@@ -39,3 +39,4 @@ export {
 } from './controls/SearchableSelect';
 
 export { Select, type SelectProps, type SelectOption } from './controls/Select';
+export { Popover } from './controls/Popover';

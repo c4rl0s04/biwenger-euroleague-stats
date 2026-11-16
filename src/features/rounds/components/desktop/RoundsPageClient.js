@@ -11,9 +11,6 @@ import {
   TrendingDown,
   Target,
   Trophy,
-  Plus,
-  X,
-  Check,
   TrendingUp,
   Calendar,
 } from 'lucide-react';
@@ -22,6 +19,7 @@ import { apiClient } from '@/lib/api-client';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { useClientUser } from '@/lib/hooks/useClientUser';
 import { RoundCard } from '../RoundCard';
+import { RoundComparisonControls } from './RoundComparisonControls';
 import { SectionHeader } from '@/components/ui/foundation';
 import RoundStandings from './RoundStandings';
 import RoundControls from './RoundControls';
@@ -29,7 +27,6 @@ import { RoundViewSwitcher } from './RoundViewSwitcher';
 import BasketballCourt from './BasketballCourt';
 import Bench from './Bench';
 import RoundStatsSidebar from './RoundStatsSidebar';
-import RoundMVPCard from './stats/RoundMVPCard';
 import StatLeaderCard from './stats/StatLeaderCard';
 import PerformanceChart from './stats/history/PerformanceChart';
 import HistoryStatCard from './stats/history/HistoryStatCard';
@@ -70,7 +67,6 @@ export default function RoundsPageClient() {
   const [comparisonUserIds, setComparisonUserIds] = useState([]);
   const [comparisonHistories, setComparisonHistories] = useState({});
   const [chartMetrics, setChartMetrics] = useState({ actual: true, ideal: true });
-  const [isCompareSelectorOpen, setIsCompareSelectorOpen] = useState(false);
 
   // --- NEW: Background Loading State ---
   const [loadBackgroundData, setLoadBackgroundData] = useState(false);
@@ -191,7 +187,7 @@ export default function RoundsPageClient() {
 
   if (listsLoading)
     return (
-      <div className="text-center py-20 animate-pulse text-zinc-500">
+      <div className="text-center py-20 animate-pulse text-muted-foreground">
         Cargando datos de la temporada...
       </div>
     );
@@ -333,19 +329,19 @@ export default function RoundsPageClient() {
           </p>
         )}
         {!selectedRoundId ? (
-          <div className="mt-8 rounded-2xl border border-white/10 bg-secondary/20 p-8 text-center backdrop-blur-md">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-4">
-              <Calendar size={32} />
-            </div>
-            <h3 className="text-xl font-bold font-display text-white mb-2">
-              Temporada en preparación
-            </h3>
-            <p className="max-w-md mx-auto text-sm text-zinc-400">
-              Aún no se ha disputado ninguna jornada. Las puntuaciones, alineaciones y análisis
-              estarán disponibles tan pronto como comience la competición. Puedes seleccionar una
-              jornada en el selector superior para consultar el calendario.
-            </p>
-          </div>
+          <Card className="mt-8">
+            <EmptyState className="py-2">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-4">
+                <Calendar size={32} />
+              </div>
+              <CardTitle className="mb-2 text-xl!">Temporada en preparación</CardTitle>
+              <p className="max-w-md mx-auto text-sm text-muted-foreground">
+                Aún no se ha disputado ninguna jornada. Las puntuaciones, alineaciones y análisis
+                estarán disponibles tan pronto como comience la competición. Puedes seleccionar una
+                jornada en el selector superior para consultar el calendario.
+              </p>
+            </EmptyState>
+          </Card>
         ) : (
           <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
             {/* LEFT COLUMN: STANDINGS + STATS (1/3 width) */}
@@ -513,124 +509,25 @@ export default function RoundsPageClient() {
       <Section title="Historial de Rendimiento" delay={200} background="section-base">
         {historyLoading ? (
           <div className="animate-pulse space-y-4">
-            <div className="h-64 bg-white/5 rounded-xl" />
+            <div className="h-64 bg-secondary rounded-xl" />
             <div className="grid grid-cols-4 gap-4">
-              <div className="h-24 bg-white/5 rounded-xl" />
-              <div className="h-24 bg-white/5 rounded-xl" />
-              <div className="h-24 bg-white/5 rounded-xl" />
-              <div className="h-24 bg-white/5 rounded-xl" />
+              <div className="h-24 bg-secondary rounded-xl" />
+              <div className="h-24 bg-secondary rounded-xl" />
+              <div className="h-24 bg-secondary rounded-xl" />
+              <div className="h-24 bg-secondary rounded-xl" />
             </div>
           </div>
         ) : (
           <div className="space-y-6">
-            {/* COMPARISON CONTROLS */}
-            <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-zinc-900/50 p-4 rounded-xl border border-white/5">
-              {/* Left: Metric Toggles */}
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-zinc-400">Métricas:</span>
-                  <button
-                    onClick={() => setChartMetrics((p) => ({ ...p, actual: !p.actual }))}
-                    className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider border transition-all cursor-pointer ${
-                      chartMetrics.actual
-                        ? 'bg-primary/20 border-primary/50 text-primary shadow-[0_0_10px_rgba(250,80,1,0.2)]'
-                        : 'bg-zinc-800/50 border-white/5 text-zinc-500'
-                    }`}
-                  >
-                    Puntos Reales
-                  </button>
-                  <button
-                    onClick={() => setChartMetrics((p) => ({ ...p, ideal: !p.ideal }))}
-                    className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider border transition-all cursor-pointer ${
-                      chartMetrics.ideal
-                        ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400 shadow-[0_0_10px_rgba(5,150,105,0.2)]'
-                        : 'bg-zinc-800/50 border-white/5 text-zinc-500'
-                    }`}
-                  >
-                    Puntos Ideales
-                  </button>
-                </div>
-              </div>
-
-              {/* Right: User Selector */}
-              <div className="flex flex-wrap items-center justify-end gap-2 max-w-full">
-                {comparisonUserIds.map((id) => {
-                  const u = lists?.users?.find((user) => user.id === id);
-                  if (!u) return null;
-                  return (
-                    <div
-                      key={id}
-                      className="flex items-center gap-1.5 bg-zinc-800 pl-1.5 pr-2 py-1 rounded-full border border-white/5"
-                    >
-                      <div className="w-4 h-4 rounded-full bg-zinc-700 overflow-hidden">
-                        {u.icon && (
-                          <img src={u.icon} alt={u.name} className="w-full h-full object-cover" />
-                        )}
-                      </div>
-                      <span className="text-xs text-zinc-300">{u.name}</span>
-                      {comparisonUserIds.length > 1 && (
-                        <button
-                          onClick={() => toggleUserInComparison(id)}
-                          className="text-zinc-500 hover:text-red-400 transition-colors ml-1 cursor-pointer"
-                        >
-                          <X size={12} />
-                        </button>
-                      )}
-                    </div>
-                  );
-                })}
-
-                <div className="relative">
-                  <button
-                    onClick={() => setIsCompareSelectorOpen(!isCompareSelectorOpen)}
-                    className="w-8 h-8 flex items-center justify-center rounded-full bg-primary hover:bg-primary/80 text-white transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-90"
-                    title="Añadir usuario a comparar"
-                  >
-                    <Plus size={16} />
-                  </button>
-
-                  {isCompareSelectorOpen && (
-                    <>
-                      <div
-                        className="fixed inset-0 z-40"
-                        onClick={() => setIsCompareSelectorOpen(false)}
-                      />
-                      <div className="absolute right-0 top-full mt-2 w-48 max-h-60 overflow-y-auto bg-zinc-900 border border-white/10 rounded-lg shadow-xl z-50 p-1 custom-scrollbar">
-                        {lists?.users?.map((user) => {
-                          const isSelected = comparisonUserIds.includes(user.id);
-                          return (
-                            <button
-                              key={user.id}
-                              onClick={() => {
-                                toggleUserInComparison(user.id);
-                                setIsCompareSelectorOpen(false);
-                              }}
-                              className={`w-full text-left px-3 py-2 rounded-md text-xs flex items-center justify-between hover:bg-white/5 transition-colors cursor-pointer ${
-                                isSelected ? 'text-blue-400 bg-blue-500/10' : 'text-zinc-400'
-                              }`}
-                            >
-                              <div className="flex items-center gap-2">
-                                <div className="w-5 h-5 rounded-full bg-zinc-800 overflow-hidden">
-                                  {user.icon && (
-                                    <img
-                                      src={user.icon}
-                                      alt={user.name}
-                                      className="w-full h-full object-cover"
-                                    />
-                                  )}
-                                </div>
-                                <span>{user.name}</span>
-                              </div>
-                              {isSelected && <Check size={12} />}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
+            <RoundComparisonControls
+              users={lists?.users || []}
+              selectedIds={comparisonUserIds}
+              metrics={chartMetrics}
+              onToggleMetric={(metric) =>
+                setChartMetrics((previous) => ({ ...previous, [metric]: !previous[metric] }))
+              }
+              onToggleUser={toggleUserInComparison}
+            />
 
             <PerformanceChart
               histories={comparisonHistories}

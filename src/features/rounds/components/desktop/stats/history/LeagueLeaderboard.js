@@ -1,23 +1,23 @@
 'use client';
 
+import { Skeleton } from '@/components/ui/foundation';
+
 import { useState, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+import { Avatar, Button } from '@/components/ui/foundation';
 import { ChevronUp, ChevronDown } from 'lucide-react';
-import { getColorForUser } from '@/lib/competition/public';
 
 /**
  * Returns a color class based on efficiency value (0-100)
  */
 function getEfficiencyColor(efficiency) {
   const eff = parseFloat(efficiency) || 0;
-  if (eff >= 95) return 'text-emerald-400';
-  if (eff >= 90) return 'text-emerald-500';
-  if (eff >= 85) return 'text-lime-400';
-  if (eff >= 80) return 'text-yellow-400';
-  if (eff >= 75) return 'text-amber-400';
-  if (eff >= 70) return 'text-orange-400';
-  return 'text-red-400';
+  if (eff >= 95) return 'text-[var(--round-ideal)]';
+  if (eff >= 90) return 'text-[var(--round-ideal)]';
+  if (eff >= 85) return 'text-[var(--round-ideal)]';
+  if (eff >= 80) return 'text-[var(--round-record)]';
+  if (eff >= 75) return 'text-[var(--round-record)]';
+  if (eff >= 70) return 'text-primary';
+  return 'text-[var(--round-danger)]';
 }
 
 /**
@@ -25,7 +25,6 @@ function getEfficiencyColor(efficiency) {
  * Shows: Rank, User, Avg Efficiency, Total Lost, Best/Worst Points, Best/Worst Efficiency
  */
 export default function LeagueLeaderboard({ leaderboardData = [], users = [], loading = false }) {
-  const router = useRouter();
   const [sortKey, setSortKey] = useState('avgEfficiency');
   const [sortDir, setSortDir] = useState('desc');
 
@@ -36,10 +35,6 @@ export default function LeagueLeaderboard({ leaderboardData = [], users = [], lo
       setSortKey(key);
       setSortDir('desc');
     }
-  };
-
-  const handleUserClick = (userId) => {
-    router.push(`/user/${userId}`);
   };
 
   const sortedData = useMemo(() => {
@@ -65,12 +60,17 @@ export default function LeagueLeaderboard({ leaderboardData = [], users = [], lo
         key={sortKeyName}
         style={{ width }}
         className="py-3 px-2 font-semibold text-muted-foreground cursor-pointer hover:text-foreground transition-colors text-right"
-        onClick={() => handleSort(sortKeyName)}
+        aria-sort={isActive ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}
       >
-        <span className="inline-flex items-center gap-1 justify-end">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => handleSort(sortKeyName)}
+          className="inline-flex items-center gap-1 justify-end"
+        >
           {label}
           {isActive && (sortDir === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}
-        </span>
+        </Button>
       </th>
     );
   };
@@ -79,7 +79,7 @@ export default function LeagueLeaderboard({ leaderboardData = [], users = [], lo
     return (
       <div className="animate-pulse space-y-2">
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="h-12 bg-white/5 rounded" />
+          <div key={i} className="h-12 bg-secondary rounded" />
         ))}
       </div>
     );
@@ -95,7 +95,10 @@ export default function LeagueLeaderboard({ leaderboardData = [], users = [], lo
 
   return (
     <div className="overflow-x-auto custom-scrollbar">
-      <table className="w-full text-sm table-fixed">
+      <table
+        aria-label="Clasificación por eficiencia"
+        className="w-full min-w-[42rem] text-sm table-fixed"
+      >
         <thead>
           <tr className="border-b border-border">
             <th
@@ -121,45 +124,38 @@ export default function LeagueLeaderboard({ leaderboardData = [], users = [], lo
         <tbody>
           {sortedData.map((row, index) => {
             const user = users.find((u) => u.id === row.userId);
-            const userColor = getColorForUser(row.userId, user?.name, user?.color_index);
+
             const effColor = getEfficiencyColor(row.avgEfficiency);
 
             return (
               <tr
                 key={row.userId}
-                className="border-b border-border/50 transition-colors hover:bg-white/5"
+                className="border-b border-border/50 transition-colors hover:bg-secondary"
               >
                 <td className="py-2 px-2 text-muted-foreground font-medium text-sm">{index + 1}</td>
                 <td className="py-2 px-2">
-                  <div
-                    className="flex items-center gap-2 cursor-pointer transition-transform hover:scale-105"
-                    onClick={() => handleUserClick(row.userId)}
+                  <a
+                    href={`/user/${row.userId}`}
+                    className="flex min-w-0 items-center gap-2 rounded focus-visible:outline-2 focus-visible:outline-primary"
                   >
-                    <div className="w-6 h-6 rounded-full bg-zinc-700 overflow-hidden flex-shrink-0">
-                      {user?.icon && (
-                        <Image
-                          src={user.icon}
-                          alt={user.name}
-                          width={24}
-                          height={24}
-                          unoptimized
-                          className="w-full h-full object-cover"
-                        />
-                      )}
-                    </div>
-                    <span className={`font-medium truncate text-sm ${userColor.text}`}>
+                    <Avatar src={user?.icon} alt="" size="sm" fallback={user?.name?.slice(0, 1)} />
+                    <span className="truncate text-sm font-medium text-foreground">
                       {user?.name || 'Usuario'}
                     </span>
-                  </div>
+                  </a>
                 </td>
                 <td className={`py-2 px-2 text-right font-medium text-sm ${effColor}`}>
                   {row.avgEfficiency}%
                 </td>
-                <td className="py-2 px-2 text-right text-red-400 text-sm">-{row.totalLost}</td>
-                <td className="py-2 px-2 text-right text-emerald-400 text-sm">{row.bestActual}</td>
-                <td className="py-2 px-2 text-right text-orange-400 text-sm">{row.worstActual}</td>
+                <td className="py-2 px-2 text-right text-[var(--round-danger)] text-sm">
+                  -{row.totalLost}
+                </td>
+                <td className="py-2 px-2 text-right text-[var(--round-ideal)] text-sm">
+                  {row.bestActual}
+                </td>
+                <td className="py-2 px-2 text-right text-primary text-sm">{row.worstActual}</td>
                 <td className="py-2 px-2 text-right text-sm">
-                  <span className="text-emerald-400">{row.bestEfficiency}%</span>
+                  <span className="text-[var(--round-ideal)]">{row.bestEfficiency}%</span>
                   {row.bestEffRound && (
                     <span className="text-muted-foreground text-[10px] ml-0.5">
                       (J{row.bestEffRound})
@@ -167,7 +163,7 @@ export default function LeagueLeaderboard({ leaderboardData = [], users = [], lo
                   )}
                 </td>
                 <td className="py-2 px-2 text-right text-sm">
-                  <span className="text-orange-400">{row.worstEfficiency}%</span>
+                  <span className="text-primary">{row.worstEfficiency}%</span>
                   {row.worstEffRound && (
                     <span className="text-muted-foreground text-[10px] ml-0.5">
                       (J{row.worstEffRound})

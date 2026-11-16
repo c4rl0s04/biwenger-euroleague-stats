@@ -2,11 +2,11 @@
 
 import { useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import ElegantCard from '@/components/ui/card-variants/ElegantCard';
+import { RoundCard } from '../../../RoundCard';
 import { TrendingUp } from 'lucide-react';
 import { getColorForUser } from '@/lib/competition/public';
 
-import { GlassTooltip, TooltipHeader } from '@/components/ui/Tooltip';
+import { Surface, EmptyState } from '@/components/ui/foundation';
 
 /**
  * Custom tooltip for the multi-user performance chart
@@ -30,8 +30,8 @@ function CustomTooltip({ active, payload, label, metrics }) {
   }, {});
 
   return (
-    <GlassTooltip className="min-w-[180px] pointer-events-none">
-      <TooltipHeader>Jornada {label}</TooltipHeader>
+    <Surface className="min-w-[180px] p-3 pointer-events-none">
+      <p className="mb-3 text-sm font-semibold text-foreground">Jornada {label}</p>
       <div className="space-y-3">
         {Object.entries(userPayloads).map(([userId, data]) => (
           <div key={userId} className="space-y-1.5">
@@ -40,25 +40,25 @@ function CustomTooltip({ active, payload, label, metrics }) {
                 className="w-2.5 h-2.5 rounded-full shadow-[0_0_8px_rgba(255,255,255,0.2)]"
                 style={{ backgroundColor: data.color }}
               />
-              <span className="text-xs font-bold text-white">{data.name}</span>
+              <span className="text-xs font-bold text-foreground">{data.name}</span>
             </div>
 
             {metrics.actual && data.points.actual !== undefined && (
               <div className="flex justify-between text-xs pl-5">
-                <span className="text-zinc-400">Reales:</span>
-                <span className="text-white font-bold tabular-nums">{data.points.actual}</span>
+                <span className="text-muted-foreground">Reales:</span>
+                <span className="text-foreground font-bold tabular-nums">{data.points.actual}</span>
               </div>
             )}
             {metrics.ideal && data.points.ideal !== undefined && (
               <div className="flex justify-between text-xs pl-5">
-                <span className="text-zinc-400">Ideales:</span>
-                <span className="text-white font-bold tabular-nums">{data.points.ideal}</span>
+                <span className="text-muted-foreground">Ideales:</span>
+                <span className="text-foreground font-bold tabular-nums">{data.points.ideal}</span>
               </div>
             )}
           </div>
         ))}
       </div>
-    </GlassTooltip>
+    </Surface>
   );
 }
 
@@ -97,16 +97,23 @@ export default function PerformanceChart({
 
   if (comparisonUsers.length === 0) {
     return (
-      <ElegantCard title="Evolución de Puntos" icon={TrendingUp} color="orange">
-        <div className="h-80 flex items-center justify-center text-zinc-500">
+      <RoundCard title="Evolución de Puntos" icon={TrendingUp} color="orange">
+        <div className="h-80 flex items-center justify-center text-muted-foreground">
           Selecciona usuarios para comparar
         </div>
-      </ElegantCard>
+      </RoundCard>
     );
   }
 
+  if (!chartData.length)
+    return (
+      <RoundCard title="Evolución de Puntos" icon={TrendingUp} color="orange">
+        <EmptyState className="py-12">No hay datos de historial para comparar.</EmptyState>
+      </RoundCard>
+    );
+
   return (
-    <ElegantCard title="Evolución de Puntos" icon={TrendingUp} color="orange">
+    <RoundCard title="Evolución de Puntos" icon={TrendingUp} color="orange">
       <div className="h-[500px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
@@ -114,14 +121,14 @@ export default function PerformanceChart({
 
             <XAxis
               dataKey="round_number"
-              tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
-              axisLine={{ stroke: 'hsl(var(--border) / 0.5)' }}
+              tick={{ fill: 'hsl(var(--content-muted))', fontSize: 11 }}
+              axisLine={{ stroke: 'hsl(var(--border-default) / 0.5)' }}
               tickLine={false}
               dy={10}
             />
             <YAxis
-              tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
-              axisLine={{ stroke: 'hsl(var(--border) / 0.5)' }}
+              tick={{ fill: 'hsl(var(--content-muted))', fontSize: 11 }}
+              axisLine={{ stroke: 'hsl(var(--border-default) / 0.5)' }}
               tickLine={false}
               dx={-10}
             />
@@ -134,7 +141,7 @@ export default function PerformanceChart({
 
               // 1. Get consistent color from constants
               const userColor = getColorForUser(user.id, user.name || 'Usuario', user.color_index);
-              const strokeColor = userColor?.stroke || '#ffffff';
+              const strokeColor = userColor?.stroke || 'hsl(var(--content-primary))';
 
               return (
                 <g key={user.id}>
@@ -173,6 +180,6 @@ export default function PerformanceChart({
           </LineChart>
         </ResponsiveContainer>
       </div>
-    </ElegantCard>
+    </RoundCard>
   );
 }
