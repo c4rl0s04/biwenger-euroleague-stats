@@ -149,17 +149,8 @@ export function prepareUserMutations(
     },
 
     markSeasonUsersInactiveExcept: async (activeUserIds: string[]) => {
-      if (activeUserIds.length === 0) {
-        await db.query(
-          `
-          UPDATE user_seasons
-          SET status = 'inactive', updated_at = NOW()
-          WHERE season_id = $1
-        `,
-          [seasonId]
-        );
-        return;
-      }
+      if (activeUserIds.length === 0)
+        throw new Error('Cannot deactivate users without active members.');
 
       await db.query(
         `
