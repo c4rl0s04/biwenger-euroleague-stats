@@ -57,6 +57,13 @@ describe('live Biwenger response mapping', () => {
       },
     };
     expect(parseAccountAccess(account, 9, 7).canViewFreeBidCount).toBe(true);
+    expect(
+      parseAccountAccess(
+        { ...account, data: { leagues: [{ ...account.data.leagues[0], type: 'ultra' }] } },
+        9,
+        7
+      ).canViewFreeBidCount
+    ).toBe(true);
     expect(() => parseAccountAccess(account, 9, 8)).toThrow(LiveMarketDataError);
     expect(
       parseAccountAccess(
