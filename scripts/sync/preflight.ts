@@ -2,6 +2,7 @@ import * as dotenv from 'dotenv';
 import pg from 'pg';
 
 import { buildPoolConfig } from '../../src/lib/db/connection-config.js';
+import { runSyncCli } from '../../src/lib/observability/sync-sentry.js';
 import { DIVIDER, formatMetrics } from '../../src/lib/sync/reporter.js';
 
 dotenv.config({ path: '.env.local' });
@@ -150,7 +151,4 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  console.error('\n✗ Sync preflight failed:', error instanceof Error ? error.message : error);
-  process.exit(1);
-});
+void runSyncCli(main, 'preflight', '\n✗ Sync preflight failed:').then((code) => process.exit(code));

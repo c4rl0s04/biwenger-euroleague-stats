@@ -16,7 +16,7 @@ import {
 } from './rounds';
 import { assertSyncSeasonWritable } from './season-guard';
 import { SyncReporter, type ReporterWriter } from './reporter';
-import { captureSyncError } from '../observability/sentry';
+import { captureSyncError } from '../observability/sync-sentry';
 
 export type SyncMode = 'routine' | 'bootstrap' | 'live';
 export type SyncSource = 'biwenger' | 'euroleague' | 'database' | 'biwenger+database';
