@@ -1,14 +1,10 @@
-import { fetchMarketListings } from '../../../api/biwenger-client';
+import { createBiwengerApi } from '../../../api/biwenger-client';
 import { prepareMarketListingMutations } from '../../../db/mutations/market-listings';
 import type { SyncManager } from '../../manager';
 
 export interface BiwengerMarketDependencies {
-  fetchMarketListings: typeof fetchMarketListings;
+  fetchMarketListings: ReturnType<typeof createBiwengerApi>['fetchMarketListings'];
 }
-
-const defaultDependencies: BiwengerMarketDependencies = {
-  fetchMarketListings,
-};
 
 export interface BiwengerMarketSyncResult {
   summary: string;
@@ -30,7 +26,7 @@ export async function syncBiwengerMarket(
   manager: SyncManager,
   overrides?: Partial<BiwengerMarketDependencies>
 ): Promise<BiwengerMarketSyncResult> {
-  const deps = { ...defaultDependencies, ...overrides };
+  const deps = { ...createBiwengerApi(manager.context.provider), ...overrides };
   manager.log('Syncing market listings');
 
   const db = manager.context.db;

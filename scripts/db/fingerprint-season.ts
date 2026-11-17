@@ -1,9 +1,6 @@
+import '../dev/load-env.mjs';
 import { createHash } from 'node:crypto';
-import * as dotenv from 'dotenv';
 import { createCliPool } from '../../src/lib/db/cli';
-
-dotenv.config({ path: '.env.local' });
-dotenv.config();
 
 const seasonId =
   process.argv.find((value) => value.startsWith('--season='))?.split('=')[1] || '2025-26';

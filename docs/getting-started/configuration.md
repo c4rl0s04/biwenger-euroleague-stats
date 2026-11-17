@@ -1,56 +1,41 @@
 ---
 title: Configuration
-description: Safe setup of database, authentication, provider, and feature configuration.
+description: Set up deployment secrets and database-owned season configuration.
 audience:
   - newcomer
   - contributor
   - operator
+  - agent
 status: active
 ---
 
 # Configuration
 
-Start from `.env.example` or let `npm run setup` create `.env`. The complete variable contract lives
-in the [environment variable reference](../reference/environment-variables.md); this guide only
-covers the decisions needed for local setup.
+Copy `.env.example` or run `npm run setup` to create a new `.env`. Setup masks secret input, refuses
+to overwrite an existing file, and makes no provider requests. Preserve existing session secrets
+and credential encryption keys when upgrading. The full contract is in the
+[environment reference](../reference/environment-variables.md).
 
-## Choose a database target
+## Connect the application
 
-Use either:
+Supply one `DATABASE_URL` and `AUTH_SECRET`. Local PostgreSQL and hosted PostgreSQL use the same
+connection contract; no split application connection variables are needed. With Docker, the URL's
+hostname must be reachable from the container; see [Docker](../operations/docker.md).
 
-- Individual `POSTGRES_*` values for local PostgreSQL. In Docker, `DOCKER_POSTGRES_HOST` selects the
-  host visible to containers.
-- `DATABASE_URL` for a complete PostgreSQL connection string. When present, it takes precedence over
-  individual connection values.
+Initialize an empty database with committed migrations, then create a season through the explicit
+[season lifecycle](../operations/season-lifecycle.md) command. No season metadata belongs in the
+deployment environment. Normal reads use the selected season or the uniquely active season.
 
-Confirm the target before any schema, repair, or synchronization command. Production fantasy data
-is treated as non-reconstructable; see [database safety](../operations/database-safety.md).
+## Enable optional capabilities
 
-## Connect Biwenger
+- Ingestion uses `BIWENGER_TOKEN`; the database season supplies the league, dates and official code,
+  while provider account discovery supplies ingestion identity.
+- Personal account linking/actions use the existing server-only credential keyring and encrypted
+  credentials stored in PostgreSQL. Login passwords are checked against stored hashes.
+- Personal bidding is available to signed-in managers using their own linked credentials; no extra account setting is needed.
+- The assistant uses an explicit provider, its matching key and optionally `AI_MODEL`.
+- Sentry reporting is optional. Browser reporting uses only the public DSN.
 
-`BIWENGER_TOKEN`, `BIWENGER_LEAGUE_ID`, and `BIWENGER_USER_ID` identify the private league and the
-user used for data ingestion. The setup wizard can discover the latter two from a valid token.
-
-The configuration layer supports season-specific overrides. Synchronization also requires an active
-`SYNC_SEASON_ID`; consult [season lifecycle](../operations/season-lifecycle.md) before enabling it.
-
-## Authentication and optional features
-
-Set `AUTH_SECRET` to a strong random value. Login uses the password hash stored for each synchronized
-application user. The setup wizard still writes `ACCESS_PASSWORD` for legacy/bootstrap tooling, but
-the current Auth.js credentials provider does not authenticate directly against that environment
-value.
-
-Assistant features support Groq's OpenAI-compatible API and OpenAI. `AI_PROVIDER` selects the
-provider; configure its corresponding key and optional model. If `AI_PROVIDER` is unset, the route
-prefers Groq when `GROQ_API_KEY` is present and otherwise selects OpenAI. Missing provider credentials
-do not prevent the rest of the application from starting.
-
-## Verify
-
-```bash
-npm run db:check
-```
-
-This command confirms connectivity, the Drizzle client, schema readiness, and table row counts. It does not replace the schema and
-season audits required before sensitive database work.
+Run `npm run db:check` for connectivity and schema-readiness diagnostics after confirming the target.
+This is not permission to mutate a remote database. Existing deployments must follow the
+[configuration cutover checklist](../operations/configuration-cutover.md) before removing old inputs.

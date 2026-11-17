@@ -1,11 +1,8 @@
-import * as dotenv from 'dotenv';
+import '../dev/load-env.mjs';
 import pg from 'pg';
 
 import { buildPoolConfig } from '../../src/lib/db/connection-config.js';
 import { DIVIDER, formatMetrics } from '../../src/lib/sync/reporter.js';
-
-dotenv.config({ path: '.env.local' });
-dotenv.config();
 
 function createPool() {
   return new pg.Pool(buildPoolConfig(process.env));
@@ -13,9 +10,7 @@ function createPool() {
 
 async function main() {
   const skipProviderProbes = process.argv.includes('--skip-provider-probes');
-  const { validateSeasonConfig } = await import('../../src/lib/config.js');
   const { assertSyncSeasonWritable } = await import('../../src/lib/sync/season-guard.js');
-  const season = validateSeasonConfig();
   const pool = createPool();
 
   try {
@@ -41,18 +36,13 @@ async function main() {
     console.log(`Season              ${writable.seasonId} (${writable.status})`);
     console.log(`Biwenger league     ${writable.sourceLeagueId}`);
     console.log(`EuroLeague code     ${writable.euroleagueCode}`);
-    if (season.START_DATE) {
-      console.log(`League start        ${season.START_DATE}`);
+    if (writable.startsAt) {
+      console.log(`League start        ${writable.startsAt}`);
     }
 
     console.log('\nExisting season rows:');
     for (const line of formatMetrics(counts.rows[0])) {
       console.log(line);
-    }
-
-    const { CONFIG } = await import('../../src/lib/config.js');
-    if (!CONFIG.API.LEAGUE_ID && writable.sourceLeagueId) {
-      CONFIG.API.LEAGUE_ID = writable.sourceLeagueId;
     }
 
     if (skipProviderProbes) {
@@ -61,8 +51,10 @@ async function main() {
       return;
     }
 
-    const { biwengerFetch, fetchCompetition, fetchLeague, fetchRoundGames } =
-      await import('../../src/lib/api/biwenger-client.js');
+    const { createBiwengerApi } = await import('../../src/lib/api/biwenger-client.js');
+    const { resolveIngestionContext } = await import('../../src/features/provider/server');
+    const context = await resolveIngestionContext(writable.sourceLeagueId);
+    const { fetch, fetchCompetition, fetchLeague, fetchRoundGames } = createBiwengerApi(context);
     const { getEuroleagueClient } = await import('../../src/lib/api/euroleague/runtime.js');
     const { euroleagueSeasonYear } = await import('../../src/lib/api/euroleague/normalization.js');
     const {
@@ -73,10 +65,10 @@ async function main() {
     const { parseBiwengerCompetition } = await import('../../src/lib/sync/context.js');
     const { relevantRounds } = await import('../../src/lib/sync/rounds.js');
 
-    const account = await biwengerFetch('/account', { skipVersionCheck: true });
+    const account = await fetch('/account', { skipVersionCheck: true });
     const league = await fetchLeague();
     const competition = await fetchCompetition();
-    const seasonYear = euroleagueSeasonYear(season.EUROLEAGUE_CODE, season.ID);
+    const seasonYear = euroleagueSeasonYear(writable.euroleagueCode, writable.seasonId);
     const provider = getEuroleagueClient();
     const [schedule, standings] = await Promise.all([
       provider.getSchedule(seasonYear),
@@ -88,22 +80,22 @@ async function main() {
     const firstRoundResponse = await fetchRoundGames(firstRound.id);
     const firstRoundGames = firstRoundResponse?.data?.games || firstRoundResponse?.games || [];
     const biwengerReadiness = validateBiwengerRoundSeason({
-      seasonId: season.ID,
+      seasonId: writable.seasonId,
       games: firstRoundGames,
     });
 
     const providerCounts = validateProviderSnapshot({
-      seasonId: season.ID,
-      biwengerLeagueId: season.BIWENGER_LEAGUE_ID,
-      biwengerUserId: season.BIWENGER_USER_ID,
-      euroleagueCode: season.EUROLEAGUE_CODE,
+      seasonId: writable.seasonId,
+      biwengerLeagueId: writable.sourceLeagueId,
+      biwengerUserId: context.userId,
+      euroleagueCode: writable.euroleagueCode,
       league,
       competition,
       schedule,
     });
     const officialCounts = validateAdvancedProviderSnapshot({
       seasonYear,
-      expectedSeasonId: season.ID,
+      expectedSeasonId: writable.seasonId,
       schedule,
       standings,
     });
@@ -118,7 +110,10 @@ async function main() {
           WHERE season_id=$1 AND provider='euroleague_advanced')::text AS mapped_teams,
          (SELECT COUNT(*) FROM official_player_mappings
           WHERE season_id=$1 AND status='review_required')::text AS pending_players`,
-      [season.ID, [...new Set(schedule.flatMap((game) => [game.homeTeamCode, game.awayTeamCode]))]]
+      [
+        writable.seasonId,
+        [...new Set(schedule.flatMap((game) => [game.homeTeamCode, game.awayTeamCode]))],
+      ]
     );
     const accountId = account?.data?.id ?? account?.id ?? 'available';
 

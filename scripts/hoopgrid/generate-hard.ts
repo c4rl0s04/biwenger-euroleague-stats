@@ -1,9 +1,7 @@
-import * as dotenv from 'dotenv';
+import '../dev/load-env.mjs';
 import * as path from 'path';
 
 // Load Env at the very top
-dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
-dotenv.config();
 
 /**
  * Script to generate a series of high-difficulty Hoopgrid challenges.

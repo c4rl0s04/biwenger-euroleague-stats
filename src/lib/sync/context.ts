@@ -1,3 +1,4 @@
+import type { BiwengerRequestContext } from '@/features/provider/server';
 import type { EuroleagueClient } from '../api/euroleague/client';
 import type { OfficialScheduleGame } from '../api/euroleague/types';
 import type { pool } from '../db/client';
@@ -14,6 +15,7 @@ export interface BiwengerCompetitionSnapshot {
 export interface SyncExecutionContext {
   db: typeof pool | null;
   seasonId?: string;
+  provider?: BiwengerRequestContext;
   season?: SyncSeasonContext;
   euroleague: EuroleagueClient;
   biwenger?: BiwengerCompetitionSnapshot;

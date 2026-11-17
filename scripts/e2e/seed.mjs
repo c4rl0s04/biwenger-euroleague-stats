@@ -28,6 +28,11 @@ try {
       if (statement.trim()) await client.query(statement);
     }
   }
+  if (process.env.E2E_ACTIVE_SEASON === '2025-26') {
+    await client.query(
+      "UPDATE seasons SET status='active', is_sync_enabled=true, name='Fixture League 2025-26', source_league_id='456', euroleague_code='E2025', starts_at='2025-09-01' WHERE id='2025-26'"
+    );
+  }
   const passwordHash = await bcrypt.hash('fixture-only-password', 10);
   await client.query(
     "INSERT INTO users (id,name,email,password) VALUES ('99001','Fixture Manager','fixture@example.invalid',$1),('99002','Fixture Rival','rival@example.invalid',$1)",
@@ -57,10 +62,10 @@ try {
   );
   for (let index = 1; index <= 12; index++) {
     const playerId = 99200 + index;
-    await client.query(
-      "INSERT INTO players (id,name,img) VALUES ($1,$2,'/icons/icon-192.png')",
-      [playerId, `Fixture Contributor ${String(index).padStart(2, '0')}`]
-    );
+    await client.query("INSERT INTO players (id,name,img) VALUES ($1,$2,'/icons/icon-192.png')", [
+      playerId,
+      `Fixture Contributor ${String(index).padStart(2, '0')}`,
+    ]);
     await client.query(
       "INSERT INTO player_seasons (season_id,player_id,team_id,owner_id,position,status) VALUES ('2025-26',$1,NULL,NULL,'1','ok')",
       [playerId]

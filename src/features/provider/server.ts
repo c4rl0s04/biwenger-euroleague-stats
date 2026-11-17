@@ -32,3 +32,5 @@ export type {
   ProviderCommandResult,
   ProviderRetryPolicy,
 } from './server/types';
+
+export { resolveIngestionContext } from './server/ingestion';

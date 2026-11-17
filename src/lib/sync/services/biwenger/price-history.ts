@@ -1,4 +1,4 @@
-import { fetchPlayerDetails } from '../../../api/biwenger-client';
+import { createBiwengerApi } from '../../../api/biwenger-client';
 import type { SyncManager, SyncStepResult } from '../../manager';
 import {
   parsePlayerPriceHistory,
@@ -24,7 +24,7 @@ export async function syncBiwengerPriceHistory(
   if (!db || !seasonId)
     throw new Error('Price history requires a resolved sync database and season.');
   const deps: PriceHistoryDependencies = {
-    fetchHistory: fetchPlayerDetails,
+    fetchHistory: createBiwengerApi(manager.context.provider).fetchPlayerDetails,
     repository: createPriceHistoryRepository(db),
     now: () => new Date(),
     ...overrides,

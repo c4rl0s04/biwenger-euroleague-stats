@@ -89,8 +89,10 @@ export class SyncManager {
 
   async getBiwengerCompetition(): Promise<BiwengerCompetitionSnapshot> {
     if (this.context.biwenger) return this.context.biwenger;
-    const { fetchCompetition } = await import('../api/biwenger-client');
-    return this.setBiwengerCompetition(await fetchCompetition());
+    const { createBiwengerApi } = await import('../api/biwenger-client');
+    return this.setBiwengerCompetition(
+      await createBiwengerApi(this.context.provider).fetchCompetition()
+    );
   }
 
   normalizeRoundName(name: string | undefined): string {
@@ -167,9 +169,9 @@ export class SyncManager {
       this.context.season = season;
       this.context.seasonId = season.seasonId;
 
-      const { CONFIG } = await import('../config');
-      if (!CONFIG.API.LEAGUE_ID && season.sourceLeagueId) {
-        CONFIG.API.LEAGUE_ID = season.sourceLeagueId;
+      if (this.steps.some((step) => step.source.includes('biwenger'))) {
+        const { resolveIngestionContext } = await import('@/features/provider/server');
+        this.context.provider = await resolveIngestionContext(season.sourceLeagueId);
       }
 
       this.reporter.seasonResolved({

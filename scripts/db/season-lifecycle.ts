@@ -1,10 +1,7 @@
-import * as dotenv from 'dotenv';
+import '../dev/load-env.mjs';
 import pg from 'pg';
-import { getSeasonConfig, validateSeasonConfig } from '../../src/lib/config';
+import { parseSeasonLifecycleArgs } from './season-lifecycle-options';
 import { createCliPool } from '../../src/lib/db/cli';
-
-dotenv.config({ path: '.env.local' });
-dotenv.config();
 
 const SYNC_LOCK_KEYS = [823744, 823745];
 
@@ -14,7 +11,7 @@ function requireBackupConfirmation() {
   }
 }
 
-async function assertNoSyncRunning(pool: pg.Pool) {
+async function assertNoSyncRunning(pool: pg.PoolClient) {
   const acquired: number[] = [];
 
   try {
@@ -28,20 +25,16 @@ async function assertNoSyncRunning(pool: pg.Pool) {
       }
       acquired.push(key);
     }
-  } finally {
+  } catch (error) {
     for (const key of acquired) {
       await pool.query('SELECT pg_advisory_unlock($1)', [key]);
     }
+    throw error;
   }
 }
 
-async function freezeSeason(pool: pg.Pool) {
-  if (!process.env.SEASON_ID?.trim()) {
-    throw new Error('SEASON_ID is required when freezing a season.');
-  }
-  const seasonId = getSeasonConfig().ID;
+async function freezeSeason(pool: pg.PoolClient, seasonId: string) {
   requireBackupConfirmation();
-  await assertNoSyncRunning(pool);
 
   const result = await pool.query(
     `
@@ -62,23 +55,20 @@ async function freezeSeason(pool: pg.Pool) {
   console.log(`Season ${seasonId} frozen at ${result.rows[0].frozen_at}.`);
 }
 
-async function createNextSeason(pool: pg.Pool) {
-  const configuredSeason = validateSeasonConfig({ requireToken: false });
-  const seasonId =
-    process.env.NEXT_SEASON_ID?.trim() || process.env.SEASON_ID?.trim() || configuredSeason.ID;
-  const seasonName =
-    process.env.NEXT_SEASON_NAME?.trim() ||
-    process.env.SEASON_NAME?.trim() ||
-    configuredSeason.NAME;
-  const euroleagueCode =
-    process.env.EUROLEAGUE_SEASON_CODE?.trim() || configuredSeason.EUROLEAGUE_CODE;
-  const startDate = process.env.LEAGUE_START_DATE?.trim() || configuredSeason.START_DATE;
-  const endDate = process.env.SEASON_END_DATE?.trim() || null;
-  const sourceLeagueId =
-    process.env.BIWENGER_LEAGUE_ID?.trim() || configuredSeason.BIWENGER_LEAGUE_ID;
+async function createNextSeason(
+  pool: pg.PoolClient,
+  options: ReturnType<typeof parseSeasonLifecycleArgs>
+) {
+  const {
+    season: seasonId,
+    name: seasonName,
+    euroleagueCode,
+    startDate,
+    endDate,
+    league: sourceLeagueId,
+  } = options;
 
   requireBackupConfirmation();
-  await assertNoSyncRunning(pool);
 
   await pool.query('BEGIN');
   try {
@@ -151,25 +141,34 @@ async function createNextSeason(pool: pg.Pool) {
 }
 
 async function main() {
-  const command = process.argv[2];
+  const options = parseSeasonLifecycleArgs(process.argv.slice(2));
+  const command = options.command;
   if (!['freeze', 'create-next'].includes(command)) {
     throw new Error('Usage: tsx scripts/db/season-lifecycle.ts <freeze|create-next>');
   }
 
+  requireBackupConfirmation();
   const pool = createCliPool();
+  const client = await pool.connect();
 
   try {
+    await assertNoSyncRunning(client);
     if (command === 'freeze') {
-      await freezeSeason(pool);
+      await freezeSeason(client, options.season);
       return;
     }
 
     if (command === 'create-next') {
-      await createNextSeason(pool);
+      await createNextSeason(client, options);
       return;
     }
   } finally {
-    await pool.end();
+    try {
+      for (const key of SYNC_LOCK_KEYS) await client.query('SELECT pg_advisory_unlock($1)', [key]);
+    } finally {
+      client.release();
+      await pool.end();
+    }
   }
 }
 

@@ -1,8 +1,5 @@
-import * as dotenv from 'dotenv';
+import '../../../scripts/dev/load-env.mjs';
 import * as path from 'path';
-
-dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
-dotenv.config();
 
 interface SyncCliOptions {
   mode: 'routine' | 'bootstrap' | 'live';
@@ -64,13 +61,12 @@ export function parseSyncArgs(args: string[]): SyncCliOptions {
 
 export async function syncData(args = process.argv.slice(2)): Promise<number> {
   const options = parseSyncArgs(args);
-  const [{ CONFIG }, { SyncManager }, { selectPipeline }] = await Promise.all([
-    import('../config'),
+  const [{ SyncManager }, { selectPipeline }] = await Promise.all([
     import('./manager'),
     import('./pipeline'),
   ]);
 
-  if (!process.env.BIWENGER_TOKEN && !CONFIG.API.TOKEN) {
+  if (!process.env.BIWENGER_TOKEN) {
     throw new Error('BIWENGER_TOKEN is required.');
   }
 

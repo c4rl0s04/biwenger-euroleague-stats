@@ -1,0 +1,21 @@
+ALTER TABLE "fichajes" ALTER COLUMN "season_id" DROP DEFAULT;--> statement-breakpoint
+ALTER TABLE "finances" ALTER COLUMN "season_id" DROP DEFAULT;--> statement-breakpoint
+ALTER TABLE "initial_squads" ALTER COLUMN "season_id" DROP DEFAULT;--> statement-breakpoint
+ALTER TABLE "lineups" ALTER COLUMN "season_id" DROP DEFAULT;--> statement-breakpoint
+ALTER TABLE "market_listings" ALTER COLUMN "season_id" DROP DEFAULT;--> statement-breakpoint
+ALTER TABLE "market_values" ALTER COLUMN "season_id" DROP DEFAULT;--> statement-breakpoint
+ALTER TABLE "matches" ALTER COLUMN "season_id" DROP DEFAULT;--> statement-breakpoint
+ALTER TABLE "player_round_stats" ALTER COLUMN "season_id" DROP DEFAULT;--> statement-breakpoint
+ALTER TABLE "player_seasons" ALTER COLUMN "season_id" DROP DEFAULT;--> statement-breakpoint
+ALTER TABLE "playoff_predictions" ALTER COLUMN "season_id" DROP DEFAULT;--> statement-breakpoint
+ALTER TABLE "playoff_results" ALTER COLUMN "season_id" DROP DEFAULT;--> statement-breakpoint
+ALTER TABLE "porras" ALTER COLUMN "season_id" DROP DEFAULT;--> statement-breakpoint
+ALTER TABLE "team_seasons" ALTER COLUMN "season_id" DROP DEFAULT;--> statement-breakpoint
+ALTER TABLE "tournament_fixtures" ALTER COLUMN "season_id" DROP DEFAULT;--> statement-breakpoint
+ALTER TABLE "tournament_phases" ALTER COLUMN "season_id" DROP DEFAULT;--> statement-breakpoint
+ALTER TABLE "tournament_standings" ALTER COLUMN "season_id" DROP DEFAULT;--> statement-breakpoint
+ALTER TABLE "tournaments" ALTER COLUMN "season_id" DROP DEFAULT;--> statement-breakpoint
+ALTER TABLE "transfer_bids" ALTER COLUMN "season_id" DROP DEFAULT;--> statement-breakpoint
+ALTER TABLE "user_playoff_media" ALTER COLUMN "season_id" DROP DEFAULT;--> statement-breakpoint
+ALTER TABLE "user_rounds" ALTER COLUMN "season_id" DROP DEFAULT;--> statement-breakpoint
+ALTER TABLE "user_seasons" ALTER COLUMN "season_id" DROP DEFAULT;

@@ -1,15 +1,11 @@
-import { biwengerFetch } from '../../../api/biwenger-client';
+import { createBiwengerApi } from '../../../api/biwenger-client';
 import { CONFIG } from '../../../config';
 import { prepareUserMutations } from '../../../db/mutations/users';
 import type { SyncManager } from '../../manager';
 
 export interface BiwengerSquadsDependencies {
-  fetch: typeof biwengerFetch;
+  fetch: ReturnType<typeof createBiwengerApi>['fetch'];
 }
-
-export const defaultSquadsDependencies: BiwengerSquadsDependencies = {
-  fetch: biwengerFetch,
-};
 
 export interface BiwengerSquadsSyncResult {
   summary: string;
@@ -21,7 +17,9 @@ export interface BiwengerSquadsSyncResult {
 
 export async function syncBiwengerSquads(
   manager: SyncManager,
-  dependencies: BiwengerSquadsDependencies = defaultSquadsDependencies
+  dependencies: BiwengerSquadsDependencies = {
+    fetch: createBiwengerApi(manager.context.provider).fetch,
+  }
 ): Promise<BiwengerSquadsSyncResult> {
   const db = manager.context.db;
   const seasonId = manager.context.seasonId;

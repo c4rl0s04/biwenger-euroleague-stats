@@ -1,11 +1,8 @@
-import * as dotenv from 'dotenv';
+import '../dev/load-env.mjs';
 import { sql } from 'drizzle-orm';
 import { createCliDb } from '../../src/lib/db/cli';
 import { validateSchemaReady } from '../../src/lib/db/schema-validation';
 import * as schema from '../../src/lib/db/schema';
-
-dotenv.config({ path: process.env.ENV_LOCAL_FILE || '.env.local' });
-dotenv.config({ path: process.env.ENV_FILE || '.env' });
 
 const DIAGNOSTIC_TABLES = [
   'users',
@@ -30,7 +27,7 @@ const DIAGNOSTIC_TABLES = [
 async function runDiagnostic() {
   console.log('\n🔍 --- Database Diagnostic Tool (db:check) ---');
 
-  const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+  const connectionString = process.env.DATABASE_URL;
   console.log('📡 Testing connectivity...');
   console.log(
     '   Target environment:',

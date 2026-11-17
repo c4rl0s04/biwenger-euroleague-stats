@@ -2,10 +2,11 @@ import type { SyncManager } from '../manager';
 import { getFantasyPointLiveRounds, hasActiveMatchesInWindow } from '../repositories/sync-queries';
 import { relevantRounds } from '../rounds';
 import { fantasyGames, syncFantasyPoints } from '../services/biwenger/fantasy-points';
-import { fetchRoundGames } from '../../api/biwenger-client';
+import { createBiwengerApi } from '../../api/biwenger-client';
 import { validateBiwengerRoundSeason } from '../preflight';
 
 export async function run(manager: SyncManager) {
+  const { fetchRoundGames } = createBiwengerApi(manager.context.provider);
   const seasonId = manager.context.seasonId;
   if (!seasonId) throw new Error('The writable season was not resolved.');
   const snapshot = await manager.getBiwengerCompetition();

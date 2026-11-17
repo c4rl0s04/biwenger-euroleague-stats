@@ -42,7 +42,7 @@ describe('live bidding service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     executeQuery.mockImplementation(async (_userId, _operation, callback) =>
-      callback({ query, command }, { token: 'private-token', userId: '7' })
+      callback({ query, command }, { token: 'private-token', userId: '7', leagueId: '9' })
     );
     query.mockImplementation(async (path) => {
       if (path === '/account') return account();

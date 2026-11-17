@@ -69,3 +69,16 @@ describe('resolveReadSeasonId', () => {
     expect(mocks.getActiveSeasonId).toHaveBeenCalled();
   });
 });
+
+it('does not hide an active-season lookup failure behind a historical fallback', async () => {
+  mocks.cookieGet.mockReturnValue(undefined);
+  mocks.getActiveSeasonId.mockRejectedValue(new Error('database unavailable'));
+  await expect(resolveReadSeasonId()).rejects.toThrow('database unavailable');
+});
+
+it('rejects unknown explicit and cookie seasons instead of selecting a different one', async () => {
+  mocks.pgQuery.mockResolvedValue({ rows: [] });
+  await expect(resolveReadSeasonId('2090-91')).rejects.toMatchObject({ code: 'SEASON_NOT_FOUND' });
+  mocks.cookieGet.mockReturnValue({ value: '2090-91' });
+  await expect(resolveReadSeasonId()).rejects.toMatchObject({ code: 'SEASON_NOT_FOUND' });
+});

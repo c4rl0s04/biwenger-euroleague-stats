@@ -64,7 +64,7 @@ procedures and [ADR-0007](../decisions/0007-server-only-database-access.md) for 
 
 ## Secrets and private data
 
-- Keep `.env`, provider tokens, `AUTH_SECRET`, `ACCESS_PASSWORD`, connection strings, encryption
+- Keep `.env`, provider tokens, `AUTH_SECRET`, connection strings, encryption
   keys, and AI provider keys outside Git.
 - Never expose plaintext or encrypted Biwenger credential material to clients, sessions, public
   contracts, or logs.

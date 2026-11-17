@@ -1,4 +1,3 @@
-import { CONFIG } from '../../../config';
 import { prepareUserMutations, type UserMutations } from '../../../db/mutations/users';
 import type { SyncManager } from '../../manager';
 
@@ -103,7 +102,7 @@ export async function syncInitialSquads(
   const initialSquads = simulateBacktracking(currentSquads, userNameToId, transfers);
 
   // 4. Persist initial squad state
-  const seasonStartDate = dependencies.seasonStartDate || CONFIG.LEAGUE.START_DATE || '';
+  const seasonStartDate = dependencies.seasonStartDate || manager.context.season?.startsAt || '';
   let totalInferred = 0;
 
   for (const user of users) {

@@ -40,6 +40,13 @@ async function main() {
     await runMigrations(disposable.pool);
     console.log('   ✅ Migrations applied successfully via canonical runner.');
 
+    const implicitSeasons = await disposable.pool.query(
+      "SELECT table_name FROM information_schema.columns WHERE table_schema='public' AND column_name='season_id' AND column_default IS NOT NULL"
+    );
+    if (implicitSeasons.rowCount !== 0)
+      throw new Error('Season columns must not default to a historical season.');
+    console.log('   ✅ All seasonal writes require explicit season IDs (no schema defaults).');
+
     // 3. Validate resulting schema with canonical validator
     console.log('   Running validateSchemaReady()...');
     const validationResult = await validateSchemaReady(disposable.pool);

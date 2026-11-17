@@ -49,14 +49,7 @@ jobs:
 
       - name: Run EuroLeague synchronizer
         env:
-          POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-          POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
-          SEASON_ID: ${{ vars.SEASON_ID }}
-          SEASON_NAME: ${{ vars.SEASON_NAME }}
-          EUROLEAGUE_SEASON_CODE: ${{ vars.EUROLEAGUE_SEASON_CODE }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
           if [ "${{ inputs.mode }}" = "dry-run" ]; then
             npm run sync:euroleague

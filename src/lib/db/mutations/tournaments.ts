@@ -1,6 +1,3 @@
-import { pool as defaultDb } from '../client';
-import { CONFIG } from '../../config';
-
 // ==========================================
 // INTERFACES
 // ==========================================
@@ -71,10 +68,11 @@ export interface UpsertStandingParams {
 // ==========================================
 
 export function prepareTournamentMutations(
-  db: TournamentDbClient = defaultDb,
+  db: TournamentDbClient,
   options: TournamentMutationOptions = {}
 ): TournamentMutations {
-  const seasonId = options.seasonId ?? CONFIG.SEASON.ID;
+  const seasonId = options.seasonId?.trim();
+  if (!seasonId) throw new Error('An explicit seasonId is required for seasonal writes.');
 
   return {
     upsertTournament: async (tournament: UpsertTournamentParams) => {
@@ -220,22 +218,4 @@ export function prepareTournamentMutations(
       );
     },
   };
-}
-
-const defaultMutations = prepareTournamentMutations(defaultDb);
-
-export async function upsertTournament(tournament: UpsertTournamentParams): Promise<void> {
-  return defaultMutations.upsertTournament(tournament);
-}
-
-export async function upsertPhase(phase: UpsertPhaseParams): Promise<number> {
-  return defaultMutations.upsertPhase(phase);
-}
-
-export async function upsertFixture(fixture: UpsertFixtureParams): Promise<void> {
-  return defaultMutations.upsertFixture(fixture);
-}
-
-export async function upsertStanding(standing: UpsertStandingParams): Promise<void> {
-  return defaultMutations.upsertStanding(standing);
 }

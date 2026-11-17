@@ -1,4 +1,3 @@
-import { CONFIG } from '@/lib/config';
 import type {
   BiwengerCommandOptions,
   BiwengerQueryOptions,
@@ -44,11 +43,11 @@ export class BiwengerProviderClient {
   private cachedVersion: string | null = null;
 
   constructor(config: ProviderClientConfig = {}) {
-    this.baseUrl = config.baseUrl || CONFIG.API.BASE_URL;
-    this.defaultToken = config.defaultToken ?? CONFIG.API.TOKEN;
-    this.defaultLeagueId = config.defaultLeagueId ?? CONFIG.API.LEAGUE_ID;
-    this.defaultUserId = config.defaultUserId ?? CONFIG.API.USER_ID;
-    this.versionFallback = config.versionFallback ?? CONFIG.API.VERSION_FALLBACK;
+    this.baseUrl = config.baseUrl || 'https://biwenger.as.com/api/v2';
+    this.defaultToken = config.defaultToken;
+    this.defaultLeagueId = config.defaultLeagueId;
+    this.defaultUserId = config.defaultUserId;
+    this.versionFallback = config.versionFallback ?? process.env.BIWENGER_API_VERSION_FALLBACK;
     this.readRetryPolicy = config.readRetryPolicy ?? READ_RETRY_POLICY;
     this.commandRetryPolicy = config.commandRetryPolicy ?? COMMAND_RETRY_POLICY;
     this.defaultDelayRange = config.defaultDelayRange ?? DEFAULT_DELAY_RANGE;
@@ -123,20 +122,14 @@ export class BiwengerProviderClient {
     },
     context?: BiwengerRequestContext
   ): Promise<any> {
-    const rawToken =
-      context?.token || this.defaultToken || CONFIG.API.TOKEN || process.env.BIWENGER_TOKEN;
-    const leagueId =
-      context?.leagueId ||
-      this.defaultLeagueId ||
-      CONFIG.API.LEAGUE_ID ||
-      process.env.BIWENGER_LEAGUE_ID;
-    const userId =
-      context?.userId || this.defaultUserId || CONFIG.API.USER_ID || process.env.BIWENGER_USER_ID;
+    const rawToken = context?.token || this.defaultToken;
+    const leagueId = context?.leagueId || this.defaultLeagueId;
+    const userId = context?.userId || this.defaultUserId;
 
     if (!rawToken) throw new BiwengerAuthError(401, 'BIWENGER_TOKEN is missing', endpoint);
-    if (!leagueId) {
+    if (!leagueId && endpoint !== '/account') {
       throw new BiwengerProviderError(
-        'BIWENGER_LEAGUE_ID is missing',
+        'Provider request requires an explicit season league binding',
         undefined,
         undefined,
         endpoint
@@ -157,8 +150,8 @@ export class BiwengerProviderClient {
 
     const headers: Record<string, string> = {
       Authorization: token,
-      'X-League': String(leagueId),
-      'X-User': String(userId || ''),
+      ...(leagueId ? { 'X-League': String(leagueId) } : {}),
+      ...(userId ? { 'X-User': String(userId) } : {}),
       Accept: 'application/json, text/plain, */*',
       'User-Agent':
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',

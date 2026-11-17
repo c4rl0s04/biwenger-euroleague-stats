@@ -1,4 +1,4 @@
-import { fetchAllPlayers, fetchPlayerDetails, fetchRoundGames } from '../../../api/biwenger-client';
+import { createBiwengerApi } from '../../../api/biwenger-client';
 import { CONFIG } from '../../../config';
 import { preparePlayerMutations } from '../../../db/mutations/players';
 import { getShortTeamName } from '@/lib/competition/public';
@@ -13,18 +13,11 @@ import { relevantRounds } from '../../rounds';
 const DEFAULT_SLEEP_MS = 600;
 
 export interface BiwengerCatalogDependencies {
-  fetchAllPlayers: typeof fetchAllPlayers;
-  fetchRoundGames: typeof fetchRoundGames;
-  fetchPlayerDetails: typeof fetchPlayerDetails;
+  fetchAllPlayers: ReturnType<typeof createBiwengerApi>['fetchAllPlayers'];
+  fetchRoundGames: ReturnType<typeof createBiwengerApi>['fetchRoundGames'];
+  fetchPlayerDetails: ReturnType<typeof createBiwengerApi>['fetchPlayerDetails'];
   sleep: (ms: number) => Promise<void>;
 }
-
-const defaultDependencies: BiwengerCatalogDependencies = {
-  fetchAllPlayers,
-  fetchRoundGames,
-  fetchPlayerDetails,
-  sleep: (ms: number) => new Promise((resolve) => setTimeout(resolve, ms)),
-};
 
 export const parseBiwengerDate = (dateInt: number | string | null | undefined): string | null => {
   if (!dateInt) return null;
@@ -147,7 +140,11 @@ export async function syncBiwengerCatalog(
   manager: SyncManager,
   overrides?: Partial<BiwengerCatalogDependencies>
 ): Promise<BiwengerCatalogSyncResult> {
-  const deps = { ...defaultDependencies, ...overrides };
+  const deps = {
+    ...createBiwengerApi(manager.context.provider),
+    sleep: (ms: number) => new Promise((resolve) => setTimeout(resolve, ms)),
+    ...overrides,
+  };
   const db = manager.context.db;
   const seasonId = manager.context.seasonId;
   if (!seasonId) throw new Error('Canonical sync season was not resolved before catalogue import.');

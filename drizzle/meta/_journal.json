@@ -148,6 +148,13 @@
       "when": 1790896164684,
       "tag": "0020_season_predictions",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1793959059205,
+      "tag": "0021_explicit_season_writes",
+      "breakpoints": true
     }
   ]
 }

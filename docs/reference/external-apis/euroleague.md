@@ -34,8 +34,8 @@ bearer token is supported, but the integration only consumes free endpoints.
 | Play-by-play                                      | `/Euroleague/play-by-play/game`     |
 | Shots                                             | `/Euroleague/shot-data/game`        |
 
-The provider year is derived from `EUROLEAGUE_SEASON_CODE=E2026` and must match
-`SEASON_ID=2026-27`. The sync rejects a mismatched season before writing.
+The provider year is derived from the resolved database season’s official code and must match
+that season’s start year. The sync rejects a mismatched season before writing.
 
 ## Persistence and matching
 

@@ -37,3 +37,6 @@ status: active
 Operational notes contain commands that can mutate databases or external Biwenger state. Confirm the
 target environment and read the warnings around a command before running it. Architecture and data
 flow explanations are maintained separately in [data and sync architecture](../architecture/data-and-sync.md).
+
+- [Configuration cutover](configuration-cutover.md) — names-only environment and schema rollout gates.
+- [Configuration implementation evidence](configuration-implementation.md) — local checks and remaining release gates.

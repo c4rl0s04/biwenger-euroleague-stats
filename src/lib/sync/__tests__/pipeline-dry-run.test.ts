@@ -1,3 +1,6 @@
+vi.mock('@/features/provider/server', () => ({
+  resolveIngestionContext: vi.fn(async () => ({ token: 'fixture', leagueId: '9', userId: '1' })),
+}));
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { mockDb } = vi.hoisted(() => ({

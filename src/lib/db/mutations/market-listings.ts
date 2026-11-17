@@ -1,5 +1,4 @@
 import { Pool } from 'pg';
-import { CONFIG } from '../../config';
 
 // Using a loose type for the db client to support both pg.Pool and the mock object
 export type DbClient =
@@ -40,7 +39,8 @@ export function prepareMarketListingMutations(
   db: DbClient,
   options: MarketListingMutationOptions = {}
 ): MarketListingMutations {
-  const seasonId = options.seasonId ?? CONFIG.SEASON.ID;
+  const seasonId = options.seasonId?.trim();
+  if (!seasonId) throw new Error('An explicit seasonId is required for seasonal writes.');
 
   return {
     /**

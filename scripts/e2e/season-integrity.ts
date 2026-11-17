@@ -331,7 +331,6 @@ try {
   try {
     await assertSyncSeasonWritable(pool as any, {
       explicitSeasonId: '2025-26',
-      skipEnvValidation: true,
     });
   } catch (err: any) {
     if (err.code === 'SYNC_SEASON_NOT_WRITABLE') {
@@ -352,7 +351,6 @@ try {
   try {
     await assertSyncSeasonWritable(pool as any, {
       explicitSeasonId: '2026-27',
-      skipEnvValidation: true,
     });
   } catch (err: any) {
     if (err.code === 'SEASON_EUROLEAGUE_CODE_MISSING') {

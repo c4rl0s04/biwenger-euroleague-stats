@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('server-only', () => ({}));
-vi.mock('@/lib/config', () => ({ CONFIG: { API: { USER_ID: '7' } } }));
 const mocks = vi.hoisted(() => ({ market: vi.fn(), count: vi.fn(), place: vi.fn() }));
 vi.mock('@/features/market/live/server/services/live-bidding.service', () => ({
   getLiveBidMarket: mocks.market,
@@ -12,13 +11,14 @@ vi.mock('@/features/market/commands/server/services/market-command.service', () 
 }));
 
 import {
-  assertPersonalBidAccess,
   readPersonalBidWorkspace,
   readPersonalBidCount,
   placePersonalBidNow,
 } from './services/personal-bids.service';
 
-beforeEach(() => vi.clearAllMocks());
+beforeEach(() => {
+  vi.clearAllMocks();
+});
 
 const payload = {
   playerId: 21,
@@ -27,11 +27,27 @@ const payload = {
 };
 
 describe('personal manual bids', () => {
-  it('restricts reads and writes to the configured manager', async () => {
-    expect(() => assertPersonalBidAccess('8')).toThrow();
-    await expect(readPersonalBidWorkspace('8')).rejects.toMatchObject({ status: 403 });
-    await expect(readPersonalBidCount('8', 21)).rejects.toMatchObject({ status: 403 });
-    await expect(placePersonalBidNow('8', payload)).rejects.toMatchObject({ status: 403 });
+  it.each(['7', '8'])(
+    'uses the signed-in manager %s for all personal operations',
+    async (userId) => {
+      mocks.market.mockResolvedValue({ listings: [] });
+      await readPersonalBidWorkspace(userId);
+      await readPersonalBidCount(userId, 21);
+      await placePersonalBidNow(userId, payload);
+      expect(mocks.market).toHaveBeenCalledWith(userId);
+      expect(mocks.count).toHaveBeenCalledWith(userId, 21);
+      expect(mocks.place).toHaveBeenCalledWith(userId, payload);
+    }
+  );
+
+  it('rejects missing identities before calling any provider operation', async () => {
+    for (const operation of [
+      () => readPersonalBidWorkspace(''),
+      () => readPersonalBidCount('', 21),
+      () => placePersonalBidNow('', payload),
+    ]) {
+      await expect(operation()).rejects.toMatchObject({ status: 401 });
+    }
     expect(mocks.market).not.toHaveBeenCalled();
     expect(mocks.count).not.toHaveBeenCalled();
     expect(mocks.place).not.toHaveBeenCalled();

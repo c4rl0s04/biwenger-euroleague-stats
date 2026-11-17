@@ -1,3 +1,6 @@
+vi.mock('@/lib/seasons/server', () => ({
+  getRequestSeason: vi.fn(async () => ({ id: '2026-27', status: 'active', sourceLeagueId: '9' })),
+}));
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('server-only', () => ({}));
@@ -42,7 +45,7 @@ describe('Provider credential integration', () => {
     expect(querySpy).toHaveBeenCalledWith(
       '/squad',
       { delayMs: 0 },
-      { token: fakeToken, userId: 'user-123' }
+      { token: fakeToken, leagueId: '9', userId: 'user-123' }
     );
   });
 
@@ -70,7 +73,33 @@ describe('Provider credential integration', () => {
     expect(commandSpy).toHaveBeenCalledWith(
       '/market',
       { method: 'POST', body: { player: 10 }, delayMs: 0 },
-      { token: fakeToken, userId: 'user-456' }
+      { token: fakeToken, leagueId: '9', userId: 'user-456' }
     );
   });
+});
+
+it('rejects historical provider operations before reading personal credentials', async () => {
+  const { getRequestSeason } = await import('@/lib/seasons/server');
+  vi.mocked(getRequestSeason).mockResolvedValueOnce({
+    ...(await getRequestSeason()),
+    status: 'frozen',
+  });
+  vi.mocked(biwengerCredentials.withCredential).mockClear();
+  await expect(executeUserProviderCommand('user-123', 'market.place', vi.fn())).rejects.toThrow(
+    'active season'
+  );
+  expect(biwengerCredentials.withCredential).not.toHaveBeenCalled();
+});
+
+it('rejects an unbound season before reading personal credentials', async () => {
+  const { getRequestSeason } = await import('@/lib/seasons/server');
+  vi.mocked(getRequestSeason).mockResolvedValueOnce({
+    ...(await getRequestSeason()),
+    sourceLeagueId: null,
+  });
+  vi.mocked(biwengerCredentials.withCredential).mockClear();
+  await expect(executeUserProviderQuery('user-123', 'squad.read', vi.fn())).rejects.toThrow(
+    'league binding'
+  );
+  expect(biwengerCredentials.withCredential).not.toHaveBeenCalled();
 });

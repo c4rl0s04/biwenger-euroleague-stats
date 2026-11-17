@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { cache } from 'react';
-import { listAvailableSeasons, getActiveSeasonId } from '@/lib/seasons';
+import { listAvailableSeasons, getActiveSeasonId, getSeasonById } from '@/lib/seasons';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
 
 export interface SeasonSelectionItem {
@@ -43,4 +43,11 @@ export const getRequestSeasonContext = cache(async (): Promise<RequestSeasonCont
     currentSeasonId,
     activeSeasonId: activeSeasonId || currentSeasonId,
   };
+});
+
+// Resolve one selected season record for server-side feature operations.
+export const getRequestSeason = cache(async () => {
+  const season = await getSeasonById(await resolveReadSeasonId());
+  if (!season) throw new Error('Selected season does not exist.');
+  return season;
 });

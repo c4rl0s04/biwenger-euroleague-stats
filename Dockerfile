@@ -24,9 +24,8 @@ COPY . .
 # Disable telemetry during build
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV SKIP_DB=true
-ENV BIWENGER_TOKEN=build_token
-ENV BIWENGER_LEAGUE_ID=build_league
-ENV BIWENGER_USER_ID=build_user
+ARG NEXT_PUBLIC_SENTRY_DSN
+ENV NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN
 
 # Build the Next.js application
 RUN npm run build

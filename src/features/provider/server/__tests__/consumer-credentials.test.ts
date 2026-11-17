@@ -1,3 +1,6 @@
+vi.mock('@/lib/seasons/server', () => ({
+  getRequestSeason: vi.fn(async () => ({ id: '2026-27', status: 'active', sourceLeagueId: '9' })),
+}));
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('server-only', () => ({}));
@@ -59,7 +62,7 @@ describe('market and lineup credential adoption', () => {
     expect(biwengerProviderClient.command).toHaveBeenCalledWith(
       '/market',
       expect.objectContaining({
-        context: { token: credential, userId: 'authenticated-actor' },
+        context: { token: credential, leagueId: '9', userId: 'authenticated-actor' },
       })
     );
   });
