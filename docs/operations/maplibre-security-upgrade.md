@@ -24,6 +24,10 @@ Pin `6.4.1`, the first published patched release, in the manifest and lockfile. 
 dependency subtree changes. No forced audit remediation or unrelated package update is included.
 Installation uses `npm ci --ignore-scripts --no-audit --no-fund`.
 
+The exact pin was later raised to `6.18.0` (November 2026). Its worker is self-contained (no
+relative shared-module import) and it ships no shared-module source map, so the preparation script
+still copies both modules but copies source maps only when the package provides them.
+
 The [v6 migration guide](https://github.com/maplibre/maplibre-gl-js/blob/v6.0.0/docs/guides/v5-to-v6-migration-guide.md)
 requires namespace/named imports and explicit worker setup with bundlers. Next's asset URL handling
 emits a hashed worker but leaves its relative shared-module import unchanged. The preparation script
