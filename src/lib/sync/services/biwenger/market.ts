@@ -1,9 +1,24 @@
+import { z } from 'zod';
 import { fetchMarketListings } from '../../../api/biwenger-client';
-import { prepareMarketListingMutations } from '../../../db/mutations/market-listings';
+import {
+  prepareMarketListingMutations,
+  type MarketListing,
+} from '../../../db/mutations/market-listings';
 import type { SyncManager } from '../../manager';
 
+const playerId = z.int32().positive();
+const price = z.int32().nonnegative();
+const sale = z.object({
+  player: z.union([playerId, z.object({ id: playerId })]),
+  price: price.nullish(),
+  value: price.nullish(),
+  user: z.object({ id: z.union([z.string().min(1), z.int().positive()]) }).nullish(),
+});
+
+const marketSnapshot = z.object({ data: z.object({ sales: z.array(sale) }) });
+
 export interface BiwengerMarketDependencies {
-  fetchMarketListings: typeof fetchMarketListings;
+  fetchMarketListings: () => Promise<unknown>;
 }
 
 const defaultDependencies: BiwengerMarketDependencies = {
@@ -34,69 +49,30 @@ export async function syncBiwengerMarket(
   manager.log('Syncing market listings');
 
   const db = manager.context.db;
-  const mutations = prepareMarketListingMutations(db as any, {
-    seasonId: manager.context.seasonId,
-  });
+  if (!db) throw new Error('Market sync requires a database connection.');
 
   const marketDate = resolveMarketDate();
   manager.log(`Fetching active market listings for market day ${marketDate}`);
-  const response = await deps.fetchMarketListings();
+  const response = marketSnapshot.safeParse(await deps.fetchMarketListings());
+  if (!response.success) throw new Error('Invalid Biwenger market snapshot.');
 
-  const items: any[] = response?.data?.sales ?? [];
-
-  if (!Array.isArray(items) || items.length === 0) {
-    manager.log('No players currently listed on the market');
-    await mutations.deleteStaleMarketListings(marketDate, []);
-    return {
-      summary: 'Biwenger market snapshot synchronized.',
-      counts: { listings: 0, skipped: 0 },
-    };
-  }
-
-  manager.log(`Found ${items.length} player(s) on the market`);
-
-  let upserted = 0;
-  let skipped = 0;
-
-  for (const item of items) {
-    const playerId: number | undefined =
-      typeof item.player === 'object' ? item.player?.id : item.player;
-
-    if (!playerId) {
-      skipped++;
-      continue;
-    }
-
-    const price: number = item.price ?? item.value ?? 0;
-    const sellerId: string | null = item.user?.id ? String(item.user.id) : null;
-
-    await mutations.upsertMarketListing({
-      player_id: playerId,
-      listed_at: marketDate,
-      price,
-      seller_id: sellerId,
+  const listings = new Map<number, MarketListing>();
+  for (const item of response.data.data.sales) {
+    const id = typeof item.player === 'number' ? item.player : item.player.id;
+    const amount = item.price ?? item.value;
+    if (amount == null) throw new Error('Invalid Biwenger market snapshot: missing price.');
+    listings.set(id, {
+      player_id: id,
+      price: amount,
+      seller_id: item.user ? String(item.user.id) : null,
     });
-
-    upserted++;
   }
 
-  const activeListings = items
-    .map((item) => {
-      const pId = typeof item.player === 'object' ? item.player?.id : item.player;
-      const sId = item.user?.id ? String(item.user.id) : null;
-      return { player_id: pId, seller_id: sId };
-    })
-    .filter(
-      (l): l is { player_id: number; seller_id: string | null } =>
-        typeof l.player_id === 'number' && !isNaN(l.player_id)
-    );
-
-  manager.log('Cleaning up stale listings for today');
-  await mutations.deleteStaleMarketListings(marketDate, activeListings);
-
-  manager.log(`Market listings synced: ${upserted} upserted, ${skipped} skipped`);
+  const mutations = prepareMarketListingMutations(db, { seasonId: manager.context.seasonId });
+  await mutations.replaceMarketSnapshot(marketDate, Array.from(listings.values()));
+  manager.log(`Market listings synced: ${listings.size} upserted`);
   return {
     summary: 'Biwenger market snapshot synchronized.',
-    counts: { listings: upserted, skipped },
+    counts: { listings: listings.size, skipped: 0 },
   };
 }
