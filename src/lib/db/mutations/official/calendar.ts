@@ -20,7 +20,7 @@ export function prepareOfficialCalendarMutations(db: DbClient, seasonId: string)
         [
           seasonId,
           game.gameCode,
-          game.scheduledAt,
+          game.scheduledAt?.toISOString() ?? null,
           game.isPlayed,
           game.arenaCode ?? null,
           game.arenaName ?? null,

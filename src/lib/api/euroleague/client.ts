@@ -87,7 +87,7 @@ function parseScheduleDate(dateValue: unknown, timeValue: unknown): Date | null 
 
 function parseIsoDate(value: unknown): Date | null {
   const text = asString(value);
-  if (!text) return null;
+  if (!text || !/T.*(?:Z|[+-]\d{2}:?\d{2})$/i.test(text)) return null;
   const parsed = new Date(text);
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }

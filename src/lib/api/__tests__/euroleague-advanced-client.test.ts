@@ -44,6 +44,23 @@ describe('EuroleagueClient contracts', () => {
     expect(games.map((game) => formatMatchTime(game.scheduledAt))).toEqual(['20:30', '20:30']);
   });
 
+  it.each([
+    [{ utcDate: '2027-01-14T19:30:00Z' }, '2027-01-14T19:30:00.000Z'],
+    [{ date: '2026-09-24T20:30:00+02:00' }, '2026-09-24T18:30:00.000Z'],
+    [{ utcDate: '2027-01-14T19:30:00', date: '2027-01-14' }, null],
+  ])(
+    'uses only report kickoff timestamps with an explicit offset (%j)',
+    async (fields, expected) => {
+      const provider = new EuroleagueClient({
+        fetchImpl: vi.fn(async () =>
+          response([{ ...fixture('report')[0], utcDate: undefined, ...fields }])
+        ) as typeof fetch,
+      });
+      const report = await provider.getGameReport(2026, 1);
+      expect(report?.scheduledAt?.toISOString() ?? null).toBe(expected);
+    }
+  );
+
   it('normalizes every free granular response used by the sync', async () => {
     const fetchImpl = vi.fn(async (url: URL | RequestInfo) => {
       const path = new URL(String(url)).pathname;
