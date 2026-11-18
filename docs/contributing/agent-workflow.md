@@ -11,8 +11,8 @@ status: active
 # Agent workflow
 
 [AGENTS.md](../../AGENTS.md) is the repository instruction entry point. Agent compatibility files
-link to it. The [migration ledger](../architecture/migration-status.md) records domain progress;
-[application layers](../architecture/application-layers.md) describes the target architecture.
+link to it. [Application layers](../architecture/application-layers.md) describes the current
+request boundaries. Track open work in [GitHub Issues](https://github.com/c4rl0s04/biwenger-euroleague-stats/issues).
 
 ## Worktree setup
 

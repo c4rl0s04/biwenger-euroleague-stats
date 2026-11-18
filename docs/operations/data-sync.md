@@ -32,6 +32,20 @@ schema ready for the current code, and a writable season bound to the configured
 The CI scheduling configuration and runtime preflight tests provide additional protection against
 accidentally enabling sync for a frozen season.
 
+## Diagnose a failed scheduled run
+
+1. Open the failed [Actions run](https://github.com/c4rl0s04/biwenger-euroleague-stats/actions).
+   Record the workflow, commit, timestamp, mode, and first failed step. Use the job logs to
+   distinguish a preflight rejection, an overlapping run, a provider failure, and a database error.
+2. If the workflow has Sentry configured, look for an event at the matching time and commit.
+   Compare the error and its cause with the job logs. A missing Sentry event does not establish
+   success. The standalone sync client reports errors only when configured.
+3. Before retrying, confirm the cause is corrected, the database and season still match the intended
+   league, and no other run holds the sync lock. Keep credentials and raw provider responses out of
+   investigation notes. For transient errors, repeat the original workflow after preflight. If
+   recovery is scoped to one step, use its documented step selector and verify the affected data.
+   For a failed guard or invalid provider payload, resolve the input or configuration first.
+
 ## Modes
 
 | Command                                                     | Purpose                                                              |
@@ -82,16 +96,10 @@ through the [database safety](database-safety.md) runbook, and fingerprint `2025
 runtime provider selector. The removed implementation can be inspected from the
 `archive/euroleague-legacy-2025-26` tag if historical diagnosis is required.
 
-Before production, run the two-pass isolation harness against a migrated local database whose name
-contains `test` or `disposable`:
-
-```bash
-RUN_DB_TESTS=true TEST_DATABASE_URL=postgresql://.../biwenger_disposable \
-  npm run test:official-integration
-```
-
-It verifies stable canonical row counts, a frozen `2025-26` fingerprint, unchanged historical
-global identities, and absence of official writes outside the active season.
+Use the [disposable database checks](../contributing/testing.md#browser-verification) for
+schema and multi-season isolation. For a controlled production activation, use the
+[season lifecycle runbook](season-lifecycle.md) and verify the frozen-season fingerprint.
+The earlier two-pass live-provider test command has been retired.
 
 ## Daily player price history
 

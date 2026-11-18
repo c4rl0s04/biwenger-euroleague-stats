@@ -5,10 +5,13 @@ audience:
   - contributor
   - maintainer
   - agent
-status: active
+status: deprecated
 ---
 
 # Architecture migration status
+
+> Historical record. For current guidance, see the documentation index. Open work is tracked in
+> [GitHub Issues](https://github.com/c4rl0s04/biwenger-euroleague-stats/issues).
 
 For current tasks and states, use the [master tracker](../migration/tracker.md); the
 [migration overview](migration-overview.md) summarizes scope. This ledger preserves dated evidence,

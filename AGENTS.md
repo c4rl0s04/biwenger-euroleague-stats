@@ -5,17 +5,18 @@
 These rules are the repository instruction entry point. Keep detailed guidance in the
 [knowledge base](docs/README.md); compatibility agent files link here instead of duplicating rules.
 
-- Architecture or API work: read [application layers](docs/architecture/application-layers.md),
-  [migration overview](docs/architecture/migration-overview.md), and consult the
-  [migration status ledger](docs/architecture/migration-status.md) when detailed release evidence is
-  needed. Use the repository [feature-migration skill](.agents/skills/feature-migration/SKILL.md) for
-  a migration.
+- Architecture or API work: read [application layers](docs/architecture/application-layers.md)
+  and the relevant [architecture guide](docs/architecture/README.md). Use the repository
+  [feature-migration skill](.agents/skills/feature-migration/SKILL.md) for a migration.
 - UI changes: read [design context](docs/product/design-system.md) and use
   [project-ui](.agents/skills/project-ui/SKILL.md). Use a redesign skill only for intended design work.
 - Setup, skills, and verification: read [agent workflow](docs/contributing/agent-workflow.md) and
   [testing](docs/contributing/testing.md).
 - Database or sync work: read [database safety](docs/operations/database-safety.md) and
   [data and sync](docs/architecture/data-and-sync.md).
+
+Use [GitHub Issues](https://github.com/c4rl0s04/biwenger-euroleague-stats/issues) for open work.
+Historical plans and acceptance evidence are indexed in [migration history](docs/migration/README.md).
 
 The current task and approved scope take precedence over skill suggestions. Skills do not authorize
 redesigns, dependency changes, provider operations, or API changes outside that scope.

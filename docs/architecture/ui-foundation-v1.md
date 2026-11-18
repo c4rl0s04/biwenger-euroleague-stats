@@ -5,10 +5,13 @@ audience:
   - contributor
   - maintainer
   - agent
-status: active
+status: deprecated
 ---
 
 # UI foundation v1
+
+> Historical record. For current guidance, see the documentation index. Open work is tracked in
+> [GitHub Issues](https://github.com/c4rl0s04/biwenger-euroleague-stats/issues).
 
 ## Purpose and scope
 

@@ -42,38 +42,16 @@ production database into a lower environment unless credential columns are remov
 operationally visible; key values must not be. The application fails closed for missing, malformed,
 duplicate, unknown, or wrong-length key configuration.
 
-## Safe deployment and migration
+## Deployment and migration history
 
-Use separate verification gates. Do not run these steps from an untrusted workstation.
+Migration `0010` added the encrypted credential table. During rollout, authorized maintenance
+migrated and verified existing envelopes before plaintext fallback was removed. Migration
+`0016` dropped the legacy `users.biwenger_token` column. All personal provider credentials now
+live in `user_biwenger_credentials`. The plaintext migration utility was retired.
 
-1. Integrate commit `4c78956` into the production branch and deploy the containment hotfix by
-   itself. Verify safe session, route, provider-gateway, and redaction tests before continuing.
-2. Rotate `AUTH_SECRET` after the containment deployment. This intentionally signs users out; tell
-   users they must sign in again. Never roll back to code that puts the provider token in sessions.
-3. Take and verify a database backup. Generate and configure a production-only credential keyring.
-   Set `BIWENGER_CREDENTIAL_PLAINTEXT_FALLBACK=true` for the migration window.
-4. Apply `drizzle/0010_encrypted_biwenger_credentials.sql` before deploying code that queries the new
-   table. The migration is additive and does not touch plaintext rows.
-5. Deploy the encryption application. Vercel traffic switching should keep the mixed-version window
-   short. Old instances can read existing plaintext rows; a user linked or relinked by new code is
-   encrypted-only and may fail on an old instance. Do not prolong this window or roll traffic back
-   casually.
-6. Inspect counts with `npm run credentials:status`. Run `npm run credentials:migrate` first as a
-   dry run. It prints only counts, key IDs, and error categories.
-7. After backup and target verification, run
-   `ALLOW_REMOTE_CREDENTIAL_MAINTENANCE=true npm run credentials:migrate -- --apply`. The utility
-   encrypts and verifies each legacy value, does not clear plaintext, continues after isolated
-   failures, and is safe to rerun.
-8. Rerun the dry run. Migration coverage is complete when every legacy row is reported
-   `alreadyVerified`, `wouldMigrate` is zero, and `failed` is zero. Test a small authorized sample
-   through non-mutating linked-state and lineup reads. Never print or compare token values manually.
-9. Investigate failed categories. Invalid provider credentials may still encrypt correctly; provider
-   rejection is handled by asking that user to reconnect. Corrupt envelopes or unavailable keys
-   require restoring the correct key configuration or re-linking, never plaintext logging.
-10. Encrypted coverage is complete and all legacy credentials have been migrated.
-11. Plaintext fallback has been disabled and removed.
-12. Migration 0016 dropped `users.biwenger_token`. All personal credentials exclusively reside
-    in `user_biwenger_credentials`.
+For current deployment and maintenance, configure the keyring, verify the schema and use
+`npm run credentials:status`. Follow the rotation and rollback procedures below for changes to
+existing encrypted credentials.
 
 ## Linking, relinking, and unlinking
 

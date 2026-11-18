@@ -329,6 +329,12 @@ Define:
 
 Do not hide redesign inside an unrelated architecture refactor.
 
+## Component ownership
+
+Use the [component layering guide](../architecture/ui-component-layers.md) to choose between
+shared primitives, shared interaction components, and feature-owned presentations. The
+[UI foundation proposal](../architecture/ui-foundation-v1.md) preserves the original rollout design.
+
 ## Representative current surfaces
 
 Useful migration references include:

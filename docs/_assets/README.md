@@ -12,3 +12,7 @@ status: active
 Keep only assets that are referenced by maintained documentation. Use descriptive lowercase
 filenames, optimize binary files before committing them, and prefer Mermaid when a diagram does not
 require a raster or vector export.
+
+The [editable stack diagram](stack.html) is self-contained. After editing it, render its canvas
+with Chromium and replace the [README export](stack.png). The README screenshots use the
+disposable Playwright league on desktop and iPhone.
