@@ -50,17 +50,21 @@ describe('user mutations season isolation', () => {
     expect(db.query).not.toHaveBeenCalled();
   });
 
-  it('resets active owners in future seasons without touching global player owner cache', async () => {
+  it('replaces ownership for the selected season in one query', async () => {
     const db = createMockDb();
-    const mutations = prepareUserMutations(db as any, { seasonId: '2026-27' });
+    const mutations = prepareUserMutations(db, { seasonId: '2026-27' });
+    const ownership = [{ player_id: 101, owner_id: 'u1' }];
 
-    await mutations.resetActiveOwners();
+    await mutations.replaceSeasonOwnership(ownership);
 
     expect(db.query).toHaveBeenCalledTimes(1);
     expect(db.query).toHaveBeenCalledWith(expect.stringContaining('UPDATE player_seasons'), [
       '2026-27',
+      JSON.stringify(ownership),
     ]);
-    expect(db.query.mock.calls[0][0]).not.toContain('is_active');
-    expect(db.query).not.toHaveBeenCalledWith(expect.stringContaining('UPDATE players'), undefined);
+    const [sql] = db.query.mock.calls[0];
+    expect(sql).toContain('WHERE existing.season_id = $1');
+    expect(sql).toContain('NOT EXISTS');
+    expect(sql).not.toContain('UPDATE players');
   });
 });
