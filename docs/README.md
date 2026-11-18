@@ -16,39 +16,23 @@ This folder is both the project knowledge base and a portable [Obsidian](https:/
 vault. It uses standard Markdown links so every note remains usable in GitHub and ordinary
 editors without Obsidian plugins.
 
-## Choose your path
+## Start here
 
-- **New to the repository:** start with the [getting-started map](getting-started/README.md).
-- **Understanding the system quickly:** read the [system overview](architecture/system-overview.md).
-- **Exploring the product:** use the [product map](product/README.md).
-- **Changing the system:** read the [architecture map](architecture/README.md) and
-  [contributor guides](contributing/README.md).
-- **Following the migration:** use the [master tracker](migration/tracker.md) for task status and
-  next actions, the [overview](architecture/migration-overview.md) for scope, and the
-  [status ledger](architecture/migration-status.md) for historical implementation/release evidence.
-- **Implementing an assigned migration:** start at the [worker queue](migration/README.md).
-- **Running or recovering the application:** use the [operations map](operations/README.md).
-- **Looking up a contract:** use the [reference map](reference/README.md).
-- **Understanding why a choice was made:** browse the [architecture decisions](decisions/README.md).
+| I want to…                                                         | Read                                                                              |
+| ------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
+| Understand where the data comes from and what the app does with it | [How it works](architecture/system-overview.md)                                   |
+| Explore screens and feature behavior                               | [Product](product/README.md)                                                      |
+| Install the app or run a synthetic development environment         | [Getting started](getting-started/README.md)                                      |
+| Change the code                                                    | [Contributing](contributing/README.md) and [architecture](architecture/README.md) |
+| Deploy, sync, or recover the app                                   | [Operations](operations/README.md)                                                |
+| Check a route, command, or setting                                 | [Reference](reference/README.md)                                                  |
 
-## Knowledge model
+Coding agents start with [AGENTS.md](../AGENTS.md). Use [GitHub Issues](https://github.com/c4rl0s04/biwenger-euroleague-stats/issues) for open work.
 
-The vault is organized by documentation purpose rather than by source-code folder:
+## Decisions and history
 
-- **Getting started** explains how to reach a working development environment.
-- **Product** connects user-visible domains to routes and their technical implementation.
-- **Architecture** describes stable boundaries, flows, and system invariants.
-- **Operations** contains procedures that can be followed during setup, sync, or recovery.
-- **Reference** records factual contracts such as commands, configuration, APIs, and data.
-- **Contributing** defines how to change and verify the project.
-- **Decisions** records consequential engineering choices and their trade-offs.
+- [Architecture decisions](decisions/README.md) explain choices that shape the system today.
+- [Migration history](migration/README.md) preserves rollout plans, reviews, and acceptance evidence.
+- [Documentation assets](_assets/README.md) explains how to store and update visuals.
 
-UI components and route files are linked from the relevant product or architecture note. They do
-not define the top-level documentation hierarchy because those implementation details change more
-frequently than the responsibilities they implement.
-
-## Conventions
-
-All maintained notes carry YAML frontmatter and follow the rules in the
-[documentation style guide](contributing/documentation-style.md). Obsidian workspace settings are
-personal and intentionally excluded from Git.
+See the [style guide](contributing/documentation-style.md) for content ownership and Markdown conventions.
