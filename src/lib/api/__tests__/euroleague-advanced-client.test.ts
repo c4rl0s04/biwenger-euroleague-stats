@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   EuroleagueApiError,
   EuroleagueClient,
+  checksumPayload,
   parseMinutes,
   parseProviderNumber,
 } from '../euroleague/client';
@@ -73,6 +74,31 @@ describe('EuroleagueClient contracts', () => {
     await expect(provider.getShots(2026, 1)).resolves.toMatchObject([
       { annotationNumber: 4, isFastbreak: false },
     ]);
+  });
+
+  it('removes NULs from mapped text and raw JSON before checksumming', async () => {
+    const row = {
+      ...fixture('play-by-play')[0],
+      COMMENT: 'Canasta de José',
+      providerExtras: ['Valid text', { note: 'Tiro libre', untouched: null }],
+    };
+    const dirty = {
+      ...row,
+      COMMENT: 'Canasta de Jo\0sé',
+      providerExtras: ['Valid text', { note: 'Tiro\0 libre', untouched: null, 'invalid\0key': 1 }],
+    };
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValueOnce(response([dirty]))
+      .mockResolvedValueOnce(response([row]));
+    const provider = new EuroleagueClient({ fetchImpl: fetchImpl as typeof fetch });
+
+    const [event] = await provider.getPlayByPlay(2026, 1);
+    const [cleanEvent] = await provider.getPlayByPlay(2026, 1);
+
+    expect(event.comment).toBe(row.COMMENT);
+    expect(event.raw).toEqual(row);
+    expect(checksumPayload(event)).toBe(checksumPayload(cleanEvent));
   });
 
   it('accepts future-game 404s as unavailable data', async () => {
