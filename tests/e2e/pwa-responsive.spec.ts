@@ -1,6 +1,7 @@
 import { expectShellPalette } from './shell-style-contract';
 import { expect, test } from './fixtures';
 import type { Page } from 'playwright';
+import { test as browserTest } from 'playwright/test';
 
 async function expectNoGlobalOverflow(page: Page) {
   const dimensions = await page.evaluate(() => ({
@@ -50,6 +51,22 @@ test('login remains usable with a virtual-keyboard-sized viewport', async ({ pag
   await expect(page.locator('#login-password')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Entrar' })).toBeVisible();
   await expectNoGlobalOverflow(page);
+});
+
+browserTest('login explains when the firewall limits credential attempts', async ({ page }) => {
+  await page.route('**/api/auth/callback/credentials', (route) =>
+    route.fulfill({ status: 429, contentType: 'text/plain', body: 'Too Many Requests' })
+  );
+  await page.goto('/login?callbackUrl=%2Fdashboard');
+  await page.getByLabel('Manager').fill('Fixture Manager');
+  await page.locator('#login-password').fill('fixture-password');
+  const submit = page.getByRole('button', { name: 'Entrar' });
+  await submit.click();
+  await expect(page.getByRole('main').getByRole('alert')).toContainText(
+    'Demasiados intentos de inicio de sesión'
+  );
+  await expect(submit).toBeEnabled();
+  await expect(page).toHaveURL(/\/login\?callbackUrl=/);
 });
 
 test('authenticated mobile shell exposes bottom navigation and More sheet', async ({ page }) => {
