@@ -4,14 +4,16 @@ import { resolveMarketDate, syncBiwengerMarket } from '../market';
 
 describe('Biwenger Market Service', () => {
   describe('resolveMarketDate', () => {
-    it('shifts date back 1 day when before 05:00 AM', () => {
-      const earlyMorning = new Date('2026-03-01T03:30:00Z');
-      expect(resolveMarketDate(earlyMorning)).toBe('2026-02-28');
-    });
-
-    it('keeps current day when after 05:00 AM', () => {
-      const midday = new Date('2026-03-01T14:30:00Z');
-      expect(resolveMarketDate(midday)).toBe('2026-03-01');
+    it.each([
+      ['winter: 04:59 Madrid', '2026-11-17T03:59:59Z', '2026-11-16'],
+      ['winter: 05:00 Madrid', '2026-11-17T04:00:00Z', '2026-11-17'],
+      ['summer: 04:59 Madrid', '2026-07-01T02:59:59Z', '2026-06-30'],
+      ['summer: 05:00 Madrid', '2026-07-01T03:00:00Z', '2026-07-01'],
+      ['spring clock change: 05:00 Madrid', '2026-03-29T03:00:00Z', '2026-03-29'],
+      ['autumn clock change: 04:59 Madrid', '2026-10-25T03:59:59Z', '2026-10-24'],
+      ['New Year: midnight Madrid', '2026-12-31T23:00:00Z', '2026-12-31'],
+    ])('returns the market date at %s', (_case, instant, expected) => {
+      expect(resolveMarketDate(new Date(instant))).toBe(expected);
     });
   });
 
