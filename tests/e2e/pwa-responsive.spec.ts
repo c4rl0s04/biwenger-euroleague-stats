@@ -20,7 +20,8 @@ test('public PWA routes work without a session and do not overflow', async ({ pa
 
   // Let SessionProvider settle before hard navigation cancels its auth requests.
   await page.waitForLoadState('networkidle');
-  await page.goto('/offline');
+  const offlineResponse = await page.goto('/offline');
+  expect(offlineResponse?.headers()['content-security-policy']).toBe("frame-ancestors 'none'");
   await expect(page.getByRole('heading', { name: /Sin conexión/i })).toBeVisible();
   await expectNoGlobalOverflow(page);
 
@@ -31,10 +32,20 @@ test('public PWA routes work without a session and do not overflow', async ({ pa
   const workerResponse = await request.get('/sw.js');
   expect(workerResponse.ok()).toBeTruthy();
   expect(workerResponse.headers()['cache-control']).toContain('no-cache');
+  expect(workerResponse.headers()['content-type']).toContain('application/javascript');
+  expect(workerResponse.headers()['content-security-policy']).toBe(
+    "default-src 'self'; script-src 'self'"
+  );
 });
 
 test('login remains usable with a virtual-keyboard-sized viewport', async ({ page }) => {
-  await page.goto('/login?callbackUrl=%2Fdashboard');
+  const response = await page.goto('/login?callbackUrl=%2Fdashboard');
+  expect(response?.headers()).toMatchObject({
+    'content-security-policy': "frame-ancestors 'none'",
+    'x-frame-options': 'DENY',
+    'x-content-type-options': 'nosniff',
+    'referrer-policy': 'strict-origin-when-cross-origin',
+  });
   await expect(page.getByLabel('Manager')).toBeVisible();
   await expect(page.locator('#login-password')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Entrar' })).toBeVisible();
