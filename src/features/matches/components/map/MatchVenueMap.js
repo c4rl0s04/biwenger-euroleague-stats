@@ -5,7 +5,7 @@ import { Map as MapComponent, MapControls, MarkerContent } from '@/components/ui
 import { getTeamColor } from '@/lib/competition/public';
 import { cn } from '@/lib/utils';
 import { TeamMarker } from './TeamMarker';
-import { formatMatchDateShort, formatMatchTime } from '@/lib/utils/date';
+import EventTime from '@/components/ui/EventTime';
 
 /**
  * NormalMarker Component
@@ -90,10 +90,10 @@ function NormalMarker({ match, isAlternate }) {
           >
             <div className="flex justify-between items-center gap-4 mb-3 pb-2.5 border-b border-zinc-900">
               <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-tighter">
-                {formatMatchDateShort(match.date)}
+                <EventTime value={match.date} format="shortDay" />
               </span>
               <span className="text-[10px] font-black text-blue-400 bg-blue-500/10 px-2 py-1 rounded-lg uppercase tracking-wider">
-                {formatMatchTime(match.date)}
+                <EventTime value={match.date} />
               </span>
             </div>
             <div className="flex flex-col gap-3">
@@ -180,7 +180,7 @@ function TourMarker({ venue, selectedTeamId }) {
           >
             <div className="flex justify-between items-center gap-4 mb-3 pb-2.5 border-b border-zinc-900">
               <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-tighter">
-                {formatMatchDateShort(match.date)}
+                <EventTime value={match.date} format="shortDay" />
               </span>
               {isFinished ? (
                 <span className="text-[10px] font-black text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-lg uppercase tracking-wider">
@@ -188,7 +188,7 @@ function TourMarker({ venue, selectedTeamId }) {
                 </span>
               ) : (
                 <span className="text-[10px] font-black text-blue-400 bg-blue-500/10 px-2 py-1 rounded-lg uppercase tracking-wider">
-                  {formatMatchTime(match.date)}
+                  <EventTime value={match.date} />
                 </span>
               )}
             </div>

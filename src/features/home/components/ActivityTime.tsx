@@ -1,10 +1,7 @@
 'use client';
 
-const absoluteFormatter = new Intl.DateTimeFormat('es-ES', {
-  dateStyle: 'medium',
-  timeStyle: 'short',
-  timeZone: 'Europe/Madrid',
-});
+import { useViewerTimeZone } from '@/lib/hooks/useViewerTimeZone';
+import { formatEventInstant, SERVER_EVENT_TIME_ZONE } from '@/lib/utils/event-time';
 
 function relativeLabel(value: string) {
   const elapsedMinutes = Math.round((new Date(value).getTime() - Date.now()) / 60000);
@@ -16,10 +13,16 @@ function relativeLabel(value: string) {
 }
 
 export default function ActivityTime({ value }: { value: string }) {
-  const absolute = absoluteFormatter.format(new Date(value));
+  const timeZone = useViewerTimeZone();
+  const absolute = formatEventInstant(value, timeZone, 'absolute');
 
   return (
-    <time dateTime={value} title={absolute} aria-label={absolute} suppressHydrationWarning>
+    <time
+      dateTime={value}
+      title={absolute}
+      aria-label={absolute ? `${absolute} (${timeZone ?? SERVER_EVENT_TIME_ZONE})` : undefined}
+      suppressHydrationWarning
+    >
       {relativeLabel(value)}
     </time>
   );

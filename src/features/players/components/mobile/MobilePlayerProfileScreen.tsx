@@ -1,3 +1,4 @@
+import EventTime from '@/components/ui/EventTime';
 import {
   Activity,
   CalendarDays,
@@ -69,14 +70,7 @@ export default function MobilePlayerProfileScreen({ player }: { player: PlayerPr
         leading={<CalendarDays size={20} aria-hidden="true" />}
         title={next ? `${next.home_team ?? ''} – ${next.away_team ?? ''}` : 'Sin próximo partido'}
         subtitle={
-          next?.match_date
-            ? new Date(next.match_date).toLocaleString('es-ES', {
-                day: 'numeric',
-                month: 'short',
-                hour: '2-digit',
-                minute: '2-digit',
-              })
-            : 'Calendario pendiente'
+          <EventTime value={next?.date} format="dateTime" fallback="Calendario pendiente" />
         }
         trailing={next?.round_name}
       />

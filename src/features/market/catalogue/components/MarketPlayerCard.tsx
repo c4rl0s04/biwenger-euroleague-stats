@@ -1,3 +1,4 @@
+import EventTime from '@/components/ui/EventTime';
 import React from 'react';
 import clsx from 'clsx';
 import Image from 'next/image';
@@ -474,11 +475,7 @@ function CardBack({
                 <Calendar size={12} className="text-amber-400" /> Próx. Partido
               </span>
               <span className="text-[10px] bg-white/6 border border-white/8 px-2 py-0.5 rounded-lg text-white/80 font-medium font-sans">
-                {new Date(player.next_match_date!).toLocaleDateString('es-ES', {
-                  weekday: 'short',
-                  day: 'numeric',
-                  month: 'short',
-                })}
+                <EventTime value={player.next_match_date} format="shortDay" />
               </span>
             </div>
 

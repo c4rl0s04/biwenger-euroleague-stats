@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import PlayerImage from '@/components/ui/PlayerImage';
-import { formatMatchTime } from '@/lib/utils/date';
+import EventTime from '@/components/ui/EventTime';
 import PlayerChip from './PlayerChip';
 import styles from './schedule-desktop.module.css';
 
@@ -9,9 +9,7 @@ export default function MatchCard({ match }) {
   const count = match.user_players.length;
   return (
     <article className={styles.match} data-has-players={count > 0}>
-      <time dateTime={match.date ?? undefined} className={styles.time}>
-        {formatMatchTime(match.date) || 'Por confirmar'}
-      </time>
+      <EventTime value={match.date} className={styles.time} fallback="Por confirmar" />
       <div className={styles.teams}>
         {[
           { id: match.home_id, name: match.home_team, fallback: 'Local' },

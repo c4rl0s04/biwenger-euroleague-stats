@@ -4,8 +4,7 @@ import { Calendar, Trophy } from 'lucide-react';
 import { ElegantCard } from '@/components/ui';
 import Image from 'next/image';
 import Link from 'next/link';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import EventTime from '@/components/ui/EventTime';
 
 import type { TeamProfileMatchViewModel } from '../../models/team-profile';
 
@@ -51,7 +50,6 @@ function MatchRow({
   type: 'upcoming' | 'recent';
 }) {
   const isUpcoming = type === 'upcoming';
-  const matchDate = new Date(match.date ?? 0);
 
   return (
     <div className="relative overflow-hidden rounded-2xl bg-white/[0.03] border border-white/[0.08] hover:bg-white/[0.06] transition-all p-4 group">
@@ -62,10 +60,10 @@ function MatchRow({
             {match.roundName || 'Euroleague'}
           </span>
           <span className="text-sm font-black text-white uppercase tracking-tight">
-            {format(matchDate, 'd MMM', { locale: es })}
+            <EventTime value={match.date} format="date" />
           </span>
           <span className="text-xs font-bold text-white/60 uppercase">
-            {format(matchDate, 'HH:mm')}
+            <EventTime value={match.date} />
           </span>
         </div>
 

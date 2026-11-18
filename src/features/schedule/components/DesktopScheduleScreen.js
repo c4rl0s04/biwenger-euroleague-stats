@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { MapPinned } from 'lucide-react';
 import ScheduleControls from './ScheduleControls';
@@ -6,14 +8,16 @@ import RoundSummary from './RoundSummary';
 import ScheduleLineupAction from './ScheduleLineupAction';
 import Section from '@/components/layout/Section';
 import { PageCanvas, PageHeader, EmptyState } from '@/components/ui/foundation';
-import { formatMatchDate } from '@/lib/utils/date';
+import { useViewerTimeZone } from '@/lib/hooks/useViewerTimeZone';
+import { formatEventInstant } from '@/lib/utils/event-time';
 import styles from './schedule-desktop.module.css';
 
 /** @param {{model: import('../models/schedule').ScheduleScreenModel}} props */
 export default function DesktopScheduleScreen({ model: { schedule, users, rounds, userId } }) {
+  const timeZone = useViewerTimeZone();
   const matches = schedule.found ? schedule.matches : [];
   const groupedMatches = matches.reduce((groups, match) => {
-    const day = match.date ? formatMatchDate(match.date) : 'Fecha por confirmar';
+    const day = formatEventInstant(match.date, timeZone, 'day') || 'Fecha por confirmar';
     (groups[day] ??= []).push(match);
     return groups;
   }, {});

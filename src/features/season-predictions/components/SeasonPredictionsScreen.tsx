@@ -1,5 +1,6 @@
 'use client';
 
+import EventTime from '@/components/ui/EventTime';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Clock3 } from 'lucide-react';
@@ -142,12 +143,18 @@ export function SeasonPredictionsScreen({
     }
   }
 
+  const openStatus = (
+    <>
+      Puedes guardar y modificar tus respuestas hasta el{' '}
+      <EventTime value={data.locksAt} format="longDeadline" serverLabel={data.locksAtLabel} />.
+    </>
+  );
   const status =
     data.status === 'not-open'
       ? 'Las predicciones todavía no están abiertas.'
       : data.status === 'locked' || secondsLeft === 0 || serverLocked
         ? 'El plazo ha terminado. Tus respuestas están bloqueadas.'
-        : `Puedes guardar y modificar tus respuestas hasta el ${data.locksAtLabel}.`;
+        : openStatus;
   const hours = secondsLeft == null ? null : Math.floor(secondsLeft / 3600);
   const remaining =
     hours == null
@@ -188,7 +195,7 @@ export function SeasonPredictionsScreen({
         </span>
       </div>
       <p className="mt-3 text-sm leading-relaxed text-[hsl(var(--content-primary))]">
-        Puedes guardar y modificar tus respuestas hasta el {data.locksAtLabel}.
+        {openStatus}
       </p>
       <p className="mt-3 border-t border-[hsl(var(--border-default))] pt-3 text-xs leading-relaxed text-[hsl(var(--content-muted))]">
         Las respuestas solo se guardan al pulsar «Guardar predicciones». Los demás miembros podrán

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import EventTime from '@/components/ui/EventTime';
 import { ArrowDownUp, Clock3, RefreshCw, Search } from 'lucide-react';
 import { Button, PageCanvas, PageHeader, PageSection } from '@/components/ui/foundation';
 import type { LiveMarketListing } from '../../live/models/live-bidding';
@@ -12,10 +13,6 @@ const euro = (value: number) =>
     currency: 'EUR',
     maximumFractionDigits: 0,
   }).format(value);
-const date = (value: string) =>
-  new Intl.DateTimeFormat('es-ES', { dateStyle: 'short', timeStyle: 'short' }).format(
-    new Date(value)
-  );
 const shell =
   'rounded-2xl border border-[hsl(var(--border-default))] bg-[hsl(var(--surface-card))]';
 const muted = 'text-[hsl(var(--content-secondary))]';
@@ -225,7 +222,7 @@ export function PersonalBidsScreen({ initialData }: { initialData: PersonalBidWo
             </strong>
           </div>
           <span className={`ml-auto text-xs ${muted}`}>
-            Actualizado {date(data.market.observedAt)}
+            Actualizado <EventTime value={data.market.observedAt} format="deadline" />
           </span>
           <Button variant="secondary" size="sm" onClick={refresh} disabled={refreshing}>
             <RefreshCw size={15} className={refreshing ? 'animate-spin' : ''} /> Actualizar
@@ -308,7 +305,7 @@ export function PersonalBidsScreen({ initialData }: { initialData: PersonalBidWo
                         <strong className="block truncate">{listing.playerName}</strong>
                         <span className={`block text-xs ${muted}`}>
                           <Clock3 size={12} className="mr-1 inline" />
-                          {date(listing.closesAt)}
+                          <EventTime value={listing.closesAt} format="deadline" />
                           {listing.ownWaitingOffers.length ? ' · Ya has pujado' : ''}
                         </span>
                       </span>
@@ -332,7 +329,8 @@ export function PersonalBidsScreen({ initialData }: { initialData: PersonalBidWo
                   </p>
                   <h2 className="mt-1 text-2xl font-semibold">{selected.playerName}</h2>
                   <p className={`text-sm ${muted}`}>
-                    {selected.sellerName} · cierre {date(selected.closesAt)}
+                    {selected.sellerName} · cierre{' '}
+                    <EventTime value={selected.closesAt} format="deadline" />
                   </p>
                 </div>
                 <div className="grid grid-cols-2 gap-3 text-sm">
@@ -413,8 +411,8 @@ export function PersonalBidsScreen({ initialData }: { initialData: PersonalBidWo
             </h2>
             <p>{confirmation.summary}</p>
             <p className={`text-sm ${muted}`}>
-              Cierre {selected && date(selected.closesAt)}. Esta acción enviará la oferta a Biwenger
-              ahora.
+              Cierre <EventTime value={selected?.closesAt} format="deadline" />. Esta acción enviará
+              la oferta a Biwenger ahora.
             </p>
             <div className="flex justify-end gap-2">
               <Button variant="secondary" onClick={() => setConfirmation(null)} disabled={busy}>

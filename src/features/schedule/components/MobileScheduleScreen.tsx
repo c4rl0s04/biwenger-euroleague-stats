@@ -1,10 +1,14 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { MapPinned } from 'lucide-react';
 
 import AutoAlignButton from './ScheduleLineupAction';
 import type { UserSchedule, ScheduleRound, ScheduleMatch } from '../models/schedule';
-import { formatMatchDate, formatMatchTime } from '@/lib/utils/date';
+import EventTime from '@/components/ui/EventTime';
+import { useViewerTimeZone } from '@/lib/hooks/useViewerTimeZone';
+import { formatEventInstant } from '@/lib/utils/event-time';
 
 import {
   MobileScreen,
@@ -24,12 +28,13 @@ export default function MobileScheduleScreen({
   rounds: ScheduleRound[];
   userName?: string | null;
 }) {
+  const timeZone = useViewerTimeZone();
   const activeRoundId = schedule?.round?.round_id;
   const matches = schedule.matches ?? [];
   const players = schedule.userPlayers ?? matches.flatMap((match) => match.user_players);
   const days = new Map<string, ScheduleMatch[]>();
   for (const match of matches) {
-    const date = match.date ? formatMatchDate(match.date) : 'Fecha por confirmar';
+    const date = formatEventInstant(match.date, timeZone, 'day') || 'Fecha por confirmar';
     const group = days.get(date) ?? [];
     group.push(match);
     days.set(date, group);
@@ -111,9 +116,7 @@ function MobileScheduleMatch({ match }: { match: ScheduleMatch }) {
   return (
     <article className={`schedule-mobile-match ${count ? 'schedule-mobile-match-active' : ''}`}>
       <div className="schedule-mobile-match-header">
-        <time dateTime={match.date ?? undefined}>
-          {formatMatchTime(match.date) || 'Por confirmar'}
-        </time>
+        <EventTime value={match.date} fallback="Por confirmar" />
         <div className="schedule-mobile-teams">
           {[
             { id: match.home_id, name: match.home_team, code: match.home_code, fallback: 'Local' },

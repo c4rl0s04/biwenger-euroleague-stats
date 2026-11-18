@@ -1,5 +1,6 @@
 'use client';
 
+import EventTime from '@/components/ui/EventTime';
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
@@ -445,7 +446,6 @@ export default function ExpandedPlayerModal({
                           </div>
                         );
 
-                      const matchDate = new Date((match.date || match.match_date)!);
                       const isHome = match.home_id === player.team_id;
                       const oppId = isHome ? match.away_id : match.home_id;
                       const oppName = isHome ? match.away_team : match.home_team;
@@ -475,10 +475,7 @@ export default function ExpandedPlayerModal({
                         >
                           <div className={`absolute top-0 w-full h-1 ${diffBg}`}></div>
                           <span className="text-[12px] text-white/40 uppercase mb-2 font-bold tracking-wider">
-                            {matchDate.toLocaleDateString('es-ES', {
-                              weekday: 'short',
-                              day: 'numeric',
-                            })}
+                            <EventTime value={match.date || match.match_date} format="weekdayDay" />
                           </span>
                           <Link
                             href={`/team/${oppId}`}

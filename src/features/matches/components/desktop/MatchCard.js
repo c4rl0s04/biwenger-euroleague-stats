@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { formatMatchTime, formatMatchDateShort } from '@/lib/utils/date';
+import EventTime from '@/components/ui/EventTime';
 
 /**
  * MatchCard Component
@@ -24,10 +24,6 @@ export function MatchCard({ match }) {
   const awayScore = match.away.score ?? 0;
   const homeWinner = isPlayed && homeScore > awayScore;
   const awayWinner = isPlayed && awayScore > homeScore;
-
-  // Format date/time using centralized utils
-  const formattedTime = formatMatchTime(match.date);
-  const formattedDate = formatMatchDateShort(match.date);
 
   return (
     <div
@@ -82,9 +78,11 @@ export function MatchCard({ match }) {
         ) : (
           <div className="flex flex-col items-center">
             <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider mb-0.5">
-              {formattedDate}
+              <EventTime value={match.date} format="shortDay" />
             </span>
-            <span className="text-foreground text-sm font-black">{formattedTime || 'VS'}</span>
+            <span className="text-foreground text-sm font-black">
+              <EventTime value={match.date} fallback="VS" />
+            </span>
           </div>
         )}
       </div>

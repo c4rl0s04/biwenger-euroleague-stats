@@ -91,7 +91,7 @@ export async function readCurrentMarketListings(seasonId: string): Promise<Marke
       tnm.opponent_id as next_opponent_id,
       tnm.opponent_name as next_opponent_name,
       tnm.opponent_img as next_opponent_img,
-      tnm.date as next_match_date
+      tnm.date AT TIME ZONE 'UTC' AS next_match_date
     FROM market_listings ml
     JOIN players p ON ml.player_id = p.id
     JOIN player_seasons ps ON ps.player_id = p.id AND ps.season_id = ml.season_id
