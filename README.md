@@ -10,12 +10,12 @@
 
 ## Product tour
 
-### Find the rounds that created the gap
+### Follow your season on mobile
 
-Compare standings, recent results and head-to-head performance across managers. In this synthetic
-league, Dani leads Alex by 34 points. Round 3 explains 32 of those points.
+Check your league position, points per round, podium finishes, and captain performance in the
+dashboard’s season view.
 
-<img src="docs/_assets/compare-mobile.png" width="340" alt="Mobile comparison of Alex and Dani, with 333 versus 367 points and five recent rounds" />
+<img src="docs/_assets/dashboard-mobile.png" width="340" alt="Mobile dashboard season view showing league position, points, round average, podium finishes, and captain stats" />
 
 ### See what the market is doing
 
