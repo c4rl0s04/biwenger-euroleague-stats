@@ -13,49 +13,43 @@ import {
 } from '@/lib/auth/session-safety';
 import { biwengerCredentials } from '@/lib/credentials/server';
 
+// Match the current password cost even for accounts without a stored password.
+const fallbackPasswordHash = '$2b$10$M3mpDAd335nmtoh5kt29JOwU8MlKXirolvgOjXgeYm2Lk.Bl2TMMy';
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
   providers: [
     Credentials({
       async authorize(credentials) {
-        console.log('LOGIN ATTEMPT:', credentials?.name);
-
-        if (!credentials?.name || !credentials?.password) {
-          console.log('LOGIN FAILED: Missing credentials');
+        const { name, password } = credentials ?? {};
+        if (
+          typeof name !== 'string' ||
+          name.length === 0 ||
+          name.length > 256 ||
+          typeof password !== 'string' ||
+          password.length === 0 ||
+          password.length > 1024
+        ) {
           return null;
         }
 
-        // Find user by name
-        const user = await findLoginAccount(credentials.name);
+        try {
+          const user = await findLoginAccount(name);
+          const isMatch = await bcrypt.compare(password, user?.password || fallbackPasswordHash);
+          if (!user?.password || !isMatch) return null;
 
-        if (!user) {
-          console.log('LOGIN FAILED: User not found:', credentials.name);
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            image: null,
+            biwengerLinked: await biwengerCredentials.hasCredential(user.id),
+          };
+        } catch {
+          // Database errors may include SQL parameters containing the submitted name.
+          console.error('Credential sign-in unavailable');
           return null;
         }
-
-        if (!user.password) {
-          console.log('LOGIN FAILED: User has no password set:', credentials.name);
-          return null;
-        }
-
-        // Compare password
-        const isMatch = await bcrypt.compare(credentials.password, user.password);
-
-        if (!isMatch) {
-          console.log('LOGIN FAILED: Password mismatch for:', credentials.name);
-          return null;
-        }
-
-        console.log('LOGIN SUCCESS:', user.name);
-
-        // Return user object for the session
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          image: null,
-          biwengerLinked: await biwengerCredentials.hasCredential(user.id),
-        };
       },
     }),
   ],

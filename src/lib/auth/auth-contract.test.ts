@@ -7,7 +7,7 @@ const mocks = vi.hoisted(() => ({
   linked: vi.fn(),
   config: null as unknown as {
     providers: {
-      authorize: (credentials: { name?: string; password?: string }) => Promise<unknown>;
+      authorize: (credentials: { name?: unknown; password?: unknown }) => Promise<unknown>;
     }[];
     callbacks: {
       jwt: (input: {
@@ -63,10 +63,40 @@ it('preserves credential rejection and returns only safe identity on successful 
   mocks.compare.mockResolvedValue(false);
   expect(await authorize({ name: 'fixture', password: 'bad' })).toBeNull();
   mocks.login.mockResolvedValue(undefined);
+  mocks.compare.mockResolvedValue(true);
   expect(await authorize({ name: 'missing', password: 'input' })).toBeNull();
+  expect(mocks.compare).toHaveBeenLastCalledWith('input', expect.stringMatching(/^\$2[aby]\$10\$/));
   mocks.login.mockResolvedValue({ id: '1', password: null });
   expect(await authorize({ name: 'fixture', password: 'input' })).toBeNull();
+  expect(mocks.compare).toHaveBeenLastCalledWith('input', expect.stringMatching(/^\$2[aby]\$10\$/));
 });
+it('rejects malformed and oversized credentials before database or bcrypt work', async () => {
+  const authorize = mocks.config.providers[0].authorize;
+  for (const credentials of [
+    { name: 42, password: 'input' },
+    { name: 'fixture', password: ['input'] },
+    { name: 'a'.repeat(257), password: 'input' },
+    { name: 'fixture', password: 'a'.repeat(1025) },
+  ]) {
+    expect(await authorize(credentials)).toBeNull();
+  }
+  expect(mocks.login).not.toHaveBeenCalled();
+  expect(mocks.compare).not.toHaveBeenCalled();
+});
+
+it('keeps account lookup failures out of logs and sign-in responses', async () => {
+  const errorLog = vi.spyOn(console, 'error').mockImplementation(() => {});
+  try {
+    mocks.login.mockRejectedValueOnce(new Error('query failed for fixture'));
+    expect(
+      await mocks.config.providers[0].authorize({ name: 'fixture', password: 'input' })
+    ).toBeNull();
+    expect(errorLog).toHaveBeenCalledExactlyOnceWith('Credential sign-in unavailable');
+  } finally {
+    errorLog.mockRestore();
+  }
+});
+
 it('refreshes JWT state from storage and ignores client update fields', async () => {
   mocks.account.mockResolvedValue({ email: 'stored@example.test' });
   const result = await mocks.config.callbacks.jwt({
