@@ -1,38 +1,44 @@
-# Biwenger Stats
+<div align="center">
+  <img src="public/icons/icon-192.png" width="72" height="72" alt="" />
+  <h1>Biwenger Stats</h1>
+  <p><strong>See where your EuroLeague fantasy season is won.</strong></p>
+  <p>Follow your squad, find the rounds that put a rival ahead, and see how the market is moving.<br />Built for private Biwenger leagues, with official EuroLeague stats and your league’s own history.</p>
+  <p><a href="#product-tour">Product tour</a> · <a href="#how-the-stack-fits-together">Architecture</a> · <a href="docs/README.md">Documentation</a></p>
+</div>
 
-**See where you gained points, how your squad’s value changed, and where your rivals are pulling ahead.**
+[![Biwenger Stats dashboard with season points, squad value, captain performance, and the last five rounds](docs/_assets/dashboard-desktop.png)](docs/_assets/dashboard-desktop.png)
 
-Biwenger Stats brings fantasy league history and official EuroLeague statistics together for private
-Biwenger leagues.
+## Product tour
 
-![Biwenger Stats desktop dashboard showing the season and squad value alongside a mobile comparison showing the gap between two managers](docs/_assets/product-showcase.webp)
+### Find the rounds that created the gap
 
-_Screens shown with synthetic league data._ [Desktop dashboard](docs/_assets/dashboard-desktop.png) ·
-[Mobile comparison](docs/_assets/compare-mobile.png)
+Compare standings, recent results and head-to-head performance across managers. In this synthetic
+league, Dani leads Alex by 34 points. Round 3 explains 32 of those points.
 
-In this example, Dani leads by 34 points. Round 3 accounts for 32 points of that gap.
+<img src="docs/_assets/compare-mobile.png" width="340" alt="Mobile comparison of Alex and Dani, with 333 versus 367 points and five recent rounds" />
 
-## What you can do
+### See what the market is doing
 
-- **Understand your season.** Track your position, recent round scores, captain performance, and
-  squad value over time.
-- **Compare with a rival.** See how your scores diverged and which rounds account for the gap.
-- **Make a squad decision.** Check player form and market value before changing your lineup or
-  placing a bid with a linked Biwenger account.
+Switch between time windows to see transfer volume. Review player values and recent activity
+before making a move with a linked Biwenger account.
 
-[Explore all features](docs/product/README.md)
+[![Market volume chart with selectable time windows and a 90-day total](docs/_assets/market-trends.webp)](docs/_assets/market-trends.webp)
 
-## From league data to fantasy decisions
+_Screens use synthetic league data._ [Explore all features](docs/product/README.md)
 
-[![Biwenger fantasy data and official EuroLeague stats feed scheduled ingestion in GitHub Actions. Supabase PostgreSQL stores the season history, and the Next.js app on Vercel serves analytics. Biwenger account actions, Groq or OpenAI, Sentry, and Docker Compose support the product.](docs/_assets/stack.png)](docs/_assets/stack.png)
+## How the stack fits together
 
-Scheduled jobs fetch and validate data from Biwenger and EuroLeague, then store it by season in
-PostgreSQL. The Next.js app queries that history on the server to serve dashboards, comparisons, and
-squad and market views.
+<picture>
+  <source media="(max-width: 650px)" srcset="docs/_assets/stack-mobile.png" />
+  <img src="docs/_assets/stack.png" alt="Two system flows. Biwenger and EuroLeague data enter GitHub Actions, which validates and stores season data in Supabase PostgreSQL for the Next.js app on Vercel. A manager’s bid goes through the authenticated Next.js server back to Biwenger using linked account credentials. Groq or OpenAI, Sentry, and Docker Compose support the app." />
+</picture>
+
+[Open full-size diagram](docs/_assets/stack.png) ·
+[Read the architecture walkthrough](docs/architecture/system-overview.md)
 
 ## Explore the repository
 
-- [How it works](docs/architecture/system-overview.md) — architecture and the path of a standings
-  read and a personal bid.
-- [Product map](docs/product/README.md) — features and screens by domain.
+- [Product map](docs/product/README.md) — features, screens, and their implementation.
 - [Local development](docs/getting-started/local-development.md) — setup, startup, and first login.
+- [Operations](docs/operations/README.md) — sync, deployment, and recovery.
+- [MIT License](LICENSE)
