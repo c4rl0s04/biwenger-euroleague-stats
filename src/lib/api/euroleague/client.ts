@@ -224,7 +224,11 @@ export class EuroleagueClient {
           );
         }
 
-        const payload = await response.json();
+        const payload: unknown = JSON.parse(await response.text(), (key, value: unknown) => {
+          // PostgreSQL rejects NUL in JSONB keys as well as values.
+          if (key.includes('\0')) return undefined;
+          return typeof value === 'string' ? value.replaceAll('\0', '') : value;
+        });
         const rows = schema.array().parse(payload) as EuroleagueRow[];
         if (rows.length === 0) this.metrics.emptyResponses++;
         this.metrics.lastSuccessfulAt = new Date().toISOString();

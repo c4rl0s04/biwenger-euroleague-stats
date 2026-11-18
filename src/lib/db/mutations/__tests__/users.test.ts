@@ -40,16 +40,14 @@ describe('user mutations season isolation', () => {
     ]);
   });
 
-  it('can mark every user in a season inactive without deleting rows', async () => {
+  it('rejects an empty active member list without writing', async () => {
     const db = createMockDb();
-    const mutations = prepareUserMutations(db as any, { seasonId: '2026-27' });
+    const mutations = prepareUserMutations(db, { seasonId: '2026-27' });
 
-    await mutations.markSeasonUsersInactiveExcept([]);
-
-    expect(db.query).toHaveBeenCalledWith(expect.stringContaining("SET status = 'inactive'"), [
-      '2026-27',
-    ]);
-    expect(db.query).not.toHaveBeenCalledWith(expect.stringContaining('DELETE'), expect.anything());
+    await expect(mutations.markSeasonUsersInactiveExcept([])).rejects.toThrow(
+      'Cannot deactivate users without active members.'
+    );
+    expect(db.query).not.toHaveBeenCalled();
   });
 
   it('replaces ownership for the selected season in one query', async () => {

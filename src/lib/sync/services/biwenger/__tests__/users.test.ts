@@ -12,6 +12,37 @@ describe('Biwenger Users Service', () => {
     );
   });
 
+  it.each([
+    { data: { standings: [] } },
+    { data: {} },
+    {
+      data: {
+        standings: [
+          { id: 10, name: 'Alice' },
+          { id: 20, name: null },
+        ],
+      },
+    },
+    { data: { standings: [{ id: {}, name: 'Alice' }] } },
+  ])('rejects empty or malformed standings before preparing mutations', async (payload) => {
+    const manager = {
+      context: { db: null, seasonId: '2025-26' },
+      log: vi.fn(),
+    };
+    const prepareMutations = vi.fn();
+
+    await expect(
+      syncBiwengerUsers(manager as unknown as Parameters<typeof syncBiwengerUsers>[0], {
+        fetchLeague: async () => payload,
+        prepareMutations,
+      })
+    ).rejects.toMatchObject({
+      message: 'Failed to synchronize Biwenger users.',
+      cause: { message: 'Biwenger returned empty or invalid league standings.' },
+    });
+    expect(prepareMutations).not.toHaveBeenCalled();
+  });
+
   it('upserts standings users and marks others inactive', async () => {
     const mockUpsertUser = vi.fn().mockResolvedValue(undefined);
     const mockMarkInactive = vi.fn().mockResolvedValue(undefined);
@@ -30,7 +61,7 @@ describe('Biwenger Users Service', () => {
       data: {
         standings: [
           { id: 10, name: 'Alice', icon: 'avatars/10.png' },
-          { id: 20, name: 'Bob', icon: null },
+          { id: '20', name: 'Bob', icon: null },
         ],
       },
     });
