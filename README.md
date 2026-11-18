@@ -1,46 +1,51 @@
 # Biwenger Stats
 
-Biwenger Stats turns private Biwenger EuroLeague leagues into a place to follow your squad,
-compare managers, and make better-informed fantasy decisions. It combines fantasy league history
-with official EuroLeague results and player data.
+![Biwenger Stats — EuroLeague fantasy analytics](docs/_assets/readme-cover.webp)
 
-![Biwenger Stats desktop dashboard with squad and league metrics from a synthetic league](docs/_assets/dashboard-desktop.png)
+**A fantasy basketball analytics app for private Biwenger EuroLeague leagues.** Follow your squad,
+spot where rivals gain points, and make lineup and market decisions with the league's history and
+official match data in one place.
 
-## What you can do
+[See the app](#product-tour) · [Explore the stack](#stack-and-data-flow) ·
+[How it works](docs/architecture/system-overview.md) · [Documentation](docs/README.md)
 
-- **Follow your league.** Explore standings, round results, captain performance, tournaments, and
-  season trends.
-- **Compare managers and players.** See where a rival gains points, browse player form and value,
-  and explore official match detail.
-- **Manage your squad and market.** Review ownership, transfers, and valuations. A linked personal
-  Biwenger account enables supported lineup and market actions.
-- **Explore beyond the standings.** Try the Hoopgrid trivia game, season predictions, and an
-  optional AI assistant grounded in league data.
+## Stack and data flow
 
-<details>
-<summary>See the mobile manager comparison</summary>
+[![Architecture diagram showing Biwenger and EuroLeague feeding GitHub Actions, season data stored in Supabase PostgreSQL, and the Next.js app on Vercel serving league managers. Linked account actions go back to Biwenger, the optional assistant uses Groq or OpenAI, and sync and app errors can reach Sentry.](docs/_assets/stack.png)](docs/_assets/stack.png)
 
-![Mobile comparison between two managers in a synthetic league](docs/_assets/compare-mobile.png)
+| Flow        | What happens                                                                                                                                                                                             |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Ingest**  | GitHub Actions pulls fantasy league state from Biwenger and official match and player statistics from EuroLeague. Sync validates the incoming data and writes it to the configured season in PostgreSQL. |
+| **Read**    | Next.js on Vercel serves responsive React views. Auth.js handles sign-in and server-side data access feeds the dashboard, standings, and comparisons from PostgreSQL.                                    |
+| **Act**     | A linked personal Biwenger account enables lineup updates, bids, and supported market actions. The optional assistant sends league context to the configured Groq or OpenAI provider.                    |
+| **Operate** | GitHub Actions runs CI, browser tests, and deployment smoke checks. Sentry receives application and sync errors where configured. Docker Compose provides a local app, database, and sync worker.        |
 
-</details>
+[Follow a request through the code](docs/architecture/system-overview.md) ·
+[Read the sync runbook](docs/operations/data-sync.md)
 
-## Stack
+## Product tour
 
-![GitHub Actions syncs Biwenger and EuroLeague into PostgreSQL. Next.js on Vercel reads the database and sends account actions to Biwenger. Sync and app errors can reach Sentry.](docs/_assets/stack.png)
+![Biwenger Stats dashboard on desktop next to a manager comparison on mobile, both using a synthetic league](docs/_assets/product-showcase.webp)
 
-GitHub Actions runs scheduled ingestion. PostgreSQL holds the synchronized history, while the
-Next.js app serves it through authenticated views and uses a manager's linked Biwenger account
-for supported writes. The screenshots use synthetic league data.
+- **Track your season.** See standings, points progression, captain performance, tournaments, and
+  head-to-head comparisons.
+- **Scout players and matches.** Explore player form, market value, official box scores, and match
+  detail.
+- **Manage your squad.** Review transfers, ownership, and listings. Link a personal Biwenger account
+  to use supported lineup and market actions.
+- **Explore the league.** Make season predictions, play Hoopgrid, or ask the optional assistant
+  about league data.
+
+[Full desktop dashboard](docs/_assets/dashboard-desktop.png) ·
+[Full mobile comparison](docs/_assets/compare-mobile.png) · [Product map](docs/product/README.md)
 
 ## Explore the repository
 
-- [How it works](docs/architecture/system-overview.md) — a five-minute walkthrough of the app
-  and its data.
-- [Documentation](docs/README.md) — product, architecture, operations, and contracts.
+- [Documentation index](docs/README.md) — architecture, operations, and contracts.
 - [Local development](docs/getting-started/local-development.md) — prerequisites, database setup,
-  and the first login.
-- [Contributing](docs/contributing/README.md) — workflow and focused checks. Coding agents start
-  with [AGENTS.md](AGENTS.md).
+  and first login.
+- [Contributing](docs/contributing/README.md) — workflow and checks. Coding agents start with
+  [AGENTS.md](AGENTS.md).
 
 Report security issues privately. Keep credentials and private league data out of issues and commits.
 
