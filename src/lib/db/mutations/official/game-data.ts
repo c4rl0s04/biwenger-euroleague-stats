@@ -90,7 +90,7 @@ export function prepareOfficialGameMutations(db: DbClient, seasonId: string) {
         metadata?.referees?.[1] ?? null,
         metadata?.referees?.[2] ?? null,
         checksum,
-        report?.scheduledAt ?? null,
+        report?.scheduledAt?.toISOString() ?? null,
         metadata?.arenaName ?? null,
         metadata?.arenaCapacity ?? null,
       ]
@@ -325,7 +325,7 @@ export function prepareOfficialGameMutations(db: DbClient, seasonId: string) {
     (
       await db.query(
         `SELECT m.official_game_code AS game_code,
-                m.date AS scheduled_at,
+                m.date AT TIME ZONE 'UTC' AS scheduled_at,
                 m.status,
                 m.payload_checksum,
                 m.round_id,
@@ -334,9 +334,10 @@ export function prepareOfficialGameMutations(db: DbClient, seasonId: string) {
          WHERE m.season_id = $1
            AND m.official_game_code IS NOT NULL
            AND ($2::int IS NOT NULL AND m.official_game_code = $2 OR $2::int IS NULL AND (
-             m.date BETWEEN NOW() - INTERVAL '48 hours' AND NOW() + INTERVAL '1 hour'
+             m.date BETWEEN (NOW() AT TIME ZONE 'UTC') - INTERVAL '48 hours'
+                        AND (NOW() AT TIME ZONE 'UTC') + INTERVAL '1 hour'
              OR m.status = 'live'
-             OR m.payload_checksum IS NULL AND m.date < NOW()
+             OR m.payload_checksum IS NULL AND m.date < (NOW() AT TIME ZONE 'UTC')
            ))
          ORDER BY m.date`,
         [seasonId, forceGame ?? null]
@@ -354,7 +355,7 @@ export function prepareOfficialGameMutations(db: DbClient, seasonId: string) {
   const getGameByMatchId = async (matchId: number) =>
     (
       await db.query(
-        `SELECT m.id, m.official_game_code, m.status, m.date
+        `SELECT m.id, m.official_game_code, m.status, m.date AT TIME ZONE 'UTC' AS date
          FROM matches m
          WHERE m.id = $1 AND m.season_id = $2`,
         [matchId, seasonId]
