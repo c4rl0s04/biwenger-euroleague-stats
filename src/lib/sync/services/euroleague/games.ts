@@ -1,6 +1,5 @@
 import { checksumPayload } from '../../../api/euroleague/client';
 import { euroleagueSeasonYear } from '../../../api/euroleague/normalization';
-import { CONFIG } from '../../../config';
 import { prepareOfficialGameMutations } from '../../../db/mutations/official/game-data';
 import { prepareOfficialMappingMutations } from '../../../db/mutations/official/mappings';
 import { SyncManager } from '../../manager';
@@ -47,8 +46,12 @@ export async function runGame(
 
   const mapping = await reconcilePlayerMappings(mappingMutations, boxscore);
   const finalized = Boolean(report?.isPlayed && !metadata?.isLive && boxscore.length > 0);
-  const checksum = checksumPayload({ report, metadata, boxscore, playByPlay, shots });
-  if (finalized && !options.force && options.existingChecksum === checksum) {
+  // Without a full payload, leave the game eligible for a later sync.
+  const checksum =
+    playByPlay === null || shots === null
+      ? null
+      : checksumPayload({ report, metadata, boxscore, playByPlay, shots });
+  if (finalized && checksum !== null && !options.force && options.existingChecksum === checksum) {
     const hasUnpersisted = await gameMutations.hasUnpersistedMappedPlayers(
       roundId,
       boxscore.map((p) => p.playerCode)
@@ -75,7 +78,7 @@ export async function runGame(
   await gameMutations.materializeRoundStats(roundId);
 
   manager.log(
-    `Game ${gameCode}: ${boxscore.length} boxscore rows, ${playByPlay.length} plays, ${shots.length} shots, ${mapping.issues.length} pending mappings`
+    `Game ${gameCode}: ${boxscore.length} boxscore rows, ${playByPlay?.length ?? 'unavailable'} plays, ${shots?.length ?? 'unavailable'} shots, ${mapping.issues.length} pending mappings`
   );
   return {
     status: 'updated' as const,

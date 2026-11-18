@@ -15,9 +15,9 @@ export interface OfficialGameDataInput {
   report: OfficialGameReport | null;
   metadata: OfficialGameMetadata | null;
   boxscore: OfficialPlayerBoxScore[];
-  playByPlay: OfficialPlayByPlayEvent[];
-  shots: OfficialShot[];
-  checksum: string;
+  playByPlay: OfficialPlayByPlayEvent[] | null;
+  shots: OfficialShot[] | null;
+  checksum: string | null;
   finalized: boolean;
 }
 
@@ -26,7 +26,7 @@ export function prepareOfficialGameMutations(db: DbClient, seasonId: string) {
     gameCode: number,
     report: OfficialGameReport | null,
     metadata: OfficialGameMetadata | null,
-    checksum: string,
+    checksum: string | null,
     client: Queryable = db
   ) => {
     const homeQuarters = metadata?.homeQuarterScores ?? [];
@@ -189,11 +189,13 @@ export function prepareOfficialGameMutations(db: DbClient, seasonId: string) {
         input.checksum,
         target
       );
-      if (input.finalized) {
+      if (input.finalized && input.playByPlay !== null) {
         await target.query(
           'DELETE FROM official_play_by_play WHERE season_id=$1 AND game_code=$2',
           [seasonId, input.gameCode]
         );
+      }
+      if (input.finalized && input.shots !== null) {
         await target.query('DELETE FROM official_shots WHERE season_id=$1 AND game_code=$2', [
           seasonId,
           input.gameCode,
@@ -303,8 +305,8 @@ export function prepareOfficialGameMutations(db: DbClient, seasonId: string) {
         }
       }
 
-      for (const row of input.playByPlay) await upsertPlay(row, target);
-      for (const row of input.shots) await upsertShot(row, target);
+      for (const row of input.playByPlay ?? []) await upsertPlay(row, target);
+      for (const row of input.shots ?? []) await upsertShot(row, target);
       if (client) await client.query('COMMIT');
       return status;
     } catch (error) {
