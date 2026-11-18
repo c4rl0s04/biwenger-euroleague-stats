@@ -33,12 +33,22 @@ export interface BiwengerMarketSyncResult {
   };
 }
 
-/**
- * Biwenger market rolls over at 5:00 AM (Spanish time).
- * To handle syncs between 00:00 and 04:59, we subtract 5 hours from the current date.
- */
+const madridMarketClock = new Intl.DateTimeFormat('en-GB', {
+  timeZone: 'Europe/Madrid',
+  year: 'numeric',
+  month: 'numeric',
+  day: 'numeric',
+  hour: 'numeric',
+  hourCycle: 'h23',
+});
+
 export function resolveMarketDate(now = new Date()): string {
-  return new Date(now.getTime() - 5 * 60 * 60 * 1000).toISOString().split('T')[0];
+  const { year, month, day, hour } = Object.fromEntries(
+    madridMarketClock.formatToParts(now).map(({ type, value }) => [type, Number(value)])
+  );
+  // Use UTC only for calendar arithmetic after resolving the Madrid wall clock.
+  const marketDay = Date.UTC(year, month - 1, hour < 5 ? day - 1 : day);
+  return new Date(marketDay).toISOString().split('T')[0];
 }
 
 export async function syncBiwengerMarket(
