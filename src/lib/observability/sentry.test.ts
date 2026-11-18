@@ -1,10 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
-import {
-  captureAppException,
-  captureSyncError,
-  redactSensitiveData,
-  sanitizeSentryEvent,
-} from './sentry';
+import { captureAppException, redactSensitiveData, sanitizeSentryEvent } from './sentry';
+
+import { captureSyncError } from './sync-sentry';
+
+vi.mock('@sentry/node', () => ({
+  captureException: vi.fn(() => 'mock-event-id'),
+  getClient: () => ({}),
+}));
 
 vi.mock('@sentry/nextjs', () => ({
   captureException: vi.fn((err: Error, options?: unknown) => 'mock-event-id'),
@@ -105,7 +107,7 @@ describe('Observability & Sentry Integration', () => {
 
   describe('captureSyncError', () => {
     it('formats sync tags and execution context cleanly', async () => {
-      const { captureException } = await import('@sentry/nextjs');
+      const { captureException } = await import('@sentry/node');
 
       const errorId = captureSyncError(new Error('Euroleague rate limited'), {
         stepId: 'euroleague-games',
@@ -138,7 +140,7 @@ describe('Observability & Sentry Integration', () => {
     });
 
     it('handles non-Error objects gracefully', async () => {
-      const { captureException } = await import('@sentry/nextjs');
+      const { captureException } = await import('@sentry/node');
 
       captureSyncError('String error message', { stepId: 'biwenger-catalog' });
 

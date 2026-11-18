@@ -53,7 +53,7 @@ describe('SyncManager', () => {
   });
 
   it('dispatches failed step details to the observability layer', async () => {
-    const observability = await import('../../observability/sentry');
+    const observability = await import('../../observability/sync-sentry');
     const spy = vi.spyOn(observability, 'captureSyncError');
     const { SyncManager } = await import('../manager');
     const manager = new SyncManager({ useAdvisoryLock: false });
