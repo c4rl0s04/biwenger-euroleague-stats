@@ -62,7 +62,9 @@ browserTest('login explains when the firewall limits credential attempts', async
   await page.locator('#login-password').fill('fixture-password');
   const submit = page.getByRole('button', { name: 'Entrar' });
   await submit.click();
-  await expect(page.getByRole('alert')).toContainText('Demasiados intentos de inicio de sesión');
+  await expect(page.getByRole('main').getByRole('alert')).toContainText(
+    'Demasiados intentos de inicio de sesión'
+  );
   await expect(submit).toBeEnabled();
   await expect(page).toHaveURL(/\/login\?callbackUrl=/);
 });
