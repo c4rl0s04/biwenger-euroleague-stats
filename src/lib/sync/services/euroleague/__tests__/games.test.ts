@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import type { EuroleagueClient } from '../../../../api/euroleague/client';
 import { runGame } from '../games';
 
 describe('Euroleague runGame service', () => {
@@ -43,7 +44,7 @@ describe('Euroleague runGame service', () => {
       getGameReport: vi.fn(async () => ({ isPlayed: true, homeScore: 80, awayScore: 75 })),
       getGameMetadata: vi.fn(async () => ({ isLive: false })),
       getPlayerBoxScore: vi.fn(async () => sampleBoxscore),
-      getPlayByPlay: vi.fn(async () => []),
+      getPlayByPlay: vi.fn<EuroleagueClient['getPlayByPlay']>(async () => []),
       getShots: vi.fn(async () => []),
     };
 
@@ -83,6 +84,32 @@ describe('Euroleague runGame service', () => {
     expect(result.finalized).toBe(true);
     expect(mockGameMutations.persistGameData).toHaveBeenCalledTimes(1);
     expect(mockGameMutations.materializeRoundStats).toHaveBeenCalledWith(10);
+  });
+
+  it('keeps finished games eligible for another sync when a feed is unavailable', async () => {
+    const { manager, mockGameMutations, mockMappingMutations, mockProvider } = createHarness();
+    mockProvider.getPlayByPlay.mockResolvedValueOnce(null);
+    const options = {
+      existingChecksum: 'previous-checksum',
+      gameMutations: mockGameMutations,
+      mappingMutations: mockMappingMutations,
+    };
+
+    await expect(runGame(manager, 1, 10, 'Jornada 10', options)).resolves.toMatchObject({
+      status: 'updated',
+      finalized: true,
+      checksum: null,
+    });
+    expect(mockGameMutations.persistGameData).toHaveBeenLastCalledWith(
+      expect.objectContaining({ playByPlay: null, shots: [], checksum: null })
+    );
+
+    await expect(
+      runGame(manager, 1, 10, 'Jornada 10', { ...options, existingChecksum: null })
+    ).resolves.toMatchObject({ status: 'updated', checksum: expect.any(String) });
+    expect(mockGameMutations.persistGameData).toHaveBeenLastCalledWith(
+      expect.objectContaining({ playByPlay: [], shots: [], checksum: expect.any(String) })
+    );
   });
 
   it('skips persistence when checksum is unchanged and all mapped players are persisted', async () => {

@@ -93,12 +93,11 @@ describe('EuroleagueClient contracts', () => {
       .mockResolvedValueOnce(response([row]));
     const provider = new EuroleagueClient({ fetchImpl: fetchImpl as typeof fetch });
 
-    const [event] = await provider.getPlayByPlay(2026, 1);
-    const [cleanEvent] = await provider.getPlayByPlay(2026, 1);
+    const events = await provider.getPlayByPlay(2026, 1);
+    const cleanEvents = await provider.getPlayByPlay(2026, 1);
 
-    expect(event.comment).toBe(row.COMMENT);
-    expect(event.raw).toEqual(row);
-    expect(checksumPayload(event)).toBe(checksumPayload(cleanEvent));
+    expect(events).toMatchObject([{ comment: row.COMMENT, raw: row }]);
+    expect(checksumPayload(events)).toBe(checksumPayload(cleanEvents));
   });
 
   it('accepts future-game 404s as unavailable data', async () => {
@@ -107,6 +106,21 @@ describe('EuroleagueClient contracts', () => {
     });
     await expect(provider.getGameMetadata(2026, 380)).resolves.toBeNull();
     await expect(provider.getPlayerBoxScore(2026, 380)).resolves.toEqual([]);
+  });
+
+  it('distinguishes unavailable game feeds from successful empty feeds', async () => {
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValueOnce(response(null, 404))
+      .mockResolvedValueOnce(response(null, 404))
+      .mockResolvedValueOnce(response([]))
+      .mockResolvedValueOnce(response([]));
+    const provider = new EuroleagueClient({ fetchImpl });
+
+    await expect(provider.getPlayByPlay(2026, 1)).resolves.toBeNull();
+    await expect(provider.getShots(2026, 1)).resolves.toBeNull();
+    await expect(provider.getPlayByPlay(2026, 1)).resolves.toEqual([]);
+    await expect(provider.getShots(2026, 1)).resolves.toEqual([]);
   });
 
   it('retries throttling and sends an optional bearer token', async () => {
