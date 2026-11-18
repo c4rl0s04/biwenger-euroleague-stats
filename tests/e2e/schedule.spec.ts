@@ -229,3 +229,59 @@ test('Desktop Schedule preserves the empty squad state and map access', async ({
     '/matches?roundId=1#mapa-de-sedes'
   );
 });
+
+for (const [timezoneId, day, time] of [
+  ['Europe/Madrid', 'viernes, 20 de noviembre', '00:30'],
+  ['America/New_York', 'jueves, 19 de noviembre', '18:30'],
+] as const) {
+  test.describe(`Schedule in ${timezoneId}`, () => {
+    test.use({ timezoneId });
+
+    test('shows the local kickoff date and time without hydration errors', async ({ page }) => {
+      test.skip(!process.env.BIWENGER_E2E_DISPOSABLE, 'Requires synthetic local league.');
+      const connectionString = process.env.E2E_DATABASE_URL;
+      assertFixtureTarget(connectionString, process.env);
+      const client = new pg.Client({ connectionString });
+      await client.connect();
+      const date = '2026-11-19T23:30:00.000Z';
+      await page.route('**/api/news', (route) =>
+        route.fulfill({ json: { success: true, data: [] } })
+      );
+      await page.route('https://cdn.biwenger.com/i/t/*.png', (route) =>
+        route.fulfill({ contentType: 'image/png', body: readFileSync('public/icons/icon-192.png') })
+      );
+      const errors: string[] = [];
+      page.on('pageerror', (error) => errors.push(error.message));
+      page.on('console', (message) => {
+        if (
+          message.type() === 'error' &&
+          /hydrat|Minified React error #(?:418|423|425)/i.test(message.text())
+        ) {
+          errors.push(message.text());
+        }
+      });
+      try {
+        await client.query(
+          "UPDATE matches SET date = $1 WHERE season_id = '2025-26' AND id = 99001",
+          [date]
+        );
+        await page.goto('/login?callbackUrl=%2Fschedule');
+        await page.getByLabel('Manager').fill(process.env.E2E_USERNAME!);
+        await page.locator('#login-password').fill(process.env.E2E_PASSWORD!);
+        await page.getByRole('button', { name: 'Entrar' }).click();
+        await expect(page).toHaveURL(/\/schedule$/);
+        await page.waitForLoadState('networkidle');
+        await page.reload();
+        const kickoff = page.locator(`main time[datetime="${date}"]`).first();
+        await expect(kickoff).toHaveText(`${time} (${timezoneId})`);
+        await expect(page.getByRole('heading', { name: new RegExp(day, 'i') })).toBeVisible();
+        expect(errors).toEqual([]);
+      } finally {
+        await client.query(
+          "UPDATE matches SET date = '2025-10-01T18:00:00Z' WHERE season_id = '2025-26' AND id = 99001"
+        );
+        await client.end();
+      }
+    });
+  });
+}

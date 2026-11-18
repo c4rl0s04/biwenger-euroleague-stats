@@ -9,15 +9,16 @@ import MatchVenueMap from '../map/MatchVenueMap';
 
 import { RoundSelector } from './RoundSelector';
 import { TeamSelector } from './TeamSelector';
-import { formatMatchDate, formatMatchTime } from '@/lib/utils/date';
+import { useViewerTimeZone } from '@/lib/hooks/useViewerTimeZone';
+import { formatEventInstant } from '@/lib/utils/event-time';
 
 /**
  * Helper to group matches by date for standard round view.
  * @param {Array} matches - List of matches
  */
-function groupMatchesByDate(matches) {
+function groupMatchesByDate(matches, timeZone) {
   return matches.reduce((acc, match) => {
-    const dateKey = formatMatchDate(match.date);
+    const dateKey = formatEventInstant(match.date, timeZone, 'day');
     if (!acc[dateKey]) acc[dateKey] = [];
     acc[dateKey].push(match);
     return acc;
@@ -48,6 +49,7 @@ function groupMatchesByStatus(matches) {
  * and switching between Round View and Team Timeline.
  */
 export default function MatchesClient({ rounds, defaultRoundId }) {
+  const timeZone = useViewerTimeZone();
   const [selectedRoundId, setSelectedRoundId] = useState(
     defaultRoundId || (rounds.length > 0 ? rounds[0].roundId : null)
   );
@@ -90,7 +92,7 @@ export default function MatchesClient({ rounds, defaultRoundId }) {
 
   const groupedMatches = isTeamMode
     ? groupMatchesByStatus(matchesToDisplay)
-    : groupMatchesByDate(matchesToDisplay);
+    : groupMatchesByDate(matchesToDisplay, timeZone);
 
   if (!activeRound && !isTeamMode) return null;
 

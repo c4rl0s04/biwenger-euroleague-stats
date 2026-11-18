@@ -6,7 +6,9 @@ import Image from 'next/image';
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { getShortTeamName } from '@/lib/competition/public';
-import { getCorrectedMatchDate, formatMatchTime } from '@/lib/utils/date';
+import EventTime from '@/components/ui/EventTime';
+import { useViewerTimeZone } from '@/lib/hooks/useViewerTimeZone';
+import { formatEventInstant } from '@/lib/utils/event-time';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import { Subheading } from '@/components/ui';
 
@@ -75,8 +77,6 @@ function DayMatchRow({ dayName, matches, roundName }) {
           className="flex gap-4 overflow-x-auto pb-4 pt-2 -mx-4 px-4 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         >
           {matches.map((match, idx) => {
-            const time = formatMatchTime(match.date);
-
             return (
               <div key={idx} className="snap-center shrink-0 w-[260px]">
                 <ElegantCard
@@ -97,12 +97,12 @@ function DayMatchRow({ dayName, matches, roundName }) {
                           </span>
                           {/* Floating Time for reference */}
                           <div className="absolute top-2 right-2 text-[10px] text-muted-foreground/50 font-mono">
-                            {time}
+                            <EventTime value={match.date} />
                           </div>
                         </div>
                       ) : (
                         <span className="text-2xl font-bold text-foreground font-mono tracking-tight block">
-                          {time}
+                          <EventTime value={match.date} />
                         </span>
                       )}
                     </div>
@@ -179,6 +179,7 @@ function DayMatchRow({ dayName, matches, roundName }) {
 }
 
 export default function NextMatchesCard() {
+  const timeZone = useViewerTimeZone();
   const { data, loading } = useApiData('/api/dashboard/next-round');
   const nextRound = data?.nextRound;
 
@@ -200,34 +201,21 @@ export default function NextMatchesCard() {
 
   // Group matches by day
   const matchesByDay = nextRound.matches.reduce((acc, match) => {
-    const date = match.date ? new Date(match.date) : new Date();
-    const dateKey = date.toLocaleDateString('es-ES', { timeZone: 'Europe/Madrid' }); // Grouping key
-
-    if (!acc[dateKey]) {
-      acc[dateKey] = {
-        date: date,
-        matches: [],
-      };
-    }
-    acc[dateKey].matches.push(match);
+    const day = formatEventInstant(match.date, timeZone, 'day') || 'Fecha por confirmar';
+    (acc[day] ??= []).push(match);
     return acc;
   }, {});
 
-  const dayGroups = Object.values(matchesByDay);
+  const dayGroups = Object.entries(matchesByDay);
 
   return (
     <div className="w-full flex flex-col gap-8">
-      {dayGroups.map((group, groupIdx) => {
-        const dayName = group.date.toLocaleDateString('es-ES', {
-          weekday: 'long',
-          day: 'numeric',
-          month: 'long',
-        });
+      {dayGroups.map(([dayName, matches]) => {
         return (
           <DayMatchRow
-            key={groupIdx}
+            key={dayName}
             dayName={dayName}
-            matches={group.matches}
+            matches={matches}
             roundName={nextRound.round_name}
           />
         );

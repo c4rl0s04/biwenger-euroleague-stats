@@ -12,13 +12,8 @@ import {
   compareTransferValue,
   type TransferValueAssessment,
 } from '@/features/home/formatters/transfer-value';
+import EventTime from '@/components/ui/EventTime';
 import HomeManagerAvatar from './HomeManagerAvatar';
-
-const hourFormatter = new Intl.DateTimeFormat('es-ES', {
-  hour: '2-digit',
-  minute: '2-digit',
-  timeZone: 'Europe/Madrid',
-});
 
 const assessmentLabels: Record<TransferValueAssessment, string> = {
   saving: 'Ahorro',
@@ -115,9 +110,7 @@ export default function TransferActivityCard({
               <Link href={`/player/${transfer.player.id}`} prefetch>
                 {transfer.player.name}
               </Link>
-              <time dateTime={transfer.occurredAt}>
-                {hourFormatter.format(new Date(transfer.occurredAt))}
-              </time>
+              <EventTime value={transfer.occurredAt} />
             </div>
             <span className="mobile-home-transfer-price-label">Operación</span>
             <strong className="mobile-home-transfer-price">

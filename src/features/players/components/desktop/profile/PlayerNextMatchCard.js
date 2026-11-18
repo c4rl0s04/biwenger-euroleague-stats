@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { formatMatchDate, formatMatchTime } from '@/lib/utils/date';
+import EventTime from '@/components/ui/EventTime';
 import { CalendarClock, MapPin } from 'lucide-react';
 import { ElegantCard } from '@/components/ui';
 
@@ -29,10 +29,6 @@ export default function PlayerNextMatchCard({ nextMatch, playerTeam, className =
 
   const playerTeamImg = isHome ? nextMatch.home_img : nextMatch.away_img;
   const playerTeamId = isHome ? nextMatch.home_id : nextMatch.away_id;
-
-  // Format date and time using standardized utility
-  const dateStr = formatMatchDate(nextMatch.date);
-  const timeStr = formatMatchTime(nextMatch.date);
 
   return (
     <ElegantCard
@@ -123,10 +119,10 @@ export default function PlayerNextMatchCard({ nextMatch, playerTeam, className =
         <div className="flex flex-col items-center mt-6 pt-5 border-t border-white/10 relative">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-px bg-orange-500/50" />
           <div className="text-3xl font-black text-white tracking-tighter tabular-nums drop-shadow-lg leading-none mb-1">
-            {timeStr}
+            <EventTime value={nextMatch.date} />
           </div>
           <div className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-widest">
-            {dateStr}
+            <EventTime value={nextMatch.date} format="day" />
           </div>
         </div>
       </div>

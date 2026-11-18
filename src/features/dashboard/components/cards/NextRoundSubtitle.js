@@ -1,5 +1,6 @@
 'use client';
 
+import EventTime from '@/components/ui/EventTime';
 import { useApiData } from '@/lib/hooks/useApiData';
 
 export default function NextRoundSubtitle() {
@@ -18,18 +19,10 @@ export default function NextRoundSubtitle() {
   const now = new Date();
   const hasStarted = now > startDate;
 
-  const dateStr = startDate.toLocaleDateString('es-ES', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-
   return (
     <span className="flex items-center gap-2">
       <span>
-        {nextRound.round_name} • {dateStr}
+        {nextRound.round_name} • <EventTime value={nextRound.start_date} format="fullDateTime" />
       </span>
       {hasStarted && (
         <span className="px-3 py-1 text-sm font-bold bg-green-500/10 text-green-500 rounded-full border border-green-500/20 ml-2">
