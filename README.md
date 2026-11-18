@@ -1,47 +1,38 @@
 # Biwenger Stats
 
-Biwenger Stats turns private Biwenger EuroLeague leagues into a place to follow your squad,
-compare managers, and make better-informed fantasy decisions. It combines fantasy league history
-with official EuroLeague results and player data.
+**See where you gained points, how your squad’s value changed, and where your rivals are pulling ahead.**
 
-![Biwenger Stats desktop dashboard with squad and league metrics from a synthetic league](docs/_assets/dashboard-desktop.png)
+Biwenger Stats brings fantasy league history and official EuroLeague statistics together for private
+Biwenger leagues.
+
+![Biwenger Stats desktop dashboard showing the season and squad value alongside a mobile comparison showing the gap between two managers](docs/_assets/product-showcase.webp)
+
+_Screens shown with synthetic league data._ [Desktop dashboard](docs/_assets/dashboard-desktop.png) ·
+[Mobile comparison](docs/_assets/compare-mobile.png)
+
+In this example, Dani leads by 34 points. Round 3 accounts for 32 points of that gap.
 
 ## What you can do
 
-- **Follow your league.** Explore standings, round results, captain performance, tournaments, and
-  season trends.
-- **Compare managers and players.** See where a rival gains points, browse player form and value,
-  and explore official match detail.
-- **Manage your squad and market.** Review ownership, transfers, and valuations. A linked personal
-  Biwenger account enables supported lineup and market actions.
-- **Explore beyond the standings.** Try the Hoopgrid trivia game, season predictions, and an
-  optional AI assistant grounded in league data.
+- **Understand your season.** Track your position, recent round scores, captain performance, and
+  squad value over time.
+- **Compare with a rival.** See how your scores diverged and which rounds account for the gap.
+- **Make a squad decision.** Check player form and market value before changing your lineup or
+  placing a bid with a linked Biwenger account.
 
-<details>
-<summary>See the mobile manager comparison</summary>
+[Explore all features](docs/product/README.md)
 
-![Mobile comparison between two managers in a synthetic league](docs/_assets/compare-mobile.png)
+## From league data to fantasy decisions
 
-</details>
+[![Biwenger fantasy data and official EuroLeague stats feed scheduled ingestion in GitHub Actions. Supabase PostgreSQL stores the season history, and the Next.js app on Vercel serves analytics. Biwenger account actions, Groq or OpenAI, Sentry, and Docker Compose support the product.](docs/_assets/stack.png)](docs/_assets/stack.png)
 
-## Stack
-
-![GitHub Actions syncs Biwenger and EuroLeague into PostgreSQL. Next.js on Vercel reads the database and sends account actions to Biwenger. Sync and app errors can reach Sentry.](docs/_assets/stack.png)
-
-GitHub Actions runs scheduled ingestion. PostgreSQL holds the synchronized history, while the
-Next.js app serves it through authenticated views and uses a manager's linked Biwenger account
-for supported writes. The screenshots use synthetic league data.
+Scheduled jobs fetch and validate data from Biwenger and EuroLeague, then store it by season in
+PostgreSQL. The Next.js app queries that history on the server to serve dashboards, comparisons, and
+squad and market views.
 
 ## Explore the repository
 
-- [How it works](docs/architecture/system-overview.md) — a five-minute walkthrough of the app
-  and its data.
-- [Documentation](docs/README.md) — product, architecture, operations, and contracts.
-- [Local development](docs/getting-started/local-development.md) — prerequisites, database setup,
-  and the first login.
-- [Contributing](docs/contributing/README.md) — workflow and focused checks. Coding agents start
-  with [AGENTS.md](AGENTS.md).
-
-Report security issues privately. Keep credentials and private league data out of issues and commits.
-
-[MIT License](LICENSE)
+- [How it works](docs/architecture/system-overview.md) — architecture and the path of a standings
+  read and a personal bid.
+- [Product map](docs/product/README.md) — features and screens by domain.
+- [Local development](docs/getting-started/local-development.md) — setup, startup, and first login.
