@@ -189,7 +189,7 @@ function BiwengerSettings({ initialLinked }) {
                   {session?.user?.email && (
                     <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2 text-[10px] font-bold text-zinc-600 uppercase tracking-tighter pointer-events-none">
                       <ShieldCheck size={14} />
-                      Email Guardado
+                      Email sugerido
                     </div>
                   )}
                 </div>

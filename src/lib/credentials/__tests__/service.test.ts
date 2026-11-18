@@ -13,7 +13,6 @@ import type {
 
 class MemoryRepository implements CredentialRecordRepository {
   encrypted = new Map<string, StoredCredential>();
-  emails = new Map<string, string>();
   failNextReplace = false;
 
   async hasEncrypted(userId: string) {
@@ -22,13 +21,12 @@ class MemoryRepository implements CredentialRecordRepository {
   async findEncrypted(userId: string) {
     return this.encrypted.get(userId) ?? null;
   }
-  async replaceCredential(userId: string, envelope: CredentialEnvelope, email?: string) {
+  async replaceCredential(userId: string, envelope: CredentialEnvelope) {
     if (this.failNextReplace) {
       this.failNextReplace = false;
       throw new Error('synthetic storage failure');
     }
     this.encrypted.set(userId, { userId, ...envelope });
-    if (email) this.emails.set(userId, email);
   }
   async deleteCredential(userId: string) {
     this.encrypted.delete(userId);
@@ -58,7 +56,7 @@ describe('server-only Biwenger credential boundary', () => {
   it('stores only an encrypted representation and exposes only status or callback-scoped plaintext', async () => {
     const service = create();
     const credential = 'synthetic-service-token';
-    await service.storeCredential({ userId: 'actor', credential, email: 'actor@example.com' });
+    await service.storeCredential({ userId: 'actor', credential });
 
     const stored = repository.encrypted.get('actor');
     expect(stored).toBeDefined();

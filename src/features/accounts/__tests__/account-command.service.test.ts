@@ -1,3 +1,8 @@
+vi.mock('@/lib/config', async (importOriginal) => {
+  const { CONFIG } = await importOriginal<typeof import('@/lib/config')>();
+  return { CONFIG: { ...CONFIG, API: { ...CONFIG.API, LEAGUE_ID: '9' } } };
+});
+
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import bcrypt from 'bcryptjs';
 import {
@@ -96,61 +101,106 @@ describe('AccountCommandService', () => {
     });
   });
 
+  function membershipResponse(leagueId: number, managerId: number) {
+    return Response.json({
+      status: 200,
+      data: { leagues: [{ id: leagueId, user: { id: managerId } }] },
+    });
+  }
+
   describe('linkBiwenger', () => {
     it('successfully links account when credentials are valid', async () => {
       const canaryToken = 'biwenger-auth-canary-token';
       mockRepo.getUserById.mockResolvedValue({
-        id: 'user-1',
+        id: '42',
         name: 'Manager 1',
         email: 'user1@example.com',
       });
 
-      mockFetch.mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: async () => ({ token: canaryToken }),
-      });
+      mockFetch
+        .mockResolvedValueOnce(Response.json({ token: canaryToken }))
+        .mockResolvedValueOnce(membershipResponse(9, 42));
 
-      const result = await service.linkBiwenger('user-1', {
+      const result = await service.linkBiwenger('42', {
         password: 'validBiwengerPassword',
       });
 
+      expect(mockFetch).toHaveBeenNthCalledWith(
+        2,
+        expect.stringMatching(/\/account$/),
+        expect.objectContaining({
+          method: 'GET',
+          cache: 'no-store',
+          headers: expect.objectContaining({
+            Authorization: 'Bearer ' + canaryToken,
+            'X-League': '9',
+            'X-User': '42',
+          }),
+        })
+      );
       expect(result).toEqual({
         message: '¡Cuenta vinculada con éxito! Tus datos se sincronizarán de forma segura.',
         status: 'linked',
         biwengerLinked: true,
       });
-      expect(mockRepo.storeBiwengerCredential).toHaveBeenCalledWith(
-        'user-1',
-        canaryToken,
-        'user1@example.com'
-      );
+      expect(mockRepo.storeBiwengerCredential).toHaveBeenCalledWith('42', canaryToken);
     });
 
     it('uses provided email override when specified', async () => {
       const canaryToken = 'biwenger-auth-canary-token-2';
       mockRepo.getUserById.mockResolvedValue({
-        id: 'user-1',
+        id: '42',
         name: 'Manager 1',
         email: 'stored@example.com',
       });
 
-      mockFetch.mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: async () => ({ token: canaryToken }),
-      });
+      mockFetch
+        .mockResolvedValueOnce(Response.json({ token: canaryToken }))
+        .mockResolvedValueOnce(membershipResponse(9, 42));
 
-      await service.linkBiwenger('user-1', {
+      await service.linkBiwenger('42', {
         password: 'validPassword',
         email: 'override@example.com',
       });
-
-      expect(mockRepo.storeBiwengerCredential).toHaveBeenCalledWith(
-        'user-1',
-        canaryToken,
-        'override@example.com'
+      expect(mockFetch.mock.calls[0][1].body).toBe(
+        JSON.stringify({ email: 'override@example.com', password: 'validPassword' })
       );
+
+      expect(mockRepo.storeBiwengerCredential).toHaveBeenCalledWith('42', canaryToken);
+    });
+
+    it.each([
+      { label: 'different manager', leagueId: 9, managerId: 43 },
+      { label: 'different league', leagueId: 10, managerId: 42 },
+    ])(
+      'rejects a $label and preserves the previous linked credential',
+      async ({ leagueId, managerId }) => {
+        mockRepo.getUserById.mockResolvedValue({ id: '42', email: 'u@example.com' });
+        mockFetch
+          .mockResolvedValueOnce(Response.json({ token: 'new-fixture-token' }))
+          .mockResolvedValueOnce(membershipResponse(leagueId, managerId));
+
+        await expect(
+          service.linkBiwenger('42', { password: 'fixture-password' })
+        ).rejects.toMatchObject({
+          statusCode: 403,
+        });
+        expect(mockRepo.storeBiwengerCredential).not.toHaveBeenCalled();
+      }
+    );
+
+    it('rejects malformed membership responses before storage', async () => {
+      mockRepo.getUserById.mockResolvedValue({ id: '42', email: 'u@example.com' });
+      mockFetch
+        .mockResolvedValueOnce(Response.json({ token: 'new-fixture-token' }))
+        .mockResolvedValueOnce(Response.json({ status: 200, data: { leagues: [{ id: 9 }] } }));
+
+      await expect(
+        service.linkBiwenger('42', { password: 'fixture-password' })
+      ).rejects.toMatchObject({
+        statusCode: 502,
+      });
+      expect(mockRepo.storeBiwengerCredential).not.toHaveBeenCalled();
     });
 
     it('throws AccountNotFoundError when user is not found', async () => {
@@ -167,13 +217,13 @@ describe('AccountCommandService', () => {
 
     it('throws AccountValidationError when neither user nor input provides email', async () => {
       mockRepo.getUserById.mockResolvedValue({
-        id: 'user-1',
+        id: '42',
         name: 'Manager 1',
         email: null,
       });
 
       await expect(
-        service.linkBiwenger('user-1', {
+        service.linkBiwenger('42', {
           password: 'validPassword',
         })
       ).rejects.toThrow(AccountValidationError);
@@ -183,7 +233,7 @@ describe('AccountCommandService', () => {
     it('throws AccountProviderAuthError on 401 unauthorized from Biwenger without leaking tokens', async () => {
       const canaryToken = 'sensitive-leak-token';
       mockRepo.getUserById.mockResolvedValue({
-        id: 'user-1',
+        id: '42',
         email: 'u@example.com',
       });
 
@@ -195,7 +245,7 @@ describe('AccountCommandService', () => {
         json: async () => ({ token: canaryToken, message: `Bad token: ${canaryToken}` }),
       });
 
-      await expect(service.linkBiwenger('user-1', { password: 'wrongPassword' })).rejects.toThrow(
+      await expect(service.linkBiwenger('42', { password: 'wrongPassword' })).rejects.toThrow(
         AccountProviderAuthError
       );
 
@@ -206,7 +256,7 @@ describe('AccountCommandService', () => {
 
     it('throws AccountProviderAuthError on 500 error from Biwenger', async () => {
       mockRepo.getUserById.mockResolvedValue({
-        id: 'user-1',
+        id: '42',
         email: 'u@example.com',
       });
 
@@ -217,7 +267,7 @@ describe('AccountCommandService', () => {
       });
 
       try {
-        await service.linkBiwenger('user-1', { password: 'somePassword' });
+        await service.linkBiwenger('42', { password: 'somePassword' });
         expect.unreachable('Should have thrown AccountProviderAuthError');
       } catch (err: any) {
         expect(err).toBeInstanceOf(AccountProviderAuthError);
@@ -227,7 +277,7 @@ describe('AccountCommandService', () => {
 
     it('throws AccountProviderAuthError when Biwenger returns 200 but no token', async () => {
       mockRepo.getUserById.mockResolvedValue({
-        id: 'user-1',
+        id: '42',
         email: 'u@example.com',
       });
 
@@ -237,7 +287,7 @@ describe('AccountCommandService', () => {
         json: async () => ({ otherField: 123 }),
       });
 
-      await expect(service.linkBiwenger('user-1', { password: 'somePassword' })).rejects.toThrow(
+      await expect(service.linkBiwenger('42', { password: 'somePassword' })).rejects.toThrow(
         AccountProviderAuthError
       );
     });
@@ -245,15 +295,13 @@ describe('AccountCommandService', () => {
     it('throws AccountStorageError when credential storage fails without leaking canary', async () => {
       const canaryToken = 'secret-canary-token';
       mockRepo.getUserById.mockResolvedValue({
-        id: 'user-1',
+        id: '42',
         email: 'u@example.com',
       });
 
-      mockFetch.mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: async () => ({ token: canaryToken }),
-      });
+      mockFetch
+        .mockResolvedValueOnce(Response.json({ token: canaryToken }))
+        .mockResolvedValueOnce(membershipResponse(9, 42));
 
       mockRepo.storeBiwengerCredential.mockRejectedValue(
         new Error(`storage write failure with payload ${canaryToken}`)
@@ -261,7 +309,7 @@ describe('AccountCommandService', () => {
 
       const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
-      await expect(service.linkBiwenger('user-1', { password: 'somePassword' })).rejects.toThrow(
+      await expect(service.linkBiwenger('42', { password: 'somePassword' })).rejects.toThrow(
         AccountStorageError
       );
 

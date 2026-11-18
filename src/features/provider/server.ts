@@ -7,6 +7,8 @@ export {
   type ProviderClientConfig,
 } from './server/client';
 
+export { verifyBiwengerManager } from './server/account-membership';
+
 export { executeUserProviderCommand, executeUserProviderQuery } from './server/credentials';
 
 export {

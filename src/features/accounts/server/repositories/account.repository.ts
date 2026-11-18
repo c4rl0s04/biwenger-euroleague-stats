@@ -38,11 +38,10 @@ export class AccountRepository {
     await pgClient.query('UPDATE users SET password = $1 WHERE id = $2', [passwordHash, userId]);
   }
 
-  async storeBiwengerCredential(userId: string, token: string, email?: string): Promise<void> {
+  async storeBiwengerCredential(userId: string, token: string): Promise<void> {
     await biwengerCredentials.storeCredential({
       userId,
       credential: token,
-      email,
     });
   }
 }
