@@ -12,9 +12,10 @@ status: active
 Keep assets referenced by maintained documentation. Use descriptive lowercase filenames, optimize
 binary files before committing them, and prefer Mermaid for simple flows that need no export.
 
-- [README data flow source](stack.html) and [export](stack.png) show the route from league data to analytics.
-  Render the `main` element at desktop width after editing.
-- [Detailed architecture source](stack-detail.html) and [export](stack-detail.png) show runtime and automation
-  connections. Render the sheet with the legend when updating the export.
-- [Desktop dashboard](dashboard-desktop.png) and [mobile comparison](compare-mobile.png) use a disposable
-  Playwright league. The [product composition](product-showcase.webp) places those captures over an illustrated arena background.
+- [README architecture source](stack.html) produces the [desktop](stack.png) and
+  [mobile](stack-mobile.png) exports. Render its `main` element at viewport widths of 1120 px and 480 px.
+- [Detailed architecture source](stack-detail.html) and [export](stack-detail.png) show runtime and
+  automation connections. Render the sheet with the legend when updating the export.
+- The [dashboard](dashboard-desktop.png), [comparison](compare-mobile.png), and
+  [market trends](market-trends.webp) use disposable Playwright league data. The market image comes
+  from the [populated market snapshot](../../tests/e2e/market-populated.spec.ts-snapshots/market-populated-trends-chart-desktop-1440-darwin.png).
