@@ -6,7 +6,7 @@
   <p><a href="#product-tour">Product tour</a> · <a href="#how-the-stack-fits-together">Architecture</a> · <a href="docs/README.md">Documentation</a></p>
 </div>
 
-[![Biwenger Stats dashboard with season points, squad value, captain performance, and the last five rounds](docs/_assets/dashboard-desktop.png)](docs/_assets/dashboard-desktop.png)
+[![Biwenger Stats dashboard with season points, squad value, captain performance, and recent rounds](docs/_assets/dashboard-desktop.png)](docs/_assets/dashboard-desktop.png)
 
 ## Product tour
 
@@ -25,7 +25,7 @@ before making a move with a linked Biwenger account.
 
 [![Market volume chart with selectable time windows and a 90-day total](docs/_assets/market-trends.webp)](docs/_assets/market-trends.webp)
 
-_Screens use synthetic league data._ [Explore all features](docs/product/README.md)
+_The market chart uses synthetic league data._ [Explore all features](docs/product/README.md)
 
 ## How the stack fits together
 
