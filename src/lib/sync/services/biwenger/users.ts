@@ -1,9 +1,21 @@
+import { z } from 'zod';
 import { fetchLeague } from '../../../api/biwenger-client';
 import { prepareUserMutations, type UserMutations } from '../../../db/mutations/users';
 import type { SyncManager } from '../../manager';
 
+const member = z.object({
+  id: z.union([z.int().positive(), z.string().regex(/^[1-9]\d*$/)]),
+  name: z.string().refine((name) => name.trim().length > 0 && !name.includes('\0')),
+  icon: z
+    .string()
+    .refine((icon) => !icon.includes('\0'))
+    .nullish(),
+});
+
+const leagueStandings = z.object({ data: z.object({ standings: z.array(member).min(1) }) });
+
 export interface UsersDependencies {
-  fetchLeague?: () => Promise<any>;
+  fetchLeague?: () => Promise<unknown>;
   prepareMutations?: (db: unknown, options: { seasonId: string }) => UserMutations;
 }
 
@@ -25,8 +37,9 @@ export async function syncBiwengerUsers(
   const mutationsFactory = dependencies.prepareMutations || prepareUserMutations;
 
   try {
-    const league = await getLeague();
-    const standings = league.data.standings;
+    const league = leagueStandings.safeParse(await getLeague());
+    if (!league.success) throw new Error('Biwenger returned empty or invalid league standings.');
+    const { standings } = league.data.data;
 
     const mutations = mutationsFactory(db as any, { seasonId });
     const activeUserIds: string[] = [];
@@ -45,7 +58,7 @@ export async function syncBiwengerUsers(
       summary: 'Biwenger league users synchronized.',
       counts: { users: standings.length },
     };
-  } catch (err: any) {
+  } catch (err) {
     throw new Error('Failed to synchronize Biwenger users.', { cause: err });
   }
 }
