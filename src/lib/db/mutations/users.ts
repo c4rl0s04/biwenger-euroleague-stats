@@ -12,7 +12,7 @@ export type DbClient =
 // INTERFACES
 // ==========================================
 
-export interface UpdatePlayerOwnerParams {
+interface SeasonOwnership {
   owner_id: string | null;
   player_id: number;
 }
@@ -53,12 +53,9 @@ export interface UpsertUserRoundParams {
 }
 
 export interface UserMutations {
-  resetAllOwners: () => Promise<void>;
-  resetActiveOwners: () => Promise<void>;
-  resetUserSquad: (userId: string) => Promise<void>;
   getAllUsers: () => Promise<{ all: () => any[]; iterate: () => any[] }>;
   markSeasonUsersInactiveExcept: (activeUserIds: string[]) => Promise<void>;
-  updatePlayerOwner: (params: UpdatePlayerOwnerParams) => Promise<void>;
+  replaceSeasonOwnership: (ownership: SeasonOwnership[]) => Promise<void>;
   updateUserColor: (colorIndex: number, userId: string) => Promise<void>;
   upsertUser: (params: UpsertUserParams) => Promise<void>;
   insertInitialSquad: (params: InsertInitialSquadParams) => Promise<void>;
@@ -102,31 +99,6 @@ export function prepareUserMutations(
   const seasonId = options.seasonId ?? CONFIG.SEASON.ID;
 
   return {
-    resetAllOwners: async () => {
-      await db.query(
-        'UPDATE player_seasons SET owner_id = NULL, updated_at = NOW() WHERE season_id = $1',
-        [seasonId]
-      );
-    },
-
-    resetActiveOwners: async () => {
-      await db.query(
-        `
-        UPDATE player_seasons
-        SET owner_id = NULL, updated_at = NOW()
-        WHERE season_id = $1
-      `,
-        [seasonId]
-      );
-    },
-
-    resetUserSquad: async (userId: string) => {
-      await db.query(
-        'UPDATE player_seasons SET owner_id = NULL, updated_at = NOW() WHERE season_id = $1 AND owner_id = $2',
-        [seasonId, userId]
-      );
-    },
-
     getAllUsers: async () => {
       const res = await db.query(
         `
@@ -172,16 +144,25 @@ export function prepareUserMutations(
       );
     },
 
-    updatePlayerOwner: async (params: UpdatePlayerOwnerParams) => {
+    replaceSeasonOwnership: async (ownership: SeasonOwnership[]) => {
+      // Assigned and cleared rows are disjoint, so one statement replaces ownership atomically.
       await db.query(
-        `
-        INSERT INTO player_seasons (season_id, player_id, owner_id, updated_at)
-        VALUES ($1, $2, $3, NOW())
-        ON CONFLICT(season_id, player_id) DO UPDATE SET
-          owner_id = excluded.owner_id,
-          updated_at = NOW()
-      `,
-        [seasonId, params.player_id, params.owner_id]
+        `WITH incoming AS (
+           SELECT player_id, owner_id
+           FROM jsonb_to_recordset($2::jsonb) AS assignment(player_id integer, owner_id text)
+         ), assigned AS (
+           INSERT INTO player_seasons (season_id, player_id, owner_id, updated_at)
+           SELECT $1, player_id, owner_id, NOW() FROM incoming
+           ON CONFLICT (season_id, player_id) DO UPDATE SET
+             owner_id = EXCLUDED.owner_id,
+             updated_at = NOW()
+           WHERE player_seasons.owner_id IS DISTINCT FROM EXCLUDED.owner_id
+         )
+         UPDATE player_seasons AS existing
+         SET owner_id = NULL, updated_at = NOW()
+         WHERE existing.season_id = $1 AND existing.owner_id IS NOT NULL
+           AND NOT EXISTS (SELECT 1 FROM incoming WHERE incoming.player_id = existing.player_id)`,
+        [seasonId, JSON.stringify(ownership)]
       );
     },
 
