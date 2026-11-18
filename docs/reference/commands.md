@@ -49,13 +49,12 @@ See the [data sync runbook](../operations/data-sync.md) and [EuroLeague official
 
 ## Tests
 
-| Command                             | Behavior                                                                       |
-| ----------------------------------- | ------------------------------------------------------------------------------ |
-| `npm test`                          | Start Vitest in its normal interactive/watch behavior.                         |
-| `npm run test:run`                  | Run the full Vitest suite once.                                                |
-| `npm run test:db:local`             | Verify fresh database construction from scratch against disposable PostgreSQL. |
-| `npm run test:e2e:local`            | Run deterministic browser fixture tests with a disposable PostgreSQL database. |
-| `npm run test:official-integration` | Run two full syncs against an explicitly disposable local PostgreSQL database. |
+| Command                  | Behavior                                                                       |
+| ------------------------ | ------------------------------------------------------------------------------ |
+| `npm test`               | Start Vitest in its normal interactive/watch behavior.                         |
+| `npm run test:run`       | Run the full Vitest suite once.                                                |
+| `npm run test:db:local`  | Verify fresh database construction from scratch against disposable PostgreSQL. |
+| `npm run test:e2e:local` | Run deterministic browser fixture tests with a disposable PostgreSQL database. |
 
 Use a focused Vitest path or name filter during development, then run the complete suite before
 integration. Database-backed tests require the explicit safety configuration described in

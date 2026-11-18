@@ -61,3 +61,5 @@ changes.
 
 Run `npm run docs:check` locally. Fix the reported frontmatter, relative path, missing asset, or
 formatting error. External URL availability is not part of the blocking local-link check.
+
+For a scheduled ingestion failure, follow [sync diagnosis](data-sync.md#diagnose-a-failed-scheduled-run).

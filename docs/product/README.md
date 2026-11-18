@@ -33,22 +33,22 @@ behavior to its page entries, internal APIs, services, data access, and tests.
 
 ## Page inventory
 
-The App Router currently exposes 24 page entry files:
+These are the main user-facing routes by domain. Several also have nested sections.
 
-| Domain                      | Routes                                                           |
-| --------------------------- | ---------------------------------------------------------------- |
-| Home and dashboard          | `/`, `/dashboard`                                                |
-| Players and teams           | `/players`, `/player/[id]`, `/team/[id]`                         |
-| Competition                 | `/rounds`, `/schedule`, `/matches`, `/standings`, `/compare`     |
-| Squad and market            | `/lineup`, `/market`                                             |
-| Predictions and tournaments | `/predictions`, `/playoffs`, `/tournaments`, `/tournaments/[id]` |
-| Assistant                   | `/assistant`                                                     |
-| Hoopgrid                    | `/hoopgrid`, `/hoopgrid-cheatsheet`, `/test-hoopgrid`            |
-| Accounts                    | `/login`, `/settings`, `/user/[id]`                              |
-| Season review               | `/season-review`                                                 |
+| Domain                      | Routes                                                                                  |
+| --------------------------- | --------------------------------------------------------------------------------------- |
+| Home and dashboard          | `/`, `/dashboard`                                                                       |
+| Players and teams           | `/players`, `/player/[id]`, `/team/[id]`                                                |
+| Competition                 | `/rounds`, `/schedule`, `/matches`, `/standings`, `/compare`                            |
+| Squad and market            | `/lineup`, `/market`, `/personal/bids`                                                  |
+| Predictions and tournaments | `/predictions`, `/season-predictions`, `/playoffs`, `/tournaments`, `/tournaments/[id]` |
+| Assistant                   | `/assistant`                                                                            |
+| Hoopgrid                    | `/hoopgrid`, `/hoopgrid-cheatsheet`, `/test-hoopgrid`                                   |
+| Accounts                    | `/login`, `/settings`, `/user/[id]`                                                     |
+| Season review               | `/season-review`                                                                        |
 
-`/test-hoopgrid` is an internal diagnostic page, not a supported end-user destination. All routes
-except the login flow are intended for authenticated use under the current middleware policy.
+`/test-hoopgrid` is an internal diagnostic page, not a supported end-user destination. The public landing page, login, install, and offline routes support public access. See
+[authentication and security](../architecture/authentication-and-security.md) for route protection.
 
 The route source is [`src/app`](../../src/app). Endpoint-level details live in the
 [internal API reference](../reference/internal-api.md).

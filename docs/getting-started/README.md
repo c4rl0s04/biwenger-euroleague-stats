@@ -10,10 +10,8 @@ status: active
 
 # Getting started
 
-1. Follow [local development](local-development.md) to install dependencies and start the app.
-2. Use [configuration](configuration.md) to choose a database and supply credentials safely.
-3. Run the initial synchronization through the [data sync runbook](../operations/data-sync.md).
-4. Read the [product map](../product/README.md) to understand the available application areas.
+- [Local development](local-development.md) walks through a fresh setup, league load, and first login.
+- [Configuration](configuration.md) explains database, provider, and optional feature settings.
+- [Synthetic browser environment](../contributing/testing.md#browser-verification) exercises login and feature pages without provider credentials.
 
-If setup fails, consult [troubleshooting](../operations/troubleshooting.md) before changing database
-or sync state.
+If setup fails, see [troubleshooting](../operations/troubleshooting.md).

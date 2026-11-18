@@ -4,10 +4,18 @@ description: Authoritative remaining-task queue, merged-scope evidence and compl
 audience:
   - maintainer
   - agent
-status: active
+status: deprecated
 ---
 
 # Architecture migration master tracker
+
+> Historical record. For current guidance, see the documentation index. Open work is tracked in
+> [GitHub Issues](https://github.com/c4rl0s04/biwenger-euroleague-stats/issues).
+>
+> Later integration evidence includes the [Season Predictions pilot](https://github.com/c4rl0s04/biwenger-euroleague-stats/pull/75),
+> [timed submissions](https://github.com/c4rl0s04/biwenger-euroleague-stats/pull/84), and
+> [presentation ownership closure](https://github.com/c4rl0s04/biwenger-euroleague-stats/pull/109).
+> The queue and status labels below are preserved as of their original checkpoints.
 
 Last reconciled: 2026-09-24 against fetched `origin/main`
 `8dbdce9ca56db0faf40c7a94d58fc94d6c8c9720`.

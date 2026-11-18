@@ -5,10 +5,13 @@ audience:
   - maintainer
   - contributor
   - agent
-status: active
+status: deprecated
 ---
 
 # Migration overview
+
+> Historical record. For current guidance, see the documentation index. Open work is tracked in
+> [GitHub Issues](https://github.com/c4rl0s04/biwenger-euroleague-stats/issues).
 
 The architecture implementation and ownership follow-ups are integrated through PR #58
 at `d6d268ca`. Task 26 regression evidence and Task 27 exact-merge CI, deployment and smoke
