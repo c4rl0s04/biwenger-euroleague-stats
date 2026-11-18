@@ -50,7 +50,8 @@ test('migrated feature screens preserve fixture data and layout', async ({ page 
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)
   ).toBe(true);
-  await page.goto('/player/99101');
+  await page.locator('a[href="/player/99101"]').first().click();
+  await expect(page).toHaveURL(/\/player\/99101$/);
   await expect(
     page.getByRole('heading', { name: 'Fixture Guard', exact: true }).first()
   ).toBeVisible();

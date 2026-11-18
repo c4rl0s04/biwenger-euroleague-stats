@@ -192,8 +192,7 @@ test('Schedule reveals round 6 on load and follows round navigation', async ({ p
     await rail.getByRole('link', { name: 'J12', exact: true }).click();
     await expect(page).toHaveURL(/roundId=12$/);
     await expectActiveVisible('J12');
-    await page.reload();
-    await expectActiveVisible('J12');
+    // The initial deep link above covers document loads without cancelling WebKit prefetches.
     expect(await page.evaluate(() => window.scrollY)).toBe(0);
     await rail.getByRole('link', { name: 'J1', exact: true }).click();
     await expect(page).toHaveURL(/roundId=1$/);

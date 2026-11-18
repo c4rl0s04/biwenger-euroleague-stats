@@ -104,6 +104,30 @@ describe('official game reconciliation', () => {
     expect(client.query).toHaveBeenCalledWith('COMMIT');
   });
 
+  it.each([
+    { playByPlay: null, shots: [], preserved: 'official_play_by_play', replaced: 'official_shots' },
+    { playByPlay: [], shots: null, preserved: 'official_shots', replaced: 'official_play_by_play' },
+  ])('preserves $preserved and replaces $replaced for a finished game', async (feeds) => {
+    const { db, client } = database();
+    const mutations = prepareOfficialGameMutations(db, '2026-27');
+
+    await mutations.persistGameData({
+      gameCode: 1,
+      report: null,
+      metadata: null,
+      boxscore: [],
+      playByPlay: feeds.playByPlay,
+      shots: feeds.shots,
+      checksum: null,
+      finalized: true,
+    });
+
+    const sql = client.query.mock.calls.map(([statement]) => statement).join(' ');
+    expect(sql).not.toContain('DELETE FROM ' + feeds.preserved);
+    expect(sql).toContain('DELETE FROM ' + feeds.replaced);
+    expect(client.query).toHaveBeenCalledWith('COMMIT');
+  });
+
   it('upserts sporting fields into player_round_stats without overwriting Biwenger fantasy points', async () => {
     const { db, client } = database();
     const mutations = prepareOfficialGameMutations(db as any, '2026-27');

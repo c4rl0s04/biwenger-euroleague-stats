@@ -60,6 +60,15 @@ Season lifecycle scripts additionally accept `NEXT_SEASON_ID`, `NEXT_SEASON_NAME
 When `AI_PROVIDER` is unset, assistant routing prefers Groq if `GROQ_API_KEY` exists and otherwise
 selects OpenAI. Provider keys are server-only.
 
+## Observability
+
+- `SENTRY_DSN` configures error reporting for the application server, edge runtime, and standalone
+  sync when the workflow passes it. Keep it in deployment or workflow configuration.
+- `NEXT_PUBLIC_SENTRY_DSN` configures the browser and is also a fallback in the server and edge
+  configuration. Standalone sync reads `SENTRY_DSN`.
+
+See the [sync diagnosis procedure](../operations/data-sync.md#diagnose-a-failed-scheduled-run).
+
 ## Explicit safety and diagnostic flags
 
 These flags are not normal persistent configuration:

@@ -10,7 +10,7 @@ status: active
 
 # Internal API reference
 
-The repository contains 75 route-handler files under [`src/app/api`](../../src/app/api). This is an
+The repository contains 84 route-handler files under [`src/app/api`](../../src/app/api). This is an
 inventory, not a promise that all endpoints share identical authentication, parameters, cache
 headers, or response envelopes. The route file and its tests remain the exact contract.
 
@@ -29,7 +29,7 @@ All routes below use GET.
 
 | Routes                                                                                                                   |
 | ------------------------------------------------------------------------------------------------------------------------ |
-| `/api/landing-stats`, `/api/news`, `/api/search`, `/api/league-average`                                                  |
+| `/api/landing-stats`, `/api/news`, `/api/search`, `/api/league-average`, `/api/health`, `/api/home/activity`             |
 | `/api/dashboard/birthdays`, `/api/dashboard/captain-stats`, `/api/dashboard/captain-suggest`                             |
 | `/api/dashboard/home-away`, `/api/dashboard/ideal-lineup`, `/api/dashboard/leader-gap`                                   |
 | `/api/dashboard/market-opportunities`, `/api/dashboard/mvps`, `/api/dashboard/next-round`                                |
@@ -41,7 +41,7 @@ All routes below use GET.
 | --------- | ------------------------------------------------------------------------------------- |
 | GET       | `/api/player/rounds`, `/api/player/squad`, `/api/player/stats`, `/api/player/streaks` |
 | GET       | `/api/players/[id]/stats`, `/api/team/[id]`, `/api/stats/leaders`, `/api/users`       |
-| GET       | `/api/compare/data`, `/api/compare/data/lite`                                         |
+| GET       | `/api/compare/data`, `/api/compare/data/lite`, `/api/users/lineup/workspace`          |
 | GET, POST | `/api/users/lineup`                                                                   |
 | POST      | `/api/user/change-password`, `/api/user/link-biwenger`                                |
 
@@ -80,6 +80,17 @@ use a 15-second cache while live and a one-hour cache after finalization.
 
 Market mutation endpoints can change external Biwenger state and require a user-specific provider
 token in addition to normal application authorization.
+
+## Personal bidding and season predictions
+
+| Methods | Routes                                                  |
+| ------- | ------------------------------------------------------- |
+| GET     | `/api/personal/bids/count`, `/api/personal/bids/market` |
+| POST    | `/api/personal/bids/place`                              |
+| PUT     | `/api/season-predictions/submission`                    |
+
+See [personal bidding](../operations/personal-bidding.md) for access and provider behavior,
+and [season predictions](../operations/season-predictions.md) for the submission window.
 
 ## Hoopgrid
 

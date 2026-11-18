@@ -23,7 +23,7 @@ New or migrated domains follow [the feature architecture](../architecture/applic
 4. Keep domain components separate from domain-agnostic UI primitives.
 
 Unmigrated global queries/services/mutations remain supported. Their paths are compatibility
-locations, not the default for new domain code. See the [migration ledger](../architecture/migration-status.md).
+locations, not the default for new domain code. See [application layers](../architecture/application-layers.md).
 
 ## Sync pipeline
 

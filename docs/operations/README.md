@@ -25,13 +25,7 @@ status: active
 - [Season predictions](season-predictions.md) — deploy closed predictions and open a seven-day window.
 - [Season simulations](season-simulations.md) — calculate and publish complete-season Monte Carlo
   results.
-- [Season data audit](season-data-audit.md) — findings from the isolated season snapshot audit.
-- [Season data copy receipt](season-data-copy-receipt.md) — preparation receipt for the isolated season
-  copy.
-- [Season data integrity stabilization](season-data-integrity-stabilization.md) — multi-season database
-  stabilization, architectural audit, and safe migration runbook.
-- [Statistics normalization investigation](statistics-normalization-investigation.md) —
-  provider-independent statistics investigation and proposed contract.
+- [Historical audits and investigations](history.md) — point-in-time evidence.
 - [Troubleshooting](troubleshooting.md) — diagnose common application, database, and sync failures.
 
 Operational notes contain commands that can mutate databases or external Biwenger state. Confirm the

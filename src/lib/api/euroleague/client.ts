@@ -428,14 +428,18 @@ export class EuroleagueClient {
     });
   }
 
-  async getPlayByPlay(seasonYear: number, gameCode: number): Promise<EuroleaguePlayByPlayEvent[]> {
+  async getPlayByPlay(
+    seasonYear: number,
+    gameCode: number
+  ): Promise<EuroleaguePlayByPlayEvent[] | null> {
     const rows = await this.getRows(
       'play-by-play/game',
       { season: seasonYear, gamecode: gameCode },
       playByPlayRowSchema,
       true
     );
-    return (rows || []).map((row) => ({
+    if (rows === null) return null;
+    return rows.map((row) => ({
       gameCode,
       sequence: requiredNumber(row, 'TRUE_NUMBEROFPLAY'),
       providerPlayNumber: asNumber(row.NUMBEROFPLAY),
@@ -456,14 +460,15 @@ export class EuroleagueClient {
     }));
   }
 
-  async getShots(seasonYear: number, gameCode: number): Promise<EuroleagueShot[]> {
+  async getShots(seasonYear: number, gameCode: number): Promise<EuroleagueShot[] | null> {
     const rows = await this.getRows(
       'shot-data/game',
       { season: seasonYear, gamecode: gameCode },
       shotRowSchema,
       true
     );
-    return (rows || []).map((row) => ({
+    if (rows === null) return null;
+    return rows.map((row) => ({
       gameCode,
       annotationNumber: requiredNumber(row, 'NUM_ANOT'),
       teamCode: asString(row.TEAM),
