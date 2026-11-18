@@ -1,5 +1,5 @@
 import { prepareOfficialGameMutations } from '../../db/mutations/official/game-data';
-import { SyncManager } from '../manager';
+import type { SyncManager } from '../manager';
 import * as officialStats from '../services/euroleague/games';
 
 async function mapWithConcurrency<T>(
@@ -8,13 +8,20 @@ async function mapWithConcurrency<T>(
   worker: (value: T) => Promise<void>
 ) {
   let next = 0;
+  let failure: { error: unknown } | undefined;
   const runners = Array.from({ length: Math.min(concurrency, values.length) }, async () => {
-    while (next < values.length) {
+    while (!failure && next < values.length) {
       const index = next++;
-      await worker(values[index]);
+      try {
+        await worker(values[index]);
+      } catch (error) {
+        failure ??= { error };
+      }
     }
   });
+  // Let in-flight games finish while the manager still owns the advisory lock.
   await Promise.all(runners);
+  if (failure) throw failure.error;
 }
 
 export async function run(manager: SyncManager) {
