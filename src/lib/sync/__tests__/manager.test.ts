@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const { mockDb } = vi.hoisted(() => ({
   mockDb: {
     connect: vi.fn(),
+    query: vi.fn(),
     end: vi.fn(async () => {}),
   },
 }));
@@ -72,6 +73,62 @@ describe('SyncManager', () => {
         syncMode: 'routine',
       })
     );
+  });
+
+  it('drains in-flight EuroLeague games before releasing the lock after a failure', async () => {
+    const { SyncManager } = await import('../manager');
+    const { run } = await import('../steps/euroleague-games');
+    const officialStats = await import('../services/euroleague/games');
+    const manager = new SyncManager();
+    const first = Promise.withResolvers<Awaited<ReturnType<typeof officialStats.runGame>>>();
+    const second = Promise.withResolvers<Awaited<ReturnType<typeof officialStats.runGame>>>();
+    const workersStarted = Promise.withResolvers<void>();
+    const failure = new Error('Official game failed');
+    const worker = vi
+      .spyOn(officialStats, 'runGame')
+      .mockReturnValueOnce(first.promise)
+      .mockImplementationOnce(() => {
+        workersStarted.resolve();
+        return second.promise;
+      })
+      .mockResolvedValue({ status: 'not_available_yet' });
+    const lockClient = {
+      query: vi.fn(async () => ({ rows: [{ locked: true }] })),
+      release: vi.fn(),
+    };
+    mockDb.connect.mockResolvedValue(lockClient);
+    mockDb.query.mockResolvedValueOnce({
+      rows: [1, 2, 3].map((game_code) => ({ game_code, round_id: 1, round_name: 'Round 1' })),
+    });
+    const nextStep = vi.fn();
+    manager.addStep(definition('euroleague-games', run));
+    manager.addStep(definition('next-step', nextStep));
+
+    const sync = manager.run();
+    try {
+      await workersStarted.promise;
+      first.reject(failure);
+      await new Promise<void>((resolve) => setImmediate(resolve));
+
+      expect(lockClient.query).toHaveBeenCalledTimes(1);
+      expect(lockClient.release).not.toHaveBeenCalled();
+      expect(mockDb.end).not.toHaveBeenCalled();
+    } finally {
+      second.resolve({ status: 'not_available_yet' });
+      await sync;
+      const startedGames = worker.mock.calls.map(([, gameCode]) => gameCode);
+      worker.mockRestore();
+      expect(startedGames).toEqual([1, 2]);
+    }
+    expect(lockClient.query).toHaveBeenLastCalledWith(
+      expect.stringContaining('pg_advisory_unlock'),
+      [manager.lockKey]
+    );
+    expect(lockClient.release).toHaveBeenCalledOnce();
+    expect(mockDb.end).toHaveBeenCalledOnce();
+    expect(nextStep).not.toHaveBeenCalled();
+    expect(manager.hasErrors).toBe(true);
+    expect(manager.logs.find((entry) => entry.type === 'error')?.error).toBe(failure);
   });
 
   it('skips all work when the shared advisory lock is unavailable', async () => {
