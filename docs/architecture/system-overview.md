@@ -50,6 +50,16 @@ manager's linked Biwenger credentials to send it to Biwenger. The credentials st
 See the [personal bidding runbook](../operations/personal-bidding.md) for account requirements and
 failure behavior.
 
+## Runtime and operations
+
+[![Detailed architecture diagram with ingestion, authenticated reads and writes, the optional assistant, CI, and error reporting](../_assets/stack-detail.png)](../_assets/stack-detail.png)
+
+GitHub Actions runs scheduled ingestion and validates changes with CI, browser tests, and deployment
+smoke checks. In the Vercel-hosted app, Auth.js handles sessions and Drizzle provides typed
+server-side data access alongside direct PostgreSQL queries. Sentry can receive errors from the
+app and standalone sync when configured. See [deployment and rollback](../operations/deployment-and-rollback.md)
+and the [sync runbook](../operations/data-sync.md) for operational details.
+
 ## Continue reading
 
 - [Product map](../product/README.md) for the available screens and their implementation.
