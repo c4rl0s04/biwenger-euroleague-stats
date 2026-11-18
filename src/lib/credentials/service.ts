@@ -15,7 +15,6 @@ export interface CredentialServiceOptions {
 export interface StoreCredentialInput {
   userId: string;
   credential: string;
-  email?: string;
 }
 
 export function createBiwengerCredentialService(options: CredentialServiceOptions) {
@@ -26,7 +25,7 @@ export function createBiwengerCredentialService(options: CredentialServiceOption
       return repository.hasEncrypted(userId);
     },
 
-    async storeCredential({ userId, credential, email }: StoreCredentialInput): Promise<void> {
+    async storeCredential({ userId, credential }: StoreCredentialInput): Promise<void> {
       const keyring = getKeyring();
       const envelope = encryptCredential(credential, userId, keyring);
 
@@ -34,7 +33,7 @@ export function createBiwengerCredentialService(options: CredentialServiceOption
         throw new CredentialError('credential_storage_failure');
       }
 
-      await repository.replaceCredential(userId, envelope, email);
+      await repository.replaceCredential(userId, envelope);
     },
 
     async withCredential<T>(

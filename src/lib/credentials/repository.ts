@@ -2,7 +2,7 @@ import 'server-only';
 
 import { and, count, eq, ne, sql } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
-import { userBiwengerCredentials, users } from '@/lib/db/schema';
+import { userBiwengerCredentials } from '@/lib/db/schema';
 import type { CredentialEnvelope, CredentialRecordRepository, StoredCredential } from './types';
 import type { CredentialMaintenanceRepository } from './maintenance';
 
@@ -35,24 +35,14 @@ export class DrizzleCredentialRepository implements CredentialRecordRepository {
     return row ? toStoredCredential(row) : null;
   }
 
-  async replaceCredential(
-    userId: string,
-    envelope: CredentialEnvelope,
-    email?: string
-  ): Promise<void> {
-    await db.transaction(async (tx) => {
-      await tx
-        .insert(userBiwengerCredentials)
-        .values({ userId, ...envelope })
-        .onConflictDoUpdate({
-          target: userBiwengerCredentials.userId,
-          set: { ...envelope, updatedAt: new Date() },
-        });
-
-      if (email !== undefined) {
-        await tx.update(users).set({ email }).where(eq(users.id, userId));
-      }
-    });
+  async replaceCredential(userId: string, envelope: CredentialEnvelope): Promise<void> {
+    await db
+      .insert(userBiwengerCredentials)
+      .values({ userId, ...envelope })
+      .onConflictDoUpdate({
+        target: userBiwengerCredentials.userId,
+        set: { ...envelope, updatedAt: new Date() },
+      });
   }
 
   async deleteCredential(userId: string): Promise<void> {

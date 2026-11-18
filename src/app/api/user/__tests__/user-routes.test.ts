@@ -1,3 +1,8 @@
+vi.mock('@/lib/config', async (importOriginal) => {
+  const { CONFIG } = await importOriginal<typeof import('@/lib/config')>();
+  return { CONFIG: { ...CONFIG, API: { ...CONFIG.API, LEAGUE_ID: '9' } } };
+});
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { auth } from '@/auth';
@@ -217,14 +222,17 @@ describe('user and lineup route contracts', () => {
     } as any);
     vi.stubGlobal(
       'fetch',
-      vi.fn(async () => ({
-        ok: true,
-        status: 200,
-        json: async () => ({
-          token: canaryToken,
-          privateProviderPayload: { authorization: `Bearer ${canaryToken}` },
-        }),
-      }))
+      vi
+        .fn()
+        .mockResolvedValueOnce(
+          Response.json({
+            token: canaryToken,
+            privateProviderPayload: { authorization: 'fixture-only' },
+          })
+        )
+        .mockResolvedValueOnce(
+          Response.json({ status: 200, data: { leagues: [{ id: 9, user: { id: 42 } }] } })
+        )
     );
 
     const { POST } = linkRoute;
@@ -244,7 +252,6 @@ describe('user and lineup route contracts', () => {
     expect(biwengerCredentials.storeCredential).toHaveBeenCalledWith({
       userId: '42',
       credential: canaryToken,
-      email: 'u@example.com',
     });
 
     const missingPassword = await POST(
@@ -300,11 +307,12 @@ describe('user and lineup route contracts', () => {
     );
     vi.stubGlobal(
       'fetch',
-      vi.fn(async () => ({
-        ok: true,
-        status: 200,
-        json: async () => ({ token: canaryToken }),
-      }))
+      vi
+        .fn()
+        .mockResolvedValueOnce(Response.json({ token: canaryToken }))
+        .mockResolvedValueOnce(
+          Response.json({ status: 200, data: { leagues: [{ id: 9, user: { id: 42 } }] } })
+        )
     );
 
     const { POST } = linkRoute;

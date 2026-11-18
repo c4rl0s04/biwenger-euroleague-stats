@@ -1,6 +1,8 @@
 import 'server-only';
 
 import bcrypt from 'bcryptjs';
+import { createBiwengerProviderClient, verifyBiwengerManager } from '@/features/provider/server';
+import { CONFIG } from '@/lib/config';
 import type { ChangePasswordResult, LinkBiwengerResult } from '../../models/account.models';
 import {
   AccountValidationError,
@@ -87,6 +89,11 @@ export class AccountCommandService {
       );
     }
 
+    const leagueId = CONFIG.API.LEAGUE_ID;
+    if (!leagueId) {
+      throw new AccountProviderAuthError('No se ha podido verificar la liga de Biwenger.', 502);
+    }
+
     const fetchFn = this.getFetch();
     const biwengerRes = await fetchFn('https://biwenger.as.com/api/v2/auth/login', {
       method: 'POST',
@@ -120,13 +127,31 @@ export class AccountCommandService {
     }
 
     const token = responseData.token || responseData.data?.token;
-    if (!token) {
+    if (typeof token !== 'string' || !token.trim()) {
       console.error('Biwenger link authentication returned no usable credential');
       throw new AccountProviderAuthError('Error al obtener el acceso desde Biwenger.', 502);
     }
 
+    let matchesManager: boolean;
     try {
-      await this.repository.storeBiwengerCredential(user.id, token, email);
+      matchesManager = await verifyBiwengerManager(createBiwengerProviderClient({ fetchFn }), {
+        token,
+        leagueId,
+        userId: user.id,
+      });
+    } catch {
+      console.warn('Biwenger link membership verification failed');
+      throw new AccountProviderAuthError('No se ha podido verificar la cuenta de Biwenger.', 502);
+    }
+    if (!matchesManager) {
+      throw new AccountProviderAuthError(
+        'Esta cuenta de Biwenger no corresponde a tu mánager en la liga.',
+        403
+      );
+    }
+
+    try {
+      await this.repository.storeBiwengerCredential(user.id, token);
     } catch {
       console.error('Biwenger link credential storage failure');
       throw new AccountStorageError('Error al guardar credenciales de Biwenger.');
