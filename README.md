@@ -15,7 +15,7 @@
 Open Home to see your league position, points, squad value, and recent activity.
 
 <p align="center">
-  <img src="docs/_assets/home-mobile.png" width="340" alt="Mobile Home screen with league position, points, squad value, and the recent activity heading" />
+  <img src="docs/_assets/home-mobile.png" width="340" alt="Full mobile Home screen with league position, squad value, recent activity, and the bottom navigation" />
 </p>
 
 ### See what the market is doing

@@ -17,6 +17,6 @@ binary files before committing them, and prefer Mermaid for simple flows that ne
 - [Detailed architecture source](stack-detail.html) and [export](stack-detail.png) show runtime and
   automation connections. Render the sheet with the legend when updating the export.
 - The [dashboard](dashboard-desktop.png), [mobile Home screen](home-mobile.png), and
-  [market trends](market-trends.webp) use disposable Playwright league data. The Home image shows the top of the mobile Home snapshot.
+  [market trends](market-trends.webp) use disposable Playwright league data. The Home image shows the full iPhone 13 viewport.
   The market image comes
   from the [populated market snapshot](../../tests/e2e/market-populated.spec.ts-snapshots/market-populated-trends-chart-desktop-1440-darwin.png).
