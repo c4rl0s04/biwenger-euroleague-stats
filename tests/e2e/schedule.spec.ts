@@ -244,15 +244,22 @@ for (const [timezoneId, day, time] of [
       const client = new pg.Client({ connectionString });
       await client.connect();
       const date = '2026-11-19T23:30:00.000Z';
-      await page.route('**/api/news', (route) =>
-        route.fulfill({ json: { success: true, data: [] } })
-      );
+      const schedulePage = await page.context().newPage();
+      await page
+        .context()
+        .route('**/api/news', (route) => route.fulfill({ json: { success: true, data: [] } }));
       await page.route('https://cdn.biwenger.com/i/t/*.png', (route) =>
         route.fulfill({ contentType: 'image/png', body: readFileSync('public/icons/icon-192.png') })
       );
+      await schedulePage.route('**/_vercel/insights/script.js*', (route) =>
+        route.fulfill({ status: 200, contentType: 'application/javascript', body: '' })
+      );
+      await schedulePage.route('https://cdn.biwenger.com/i/t/*.png', (route) =>
+        route.fulfill({ contentType: 'image/png', body: readFileSync('public/icons/icon-192.png') })
+      );
       const errors: string[] = [];
-      page.on('pageerror', (error) => errors.push(error.message));
-      page.on('console', (message) => {
+      schedulePage.on('pageerror', (error) => errors.push(error.message));
+      schedulePage.on('console', (message) => {
         if (
           message.type() === 'error' &&
           /hydrat|Minified React error #(?:418|423|425)/i.test(message.text())
@@ -270,11 +277,13 @@ for (const [timezoneId, day, time] of [
         await page.locator('#login-password').fill(process.env.E2E_PASSWORD!);
         await page.getByRole('button', { name: 'Entrar' }).click();
         await expect(page).toHaveURL(/\/schedule$/);
-        await page.waitForLoadState('networkidle');
-        await page.reload();
-        const kickoff = page.locator(`main time[datetime="${date}"]`).first();
+        // Load a fresh document without cancelling the login tab's WebKit prefetches.
+        await schedulePage.goto('/schedule');
+        const kickoff = schedulePage.locator(`main time[datetime="${date}"]`).first();
         await expect(kickoff).toHaveText(`${time} (${timezoneId})`);
-        await expect(page.getByRole('heading', { name: new RegExp(day, 'i') })).toBeVisible();
+        await expect(
+          schedulePage.getByRole('heading', { name: new RegExp(day, 'i') })
+        ).toBeVisible();
         expect(errors).toEqual([]);
       } finally {
         await client.query(

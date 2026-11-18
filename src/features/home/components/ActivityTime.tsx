@@ -1,7 +1,7 @@
 'use client';
 
 import { useViewerTimeZone } from '@/lib/hooks/useViewerTimeZone';
-import { formatEventInstant } from '@/lib/utils/event-time';
+import { formatEventInstant, SERVER_EVENT_TIME_ZONE } from '@/lib/utils/event-time';
 
 function relativeLabel(value: string) {
   const elapsedMinutes = Math.round((new Date(value).getTime() - Date.now()) / 60000);
@@ -20,7 +20,7 @@ export default function ActivityTime({ value }: { value: string }) {
     <time
       dateTime={value}
       title={absolute}
-      aria-label={absolute ? `${absolute} (${timeZone})` : undefined}
+      aria-label={absolute ? `${absolute} (${timeZone ?? SERVER_EVENT_TIME_ZONE})` : undefined}
       suppressHydrationWarning
     >
       {relativeLabel(value)}

@@ -146,12 +146,7 @@ export function SeasonPredictionsScreen({
   const openStatus = (
     <>
       Puedes guardar y modificar tus respuestas hasta el{' '}
-      <EventTime
-        value={data.locksAt}
-        format="longDeadline"
-        fallback={data.locksAtLabel ?? undefined}
-      />
-      .
+      <EventTime value={data.locksAt} format="longDeadline" serverLabel={data.locksAtLabel} />.
     </>
   );
   const status =
