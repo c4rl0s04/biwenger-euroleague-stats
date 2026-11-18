@@ -10,12 +10,13 @@
 
 ## Product tour
 
-### Follow your season on mobile
+### Catch up on your league on mobile
 
-Check your league position, points per round, podium finishes, and captain performance in the
-dashboard’s season view.
+Open Home to see your league position, points, squad value, and recent activity.
 
-<img src="docs/_assets/dashboard-mobile.png" width="340" alt="Mobile dashboard season view showing league position, points, round average, podium finishes, and captain stats" />
+<p align="center">
+  <img src="docs/_assets/home-mobile.png" width="340" alt="Mobile Home screen with league position, points, squad value, and the recent activity heading" />
+</p>
 
 ### See what the market is doing
 
