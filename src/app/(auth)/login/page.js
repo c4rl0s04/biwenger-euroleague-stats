@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { signInWithCredentials } from '@/lib/auth/sign-in';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, Eye, EyeOff, User, Lock, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
@@ -24,8 +24,12 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
     try {
-      const res = await signIn('credentials', { name, password, redirect: false });
-      if (res?.error) {
+      const result = await signInWithCredentials(name, password, callbackUrl);
+      if (result === 'rate-limited') {
+        setError(
+          'Demasiados intentos de inicio de sesión. Espera unos minutos y vuelve a intentarlo.'
+        );
+      } else if (result === 'invalid-credentials') {
         setError('Credenciales incorrectas. Revisa tu nombre de Manager o contraseña.');
       } else {
         router.push(callbackUrl);
