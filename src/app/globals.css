@@ -967,6 +967,8 @@ h3,
 
 .offline-retry-button {
   margin-top: 1.75rem;
+  background: hsl(var(--action-primary));
+  color: hsl(var(--action-primary-content));
 }
 
 @keyframes mobile-sheet-enter {

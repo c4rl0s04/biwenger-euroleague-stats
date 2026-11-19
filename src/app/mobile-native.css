@@ -722,7 +722,7 @@
 .mobile-winner-banner strong,
 .mobile-compare-hero strong {
   overflow: hidden;
-  color: white;
+  color: hsl(var(--foreground));
   font-size: 1rem;
   font-weight: 900;
   text-overflow: ellipsis;
@@ -1718,7 +1718,7 @@
   font-size: 0.7rem;
 }
 .mobile-method-list dd {
-  color: white;
+  color: hsl(var(--foreground));
   font-size: 0.72rem;
   font-weight: 800;
   text-align: right;
@@ -1932,7 +1932,7 @@
 
 .mobile-home-pulse-metrics strong {
   overflow: visible;
-  color: white;
+  color: hsl(var(--foreground));
   font-family: var(--font-display);
   font-size: clamp(1.45rem, 7.5vw, 2rem);
   font-weight: 500;
@@ -2028,7 +2028,7 @@
 
 .mobile-home-feed-heading h2 {
   margin-top: 0.15rem;
-  color: white;
+  color: hsl(var(--foreground));
   font-family: var(--font-display);
   font-size: 1.55rem;
   font-weight: 500;
