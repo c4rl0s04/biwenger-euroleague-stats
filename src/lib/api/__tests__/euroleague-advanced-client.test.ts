@@ -1,3 +1,9 @@
+import {
+  mapEuroleagueGameReport,
+  mapEuroleagueGameMetadata,
+  mapEuroleaguePlayByPlayEvent,
+  mapEuroleagueShot,
+} from '../euroleague/game.mapper';
 import { checksumPayload } from '../../sync/services/euroleague/checksum';
 import { mapEuroleagueBoxScoreRow } from '../euroleague/box-score.mapper';
 import { boxScoreRowSchema } from '../euroleague/schemas';
@@ -257,5 +263,24 @@ describe('mapEuroleagueBoxScoreRow', () => {
       points: 12,
     });
     expect(boxScore.raw).toBe(row);
+  });
+});
+
+describe('EuroLeague game mappers', () => {
+  it.each([
+    ['report', mapEuroleagueGameReport, { homeScore: 88 }],
+    ['metadata', mapEuroleagueGameMetadata, { homeQuarterScores: [20, 22, 23, 23] }],
+    ['play-by-play', mapEuroleaguePlayByPlayEvent, { sequence: 4 }],
+    [
+      'shots',
+      mapEuroleagueShot,
+      { annotationNumber: 4, occurredAt: new Date('2026-09-30T18:30:49Z') },
+    ],
+  ] as const)('maps the %s fixture without HTTP', (name, mapRow, expected) => {
+    const row = fixture(name)[0];
+    const result = mapRow(row, 1);
+
+    expect(result).toMatchObject({ gameCode: 1, ...expected });
+    expect(result.raw).toBe(row);
   });
 });
