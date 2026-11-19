@@ -12,5 +12,5 @@ export default async function CompareOpponentPage({
   const route = await requireMobileRoute(`/compare/${userId}`);
   const [data, session] = await Promise.all([getCompareDataLite(), auth()]);
   const model = mapCompareOpponent(data, userId, session?.user?.id);
-  return model ? <CompareOpponentScreen model={model} title={route.definition.title} /> : null;
+  return <CompareOpponentScreen model={model} title={route.definition.title} />;
 }

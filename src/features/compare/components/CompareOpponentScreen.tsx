@@ -6,14 +6,23 @@ import {
   MobileMetricGrid,
   MobileSectionHeading,
 } from '@/components/mobile/MobileScreen';
+import { EmptyState } from '@/components/ui/compositions/EmptyState';
 import type { CompareOpponentModel } from '../models/compare';
 export default function CompareOpponentScreen({
   model,
   title,
 }: {
-  model: CompareOpponentModel;
+  model: CompareOpponentModel | null;
   title: string;
 }) {
+  if (!model) {
+    return (
+      <MobileDetailScaffold title={title} context={null} backHref="/compare">
+        <EmptyState className="py-6">Esta comparativa no está disponible.</EmptyState>
+      </MobileDetailScaffold>
+    );
+  }
+
   const { current, opponent, currentStanding, opponentStanding } = model;
   return (
     <MobileDetailScaffold
