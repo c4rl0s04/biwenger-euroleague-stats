@@ -142,7 +142,8 @@ export class SyncManager {
     this.context.db = pool;
 
     let completedStepsCount = 0;
-    let failedStep: SyncStepDefinition | null = null;
+    const failedSteps: string[] = [];
+    const unavailableSteps = new Set<string>();
     this.warningsCount = 0;
     this.currentStepWarnings = [];
 
@@ -203,6 +204,16 @@ export class SyncManager {
           timestamp: new Date(),
         });
 
+        // A dependency not selected for this run can be satisfied by existing data.
+        const unavailableDependencies = step.dependencies.filter((id) => unavailableSteps.has(id));
+        if (unavailableDependencies.length) {
+          unavailableSteps.add(step.id);
+          this.log(
+            `Skipped ${step.id}: dependency unavailable (${unavailableDependencies.join(', ')}).`
+          );
+          continue;
+        }
+
         try {
           const result = await step.run(this);
           const durationMs = Date.now() - stepStartedAt;
@@ -248,10 +259,10 @@ export class SyncManager {
           completedStepsCount++;
         } catch (error) {
           const durationMs = Date.now() - stepStartedAt;
-          failedStep = step;
+          failedSteps.push(step.id);
+          unavailableSteps.add(step.id);
           this.error(`${step.id} failed.`, error, { stepId: step.id, durationMs });
           this.reporter.stepFailed({ step, durationMs, error });
-          break;
         }
       }
     } catch (error) {
@@ -268,10 +279,8 @@ export class SyncManager {
       if (this.hasErrors) {
         this.reporter.runFailed({
           completedSteps: completedStepsCount,
-          failedStepId: failedStep ? failedStep.id : 'preconditions',
-          remainingSteps: failedStep
-            ? this.steps.length - completedStepsCount - 1
-            : this.steps.length,
+          failedStepIds: failedSteps.length ? failedSteps : ['preconditions'],
+          remainingSteps: this.steps.length - completedStepsCount - failedSteps.length,
           warningsCount: this.warningsCount,
           durationMs: totalDurationMs,
         });

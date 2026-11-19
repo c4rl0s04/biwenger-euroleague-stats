@@ -8,20 +8,15 @@ async function mapWithConcurrency<T>(
   worker: (value: T) => Promise<void>
 ) {
   let next = 0;
-  let failure: { error: unknown } | undefined;
   const runners = Array.from({ length: Math.min(concurrency, values.length) }, async () => {
-    while (!failure && next < values.length) {
-      const index = next++;
-      try {
-        await worker(values[index]);
-      } catch (error) {
-        failure ??= { error };
-      }
+    while (next < values.length) {
+      await worker(values[next++]);
     }
   });
   // Let in-flight games finish while the manager still owns the advisory lock.
-  await Promise.all(runners);
-  if (failure) throw failure.error;
+  const results = await Promise.allSettled(runners);
+  const rejected = results.find((result) => result.status === 'rejected');
+  if (rejected) throw rejected.reason;
 }
 
 export async function run(manager: SyncManager) {
@@ -33,21 +28,28 @@ export async function run(manager: SyncManager) {
 
   const mutations = prepareOfficialGameMutations(db, seasonId);
   const candidates = await mutations.getSyncCandidates(forceGame);
-  const counts = { updated: 0, unchanged: 0, unavailable: 0 };
+  const counts = { updated: 0, unchanged: 0, unavailable: 0, failed: 0 };
+  let firstFailure: unknown;
   await mapWithConcurrency(candidates, 2, async (game) => {
-    const result = await officialStats.runGame(
-      manager,
-      game.game_code,
-      game.round_id,
-      game.round_name,
-      {
-        force: forceGame === game.game_code,
-        existingChecksum: game.payload_checksum,
-      }
-    );
-    if (result.status === 'updated') counts.updated++;
-    if (result.status === 'unchanged') counts.unchanged++;
-    if (result.status === 'not_available_yet') counts.unavailable++;
+    try {
+      const result = await officialStats.runGame(
+        manager,
+        game.game_code,
+        game.round_id,
+        game.round_name,
+        {
+          force: forceGame === game.game_code,
+          existingChecksum: game.payload_checksum,
+        }
+      );
+      if (result.status === 'updated') counts.updated++;
+      if (result.status === 'unchanged') counts.unchanged++;
+      if (result.status === 'not_available_yet') counts.unavailable++;
+    } catch (error) {
+      if (counts.failed === 0) firstFailure = error;
+      counts.failed++;
+      manager.warn(`Official game ${game.game_code} failed.`);
+    }
   });
 
   const metrics = manager.context.euroleague.getMetrics();
@@ -57,6 +59,15 @@ export async function run(manager: SyncManager) {
   manager.log(
     `Official provider metrics: ${JSON.stringify({ ...metrics, lastSuccessfulAgeSeconds })}`
   );
+
+  if (counts.failed) {
+    manager.log(
+      `Official game counts: ${JSON.stringify({ candidates: candidates.length, ...counts })}`
+    );
+    throw new Error(`Official game synchronization failed for ${counts.failed} game(s).`, {
+      cause: firstFailure,
+    });
+  }
 
   return {
     summary: 'Official reports, scores, boxscores, events and shots synchronized.',
