@@ -14,30 +14,36 @@ export class BiwengerProviderError extends Error {
   readonly status?: number;
   readonly statusText?: string;
   readonly endpoint: string;
+  readonly retryAfterMs?: number;
 
-  constructor(message: string, status?: number, statusText?: string, endpoint: string = '') {
+  constructor(
+    message: string,
+    status?: number,
+    statusText?: string,
+    endpoint: string = '',
+    retryAfterMs?: number
+  ) {
     super(sanitizeErrorMessage(message));
     this.name = 'BiwengerProviderError';
     this.status = status;
     this.statusText = statusText ? sanitizeErrorMessage(statusText) : undefined;
     this.endpoint = sanitizeErrorMessage(endpoint);
+    this.retryAfterMs = retryAfterMs;
 
     Object.setPrototypeOf(this, new.target.prototype);
   }
 }
 
 export class BiwengerRateLimitError extends BiwengerProviderError {
-  readonly retryAfterMs?: number;
-
   constructor(endpoint: string = '', retryAfterMs?: number) {
     super(
       'Biwenger API Error: 429 Too Many Requests (Max retries exceeded or rate limit hit)',
       429,
       'Too Many Requests',
-      endpoint
+      endpoint,
+      retryAfterMs
     );
     this.name = 'BiwengerRateLimitError';
-    this.retryAfterMs = retryAfterMs;
   }
 }
 

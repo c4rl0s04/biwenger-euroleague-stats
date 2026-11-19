@@ -1,11 +1,12 @@
 import type { ProviderRetryPolicy } from './types';
-import { BiwengerRateLimitError } from './errors';
+import { BiwengerNetworkError, BiwengerProviderError } from './errors';
 
 export const READ_RETRY_POLICY: ProviderRetryPolicy = Object.freeze({
   maxRetries: 3,
   initialDelayMs: 5000,
   backoffFactor: 2,
-  retryableStatuses: [429],
+  retryableStatuses: [429, 502, 503, 504],
+  retryNetworkErrors: true,
 });
 
 export const COMMAND_RETRY_POLICY: ProviderRetryPolicy = Object.freeze({
@@ -14,6 +15,17 @@ export const COMMAND_RETRY_POLICY: ProviderRetryPolicy = Object.freeze({
   backoffFactor: 1,
   retryableStatuses: [],
 });
+
+const MAX_RETRY_AFTER_MS = 60_000;
+
+export function parseRetryAfter(header: string | null | undefined): number | undefined {
+  const value = header?.trim();
+  if (!value) return undefined;
+  if (/^\d+$/.test(value)) return Number(value) * 1000;
+  if (!/[a-z]/i.test(value)) return undefined;
+  const deadline = Date.parse(value);
+  return Number.isFinite(deadline) ? Math.max(0, deadline - Date.now()) : undefined;
+}
 
 export interface RetryContext {
   attempt: number;
@@ -45,7 +57,7 @@ export async function executeWithRetry<T>(
           : undefined;
 
       const isRetryable =
-        (error instanceof BiwengerRateLimitError ||
+        ((policy.retryNetworkErrors && error instanceof BiwengerNetworkError) ||
           (status !== undefined && policy.retryableStatuses.includes(status))) &&
         attempt < policy.maxRetries;
 
@@ -53,15 +65,18 @@ export async function executeWithRetry<T>(
         throw error;
       }
 
+      const retryAfter = error instanceof BiwengerProviderError ? error.retryAfterMs : undefined;
+      if (retryAfter !== undefined && retryAfter > MAX_RETRY_AFTER_MS) throw error;
+      const delayMs = Math.max(currentDelay, retryAfter ?? 0);
       attempt += 1;
       options?.onRetry?.({
         attempt,
         maxRetries: policy.maxRetries,
-        delayMs: currentDelay,
+        delayMs,
         error,
       });
 
-      await sleep(currentDelay);
+      await sleep(delayMs);
       currentDelay *= policy.backoffFactor;
     }
   }

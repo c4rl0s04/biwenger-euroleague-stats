@@ -13,7 +13,12 @@ import {
   BiwengerProviderError,
   BiwengerRateLimitError,
 } from './errors';
-import { COMMAND_RETRY_POLICY, executeWithRetry, READ_RETRY_POLICY } from './retry';
+import {
+  COMMAND_RETRY_POLICY,
+  executeWithRetry,
+  parseRetryAfter,
+  READ_RETRY_POLICY,
+} from './retry';
 
 export interface ProviderClientConfig {
   baseUrl?: string;
@@ -22,12 +27,13 @@ export interface ProviderClientConfig {
   defaultUserId?: string;
   versionFallback?: string;
   readRetryPolicy?: ProviderRetryPolicy;
-  commandRetryPolicy?: ProviderRetryPolicy;
+  readTimeoutMs?: number;
   defaultDelayRange?: [number, number];
   sleepFn?: (ms: number) => Promise<void>;
   fetchFn?: typeof fetch;
 }
 
+const DEFAULT_READ_TIMEOUT_MS = 20_000;
 const DEFAULT_DELAY_RANGE: [number, number] = [2000, 5000];
 
 export class BiwengerProviderClient {
@@ -37,7 +43,7 @@ export class BiwengerProviderClient {
   private readonly defaultUserId?: string;
   private readonly versionFallback?: string;
   private readonly readRetryPolicy: ProviderRetryPolicy;
-  private readonly commandRetryPolicy: ProviderRetryPolicy;
+  private readonly readTimeoutMs: number;
   private readonly defaultDelayRange: [number, number];
   private readonly sleepFn: (ms: number) => Promise<void>;
   private readonly fetchFn: typeof fetch;
@@ -50,7 +56,7 @@ export class BiwengerProviderClient {
     this.defaultUserId = config.defaultUserId ?? CONFIG.API.USER_ID;
     this.versionFallback = config.versionFallback ?? CONFIG.API.VERSION_FALLBACK;
     this.readRetryPolicy = config.readRetryPolicy ?? READ_RETRY_POLICY;
-    this.commandRetryPolicy = config.commandRetryPolicy ?? COMMAND_RETRY_POLICY;
+    this.readTimeoutMs = config.readTimeoutMs ?? DEFAULT_READ_TIMEOUT_MS;
     this.defaultDelayRange = config.defaultDelayRange ?? DEFAULT_DELAY_RANGE;
     this.sleepFn =
       config.sleepFn ??
@@ -187,6 +193,7 @@ export class BiwengerProviderClient {
       headers,
       method: options.method,
       cache: options.cache,
+      ...(options.method === 'GET' ? { signal: AbortSignal.timeout(this.readTimeoutMs) } : {}),
     };
 
     if (options.body) {
@@ -195,8 +202,10 @@ export class BiwengerProviderClient {
     }
 
     let response: Response;
+    let responseText = '';
     try {
       response = await this.fetchFn(url, fetchOptions);
+      if (response.ok) responseText = await response.text();
     } catch (networkError: any) {
       const netErr = new BiwengerNetworkError(
         networkError?.message || 'Network request failed',
@@ -208,8 +217,9 @@ export class BiwengerProviderClient {
 
     // On non-2xx status, NEVER read or leak response body
     if (!response.ok) {
+      const retryAfterMs = parseRetryAfter(response.headers?.get('retry-after'));
       if (response.status === 429) {
-        throw new BiwengerRateLimitError(endpoint);
+        throw new BiwengerRateLimitError(endpoint, retryAfterMs);
       }
       if (response.status === 401 || response.status === 403) {
         const authErr = new BiwengerAuthError(
@@ -224,13 +234,14 @@ export class BiwengerProviderClient {
         `Biwenger API Error: ${response.status} ${response.statusText}`,
         response.status,
         response.statusText,
-        endpoint
+        endpoint,
+        retryAfterMs
       );
       console.error(`Failed to fetch ${endpoint}:`, providerErr.message);
       throw providerErr;
     }
 
-    const text = await response.text();
+    const text = responseText;
     try {
       return text ? JSON.parse(text) : { success: true, status: response.status };
     } catch {
@@ -240,7 +251,7 @@ export class BiwengerProviderClient {
 
   /**
    * Executes an idempotent read query (GET).
-   * Follows READ_RETRY_POLICY (up to 3 retries with exponential backoff on 429).
+   * Follows READ_RETRY_POLICY (bounded retries for transient read failures).
    */
   async query<T = any>(
     endpoint: string,
@@ -273,7 +284,7 @@ export class BiwengerProviderClient {
       {
         sleepFn: this.sleepFn,
         onRetry: ({ delayMs }) => {
-          console.warn(`⚠️ Rate Limit (429). Pausing ${delayMs}ms before retrying...`);
+          console.warn(`Biwenger read failed temporarily. Retrying in ${delayMs}ms.`);
         },
       }
     );
@@ -293,16 +304,6 @@ export class BiwengerProviderClient {
     if (method !== 'POST' && method !== 'PUT' && method !== 'DELETE') {
       throw new BiwengerMutationError(`Unsupported command method: ${method}`, undefined, endpoint);
     }
-
-    const policy: ProviderRetryPolicy = {
-      ...this.commandRetryPolicy,
-      maxRetries:
-        options.retries !== undefined ? options.retries : this.commandRetryPolicy.maxRetries,
-      initialDelayMs:
-        options.retryDelay !== undefined
-          ? options.retryDelay
-          : this.commandRetryPolicy.initialDelayMs,
-    };
 
     const effectiveContext = context ?? options.context;
     return executeWithRetry(
@@ -359,7 +360,7 @@ export class BiwengerProviderClient {
           );
         }
       },
-      policy,
+      COMMAND_RETRY_POLICY,
       {
         sleepFn: this.sleepFn,
       }

@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   COMMAND_RETRY_POLICY,
   executeWithRetry,
+  parseRetryAfter,
   READ_RETRY_POLICY,
   type RetryContext,
 } from '../retry';
@@ -16,6 +17,18 @@ describe('Provider retry policies and runner', () => {
   it('COMMAND_RETRY_POLICY fails closed with 0 retries', () => {
     expect(COMMAND_RETRY_POLICY.maxRetries).toBe(0);
     expect(COMMAND_RETRY_POLICY.retryableStatuses).toHaveLength(0);
+  });
+
+  it('accepts HTTP-date retry hints and ignores invalid ones', () => {
+    const now = vi.spyOn(Date, 'now').mockReturnValue(Date.parse('2026-11-19T12:00:00Z'));
+    try {
+      expect(parseRetryAfter('Thu, 19 Nov 2026 12:00:10 GMT')).toBe(10_000);
+      expect(parseRetryAfter('Thu, 19 Nov 2026 11:59:59 GMT')).toBe(0);
+      expect(parseRetryAfter('1.5')).toBeUndefined();
+      expect(parseRetryAfter('invalid')).toBeUndefined();
+    } finally {
+      now.mockRestore();
+    }
   });
 
   it('retries when error matches retryable status and succeeds eventually', async () => {

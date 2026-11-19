@@ -9,6 +9,7 @@ export interface ProviderRetryPolicy {
   initialDelayMs: number;
   backoffFactor: number;
   retryableStatuses: number[];
+  retryNetworkErrors?: boolean;
 }
 
 export interface BiwengerQueryOptions {
