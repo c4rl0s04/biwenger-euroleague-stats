@@ -8,6 +8,7 @@ import {
   officialTeamMappings,
   playerSeasons,
   players,
+  userRounds,
   userSeasons,
 } from '../../db/schema';
 import type { BiwengerRound } from '../rounds';
@@ -278,6 +279,37 @@ export async function getRoundScheduleState(
     matchCount: Number(matchCount) || 0,
     hasLineups: Boolean(hasLineups),
   };
+}
+
+/** Count saved lineup managers that still lack a usable final result for the same round. */
+export async function getRoundManagerResultCoverage(
+  seasonId: string,
+  roundIds: number[],
+  client?: SyncDb
+) {
+  if (roundIds.length === 0) return [];
+
+  return resolveDrizzle(client)
+    .select({
+      roundId: sql<number>`${lineups.roundId}`.as('round_id'),
+      expected: sql<number>`COUNT(DISTINCT ${lineups.userId})::int`.as('expected'),
+      missing:
+        sql<number>`COUNT(DISTINCT ${lineups.userId}) FILTER (WHERE ${userRounds.points} IS NULL OR ${userRounds.participated} IS NULL)::int`.as(
+          'missing'
+        ),
+    })
+    .from(lineups)
+    .leftJoin(
+      userRounds,
+      and(
+        eq(userRounds.seasonId, lineups.seasonId),
+        eq(userRounds.roundId, lineups.roundId),
+        eq(userRounds.userId, lineups.userId)
+      )
+    )
+    .where(and(eq(lineups.seasonId, seasonId), inArray(lineups.roundId, roundIds)))
+    .groupBy(lineups.roundId)
+    .orderBy(asc(lineups.roundId));
 }
 
 /**
