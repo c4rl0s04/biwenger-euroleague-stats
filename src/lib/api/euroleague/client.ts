@@ -11,7 +11,12 @@ import {
   standingRowSchema,
   type EuroleagueRow,
 } from './schemas';
-import { asBoolean, asString, normalizeEuroleaguePlayerCode, requiredString } from './normalization';
+import {
+  asBoolean,
+  asString,
+  normalizeEuroleaguePlayerCode,
+  requiredString,
+} from './normalization';
 import type {
   EuroleagueClientMetrics,
   EuroleagueGameMetadata,

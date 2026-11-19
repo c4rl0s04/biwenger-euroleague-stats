@@ -1,4 +1,9 @@
-import { asBoolean, asString, normalizeEuroleaguePlayerCode, requiredString } from './normalization';
+import {
+  asBoolean,
+  asString,
+  normalizeEuroleaguePlayerCode,
+  requiredString,
+} from './normalization';
 import type { EuroleagueRow } from './schemas';
 import type { EuroleaguePlayerBoxScore } from './types';
 
