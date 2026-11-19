@@ -1,8 +1,8 @@
 import type { SyncManager } from '../manager';
 import { getFantasyPointLiveRounds, hasActiveMatchesInWindow } from '../repositories/sync-queries';
 import { relevantRounds } from '../rounds';
-import { fantasyGames, syncFantasyPoints } from '../services/biwenger/fantasy-points';
-import { fetchRoundGames } from '../../api/biwenger-client';
+import { syncFantasyPoints } from '../services/biwenger/fantasy-points';
+import { readBiwengerRoundGames } from '@/features/provider/server';
 import { validateBiwengerRoundSeason } from '../preflight';
 
 export async function run(manager: SyncManager) {
@@ -36,19 +36,15 @@ export async function run(manager: SyncManager) {
   if (selected.length) {
     // Single-step recovery and live runs do not execute the catalogue's season-readiness guard.
     const firstRound = rounds[0];
-    const probe = await fetchRoundGames(firstRound.id);
-    const games = fantasyGames(probe);
+    const games = await readBiwengerRoundGames(firstRound.id);
     validateBiwengerRoundSeason({
       seasonId,
-      games: games.map((game) => {
-        const date = (game as { date?: unknown } | null)?.date;
-        return { date: typeof date === 'number' || typeof date === 'string' ? date : null };
-      }),
+      games,
     });
     for (const round of selected) {
       const result = await syncFantasyPoints(manager, round, {
         fetchRoundGames: (id) =>
-          id === firstRound.id ? Promise.resolve(probe) : fetchRoundGames(id),
+          id === firstRound.id ? Promise.resolve(games) : readBiwengerRoundGames(id),
       });
       counts.rounds++;
       counts.reports += result.reports;

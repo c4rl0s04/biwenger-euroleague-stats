@@ -1,3 +1,4 @@
+import { parseBiwengerRoundGames } from '@/features/provider/server';
 import { describe, expect, it, vi } from 'vitest';
 import { syncFantasyPoints } from '../fantasy-points';
 
@@ -23,25 +24,27 @@ describe('Biwenger Fantasy Points Service', () => {
       log: vi.fn(),
     };
 
-    const mockFetchRoundGames = vi.fn().mockResolvedValue({
-      data: {
-        games: [
-          {
-            home: {
-              reports: {
-                1: { player: { id: 101 }, points: 15 },
+    const mockFetchRoundGames = vi.fn().mockResolvedValue(
+      parseBiwengerRoundGames({
+        data: {
+          games: [
+            {
+              home: {
+                reports: {
+                  1: { player: { id: 101 }, points: 15 },
+                },
+              },
+              away: {
+                reports: {
+                  1: { player: { id: 201 }, points: 22 },
+                  2: { player: { id: 202 }, points: -2 },
+                },
               },
             },
-            away: {
-              reports: {
-                1: { player: { id: 201 }, points: 22 },
-                2: { player: { id: 202 }, points: -2 },
-              },
-            },
-          },
-        ],
-      },
-    });
+          ],
+        },
+      })
+    );
 
     const updated = await syncFantasyPoints(
       manager,

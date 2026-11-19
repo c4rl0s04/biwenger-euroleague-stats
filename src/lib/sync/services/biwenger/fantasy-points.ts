@@ -1,4 +1,4 @@
-import { fetchRoundGames as defaultFetchRoundGames } from '../../../api/biwenger-client';
+import { readBiwengerRoundGames } from '@/features/provider/server';
 import {
   preparePlayerStatMutations,
   type PlayerStatMutations,
@@ -8,22 +8,8 @@ import type { SyncManager } from '../../manager';
 import type { BiwengerRound } from '../../rounds';
 
 export interface FantasyPointsDependencies {
-  fetchRoundGames?: (roundId: number) => Promise<unknown>;
+  fetchRoundGames?: typeof readBiwengerRoundGames;
   prepareMutations?: (db: DbClient, seasonId: string) => PlayerStatMutations;
-}
-
-function object(value: unknown): Record<string, unknown> {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    throw new Error('Invalid Biwenger fantasy report structure.');
-  }
-  return value as Record<string, unknown>;
-}
-
-export function fantasyGames(payload: unknown): unknown[] {
-  const envelope = object(payload);
-  const games = object(envelope.data ?? envelope).games;
-  if (!Array.isArray(games)) throw new Error('Biwenger returned no games for fantasy points.');
-  return games;
 }
 
 export async function syncFantasyPoints(
@@ -34,44 +20,19 @@ export async function syncFantasyPoints(
   const seasonId = manager.context.seasonId;
   if (!seasonId) throw new Error('The writable season was not resolved.');
   if (!manager.context.db) throw new Error('The sync database was not initialized.');
-  const games = fantasyGames(
-    await (dependencies.fetchRoundGames || defaultFetchRoundGames)(round.id)
-  );
+  const games = await (dependencies.fetchRoundGames || readBiwengerRoundGames)(round.id);
   const scores: Array<{ playerId: number; roundId: number; fantasyPoints: number }> = [];
   let reports = 0;
   let missingScores = 0;
-  // Validate the complete response before persisting any scores from this round.
-  for (const rawGame of games) {
-    const game = object(rawGame);
+  for (const game of games) {
     for (const side of [game.home, game.away]) {
-      if (side == null) continue;
-      const collection = object(side).reports;
-      if (collection == null) continue;
-      if (typeof collection !== 'object')
-        throw new Error('Invalid Biwenger fantasy report collection.');
-      for (const rawReport of Object.values(collection)) {
+      for (const { player, points } of Object.values(side?.reports ?? {})) {
         reports++;
-        const report = object(rawReport);
-        const playerId = object(report.player).id;
-        const points = report.points;
-        if (
-          typeof playerId !== 'number' ||
-          !Number.isInteger(playerId) ||
-          playerId <= 0 ||
-          playerId > 2147483647 ||
-          (points != null &&
-            (typeof points !== 'number' ||
-              !Number.isInteger(points) ||
-              points < -2147483648 ||
-              points > 2147483647))
-        ) {
-          throw new Error(`Invalid Biwenger fantasy report in round ${round.id}.`);
-        }
         if (points == null) {
           missingScores++;
           continue;
         }
-        scores.push({ playerId, roundId: round.dbId, fantasyPoints: points as number });
+        scores.push({ playerId: player.id, roundId: round.dbId, fantasyPoints: points });
       }
     }
   }

@@ -1,4 +1,4 @@
-import { fetchRoundGames } from '../../../api/biwenger-client';
+import { readBiwengerRoundGames, type BiwengerRoundGame } from '@/features/provider/server';
 import { euroleagueSeasonYear } from '../../../api/euroleague/normalization';
 import type { OfficialScheduleGame } from '../../../api/euroleague/types';
 import { CONFIG } from '../../../config';
@@ -36,7 +36,7 @@ export interface OfficialMatchRow {
 }
 
 export interface MatchesDependencies {
-  fetchRoundGames?: (roundId: number) => Promise<any>;
+  fetchRoundGames?: typeof readBiwengerRoundGames;
   getOfficialTeamMappings?: (seasonId: string, db?: any) => Promise<OfficialTeamMappingRecord[]>;
   prepareMutations?: (db: unknown, options: { seasonId: string }) => MatchMutations;
   getSchedule?: (seasonYear: number) => Promise<OfficialScheduleGame[]>;
@@ -88,11 +88,11 @@ export async function syncBiwengerMatches(
   const mutationsFactory = dependencies.prepareMutations || prepareMatchMutations;
   const mutations = mutationsFactory(db, { seasonId });
 
-  const fetchGames = dependencies.fetchRoundGames || fetchRoundGames;
+  const fetchGames = dependencies.fetchRoundGames || readBiwengerRoundGames;
   const getMappings = dependencies.getOfficialTeamMappings || defaultGetOfficialTeamMappings;
 
-  let gamesData: any;
-  let mappingResult: any;
+  let games: BiwengerRoundGame[];
+  let mappingResult: OfficialTeamMappingRecord[];
   let officialGames: OfficialMatchRow[] = [];
   try {
     const getSchedulePromise = (async (): Promise<OfficialScheduleGame[]> => {
@@ -130,7 +130,7 @@ export async function syncBiwengerMatches(
       getMappings(seasonId, db),
       getSchedulePromise,
     ]);
-    gamesData = gamesRes;
+    games = gamesRes;
     mappingResult = mappings;
     officialGames = scheduleRes.map((game: OfficialScheduleGame) => ({
       game_code: game.gameCode,
@@ -160,8 +160,6 @@ export async function syncBiwengerMatches(
   } catch (error: any) {
     throw new Error('Could not load fantasy and official match inputs.', { cause: error });
   }
-
-  const games = gamesData?.data?.games || gamesData?.games || [];
 
   // Enforce invariant: Within one season and one fantasy round, a team appears in at most one official game.
   const seenTeamIds = new Set<number>();
@@ -198,8 +196,8 @@ export async function syncBiwengerMatches(
   for (const game of games) {
     const homeId = game.home?.id;
     const awayId = game.away?.id;
-    const homeCode = codeByTeam.get(homeId);
-    const awayCode = codeByTeam.get(awayId);
+    const homeCode = homeId != null ? codeByTeam.get(homeId) : undefined;
+    const awayCode = awayId != null ? codeByTeam.get(awayId) : undefined;
     const candidates = officialGames.filter(
       (item) => item.home_team_code === homeCode && item.away_team_code === awayCode
     );
