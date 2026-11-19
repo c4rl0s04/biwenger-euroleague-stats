@@ -270,7 +270,7 @@ describe('SyncReporter Output Scenarios', () => {
 
     reporter.runFailed({
       completedSteps: 4,
-      failedStepId: 'euroleague-games',
+      failedStepIds: ['euroleague-games'],
       remainingSteps: 8,
       warningsCount: 1,
       durationMs: 7800,

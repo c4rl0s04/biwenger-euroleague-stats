@@ -57,7 +57,8 @@ source, the tables or fields it owns, its supported modes, and its dependencies.
 numeric aliases or hidden retired steps.
 
 [`SyncManager`](../../src/lib/sync/manager.ts) acquires the advisory lock, verifies schema readiness,
-resolves a writable season, executes the selected steps in order, and stops on the first failure.
+resolves a writable season and executes the selected steps in order. A failed step blocks its
+selected dependants. Independent steps still run, and the run reports failure at the end.
 Routine, bootstrap, and live execution share the same advisory-lock key, so they cannot overlap.
 
 ## Provider ownership and persistence
@@ -110,7 +111,8 @@ remaining on the active execution path.
   reintroduced on the global identity table.
 - Concurrent sync workers must not write through the same advisory-lock scope.
 - Sync mutations should be idempotent so a stopped pipeline can be safely rerun.
-- Any step failure stops the current pipeline; partial successful writes remain safe to rerun.
+- Successful writes from a partial run remain safe to rerun. A single-step run can rely on
+  prerequisites already stored in the database.
 - Production schema mutation must never be hidden inside routine sync execution.
 - Sporting totals and Biwenger fantasy points have separate mutations and cannot overwrite one another.
 - Current ownership has a single writer (`biwenger-squads`); board ingestion never infers ownership.

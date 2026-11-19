@@ -17,13 +17,13 @@ vi.mock('../season-guard', () => ({
   assertSyncSeasonWritable: vi.fn(async () => ({ seasonId: '2026-27', status: 'active' })),
 }));
 
-const definition = (id: string, run: any) => ({
+const definition = (id: string, run: any, dependencies: string[] = []) => ({
   id,
   title: id,
   source: 'database' as const,
   writes: [],
   modes: ['routine'] as const,
-  dependencies: [],
+  dependencies,
   run,
 });
 
@@ -36,21 +36,38 @@ describe('SyncManager', () => {
     });
   });
 
-  it('fails fast after the first step exception', async () => {
+  it('runs independent steps and skips failed dependencies transitively', async () => {
     const { SyncManager } = await import('../manager');
-    const manager = new SyncManager({ useAdvisoryLock: false });
-    const first = vi.fn(async () => {
-      throw new Error('boom');
+    const terminalLines: string[] = [];
+    const write = (line: string) => terminalLines.push(line);
+    const manager = new SyncManager({
+      useAdvisoryLock: false,
+      writer: { log: write, error: write },
     });
-    const second = vi.fn(async () => ({ summary: 'done' }));
-    manager.addStep(definition('first', first));
-    manager.addStep(definition('second', second));
+    const fail = async () => {
+      throw new Error('fixture failure');
+    };
+    const dependent = vi.fn();
+    const transitive = vi.fn();
+    const independent = vi.fn(async () => ({ summary: 'done' }));
+    manager.addStep(definition('euroleague-games', fail));
+    manager.addStep(definition('dependent', dependent, ['euroleague-games']));
+    manager.addStep(definition('transitive', transitive, ['dependent']));
+    manager.addStep(definition('biwenger-board', independent, ['outside-selected-mode']));
+    manager.addStep(definition('another-failure', fail));
 
     await manager.run();
 
-    expect(first).toHaveBeenCalledOnce();
-    expect(second).not.toHaveBeenCalled();
+    expect(dependent).not.toHaveBeenCalled();
+    expect(transitive).not.toHaveBeenCalled();
+    expect(independent).toHaveBeenCalledOnce();
     expect(manager.hasErrors).toBe(true);
+    expect(terminalLines).toContain(
+      '  · Skipped dependent: dependency unavailable (euroleague-games).'
+    );
+    expect(terminalLines).toContain('  · Skipped transitive: dependency unavailable (dependent).');
+    expect(terminalLines).toContain('Failed       euroleague-games, another-failure');
+    expect(terminalLines).toContain('Not run      2');
   });
 
   it('dispatches failed step details to the observability layer', async () => {
@@ -118,7 +135,7 @@ describe('SyncManager', () => {
       await sync;
       const startedGames = worker.mock.calls.map(([, gameCode]) => gameCode);
       worker.mockRestore();
-      expect(startedGames).toEqual([1, 2]);
+      expect(startedGames).toEqual([1, 2, 3]);
     }
     expect(lockClient.query).toHaveBeenLastCalledWith(
       expect.stringContaining('pg_advisory_unlock'),
@@ -126,9 +143,11 @@ describe('SyncManager', () => {
     );
     expect(lockClient.release).toHaveBeenCalledOnce();
     expect(mockDb.end).toHaveBeenCalledOnce();
-    expect(nextStep).not.toHaveBeenCalled();
+    expect(nextStep).toHaveBeenCalledOnce();
     expect(manager.hasErrors).toBe(true);
-    expect(manager.logs.find((entry) => entry.type === 'error')?.error).toBe(failure);
+    expect(manager.logs.find((entry) => entry.type === 'error')?.error).toMatchObject({
+      cause: failure,
+    });
   });
 
   it('skips all work when the shared advisory lock is unavailable', async () => {

@@ -255,7 +255,7 @@ export class SyncReporter {
 
   runFailed(params: {
     completedSteps: number;
-    failedStepId: string;
+    failedStepIds: readonly string[];
     remainingSteps: number;
     warningsCount: number;
     durationMs: number;
@@ -263,7 +263,7 @@ export class SyncReporter {
     this.writer.log('');
     const entries: [string, string | number | undefined][] = [
       ['Completed', params.completedSteps],
-      ['Failed', params.failedStepId],
+      ['Failed', params.failedStepIds.join(', ')],
       ['Not run', params.remainingSteps],
       ['Warnings', params.warningsCount],
       ['Duration', formatDuration(params.durationMs)],
