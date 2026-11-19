@@ -169,11 +169,73 @@ describe('BiwengerProviderClient', () => {
 
     it('wraps fetch network exceptions into BiwengerNetworkError', async () => {
       const client = createClient();
-      fetchMock.mockRejectedValueOnce(new Error('Connection reset'));
+      fetchMock.mockRejectedValue(new Error('Connection reset'));
 
       await expect(
-        client.query('/players', { skipVersionCheck: true, delayMs: 0 })
+        client.query('/players', { skipVersionCheck: true, delayMs: 0, retries: 0 })
       ).rejects.toThrow(BiwengerNetworkError);
+    });
+
+    it.each([502, 503, 504])(
+      'retries a transient HTTP %i and respects Retry-After',
+      async (status) => {
+        fetchMock
+          .mockResolvedValueOnce(new Response(null, { status, headers: { 'Retry-After': '2' } }))
+          .mockResolvedValueOnce(Response.json({ status: 'recovered' }));
+
+        await expect(
+          createClient().query('/players', { skipVersionCheck: true, retryDelay: 50 })
+        ).resolves.toEqual({ status: 'recovered' });
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+        expect(sleepMock).toHaveBeenCalledExactlyOnceWith(2000);
+      }
+    );
+
+    it('retries an interrupted read', async () => {
+      fetchMock
+        .mockRejectedValueOnce(new TypeError('Connection reset'))
+        .mockResolvedValueOnce(Response.json({ status: 'recovered' }));
+
+      await expect(
+        createClient().query('/players', { skipVersionCheck: true, retryDelay: 50 })
+      ).resolves.toEqual({ status: 'recovered' });
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+
+    it.each(['headers', 'body'])(
+      'times out while reading %s and retries with a fresh signal',
+      async (stage) => {
+        fetchMock
+          .mockImplementationOnce((_url, { signal }: RequestInit) => {
+            const stalled = () =>
+              new Promise<never>((_resolve, reject) => {
+                signal?.addEventListener('abort', () => reject(signal.reason), { once: true });
+              });
+            return stage === 'headers' ? stalled() : { ok: true, text: stalled };
+          })
+          .mockResolvedValueOnce(Response.json({ status: 'recovered' }));
+
+        await expect(
+          createClient({ readTimeoutMs: 10 }).query('/players', {
+            skipVersionCheck: true,
+            retryDelay: 50,
+          })
+        ).resolves.toEqual({ status: 'recovered' });
+        const firstSignal = fetchMock.mock.calls[0][1].signal as AbortSignal;
+        expect(firstSignal.aborted).toBe(true);
+        expect(fetchMock.mock.calls[1][1].signal).not.toBe(firstSignal);
+      }
+    );
+
+    it('does not retry earlier than a Retry-After outside the wait budget', async () => {
+      fetchMock.mockResolvedValueOnce(
+        new Response(null, { status: 429, headers: { 'Retry-After': '3600' } })
+      );
+      await expect(
+        createClient().query('/players', { skipVersionCheck: true })
+      ).rejects.toBeInstanceOf(BiwengerRateLimitError);
+      expect(fetchMock).toHaveBeenCalledOnce();
+      expect(sleepMock).not.toHaveBeenCalled();
     });
 
     it('throws BiwengerAuthError when token is missing', async () => {
@@ -238,6 +300,7 @@ describe('BiwengerProviderClient', () => {
           body: { player: 42 },
           skipVersionCheck: true,
           delayMs: 0,
+          retries: 2,
         })
       ).rejects.toThrow(BiwengerRateLimitError);
 
