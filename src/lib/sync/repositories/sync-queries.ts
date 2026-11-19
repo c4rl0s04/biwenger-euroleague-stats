@@ -8,6 +8,7 @@ import {
   officialTeamMappings,
   playerSeasons,
   players,
+  userRounds,
   userSeasons,
 } from '../../db/schema';
 import type { BiwengerRound } from '../rounds';
@@ -278,6 +279,69 @@ export async function getRoundScheduleState(
     matchCount: Number(matchCount) || 0,
     hasLineups: Boolean(hasLineups),
   };
+}
+
+/** Compare the manager snapshots and usable results observed for the selected rounds. */
+export async function getRoundManagerResultCoverage(
+  seasonId: string,
+  roundIds: number[],
+  client?: SyncDb
+) {
+  if (roundIds.length === 0) return [];
+
+  const db = resolveDrizzle(client);
+  const lineupManagers = db
+    .selectDistinct({ roundId: lineups.roundId, userId: lineups.userId })
+    .from(lineups)
+    .where(
+      and(
+        eq(lineups.seasonId, seasonId),
+        inArray(lineups.roundId, roundIds),
+        isNotNull(lineups.userId)
+      )
+    )
+    .as('lineup_managers');
+  const resultManagers = db
+    .select({
+      roundId: userRounds.roundId,
+      userId: userRounds.userId,
+      points: userRounds.points,
+      participated: userRounds.participated,
+    })
+    .from(userRounds)
+    .where(
+      and(
+        eq(userRounds.seasonId, seasonId),
+        inArray(userRounds.roundId, roundIds),
+        isNotNull(userRounds.userId)
+      )
+    )
+    .as('result_managers');
+  const roundId = sql<number>`coalesce(${lineupManagers.roundId}, ${resultManagers.roundId})`;
+
+  return db
+    .select({
+      roundId: roundId.as('round_id'),
+      expected: sql<number>`COUNT(*)::int`.as('expected'),
+      missing:
+        sql<number>`COUNT(*) FILTER (WHERE ${resultManagers.points} IS NULL OR ${resultManagers.participated} IS NULL)::int`.as(
+          'missing'
+        ),
+      missingLineups:
+        sql<number>`COUNT(*) FILTER (WHERE ${resultManagers.participated} = true AND ${lineupManagers.userId} IS NULL)::int`.as(
+          'missing_lineups'
+        ),
+    })
+    .from(lineupManagers)
+    .fullJoin(
+      resultManagers,
+      and(
+        eq(lineupManagers.roundId, resultManagers.roundId),
+        eq(lineupManagers.userId, resultManagers.userId)
+      )
+    )
+    .groupBy(roundId)
+    .orderBy(asc(roundId));
 }
 
 /**

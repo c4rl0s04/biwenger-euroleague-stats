@@ -38,6 +38,9 @@ export async function syncBiwengerLineups(
   const roundName = round.name;
   const status = round.status;
   let insertedCount = 0;
+  let fetchedManagers = 0;
+  let acceptedLineups = 0;
+  let persistedResults = 0;
 
   const fetchRounds = dependencies.fetchRoundsLeague || defaultFetchRoundsLeague;
   const fetchDetails = dependencies.fetchPlayerDetails || defaultFetchPlayerDetails;
@@ -65,6 +68,7 @@ export async function syncBiwengerLineups(
       throw new Error(
         `Round ${roundId} returned no usable standings; existing snapshots retained.`
       );
+    fetchedManagers = standings.length;
     if (standings) {
       const mutations = userMutationsFactory(db as any, { seasonId: manager.context.seasonId });
       const playerMutations = playerMutationsFactory(db as any, {
@@ -95,6 +99,7 @@ export async function syncBiwengerLineups(
           !snapshot.slice(0, 5).some((id: unknown) => id != null && String(id) === String(captain))
         )
           throw new Error(`Invalid captain in round snapshot for manager ${user.id}.`);
+        acceptedLineups++;
         const rows = [];
 
         await mutations.upsertUser({
@@ -115,8 +120,11 @@ export async function syncBiwengerLineups(
               participated: participated === 1,
               alineacion: alineacion,
             });
+            persistedResults++;
           } catch (e: any) {
-            throw new Error(`Failed to store round result for ${user.name}.`, { cause: e });
+            throw new Error(`Failed to store a manager result for round ${dbRoundId}.`, {
+              cause: e,
+            });
           }
         }
 
@@ -192,7 +200,7 @@ export async function syncBiwengerLineups(
     manager.log('Skipping lineups (round not finished/active).');
   }
 
-  return { insertedCount };
+  return { insertedCount, fetchedManagers, acceptedLineups, persistedResults };
 }
 
 /** Compatibility export */

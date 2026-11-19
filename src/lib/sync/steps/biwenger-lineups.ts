@@ -1,5 +1,9 @@
 import type { SyncManager } from '../manager';
-import { getPlayerDirectoryMap, getRoundScheduleState } from '../repositories/sync-queries';
+import {
+  getPlayerDirectoryMap,
+  getRoundManagerResultCoverage,
+  getRoundScheduleState,
+} from '../repositories/sync-queries';
 import { relevantRounds } from '../rounds';
 import { deriveRoundLifecycle } from '../../competition/public';
 import * as lineups from '../services/biwenger/lineups';
@@ -10,8 +14,22 @@ export async function run(manager: SyncManager) {
   const rounds = relevantRounds((await manager.getBiwengerCompetition()).rounds);
   const players =
     manager.context.biwenger?.players || (await getPlayerDirectoryMap(manager.context.db));
-  let inserted = 0;
-  let synchronizedRounds = 0;
+  const finishedRounds = new Set<number>();
+  const counts = {
+    rounds: 0,
+    lineups: 0,
+    fetchedManagers: 0,
+    acceptedLineups: 0,
+    persistedResults: 0,
+    skippedSnapshots: 0,
+    skippedRounds: 0,
+    emptyRounds: 0,
+    incompleteRounds: 0,
+    missingResults: 0,
+    missingLineups: 0,
+    unverifiedRounds: 0,
+    failedRounds: 0,
+  };
   const now = new Date();
   if (
     manager.forceRound &&
@@ -38,6 +56,8 @@ export async function run(manager: SyncManager) {
         : round.status === 'active'
           ? 'live'
           : 'upcoming';
+    const isFinal = effective === 'finished' && round.status === 'finished';
+    if (isFinal) finishedRounds.add(dbId);
     const oldFinished =
       effective === 'finished' &&
       row.lastMatchDate &&
@@ -46,26 +66,72 @@ export async function run(manager: SyncManager) {
       effective === 'upcoming' ||
       (oldFinished && manager.mode !== 'bootstrap' && !manager.forceRound)
     ) {
-      manager.log(`Lineup round ${dbId}: skipped (${effective}).`);
+      counts.skippedRounds++;
+      const reason = effective === 'upcoming' ? 'upcoming' : 'outside_refresh_window';
+      manager.log(`Lineup round ${dbId}: skipped (${reason}).`);
       continue;
     }
     manager.log(
       `Lineup round ${dbId}: ${effective}; provider status ${round.status || 'unknown'}.`
     );
     // Live snapshots are useful before manager results are final; never finalize them from schedule alone.
-    const result = await lineups.run(
-      manager,
-      {
-        ...round,
-        status: effective === 'finished' && round.status === 'finished' ? 'finished' : 'active',
-      },
-      players
-    );
-    inserted += result.insertedCount || 0;
-    synchronizedRounds++;
+    try {
+      const result = await lineups.run(
+        manager,
+        { ...round, status: isFinal ? 'finished' : 'active' },
+        players
+      );
+      counts.rounds++;
+      counts.lineups += result.insertedCount;
+      counts.fetchedManagers += result.fetchedManagers;
+      counts.acceptedLineups += result.acceptedLineups;
+      counts.persistedResults += result.persistedResults;
+      counts.skippedSnapshots += result.fetchedManagers - result.acceptedLineups;
+      if (result.fetchedManagers === 0) {
+        counts.emptyRounds++;
+        manager.log(`Lineup round ${dbId}: provider returned empty standings.`);
+      }
+    } catch (error) {
+      counts.failedRounds++;
+      manager.log(
+        `Lineup round ${dbId}: failed. Counts from completed rounds: ${JSON.stringify(counts)}`
+      );
+      throw error;
+    }
   }
+
+  const coverage = await getRoundManagerResultCoverage(
+    seasonId,
+    Array.from(finishedRounds),
+    manager.context.db
+  );
+  for (const { roundId, expected, missing, missingLineups } of coverage) {
+    finishedRounds.delete(roundId);
+    if (missing === 0 && missingLineups === 0) continue;
+    counts.incompleteRounds++;
+    counts.missingResults += missing;
+    counts.missingLineups += missingLineups;
+    if (missing > 0) {
+      manager.warn(
+        `Lineup round ${roundId}: incomplete final results (${missing}/${expected} managers missing).`
+      );
+    }
+    if (missingLineups > 0) {
+      manager.warn(
+        `Lineup round ${roundId}: ${missingLineups} participating managers lack saved lineups.`
+      );
+    }
+  }
+  for (const roundId of Array.from(finishedRounds)) {
+    counts.incompleteRounds++;
+    counts.unverifiedRounds++;
+    manager.warn(
+      `Lineup round ${roundId}: no saved lineups or final results; coverage unverified.`
+    );
+  }
+
   return {
     summary: 'Biwenger lineups and manager round results synchronized.',
-    counts: { rounds: synchronizedRounds, lineups: inserted },
+    counts,
   };
 }
