@@ -1,10 +1,12 @@
+import { checksumPayload } from '../../sync/services/euroleague/checksum';
+import { mapEuroleagueBoxScoreRow } from '../euroleague/box-score.mapper';
+import { boxScoreRowSchema } from '../euroleague/schemas';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it, vi } from 'vitest';
 import {
   EuroleagueApiError,
   EuroleagueClient,
-  checksumPayload,
   parseMinutes,
   parseProviderNumber,
 } from '../euroleague/client';
@@ -238,5 +240,22 @@ describe('EuroleagueClient contracts', () => {
       expect(player.twoPointsMade).toBeNull(); // Missing preserved as null
       expect(player.assists).toBeNull(); // Missing preserved as null
     });
+  });
+});
+
+describe('mapEuroleagueBoxScoreRow', () => {
+  it('maps a provider fixture without HTTP', () => {
+    const row = boxScoreRowSchema.parse(fixture('boxscore')[0]);
+    const boxScore = mapEuroleagueBoxScoreRow(row, 1);
+
+    expect(boxScore).toMatchObject({
+      gameCode: 1,
+      playerCode: 'P014102',
+      teamCode: 'MAD',
+      minutesSeconds: 1265,
+      isDnp: false,
+      points: 12,
+    });
+    expect(boxScore.raw).toBe(row);
   });
 });

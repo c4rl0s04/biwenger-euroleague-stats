@@ -1,4 +1,4 @@
-import { checksumPayload } from '../../../api/euroleague/client';
+import { checksumPayload } from './checksum';
 import { euroleagueSeasonYear } from '../../../api/euroleague/normalization';
 import { prepareOfficialGameMutations } from '../../../db/mutations/official/game-data';
 import { prepareOfficialMappingMutations } from '../../../db/mutations/official/mappings';

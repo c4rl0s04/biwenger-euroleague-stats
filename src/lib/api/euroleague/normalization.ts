@@ -1,3 +1,17 @@
+import type { EuroleagueRow } from './schemas';
+
+export const asString = (value: unknown): string | null =>
+  value === null || value === undefined || value === '' ? null : String(value).trim();
+
+export const asBoolean = (value: unknown): boolean =>
+  value === true || value === 1 || value === '1' || String(value).toLowerCase() === 'true';
+
+export const requiredString = (row: EuroleagueRow, key: string): string => {
+  const value = asString(row[key]);
+  if (!value) throw new Error(`EuroLeague API row is missing ${key}.`);
+  return value;
+};
+
 export function normalizeEuroleaguePlayerCode(value: unknown): string {
   const digits = String(value ?? '').replace(/\D/g, '');
   return digits ? `P${digits.padStart(6, '0')}` : '';
