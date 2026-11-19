@@ -105,7 +105,20 @@ describe('hoopgrid route contracts', () => {
     expect(json.challenge.id).toBe('challenge-1');
     expect(json.challenge.complexity).toBe(42);
     expect(json.userGuesses[0].rarity).toBe(7);
+    expect(response.headers.get('Cache-Control')).toMatch(/\bprivate\b/);
+    expect(response.headers.get('Cache-Control')).toMatch(/\bno-store\b/);
     expect(hoopgridReadServiceMock.getTodayChallenge).toHaveBeenCalledWith('2026-05-18', '42');
+  });
+
+  it('returns a private, non-cacheable response when the daily challenge fails', async () => {
+    hoopgridReadServiceMock.getTodayChallenge.mockRejectedValueOnce(new Error('Challenge failed'));
+    const { GET } = await import('@/app/api/hoopgrid/today/route');
+    const response = await GET(request('http://localhost/api/hoopgrid/today'));
+
+    expect(response.status).toBe(500);
+    expect(await response.json()).toEqual({ error: 'Challenge failed' });
+    expect(response.headers.get('Cache-Control')).toMatch(/\bprivate\b/);
+    expect(response.headers.get('Cache-Control')).toMatch(/\bno-store\b/);
   });
 
   it('covers POST /api/hoopgrid/guess auth and success contracts', async () => {
