@@ -29,3 +29,15 @@ export function euroleagueSeasonYear(seasonCode: string, seasonId: string): numb
   }
   return year;
 }
+
+export const asNumber = (value: unknown): number | null => {
+  if (value === null || value === undefined || value === '') return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+export const requiredNumber = (row: EuroleagueRow, key: string): number => {
+  const value = asNumber(row[key]);
+  if (value === null) throw new Error(`EuroLeague API row is missing ${key}.`);
+  return value;
+};
