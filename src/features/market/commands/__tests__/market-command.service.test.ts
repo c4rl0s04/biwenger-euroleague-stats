@@ -84,7 +84,7 @@ describe('Market Command Service', () => {
         mode: 'immediateSell',
         message: 'Jugador procesado en el mercado correctamente',
       });
-      expect(repository.clearLocalPlayerOwner).toHaveBeenCalledWith(202);
+      expect(repository.clearLocalPlayerOwner).toHaveBeenCalledWith(202, 'user-1');
     });
 
     it('catches and logs local DB failure on immediateSell without throwing', async () => {
@@ -239,7 +239,7 @@ describe('Market Command Service', () => {
         playerId: 888,
         message: 'Oferta aceptada correctamente',
       });
-      expect(repository.clearLocalPlayerOwner).toHaveBeenCalledWith(888);
+      expect(repository.clearLocalPlayerOwner).toHaveBeenCalledWith(888, 'user-1');
     });
 
     it('catches and logs DB failure on acceptOffer without failing the operation', async () => {

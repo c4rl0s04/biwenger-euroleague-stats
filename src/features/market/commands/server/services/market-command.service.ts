@@ -161,10 +161,7 @@ export function createMarketCommandService(
 
         if (validated.type === 'immediateSell') {
           try {
-            await repository.clearLocalPlayerOwner(validated.playerId);
-            console.log(
-              `[DB] Successfully set player ${validated.playerId} season owner to null after immediateSell`
-            );
+            await repository.clearLocalPlayerOwner(validated.playerId, userId);
           } catch (dbErr) {
             console.error('Failed to update player owner in DB after immediate sell:', dbErr);
           }
@@ -310,10 +307,7 @@ export function createMarketCommandService(
 
         if (validated.playerId) {
           try {
-            await repository.clearLocalPlayerOwner(validated.playerId);
-            console.log(
-              `[DB] Successfully set player ${validated.playerId} season owner to null after accepting offer`
-            );
+            await repository.clearLocalPlayerOwner(validated.playerId, userId);
           } catch (dbErr) {
             console.error('Failed to update player owner in DB after offer acceptance:', dbErr);
           }
