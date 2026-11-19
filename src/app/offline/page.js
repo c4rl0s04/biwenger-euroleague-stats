@@ -16,8 +16,8 @@ export default function OfflinePage() {
         <div className="mx-auto mt-6 flex h-12 w-12 items-center justify-center rounded-full bg-zinc-800 text-zinc-400">
           <WifiOff size={23} aria-hidden="true" />
         </div>
-        <h1 className="mt-5 text-4xl text-white">Sin conexión</h1>
-        <p className="mx-auto mt-3 max-w-sm text-sm leading-7 text-zinc-400">
+        <h1 className="mt-5 text-4xl text-card-foreground">Sin conexión</h1>
+        <p className="mx-auto mt-3 max-w-sm text-sm leading-7 text-muted-foreground">
           Necesitas conexión para consultar las estadísticas. No guardamos datos privados en este
           dispositivo.
         </p>
