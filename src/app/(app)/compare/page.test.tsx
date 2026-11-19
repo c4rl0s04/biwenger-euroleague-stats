@@ -1,3 +1,4 @@
+import { renderToStaticMarkup } from 'react-dom/server';
 import { beforeEach, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   phone: vi.fn(),
@@ -7,16 +8,19 @@ const mocks = vi.hoisted(() => ({
   opponent: vi.fn(),
 }));
 vi.mock('@/auth', () => ({ auth: mocks.auth }));
+vi.mock('@/components/shell/mobile/MobileHeaderActions', () => ({ default: () => null }));
+
 vi.mock('@/lib/mobile/presentation-server', () => ({ isPhonePresentation: mocks.phone }));
 vi.mock('@/lib/mobile/route-server', () => ({ requireMobileRoute: mocks.guard }));
 vi.mock('@/features/compare/server', () => ({
   getCompareDataLite: mocks.data,
   mapCompareOpponent: mocks.opponent,
 }));
-vi.mock('@/features/compare/public', () => ({
+vi.mock('@/features/compare/public', async () => ({
   DesktopCompareScreen: () => null,
   MobileCompareScreen: () => null,
-  CompareOpponentScreen: () => null,
+  CompareOpponentScreen: (await import('@/features/compare/components/CompareOpponentScreen'))
+    .default,
 }));
 import ComparePage from './page';
 import OpponentPage from './[userId]/page';
@@ -53,7 +57,10 @@ it('does not read when desktop/mobile route guard redirects', async () => {
   );
   expect(mocks.data).not.toHaveBeenCalled();
 });
-it('preserves the blank missing-manager result', async () => {
+it('shows a recovery state with a way back when the comparison cannot be resolved', async () => {
   mocks.opponent.mockReturnValue(null);
-  expect(await OpponentPage({ params: Promise.resolve({ userId: 'missing' }) })).toBeNull();
+  const result = await OpponentPage({ params: Promise.resolve({ userId: 'missing' }) });
+  const html = renderToStaticMarkup(result);
+  expect(html).toContain('Esta comparativa no está disponible.');
+  expect(html).toContain('href="/compare"');
 });
