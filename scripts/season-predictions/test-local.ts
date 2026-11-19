@@ -184,12 +184,32 @@ try {
     ids: ['1', '2'],
   });
 
+  // Windows and submissions are phase-scoped; a phase without a window rejects submissions.
+  const phases = await disposable.pool.query(`SELECT phase FROM season_prediction_submissions
+    WHERE season_id = '2026-27' GROUP BY phase`);
+  assert.deepEqual(
+    phases.rows.map((row) => row.phase),
+    ['preseason']
+  );
+  await assert.rejects(
+    disposable.pool.query(`INSERT INTO season_prediction_submissions (season_id, phase, user_id, answers)
+      VALUES ('2026-27', 'playoffs', 'u1', '{}'::jsonb)`),
+    /season_prediction_submissions_window_fk/
+  );
+  await assert.rejects(
+    disposable.pool.query(`UPDATE season_prediction_windows SET phase = 'regular'
+      WHERE season_id = '2026-27'`),
+    /season_prediction_window_phase/
+  );
+
   const tables = await disposable.pool.query(`SELECT relname, relrowsecurity FROM pg_class
-    WHERE relname IN ('season_prediction_windows', 'season_prediction_submissions')`);
-  assert.equal(tables.rowCount, 2);
+    WHERE relname IN ('season_prediction_windows', 'season_prediction_submissions',
+      'official_schedule_games')`);
+  assert.equal(tables.rowCount, 3);
   assert(tables.rows.every((row) => row.relrowsecurity));
   const grants = await disposable.pool.query(`SELECT * FROM information_schema.role_table_grants
-    WHERE table_name IN ('season_prediction_windows', 'season_prediction_submissions')
+    WHERE table_name IN ('season_prediction_windows', 'season_prediction_submissions',
+      'official_schedule_games')
       AND grantee IN ('anon', 'authenticated', 'service_role')`);
   assert.equal(grants.rowCount, 0);
   await pool.end();

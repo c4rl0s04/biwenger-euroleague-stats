@@ -31,7 +31,12 @@ describe('supabase data access hardening (0018_lock_down_supabase_data_access)',
       for (const exportVal of Object.values(schema)) {
         try {
           const config = getTableConfig(exportVal as any);
-          if (config?.name && !config.name.startsWith('season_prediction_')) {
+          // Tables created after 0018 enable RLS in their own migrations (0020, 0021).
+          if (
+            config?.name &&
+            !config.name.startsWith('season_prediction_') &&
+            config.name !== 'official_schedule_games'
+          ) {
             schemaTables.push(config.name);
           }
         } catch {

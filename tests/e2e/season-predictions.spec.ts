@@ -152,8 +152,8 @@ for (const theme of ['dark', 'light'] as const) {
     const client = new pg.Client({ connectionString: process.env.E2E_DATABASE_URL });
     await client.connect();
     try {
-      await client.query(`INSERT INTO season_prediction_submissions (season_id, user_id, answers)
-        VALUES ('2025-26', '99002', '{"team-champion":{"kind":"single","id":"9901"}}'::jsonb);
+      await client.query(`INSERT INTO season_prediction_submissions (season_id, phase, user_id, answers)
+        VALUES ('2025-26', 'preseason', '99002', '{"team-champion":{"kind":"single","id":"9901"}}'::jsonb);
         UPDATE season_prediction_windows SET locks_at = clock_timestamp()
         WHERE season_id = '2025-26'`);
     } finally {
@@ -182,8 +182,8 @@ rawTest(
       await client.query(`DELETE FROM season_prediction_submissions WHERE season_id = '2025-26';
       UPDATE season_prediction_windows SET opens_at = clock_timestamp(),
         locks_at = clock_timestamp() + interval '168 hours' WHERE season_id = '2025-26';
-      INSERT INTO season_prediction_submissions (season_id, user_id, answers)
-        VALUES ('2025-26', '99002', '{"team-champion":{"kind":"single","id":"9901"}}'::jsonb);`);
+      INSERT INTO season_prediction_submissions (season_id, phase, user_id, answers)
+        VALUES ('2025-26', 'preseason', '99002', '{"team-champion":{"kind":"single","id":"9901"}}'::jsonb);`);
       await page.goto('/login?callbackUrl=%2Fseason-predictions');
       await page.getByLabel('Manager').fill(process.env.E2E_USERNAME!);
       await page.locator('#login-password').fill(process.env.E2E_PASSWORD!);

@@ -14,12 +14,19 @@ No submission is accepted before that operation. The window snapshots the 12 que
 season's player, EuroLeague team, and fantasy manager candidates. Existing windows cannot be
 reopened or extended by this command.
 
+Windows and submissions are scoped by phase. Migration `0021_prediction_phases.sql` keys them by
+`(season_id, phase)` and `(season_id, phase, user_id)`, backfills existing rows as `preseason`, and
+adds `official_schedule_games` for the upcoming playoff bracket. The opening command and the page
+currently handle only the `preseason` phase.
+
 ## Rollout
 
 1. Follow [database safety](database-safety.md): identify the target database, take and verify schema
    and data backups, and audit the current schema.
-2. Apply committed migration `0020_season_predictions.sql` with `npm run db:migrate`. Verify with
-   `npm run db:validate` and `npm run db:check`.
+2. Apply committed migrations `0020_season_predictions.sql` and `0021_prediction_phases.sql` with
+   `npm run db:migrate` while no preseason window is open. Verify with `npm run db:validate` and
+   `npm run db:check`, then deploy the matching application version immediately: saves from older
+   code fail once the submission key includes the phase.
 3. Deploy the application. The page shows a closed state until the separate opening command runs.
 4. Preview candidate counts for the intended season:
 
