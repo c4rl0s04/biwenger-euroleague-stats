@@ -281,7 +281,7 @@ export async function getRoundScheduleState(
   };
 }
 
-/** Count saved lineup managers that still lack a usable final result for the same round. */
+/** Compare the manager snapshots and usable results observed for the selected rounds. */
 export async function getRoundManagerResultCoverage(
   seasonId: string,
   roundIds: number[],
@@ -289,27 +289,59 @@ export async function getRoundManagerResultCoverage(
 ) {
   if (roundIds.length === 0) return [];
 
-  return resolveDrizzle(client)
-    .select({
-      roundId: sql<number>`${lineups.roundId}`.as('round_id'),
-      expected: sql<number>`COUNT(DISTINCT ${lineups.userId})::int`.as('expected'),
-      missing:
-        sql<number>`COUNT(DISTINCT ${lineups.userId}) FILTER (WHERE ${userRounds.points} IS NULL OR ${userRounds.participated} IS NULL)::int`.as(
-          'missing'
-        ),
-    })
+  const db = resolveDrizzle(client);
+  const lineupManagers = db
+    .selectDistinct({ roundId: lineups.roundId, userId: lineups.userId })
     .from(lineups)
-    .leftJoin(
-      userRounds,
+    .where(
       and(
-        eq(userRounds.seasonId, lineups.seasonId),
-        eq(userRounds.roundId, lineups.roundId),
-        eq(userRounds.userId, lineups.userId)
+        eq(lineups.seasonId, seasonId),
+        inArray(lineups.roundId, roundIds),
+        isNotNull(lineups.userId)
       )
     )
-    .where(and(eq(lineups.seasonId, seasonId), inArray(lineups.roundId, roundIds)))
-    .groupBy(lineups.roundId)
-    .orderBy(asc(lineups.roundId));
+    .as('lineup_managers');
+  const resultManagers = db
+    .select({
+      roundId: userRounds.roundId,
+      userId: userRounds.userId,
+      points: userRounds.points,
+      participated: userRounds.participated,
+    })
+    .from(userRounds)
+    .where(
+      and(
+        eq(userRounds.seasonId, seasonId),
+        inArray(userRounds.roundId, roundIds),
+        isNotNull(userRounds.userId)
+      )
+    )
+    .as('result_managers');
+  const roundId = sql<number>`coalesce(${lineupManagers.roundId}, ${resultManagers.roundId})`;
+
+  return db
+    .select({
+      roundId: roundId.as('round_id'),
+      expected: sql<number>`COUNT(*)::int`.as('expected'),
+      missing:
+        sql<number>`COUNT(*) FILTER (WHERE ${resultManagers.points} IS NULL OR ${resultManagers.participated} IS NULL)::int`.as(
+          'missing'
+        ),
+      missingLineups:
+        sql<number>`COUNT(*) FILTER (WHERE ${resultManagers.participated} = true AND ${lineupManagers.userId} IS NULL)::int`.as(
+          'missing_lineups'
+        ),
+    })
+    .from(lineupManagers)
+    .fullJoin(
+      resultManagers,
+      and(
+        eq(lineupManagers.roundId, resultManagers.roundId),
+        eq(lineupManagers.userId, resultManagers.userId)
+      )
+    )
+    .groupBy(roundId)
+    .orderBy(asc(roundId));
 }
 
 /**

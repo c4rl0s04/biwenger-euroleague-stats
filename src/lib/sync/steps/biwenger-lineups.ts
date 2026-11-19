@@ -14,7 +14,7 @@ export async function run(manager: SyncManager) {
   const rounds = relevantRounds((await manager.getBiwengerCompetition()).rounds);
   const players =
     manager.context.biwenger?.players || (await getPlayerDirectoryMap(manager.context.db));
-  const finishedRounds: number[] = [];
+  const finishedRounds = new Set<number>();
   const counts = {
     rounds: 0,
     lineups: 0,
@@ -26,6 +26,8 @@ export async function run(manager: SyncManager) {
     emptyRounds: 0,
     incompleteRounds: 0,
     missingResults: 0,
+    missingLineups: 0,
+    unverifiedRounds: 0,
     failedRounds: 0,
   };
   const now = new Date();
@@ -55,7 +57,7 @@ export async function run(manager: SyncManager) {
           ? 'live'
           : 'upcoming';
     const isFinal = effective === 'finished' && round.status === 'finished';
-    if (isFinal) finishedRounds.push(dbId);
+    if (isFinal) finishedRounds.add(dbId);
     const oldFinished =
       effective === 'finished' &&
       row.lastMatchDate &&
@@ -100,15 +102,31 @@ export async function run(manager: SyncManager) {
 
   const coverage = await getRoundManagerResultCoverage(
     seasonId,
-    finishedRounds,
+    Array.from(finishedRounds),
     manager.context.db
   );
-  for (const { roundId, expected, missing } of coverage) {
-    if (missing === 0) continue;
+  for (const { roundId, expected, missing, missingLineups } of coverage) {
+    finishedRounds.delete(roundId);
+    if (missing === 0 && missingLineups === 0) continue;
     counts.incompleteRounds++;
     counts.missingResults += missing;
+    counts.missingLineups += missingLineups;
+    if (missing > 0) {
+      manager.warn(
+        `Lineup round ${roundId}: incomplete final results (${missing}/${expected} managers missing).`
+      );
+    }
+    if (missingLineups > 0) {
+      manager.warn(
+        `Lineup round ${roundId}: ${missingLineups} participating managers lack saved lineups.`
+      );
+    }
+  }
+  for (const roundId of Array.from(finishedRounds)) {
+    counts.incompleteRounds++;
+    counts.unverifiedRounds++;
     manager.warn(
-      `Lineup round ${roundId}: incomplete final results (${missing}/${expected} managers missing).`
+      `Lineup round ${roundId}: no saved lineups or final results; coverage unverified.`
     );
   }
 

@@ -106,16 +106,16 @@ describe('sync-queries repository', () => {
 
   it('reads finished-round coverage through the sync PostgreSQL adapter', async () => {
     const query = vi.fn().mockResolvedValue({
-      rows: [{ round_id: 5145, expected: 6, missing: 6 }],
+      rows: [{ round_id: 5145, expected: 6, missing: 6, missing_lineups: 0 }],
     });
     expect(await getRoundManagerResultCoverage('2026-27', [5145], { query })).toEqual([
-      { roundId: 5145, expected: 6, missing: 6 },
+      { roundId: 5145, expected: 6, missing: 6, missingLineups: 0 },
     ]);
     const [statement, parameters] = query.mock.calls[0];
     expect(statement).toContain('as "expected"');
     expect(statement).toContain('as "missing"');
-    expect(statement).toContain('"user_rounds"."season_id" = "lineups"."season_id"');
-    expect(parameters).toEqual(['2026-27', 5145]);
+    expect(statement).toContain('full join');
+    expect(parameters).toEqual(['2026-27', 5145, '2026-27', 5145]);
   });
 
   describe('getRoundScheduleState', () => {
