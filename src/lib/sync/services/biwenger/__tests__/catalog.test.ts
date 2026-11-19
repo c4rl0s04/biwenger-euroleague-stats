@@ -1,3 +1,4 @@
+import { parseBiwengerRoundGames } from '@/features/provider/server';
 import { describe, expect, it, vi } from 'vitest';
 import { normalizeBiwengerPlayer, parseBiwengerDate, syncBiwengerCatalog } from '../catalog';
 
@@ -69,13 +70,15 @@ describe('Biwenger Catalog Service', () => {
             rounds: [{ id: 1, name: 'Jornada 1' }],
           },
         }),
-        fetchRoundGames: vi.fn().mockResolvedValue({
-          data: {
-            games: [
-              { id: 10, date: 1759685765 }, // 2025 date
-            ],
-          },
-        }),
+        fetchRoundGames: vi.fn().mockResolvedValue(
+          parseBiwengerRoundGames({
+            data: {
+              games: [
+                { id: 10, date: 1759685765 }, // 2025 date
+              ],
+            },
+          })
+        ),
         fetchPlayerDetails: vi.fn().mockResolvedValue({
           data: {
             birthday: 19910323,

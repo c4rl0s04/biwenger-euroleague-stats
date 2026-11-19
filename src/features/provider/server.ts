@@ -7,6 +7,12 @@ export {
   type ProviderClientConfig,
 } from './server/client';
 
+export {
+  readBiwengerRoundGames,
+  parseBiwengerRoundGames,
+  type BiwengerRoundGame,
+} from './server/round-games';
+
 export { verifyBiwengerManager } from './server/account-membership';
 
 export { executeUserProviderCommand, executeUserProviderQuery } from './server/credentials';

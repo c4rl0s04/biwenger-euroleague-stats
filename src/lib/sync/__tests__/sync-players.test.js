@@ -1,3 +1,4 @@
+import { readBiwengerRoundGames } from '@/features/provider/server';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { run } from '../steps/biwenger-catalog.js';
 import * as client from '../../api/biwenger-client.js';
@@ -7,7 +8,6 @@ vi.mock('../../api/biwenger-client.js', () => ({
   biwengerFetch: vi.fn(),
   fetchAllPlayers: vi.fn(),
   fetchPlayerDetails: vi.fn(),
-  fetchRoundGames: vi.fn(),
 }));
 
 // Mock config
@@ -16,6 +16,8 @@ vi.mock('../../config.js', () => ({
     POSITIONS: { 1: 'Base' },
   },
 }));
+
+vi.mock('@/features/provider/server', () => ({ readBiwengerRoundGames: vi.fn() }));
 
 describe('syncPlayers', () => {
   let db;
@@ -26,9 +28,9 @@ describe('syncPlayers', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    client.fetchRoundGames.mockResolvedValue({
-      data: { games: [{ id: 1, date: Date.parse('2026-09-30T18:00:00Z') / 1000 }] },
-    });
+    readBiwengerRoundGames.mockResolvedValue([
+      { id: 1, date: Date.parse('2026-09-30T18:00:00Z') / 1000 },
+    ]);
 
     db = {
       query: vi.fn(async (sql, params) => {

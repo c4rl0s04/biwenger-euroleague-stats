@@ -1,14 +1,15 @@
+import { readBiwengerRoundGames } from '@/features/provider/server';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { run as syncMatches } from '../services/biwenger/matches.js';
-import * as client from '../../api/biwenger-client.js';
 
 // Mock biwenger-client
 vi.mock('../../api/biwenger-client.js', () => ({
   biwengerFetch: vi.fn(),
   fetchAllPlayers: vi.fn(),
   fetchPlayerDetails: vi.fn(),
-  fetchRoundGames: vi.fn(),
 }));
+
+vi.mock('@/features/provider/server', () => ({ readBiwengerRoundGames: vi.fn() }));
 
 describe('syncMatches', () => {
   let db;
@@ -100,13 +101,13 @@ describe('syncMatches', () => {
       },
     };
 
-    client.fetchRoundGames.mockResolvedValue(mockGamesData);
+    readBiwengerRoundGames.mockResolvedValue(mockGamesData.data.games);
 
     const round = { id: 4746, name: 'Jornada 1', dbId: 4746 };
     await syncMatches(manager(), round);
 
     // Verify fetchRoundGames was called
-    expect(client.fetchRoundGames).toHaveBeenCalledWith(4746);
+    expect(readBiwengerRoundGames).toHaveBeenCalledWith(4746);
 
     // Sporting fields come from official_games, not the Biwenger score/date.
     expect(db.query).toHaveBeenCalledWith(
@@ -119,7 +120,7 @@ describe('syncMatches', () => {
   });
 
   it('fails fast when Biwenger cannot return the round games', async () => {
-    client.fetchRoundGames.mockRejectedValue(new Error('API Error'));
+    readBiwengerRoundGames.mockRejectedValue(new Error('API Error'));
 
     const round = { id: 4746, name: 'Jornada 1' };
     await expect(syncMatches(manager(), round)).rejects.toThrow(
