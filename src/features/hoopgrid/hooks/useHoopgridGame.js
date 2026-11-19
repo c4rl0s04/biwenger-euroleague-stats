@@ -1,83 +1,78 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 /**
  * Hook to manage the Hoopgrid game state and API interactions.
  */
-export function useHoopgridGame() {
-  const searchParams = useSearchParams();
+export function useHoopgridGame(searchParams) {
   const router = useRouter();
   const dateParam = searchParams.get('date');
 
   const [challenge, setChallenge] = useState(null);
-  const [allChallenges, setAllChallenges] = useState([]);
   const [guesses, setGuesses] = useState({});
   const [loading, setLoading] = useState(true);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [activeCell, setActiveCell] = useState(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    fetchAllChallenges();
-  }, []);
+    const controller = new AbortController();
+    const { signal } = controller;
+    async function fetchChallenge() {
+      try {
+        const url = dateParam
+          ? `/api/hoopgrid/today?${new URLSearchParams({ date: dateParam })}`
+          : '/api/hoopgrid/today';
+        const res = await fetch(url, { signal });
+        if (!res.ok) throw new Error(`Challenge request failed (${res.status})`);
+        const data = await res.json();
 
-  useEffect(() => {
-    fetchChallenge(dateParam);
-  }, [dateParam]);
+        if (signal.aborted) return;
+        if (data.challenge) {
+          setChallenge({
+            ...data.challenge,
+            rows:
+              typeof data.challenge.rows === 'string'
+                ? JSON.parse(data.challenge.rows)
+                : data.challenge.rows,
+            cols:
+              typeof data.challenge.cols === 'string'
+                ? JSON.parse(data.challenge.cols)
+                : data.challenge.cols,
+            possibleCounts:
+              typeof data.challenge.possibleCounts === 'string'
+                ? JSON.parse(data.challenge.possibleCounts)
+                : data.challenge.possibleCounts,
+          });
 
-  const fetchAllChallenges = async () => {
-    try {
-      const res = await fetch('/api/hoopgrid/list');
-      const data = await res.json();
-      if (data.challenges) setAllChallenges(data.challenges);
-    } catch (err) {
-      console.error('Failed to fetch challenges list:', err);
-    }
-  };
-
-  const fetchChallenge = async (date) => {
-    setLoading(true);
-    try {
-      const url = date ? `/api/hoopgrid/today?date=${date}` : '/api/hoopgrid/today';
-      const res = await fetch(url);
-      const data = await res.json();
-
-      if (data.challenge) {
-        setChallenge({
-          ...data.challenge,
-          rows:
-            typeof data.challenge.rows === 'string'
-              ? JSON.parse(data.challenge.rows)
-              : data.challenge.rows,
-          cols:
-            typeof data.challenge.cols === 'string'
-              ? JSON.parse(data.challenge.cols)
-              : data.challenge.cols,
-          possibleCounts:
-            typeof data.challenge.possibleCounts === 'string'
-              ? JSON.parse(data.challenge.possibleCounts)
-              : data.challenge.possibleCounts,
-        });
-
-        const guessMap = {};
-        let hasSavedGuesses = false;
-        data.userGuesses?.forEach((g) => {
-          if (g.isCorrect) {
-            guessMap[g.cellIndex] = g;
-            hasSavedGuesses = true;
-          }
-        });
-        setGuesses(guessMap);
-        // Only set as submitted if we have at least one guess OR if we want to show results
-        setIsSubmitted(hasSavedGuesses);
+          const guessMap = {};
+          let hasSavedGuesses = false;
+          data.userGuesses?.forEach((g) => {
+            if (g.isCorrect) {
+              guessMap[g.cellIndex] = g;
+              hasSavedGuesses = true;
+            }
+          });
+          setGuesses(guessMap);
+          // Only set as submitted if we have at least one guess OR if we want to show results
+          setIsSubmitted(hasSavedGuesses);
+        }
+      } catch (err) {
+        if (!signal.aborted) console.error('Failed to fetch hoopgrid:', err);
+      } finally {
+        if (!signal.aborted) setLoading(false);
       }
-    } catch (err) {
-      console.error('Failed to fetch hoopgrid:', err);
-    } finally {
-      setLoading(false);
     }
+    void fetchChallenge();
+    return () => controller.abort();
+  }, [dateParam, loadAttempt]);
+
+  const retryChallenge = () => {
+    setLoading(true);
+    setLoadAttempt((attempt) => attempt + 1);
   };
 
   const handleGuess = async (player) => {
@@ -172,7 +167,6 @@ export function useHoopgridGame() {
 
   return {
     challenge,
-    allChallenges,
     guesses,
     loading,
     activeCell,
@@ -190,5 +184,6 @@ export function useHoopgridGame() {
     handleGuess,
     handleSubmitBoard,
     navigateToDate,
+    retryChallenge,
   };
 }

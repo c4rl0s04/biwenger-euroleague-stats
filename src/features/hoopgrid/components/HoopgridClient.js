@@ -1,8 +1,10 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { Share2, Calendar } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { Button } from '@/components/ui/primitives/Button';
 import { useUser } from '@/contexts/UserContext';
 
 // Hooks
@@ -24,6 +26,34 @@ import HoopgridCalendar from './HoopgridCalendar';
  */
 /** @param {{ mobile?: boolean }} props */
 export default function HoopgridClient({ mobile = false }) {
+  const searchParams = useSearchParams();
+  const [allChallenges, setAllChallenges] = useState([]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const { signal } = controller;
+    fetch('/api/hoopgrid/list', { signal })
+      .then((response) => response.json())
+      .then((data) => {
+        if (!signal.aborted && data.challenges) setAllChallenges(data.challenges);
+      })
+      .catch((error) => {
+        if (!signal.aborted) console.error('Failed to fetch challenges list:', error);
+      });
+    return () => controller.abort();
+  }, []);
+  return (
+    <HoopgridGame
+      key={searchParams.get('date') ?? ''}
+      searchParams={searchParams}
+      allChallenges={allChallenges}
+
+      mobile={mobile}
+    />
+  );
+}
+
+function HoopgridGame({ searchParams, mobile, allChallenges }) {
   const gridRef = useRef(null);
   const { currentUser } = useUser();
   const [calendarOpen, setCalendarOpen] = useState(false);
@@ -31,7 +61,6 @@ export default function HoopgridClient({ mobile = false }) {
   // 1. Logic Engine
   const {
     challenge,
-    allChallenges,
     guesses,
     loading,
     activeCell,
@@ -49,7 +78,8 @@ export default function HoopgridClient({ mobile = false }) {
     handleGuess,
     handleSubmitBoard,
     navigateToDate,
-  } = useHoopgridGame();
+    retryChallenge,
+  } = useHoopgridGame(searchParams);
 
   // 2. Share Engine (Symmetrical Centering)
   const { copying, shareModalOpen, shareImageUri, shareText, setShareModalOpen, handleShare } =
@@ -63,7 +93,14 @@ export default function HoopgridClient({ mobile = false }) {
     );
   }
 
-  if (!challenge) return null;
+  if (!challenge) {
+    return (
+      <div className="flex min-h-[400px] flex-col items-center justify-center gap-4 p-4 text-center">
+        <p role="alert">No se pudo cargar el reto.</p>
+        <Button onClick={retryChallenge}>Reintentar</Button>
+      </div>
+    );
+  }
 
   return (
     <div
