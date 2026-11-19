@@ -1,3 +1,4 @@
+import { parseBiwengerRoundGames } from '@/features/provider/server';
 import { describe, expect, it, vi } from 'vitest';
 import {
   closestOfficialGame,
@@ -126,18 +127,20 @@ describe('Biwenger Matches Service', () => {
         resolveRoundId: vi.fn((r) => r.id),
       };
 
-      const mockFetchRoundGames = vi.fn().mockResolvedValue({
-        data: {
-          games: [
-            {
-              id: 1001,
-              home: { id: 1 },
-              away: { id: 2 },
-              date: 1759685765,
-            },
-          ],
-        },
-      });
+      const mockFetchRoundGames = vi.fn().mockResolvedValue(
+        parseBiwengerRoundGames({
+          data: {
+            games: [
+              {
+                id: 1001,
+                home: { id: 1 },
+                away: { id: 2 },
+                date: 1759685765,
+              },
+            ],
+          },
+        })
+      );
 
       const mockGetOfficialTeamMappings = vi.fn().mockResolvedValue([
         { teamId: 1, providerTeamCode: 'MAD' },
@@ -193,17 +196,19 @@ describe('Biwenger Matches Service', () => {
         resolveRoundId: vi.fn((r) => r.id),
       };
 
-      const mockFetchRoundGames = vi.fn().mockResolvedValue({
-        data: {
-          games: [
-            {
-              id: 1001,
-              home: { id: 1 },
-              away: { id: 2 },
-            },
-          ],
-        },
-      });
+      const mockFetchRoundGames = vi.fn().mockResolvedValue(
+        parseBiwengerRoundGames({
+          data: {
+            games: [
+              {
+                id: 1001,
+                home: { id: 1 },
+                away: { id: 2 },
+              },
+            ],
+          },
+        })
+      );
 
       // Mappings exist, but official schedule has NO games between MAD and BAR
       const mockGetOfficialTeamMappings = vi.fn().mockResolvedValue([
@@ -240,14 +245,16 @@ describe('Biwenger Matches Service', () => {
       };
 
       // Team 1 appears in both Match 1 (home) and Match 2 (away) in Round 1
-      const mockFetchRoundGames = vi.fn().mockResolvedValue({
-        data: {
-          games: [
-            { id: 1001, home: { id: 1 }, away: { id: 2 } },
-            { id: 1002, home: { id: 3 }, away: { id: 1 } },
-          ],
-        },
-      });
+      const mockFetchRoundGames = vi.fn().mockResolvedValue(
+        parseBiwengerRoundGames({
+          data: {
+            games: [
+              { id: 1001, home: { id: 1 }, away: { id: 2 } },
+              { id: 1002, home: { id: 3 }, away: { id: 1 } },
+            ],
+          },
+        })
+      );
 
       const mockGetOfficialTeamMappings = vi.fn().mockResolvedValue([
         { teamId: 1, providerTeamCode: 'MAD' },

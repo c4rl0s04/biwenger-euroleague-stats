@@ -62,8 +62,9 @@ async function main() {
       return;
     }
 
-    const { biwengerFetch, fetchCompetition, fetchLeague, fetchRoundGames } =
+    const { biwengerFetch, fetchCompetition, fetchLeague } =
       await import('../../src/lib/api/biwenger-client.js');
+    const { readBiwengerRoundGames } = await import('../../src/features/provider/server.js');
     const { getEuroleagueClient } = await import('../../src/lib/api/euroleague/runtime.js');
     const { euroleagueSeasonYear } = await import('../../src/lib/api/euroleague/normalization.js');
     const {
@@ -86,8 +87,7 @@ async function main() {
     const competitionSnapshot = parseBiwengerCompetition(competition);
     const firstRound = relevantRounds(competitionSnapshot.rounds)[0];
     if (!firstRound) throw new Error('Biwenger competition contains no syncable rounds.');
-    const firstRoundResponse = await fetchRoundGames(firstRound.id);
-    const firstRoundGames = firstRoundResponse?.data?.games || firstRoundResponse?.games || [];
+    const firstRoundGames = await readBiwengerRoundGames(firstRound.id);
     const biwengerReadiness = validateBiwengerRoundSeason({
       seasonId: season.ID,
       games: firstRoundGames,

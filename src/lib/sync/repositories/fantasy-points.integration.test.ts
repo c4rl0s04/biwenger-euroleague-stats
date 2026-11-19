@@ -62,9 +62,9 @@ describe.skipIf(process.env.RUN_FANTASY_POINTS_DB_TESTS !== 'true')(
           manager as never,
           { id: 2, dbId: 2, name: 'Jornada 2' },
           {
-            fetchRoundGames: async () => ({
-              games: [{ home: { reports: [{ player: { id: 900001 }, points }] } }],
-            }),
+            fetchRoundGames: async () => [
+              { home: { reports: [{ player: { id: 900001 }, points }] } },
+            ],
           }
         );
         expect(await score()).toBe(points ?? 15);

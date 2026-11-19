@@ -5,7 +5,7 @@ const mocks = vi.hoisted(() => ({
   live: vi.fn(),
   query: vi.fn(),
 }));
-vi.mock('../../api/biwenger-client', () => ({ fetchRoundGames: mocks.fetch }));
+vi.mock('@/features/provider/server', () => ({ readBiwengerRoundGames: mocks.fetch }));
 vi.mock('../repositories/sync-queries', () => ({
   hasActiveMatchesInWindow: mocks.active,
   getFantasyPointLiveRounds: mocks.live,
@@ -32,16 +32,12 @@ beforeEach(() => {
   mocks.active.mockImplementation(async (_season, id) => id === 3);
   mocks.live.mockResolvedValue([{ id: 1 }, { id: 2 }]);
   mocks.query.mockResolvedValue({ rows: [] });
-  mocks.fetch.mockImplementation(async () => ({
-    data: {
-      games: [
-        {
-          date: Date.UTC(2026, 9, 1) / 1000,
-          home: { reports: [{ player: { id: 10 }, points: 0 }] },
-        },
-      ],
+  mocks.fetch.mockImplementation(async () => [
+    {
+      date: Date.UTC(2026, 9, 1) / 1000,
+      home: { reports: [{ player: { id: 10 }, points: 0 }] },
     },
-  }));
+  ]);
 });
 it.each(['routine', 'bootstrap'])(
   '%s refreshes completed, active and started pending rounds, skipping future-only rounds',
@@ -66,12 +62,12 @@ it('live includes a recently finished round and excludes older/future rounds usi
   expect(mocks.active).not.toHaveBeenCalled();
 });
 it('rejects another provider season before any writes in standalone recovery', async () => {
-  mocks.fetch.mockResolvedValue({ data: { games: [{ date: Date.UTC(2025, 9, 1) / 1000 }] } });
+  mocks.fetch.mockResolvedValue([{ date: Date.UTC(2025, 9, 1) / 1000 }]);
   await expect(run(manager('bootstrap') as never)).rejects.toThrow('expected 2026');
   expect(mocks.query).not.toHaveBeenCalled();
 });
 it('warns on completed rounds with no scores without manufacturing zeros', async () => {
-  mocks.fetch.mockResolvedValue({ data: { games: [{ date: Date.UTC(2026, 9, 1) / 1000 }] } });
+  mocks.fetch.mockResolvedValue([{ date: Date.UTC(2026, 9, 1) / 1000 }]);
   const m = manager();
   const result = await run(m as never);
   expect(result.counts.playerScores).toBe(0);

@@ -90,10 +90,6 @@ export async function fetchRoundsLeague(roundId) {
   return biwengerFetch(CONFIG.ENDPOINTS.BIWENGER.ROUND_LEAGUE(roundId));
 }
 
-export async function fetchRoundGames(roundId) {
-  return biwengerFetch(CONFIG.ENDPOINTS.BIWENGER.ROUND_GAMES(roundId));
-}
-
 export async function fetchPlayerDetails(playerId) {
   return biwengerFetch(CONFIG.ENDPOINTS.BIWENGER.PLAYER_DETAILS(playerId));
 }

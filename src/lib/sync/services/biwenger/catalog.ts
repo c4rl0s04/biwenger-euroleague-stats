@@ -1,4 +1,5 @@
-import { fetchAllPlayers, fetchPlayerDetails, fetchRoundGames } from '../../../api/biwenger-client';
+import { readBiwengerRoundGames } from '@/features/provider/server';
+import { fetchAllPlayers, fetchPlayerDetails } from '../../../api/biwenger-client';
 import { CONFIG } from '../../../config';
 import { preparePlayerMutations } from '../../../db/mutations/players';
 import { getShortTeamName } from '@/lib/competition/public';
@@ -14,14 +15,14 @@ const DEFAULT_SLEEP_MS = 600;
 
 export interface BiwengerCatalogDependencies {
   fetchAllPlayers: typeof fetchAllPlayers;
-  fetchRoundGames: typeof fetchRoundGames;
+  fetchRoundGames: typeof readBiwengerRoundGames;
   fetchPlayerDetails: typeof fetchPlayerDetails;
   sleep: (ms: number) => Promise<void>;
 }
 
 const defaultDependencies: BiwengerCatalogDependencies = {
   fetchAllPlayers,
-  fetchRoundGames,
+  fetchRoundGames: readBiwengerRoundGames,
   fetchPlayerDetails,
   sleep: (ms: number) => new Promise((resolve) => setTimeout(resolve, ms)),
 };
@@ -159,8 +160,7 @@ export async function syncBiwengerCatalog(
 
   const firstRound = relevantRounds(snapshot.rounds)[0];
   if (!firstRound) throw new Error('Biwenger competition contains no syncable rounds.');
-  const firstRoundResponse = await deps.fetchRoundGames(firstRound.id);
-  const firstRoundGames = firstRoundResponse?.data?.games || firstRoundResponse?.games || [];
+  const firstRoundGames = await deps.fetchRoundGames(firstRound.id);
   const readiness = validateBiwengerRoundSeason({ seasonId, games: firstRoundGames });
   manager.log(
     `Biwenger season readiness: ${readiness.datedGames}/${readiness.games} first-round games belong to ${readiness.seasonYear}`

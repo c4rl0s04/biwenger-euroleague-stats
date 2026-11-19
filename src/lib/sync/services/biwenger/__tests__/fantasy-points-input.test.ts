@@ -1,3 +1,4 @@
+import { parseBiwengerRoundGames } from '@/features/provider/server';
 import { expect, it, vi } from 'vitest';
 import { syncFantasyPoints } from '../fantasy-points';
 
@@ -5,7 +6,9 @@ function fixture(reports: unknown[]) {
   const updateFantasyPoints = vi.fn().mockResolvedValue(undefined);
   const manager = { context: { db: {}, seasonId: '2026-27' }, warn: vi.fn() };
   const dependencies = {
-    fetchRoundGames: vi.fn().mockResolvedValue({ data: { games: [{ home: { reports } }] } }),
+    fetchRoundGames: vi.fn(async () =>
+      parseBiwengerRoundGames({ data: { games: [{ home: { reports } }] } })
+    ),
     prepareMutations: () => ({ updateFantasyPoints }),
   };
   return { manager, dependencies, updateFantasyPoints };
@@ -22,9 +25,9 @@ it('writes zero, negative and revised scores but skips missing scores', async ()
     missingScores: 2,
   });
   expect(f.updateFantasyPoints.mock.calls.map(([v]) => v.fantasyPoints)).toEqual([0, -2, 15]);
-  f.dependencies.fetchRoundGames.mockResolvedValue({
-    data: { games: [{ home: { reports: [{ player: { id: 1 }, points: -1 }] } }] },
-  });
+  f.dependencies.fetchRoundGames.mockResolvedValue([
+    { home: { reports: [{ player: { id: 1 }, points: -1 }] } },
+  ]);
   await syncFantasyPoints(f.manager as never, round, f.dependencies);
   expect(f.updateFantasyPoints).toHaveBeenLastCalledWith({
     playerId: 1,
@@ -41,7 +44,7 @@ it.each([NaN, Infinity, 1.5, '', '12', {}, 2147483648])(
       { player: { id: 2 }, points },
     ]);
     await expect(syncFantasyPoints(f.manager as never, round, f.dependencies)).rejects.toThrow(
-      'Invalid Biwenger fantasy report'
+      'Invalid Biwenger round games response'
     );
     expect(f.updateFantasyPoints).not.toHaveBeenCalled();
   }
@@ -49,7 +52,7 @@ it.each([NaN, Infinity, 1.5, '', '12', {}, 2147483648])(
 it.each([0, -1, '1', null])('rejects invalid player identifier %j', async (id) => {
   const f = fixture([{ player: { id }, points: 5 }]);
   await expect(syncFantasyPoints(f.manager as never, round, f.dependencies)).rejects.toThrow(
-    'Invalid Biwenger fantasy report'
+    'Invalid Biwenger round games response'
   );
   expect(f.updateFantasyPoints).not.toHaveBeenCalled();
 });
