@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { privateJsonResponse } from '@/lib/utils/response';
 import { hoopgridReadService } from '@/features/hoopgrid/server';
 import { auth } from '@/auth';
 
@@ -12,9 +12,9 @@ export async function GET(request: Request) {
 
     const data = await hoopgridReadService.getTodayChallenge(dateParam, userId);
 
-    return NextResponse.json(data);
+    return privateJsonResponse(data);
   } catch (error: any) {
     console.error('Hoopgrid Today Error:', error);
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+    return privateJsonResponse({ error: error.message || 'Internal Server Error' }, 500);
   }
 }
