@@ -13,6 +13,8 @@ try {
     saveSeasonPredictions,
     previewSeasonPredictionWindow,
     openSeasonPredictionWindow,
+    previewPreseasonReopen,
+    reopenPreseasonWindow,
   } = await import('../../src/features/season-predictions/server');
   const { PredictionError } =
     await import('../../src/features/season-predictions/models/submission');
@@ -184,6 +186,30 @@ try {
     ids: ['1', '2'],
   });
 
+  // A locked preseason window reopens exactly once and keeps submissions and revisions.
+  await assert.rejects(previewPreseasonReopen('2026-27', 0), expectCode('invalid'));
+  await assert.rejects(previewPreseasonReopen('2027-28', 24), expectCode('not-open'));
+  const reopenPreview = await previewPreseasonReopen('2026-27', 24);
+  assert.equal(reopenPreview.locked, true);
+  assert.equal(reopenPreview.alreadyReopened, false);
+  assert.equal(reopenPreview.submissions, 2);
+  const reopened = await reopenPreseasonWindow('2026-27', 24);
+  assert(new Date(reopened.locksAt) > new Date(reopened.reopenedAt));
+  const afterReopen = await readSeasonPredictions('2026-27', 'u1');
+  assert.equal(afterReopen.status, 'open');
+  assert.equal(afterReopen.submission?.revision, 3);
+  await assert.rejects(reopenPreseasonWindow('2026-27', 24), expectCode('already-open'));
+  const resaved = await saveSeasonPredictions({
+    seasonId: '2026-27',
+    userId: 'u1',
+    revision: 3,
+    answers: {},
+  });
+  assert.equal(resaved.revision, 4);
+  await disposable.pool.query(`UPDATE season_prediction_windows SET locks_at = clock_timestamp()
+    WHERE season_id = '2026-27'`);
+  await assert.rejects(reopenPreseasonWindow('2026-27', 24), expectCode('already-reopened'));
+
   // Windows and submissions are phase-scoped; a phase without a window rejects submissions.
   const phases = await disposable.pool.query(`SELECT phase FROM season_prediction_submissions
     WHERE season_id = '2026-27' GROUP BY phase`);
@@ -192,7 +218,8 @@ try {
     ['preseason']
   );
   await assert.rejects(
-    disposable.pool.query(`INSERT INTO season_prediction_submissions (season_id, phase, user_id, answers)
+    disposable.pool
+      .query(`INSERT INTO season_prediction_submissions (season_id, phase, user_id, answers)
       VALUES ('2026-27', 'playoffs', 'u1', '{}'::jsonb)`),
     /season_prediction_submissions_window_fk/
   );

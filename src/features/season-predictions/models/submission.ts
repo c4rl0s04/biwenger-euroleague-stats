@@ -46,7 +46,8 @@ export class PredictionError extends Error {
       | 'locked'
       | 'conflict'
       | 'already-open'
-      | 'empty-candidates',
+      | 'empty-candidates'
+      | 'already-reopened',
     message: string
   ) {
     super(message);
