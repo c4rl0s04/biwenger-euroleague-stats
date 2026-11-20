@@ -53,7 +53,7 @@ accidentally enabling sync for a frozen season.
 | `npm run sync`                                              | Routine ordered refresh.                                             |
 | `npm run sync:bootstrap`                                    | Routine pipeline plus one-time initial squads and user colors.       |
 | `npm run sync:live`                                         | Official data, live fantasy points and missing Biwenger lineups.     |
-| `npm run sync:playoffs`                                     | Apply custom playoff metadata and results from checked-in JSON.      |
+| `npm run sync:playoffs -- --season YYYY-YY`                 | Apply custom playoff metadata and results from checked-in JSON.      |
 | `npm run sync:euroleague`                                   | Preview EuroLeague official website bio data & photoshoot portraits. |
 | `npm run sync:euroleague:apply`                             | Commit EuroLeague official website photoshoot portraits & bio data.  |
 | `npm run sync -- --step=match-linking`                      | Run one descriptive step for diagnosis or recovery.                  |

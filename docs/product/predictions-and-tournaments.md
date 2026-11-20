@@ -33,13 +33,14 @@ status: active
 - Data: Tournament-owned read queries; remaining legacy queries and mutations under
   [`src/lib/db`](../../src/lib/db).
 - Sync: `biwenger-board` and `biwenger-tournaments`, plus the separate playoff command and
-  [`playoff-data.json`](../../src/lib/sync/playoffs/playoff-data.json).
+  [`playoff-data/2025-26.json`](../../src/lib/sync/playoffs/playoff-data/2025-26.json).
 
 ## Source distinctions
 
 Biwenger prediction pools and tournaments arrive through the normal pipeline. Custom playoff
-metadata and results use a checked-in JSON source processed by `npm run sync:playoffs`. That command
-still writes to PostgreSQL and must follow season and database safety rules.
+metadata and results use a checked-in JSON source processed by `npm run sync:playoffs -- --season YYYY-YY`. That command
+loads the file for that season from `src/lib/sync/playoffs/playoff-data/` and requires its declared
+season to match. It still writes to PostgreSQL and must follow season and database safety rules.
 
 Provider tournament structures can contain groups, knockout brackets, fixtures, or incomplete
 phases. UI code must tolerate whichever structures are actually returned rather than assuming one
