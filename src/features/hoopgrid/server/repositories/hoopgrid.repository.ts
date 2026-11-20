@@ -16,6 +16,14 @@ import { eq, and, count, max, desc } from 'drizzle-orm';
 import { resolveReadSeasonId } from '@/lib/db/season-context';
 import crypto from 'crypto';
 
+type GuessWrite = {
+  challengeId: string;
+  userId: string;
+  cellIndex: number;
+  playerId: number;
+  isCorrect: boolean;
+};
+
 export class HoopgridRepository {
   private mergeSeasonPlayer(row: { player: any; season: any }) {
     return {
@@ -164,14 +172,22 @@ export class HoopgridRepository {
     return (finalPicks * 100) / (finalTotal || 1);
   }
 
-  async upsertGuess(data: {
-    challengeId: string;
-    userId: string;
-    cellIndex: number;
-    playerId: number;
-    isCorrect: boolean;
-  }) {
-    const [guess] = await db
+  async upsertGuess(data: GuessWrite) {
+    return this.writeGuess(db, data);
+  }
+
+  async upsertGuesses(data: GuessWrite[]) {
+    return db.transaction(async (transaction) => {
+      const guesses = [];
+      for (const guess of data) {
+        guesses.push(await this.writeGuess(transaction, guess));
+      }
+      return guesses;
+    });
+  }
+
+  private async writeGuess(writer: Pick<typeof db, 'insert'>, data: GuessWrite) {
+    const [guess] = await writer
       .insert(hoopgridGuesses)
       .values({
         id: crypto.randomUUID(),
