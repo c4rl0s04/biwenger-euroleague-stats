@@ -14,7 +14,6 @@ import {
   HoopgridCriteria,
   SubmitGuessInput,
   SubmitGuessResult,
-  SubmitBatchGuessesInput,
   SubmitBatchGuessesResult,
 } from '../../models/hoopgrid.models';
 import {
@@ -421,6 +420,15 @@ export class HoopgridCommandService {
 
     const input = validateSubmitGuessInput(rawInput);
 
+    const { isCorrect, rarity } = await this.evaluateGuess(input, userId);
+    const { challengeId, cellIndex, playerId } = input;
+    const data = { challengeId, userId, cellIndex, playerId, isCorrect };
+    const guess = input.dryRun ? { id: 'draft', ...data } : await this.repository.upsertGuess(data);
+
+    return { isCorrect, rarity, guess };
+  }
+
+  private async evaluateGuess(input: SubmitGuessInput, userId: string) {
     const [challenge, context] = await Promise.all([
       this.repository.findChallengeById(input.challengeId),
       this.repository.getPlayerValidationContext(input.playerId),
@@ -474,34 +482,7 @@ export class HoopgridCommandService {
       );
     }
 
-    if (input.dryRun) {
-      return {
-        isCorrect,
-        rarity,
-        guess: {
-          id: 'draft',
-          challengeId: input.challengeId,
-          userId,
-          cellIndex: input.cellIndex,
-          playerId: input.playerId,
-          isCorrect,
-        },
-      };
-    }
-
-    const guess = await this.repository.upsertGuess({
-      challengeId: input.challengeId,
-      userId,
-      cellIndex: input.cellIndex,
-      playerId: input.playerId,
-      isCorrect,
-    });
-
-    return {
-      isCorrect,
-      rarity,
-      guess,
-    };
+    return { isCorrect, rarity };
   }
 
   async submitBatchGuesses(rawInput: unknown, userId: string): Promise<SubmitBatchGuessesResult> {
@@ -510,28 +491,27 @@ export class HoopgridCommandService {
     }
 
     const input = validateSubmitBatchGuessesInput(rawInput);
-    const results: Array<{
-      cellIndex: number;
-      isCorrect: boolean;
-      rarity: number | null;
-      guess?: any;
-    }> = [];
-
-    for (const [cellIdxStr, p] of Object.entries(input.guesses)) {
-      if (!p.isCorrect) continue;
-      const cellIdx = parseInt(cellIdxStr, 10);
-      const res = await this.submitGuess(
-        {
-          challengeId: input.challengeId,
-          cellIndex: cellIdx,
-          playerId: p.playerId,
-          dryRun: false,
-        },
-        userId
-      );
-      results.push({ cellIndex: cellIdx, ...res });
+    const evaluated = [];
+    for (const [key, candidate] of Object.entries(input.guesses)) {
+      if (!candidate.isCorrect) continue;
+      const data = {
+        challengeId: input.challengeId,
+        cellIndex: Number(key),
+        playerId: candidate.playerId,
+      };
+      const { isCorrect, rarity } = await this.evaluateGuess(data, userId);
+      evaluated.push({ data: { ...data, userId, isCorrect }, rarity });
     }
 
+    if (evaluated.length === 0) return { success: true, results: [] };
+
+    const guesses = await this.repository.upsertGuesses(evaluated.map(({ data }) => data));
+    const results = evaluated.map(({ data, rarity }, index) => ({
+      cellIndex: data.cellIndex,
+      isCorrect: data.isCorrect,
+      rarity,
+      guess: guesses[index],
+    }));
     return { success: true, results };
   }
 }

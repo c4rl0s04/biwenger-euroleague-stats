@@ -39,7 +39,7 @@ export const SubmitBatchGuessesInputSchema = z.object({
     .min(1, { message: 'challengeId is required' }),
   action: z.literal('submitBatch'),
   guesses: z.record(
-    z.string(),
+    z.string().regex(/^[0-8]$/, { message: 'Cell index must be one digit from 0 to 8' }),
     z.object({
       playerId: z.number().int().positive(),
       isCorrect: z.boolean(),

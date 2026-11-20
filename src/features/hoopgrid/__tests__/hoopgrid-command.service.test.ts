@@ -22,6 +22,9 @@ describe('HoopgridCommandService', () => {
       getUserGuesses: vi.fn(),
       getRarity: vi.fn(async () => 25),
       upsertGuess: vi.fn(async (data) => ({ id: 'g-1', ...data })),
+      upsertGuesses: vi.fn(async (writes) =>
+        writes.map((data: object) => ({ id: 'g-1', ...data }))
+      ),
       getPlayerValidationContext: vi.fn(),
       getSeasonFullData: vi.fn(),
     };
@@ -427,7 +430,7 @@ describe('HoopgridCommandService', () => {
   });
 
   describe('submitBatchGuesses', () => {
-    it('submits correct guesses from a batch', async () => {
+    beforeEach(() => {
       repositoryMock.findChallengeById.mockResolvedValue({
         id: 'ch-1',
         rows: JSON.stringify([
@@ -447,7 +450,9 @@ describe('HoopgridCommandService', () => {
         transfers: [],
         allUsers: [],
       });
+    });
 
+    it('submits correct guesses from a batch', async () => {
       const result = await service.submitBatchGuesses(
         {
           challengeId: 'ch-1',
@@ -462,7 +467,61 @@ describe('HoopgridCommandService', () => {
 
       expect(result.success).toBe(true);
       expect(result.results.length).toBe(1);
-      expect(result.results[0].cellIndex).toBe(0);
+      expect(result.results[0]).toMatchObject({
+        cellIndex: 0,
+        isCorrect: true,
+        rarity: 25,
+        guess: { id: 'g-1' },
+      });
+      expect(repositoryMock.upsertGuesses).toHaveBeenCalledOnce();
+      expect(repositoryMock.upsertGuess).not.toHaveBeenCalled();
+    });
+    it.each(['9', '01', '1x', '-1'])(
+      'rejects a noncanonical cell index %s before writing',
+      async (key) => {
+        await expect(
+          service.submitBatchGuesses(
+            {
+              challengeId: 'ch-1',
+              action: 'submitBatch',
+              guesses: {
+                '0': { playerId: 10, isCorrect: true },
+                [key]: { playerId: 20, isCorrect: false },
+              },
+            },
+            'user-42'
+          )
+        ).rejects.toBeInstanceOf(HoopgridValidationError);
+        expect(repositoryMock.upsertGuess).not.toHaveBeenCalled();
+        expect(repositoryMock.upsertGuesses).not.toHaveBeenCalled();
+      }
+    );
+
+    it('writes no cells if evaluation fails for a later player', async () => {
+      repositoryMock.getPlayerValidationContext
+        .mockResolvedValueOnce({
+          player: { id: 10, position: 'Base', country: 'Spain' },
+          stats: [],
+          initials: [],
+          transfers: [],
+          allUsers: [],
+        })
+        .mockResolvedValueOnce({ player: null });
+      await expect(
+        service.submitBatchGuesses(
+          {
+            challengeId: 'ch-1',
+            action: 'submitBatch',
+            guesses: {
+              '0': { playerId: 10, isCorrect: true },
+              '1': { playerId: 20, isCorrect: true },
+            },
+          },
+          'user-42'
+        )
+      ).rejects.toThrow('Data not found');
+      expect(repositoryMock.upsertGuess).not.toHaveBeenCalled();
+      expect(repositoryMock.upsertGuesses).not.toHaveBeenCalled();
     });
   });
 
