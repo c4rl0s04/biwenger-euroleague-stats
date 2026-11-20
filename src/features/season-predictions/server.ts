@@ -7,3 +7,4 @@ export {
   SEASON_PREDICTIONS_POLICY,
 } from './server/repositories/predictions.repository';
 export { PredictionError } from './models/submission';
+export { getPreseasonOutcomes } from './server/queries/outcomes.query';
