@@ -1,10 +1,21 @@
 import { CONFIG } from '../../../config';
 import { euroleagueSeasonYear } from '../../../api/euroleague/normalization';
+import type { EuroleagueScheduleGame } from '../../../api/euroleague/types';
 import { prepareOfficialCalendarMutations } from '../../../db/mutations/official/calendar';
 import { prepareOfficialMappingMutations } from '../../../db/mutations/official/mappings';
 import type { SyncManager } from '../../manager';
 import { validateAdvancedProviderSnapshot } from '../../preflight';
 import { reconcilePlayerMappings, reconcileTeamMappings } from './mappings';
+
+// The standings endpoint 404s for play-in/playoff/Final Four gamedays, so only RS gamedays count.
+export function regularSeasonStandingsRound(schedule: EuroleagueScheduleGame[]) {
+  return Math.max(
+    1,
+    ...schedule
+      .filter((game) => game.isPlayed && game.roundCode === 'RS' && game.roundNumber != null)
+      .map((game) => game.roundNumber as number)
+  );
+}
 
 export async function syncOfficialMasterData(manager: SyncManager) {
   const seasonCode = manager.context.season?.euroleagueCode;
@@ -22,12 +33,7 @@ export async function syncOfficialMasterData(manager: SyncManager) {
   ]);
   if (schedule.length === 0) throw new Error(`Official schedule for ${seasonYear} is empty.`);
   manager.context.officialSchedule = schedule;
-  const standingsRound = Math.max(
-    1,
-    ...schedule
-      .filter((game) => game.isPlayed && game.roundNumber != null)
-      .map((game) => game.roundNumber as number)
-  );
+  const standingsRound = regularSeasonStandingsRound(schedule);
   const standings = await provider.getStandings(seasonYear, standingsRound);
   validateAdvancedProviderSnapshot({
     seasonYear,
