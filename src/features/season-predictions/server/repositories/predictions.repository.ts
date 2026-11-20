@@ -19,8 +19,11 @@ import {
   getSeasonPredictionCandidates,
   getSeasonPredictionTeamCrests,
 } from '../queries/candidates.query';
+import type { PredictionPhase } from '../../models/phases';
 
 const database = pool as Pool;
+// Only the preseason questionnaire is served until the playoff bracket phase lands.
+const PRESEASON: PredictionPhase = 'preseason';
 
 interface WindowRow {
   opens_at: Date;
@@ -66,8 +69,8 @@ export async function readSeasonPredictions(
   const now = nowResult.rows[0].now;
   const windowResult = await database.query<WindowRow>(
     `SELECT opens_at, locks_at, question_set_version, questions, candidates
-     FROM season_prediction_windows WHERE season_id = $1`,
-    [seasonId]
+     FROM season_prediction_windows WHERE season_id = $1 AND phase = $2`,
+    [seasonId, PRESEASON]
   );
   const window = windowResult.rows[0];
   if (!window || now < window.opens_at) {
@@ -100,8 +103,8 @@ export async function readSeasonPredictions(
     updated_at: Date;
   }>(
     `SELECT answers, revision, updated_at FROM season_prediction_submissions
-     WHERE season_id = $1 AND user_id = $2`,
-    [seasonId, userId]
+     WHERE season_id = $1 AND phase = $2 AND user_id = $3`,
+    [seasonId, PRESEASON, userId]
   );
   const own = submissionResult.rows[0];
   const league = locked
@@ -116,8 +119,8 @@ export async function readSeasonPredictions(
           `SELECT s.user_id, u.name, u.icon, s.answers, s.updated_at
      FROM season_prediction_submissions s JOIN user_seasons u
        ON u.season_id = s.season_id AND u.user_id = s.user_id
-     WHERE s.season_id = $1 ORDER BY u.name, s.user_id`,
-          [seasonId]
+     WHERE s.season_id = $1 AND s.phase = $2 ORDER BY u.name, s.user_id`,
+          [seasonId, PRESEASON]
         )
       ).rows.map((row) => ({
         userId: row.user_id,
@@ -158,8 +161,8 @@ export async function saveSeasonPredictions(input: {
     // Serializes saves against this window and rechecks the database clock after waiting.
     const windowResult = await client.query<WindowRow>(
       `SELECT opens_at, locks_at, question_set_version, questions, candidates
-       FROM season_prediction_windows WHERE season_id = $1 FOR UPDATE`,
-      [input.seasonId]
+       FROM season_prediction_windows WHERE season_id = $1 AND phase = $2 FOR UPDATE`,
+      [input.seasonId, PRESEASON]
     );
     const window = windowResult.rows[0];
     if (!window) throw new PredictionError('not-open', 'Las predicciones aún no están abiertas.');
@@ -172,8 +175,9 @@ export async function saveSeasonPredictions(input: {
       throw new PredictionError('invalid', 'Revisión inválida.');
     const answers = validatePredictionAnswers(input.answers, window.questions, window.candidates);
     const previous = await client.query<{ revision: number }>(
-      `SELECT revision FROM season_prediction_submissions WHERE season_id = $1 AND user_id = $2 FOR UPDATE`,
-      [input.seasonId, input.userId]
+      `SELECT revision FROM season_prediction_submissions
+       WHERE season_id = $1 AND phase = $2 AND user_id = $3 FOR UPDATE`,
+      [input.seasonId, PRESEASON, input.userId]
     );
     const actualRevision = previous.rows[0]?.revision ?? 0;
     if (input.revision !== actualRevision)
@@ -182,13 +186,13 @@ export async function saveSeasonPredictions(input: {
         'Tus predicciones se modificaron en otra pestaña. Recarga la página.'
       );
     const result = await client.query<{ revision: number; updated_at: Date }>(
-      `INSERT INTO season_prediction_submissions (season_id, user_id, answers, revision)
-       VALUES ($1, $2, $3::jsonb, 1)
-       ON CONFLICT (season_id, user_id) DO UPDATE SET answers = EXCLUDED.answers,
+      `INSERT INTO season_prediction_submissions (season_id, phase, user_id, answers, revision)
+       VALUES ($1, $2, $3, $4::jsonb, 1)
+       ON CONFLICT (season_id, phase, user_id) DO UPDATE SET answers = EXCLUDED.answers,
          revision = season_prediction_submissions.revision + 1,
          updated_at = clock_timestamp()
        RETURNING revision, updated_at`,
-      [input.seasonId, input.userId, JSON.stringify(answers)]
+      [input.seasonId, PRESEASON, input.userId, JSON.stringify(answers)]
     );
     await client.query('COMMIT');
     return {
@@ -208,8 +212,8 @@ export async function previewSeasonPredictionWindow(seasonId: string) {
   const season = await database.query('SELECT id FROM seasons WHERE id = $1', [seasonId]);
   if (!season.rowCount) throw new PredictionError('invalid', 'Temporada desconocida.');
   const existing = await database.query(
-    'SELECT 1 FROM season_prediction_windows WHERE season_id = $1',
-    [seasonId]
+    'SELECT 1 FROM season_prediction_windows WHERE season_id = $1 AND phase = $2',
+    [seasonId, PRESEASON]
   );
   const candidates = await getSeasonPredictionCandidates(seasonId);
   return {
@@ -229,8 +233,8 @@ export async function openSeasonPredictionWindow(seasonId: string) {
     const season = await client.query('SELECT id FROM seasons WHERE id = $1', [seasonId]);
     if (!season.rowCount) throw new PredictionError('invalid', 'Temporada desconocida.');
     const existing = await client.query(
-      'SELECT 1 FROM season_prediction_windows WHERE season_id = $1',
-      [seasonId]
+      'SELECT 1 FROM season_prediction_windows WHERE season_id = $1 AND phase = $2',
+      [seasonId, PRESEASON]
     );
     if (existing.rowCount) throw new PredictionError('already-open', 'La ventana ya se abrió.');
     const candidates = await getSeasonPredictionCandidates(seasonId, client);
@@ -242,11 +246,12 @@ export async function openSeasonPredictionWindow(seasonId: string) {
     const result = await client.query<{ opens_at: Date; locks_at: Date }>(
       `WITH opened AS (SELECT clock_timestamp() AS at)
        INSERT INTO season_prediction_windows
-         (season_id, opens_at, locks_at, question_set_version, questions, candidates)
-       SELECT $1, opened.at, opened.at + interval '168 hours', $2, $3::jsonb, $4::jsonb FROM opened
+         (season_id, phase, opens_at, locks_at, question_set_version, questions, candidates)
+       SELECT $1, $2, opened.at, opened.at + interval '168 hours', $3, $4::jsonb, $5::jsonb FROM opened
        RETURNING opens_at, locks_at`,
       [
         seasonId,
+        PRESEASON,
         QUESTION_SET_VERSION,
         JSON.stringify(PREDICTION_QUESTIONS),
         JSON.stringify(candidates),

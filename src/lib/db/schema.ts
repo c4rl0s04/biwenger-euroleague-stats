@@ -189,19 +189,28 @@ export const userSeasons = pgTable(
   })
 );
 
-// Season prediction windows are opened explicitly by an operator. Snapshots keep
-// questions and candidates stable throughout the editing window and afterwards.
-export const seasonPredictionWindows = pgTable('season_prediction_windows', {
-  seasonId: text('season_id')
-    .primaryKey()
-    .references(() => seasons.id),
-  opensAt: timestamp('opens_at', { withTimezone: true }).notNull(),
-  locksAt: timestamp('locks_at', { withTimezone: true }).notNull(),
-  questionSetVersion: text('question_set_version').notNull(),
-  questions: jsonb('questions').notNull(),
-  candidates: jsonb('candidates').notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-});
+// Season prediction windows are opened explicitly by an operator, one per season phase
+// ('preseason' | 'playoffs'). Snapshots keep questions and candidates stable throughout
+// the editing window and afterwards.
+export const seasonPredictionWindows = pgTable(
+  'season_prediction_windows',
+  {
+    seasonId: text('season_id')
+      .notNull()
+      .references(() => seasons.id),
+    phase: text('phase').notNull(),
+    opensAt: timestamp('opens_at', { withTimezone: true }).notNull(),
+    locksAt: timestamp('locks_at', { withTimezone: true }).notNull(),
+    reopenedAt: timestamp('reopened_at', { withTimezone: true }),
+    questionSetVersion: text('question_set_version').notNull(),
+    questions: jsonb('questions').notNull(),
+    candidates: jsonb('candidates').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.seasonId, t.phase], name: 'season_prediction_windows_pkey' }),
+  })
+);
 
 export const seasonPredictionSubmissions = pgTable(
   'season_prediction_submissions',
@@ -209,6 +218,7 @@ export const seasonPredictionSubmissions = pgTable(
     seasonId: text('season_id')
       .notNull()
       .references(() => seasons.id),
+    phase: text('phase').notNull(),
     userId: text('user_id')
       .notNull()
       .references(() => users.id),
@@ -218,11 +228,19 @@ export const seasonPredictionSubmissions = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => ({
-    pk: primaryKey({ columns: [t.seasonId, t.userId] }),
+    pk: primaryKey({
+      columns: [t.seasonId, t.phase, t.userId],
+      name: 'season_prediction_submissions_pkey',
+    }),
     memberFk: foreignKey({
       columns: [t.seasonId, t.userId],
       foreignColumns: [userSeasons.seasonId, userSeasons.userId],
       name: 'season_prediction_submissions_member_fk',
+    }),
+    windowFk: foreignKey({
+      columns: [t.seasonId, t.phase],
+      foreignColumns: [seasonPredictionWindows.seasonId, seasonPredictionWindows.phase],
+      name: 'season_prediction_submissions_window_fk',
     }),
   })
 );
@@ -692,6 +710,33 @@ export const officialTeamStandings = pgTable(
       t.roundNumber,
       t.teamCode
     ),
+  })
+);
+
+// Official EuroLeague schedule facts keyed by provider game code, independent of the
+// fantasy round catalogue. phase_code is 'RS' | 'PI' | 'PO' | 'FF'; scores are only
+// stored for postseason games, which drive the playoff bracket results.
+export const officialScheduleGames = pgTable(
+  'official_schedule_games',
+  {
+    seasonId: text('season_id')
+      .notNull()
+      .references(() => seasons.id),
+    gameCode: integer('game_code').notNull(),
+    phaseCode: text('phase_code').notNull(),
+    roundCode: text('round_code'),
+    roundNumber: integer('round_number'),
+    homeTeamCode: text('home_team_code').notNull(),
+    awayTeamCode: text('away_team_code').notNull(),
+    scheduledAt: timestamp('scheduled_at', { withTimezone: true }),
+    isPlayed: boolean('is_played').notNull(),
+    homeScore: integer('home_score'),
+    awayScore: integer('away_score'),
+    syncedAt: timestamp('synced_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.seasonId, t.gameCode], name: 'official_schedule_games_pkey' }),
+    phaseIdx: index('idx_official_schedule_games_phase').on(t.seasonId, t.phaseCode),
   })
 );
 
