@@ -11,8 +11,8 @@ status: active
 
 The `/season-predictions` page stays closed until an operator opens a window for a specific season.
 No submission is accepted before that operation. The window snapshots the 12 questions and the
-season's player, EuroLeague team, and fantasy manager candidates. Existing windows cannot be
-reopened or extended by this command.
+season's player, EuroLeague team, and fantasy manager candidates. A locked preseason window can be
+reopened once (see [Reopen once](#reopen-once)); it cannot otherwise be extended.
 
 Windows and submissions are scoped by phase. Migration `0021_prediction_phases.sql` keys them by
 `(season_id, phase)` and `(season_id, phase, user_id)`, backfills existing rows as `preseason`, and
@@ -45,5 +45,20 @@ refuses a season with any empty candidate list and refuses a second opening. Ros
 opening do not change the frozen choices. The browser countdown is informational; PostgreSQL time
 controls the lock. After the lock, submissions are read-only and visible only to members of that
 same season. This release does not score predictions.
+
+## Reopen once
+
+A locked preseason window can be reopened exactly once, for example when few members answered
+before the lock. Questions, candidates, existing submissions and revisions are kept; only the lock
+moves. Preview the effect first, then apply it deliberately:
+
+```bash
+npm run season-predictions:open -- --season 2026-27 --reopen --hours 72
+npm run season-predictions:open -- --season 2026-27 --reopen --hours 72 --apply
+```
+
+The new lock is database time plus the given hours (1 to 336). The command refuses a window that
+is still open or was already reopened, and records the reopening in `reopened_at`. Because league
+answers were visible while the window was locked, announce the reopening to the league.
 
 For a disposable local end-to-end check, run `npm run season-predictions:test:local`.

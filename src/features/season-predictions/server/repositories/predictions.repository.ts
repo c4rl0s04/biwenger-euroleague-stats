@@ -277,3 +277,63 @@ export async function openSeasonPredictionWindow(seasonId: string) {
     client.release();
   }
 }
+
+// A locked preseason window may be reopened exactly once, keeping its frozen questions,
+// candidates and every existing submission and revision.
+const MAX_REOPEN_HOURS = 336;
+
+function assertReopenHours(hours: number) {
+  if (!Number.isInteger(hours) || hours < 1 || hours > MAX_REOPEN_HOURS)
+    throw new PredictionError(
+      'invalid',
+      `Las horas deben ser un entero entre 1 y ${MAX_REOPEN_HOURS}.`
+    );
+}
+
+export async function previewPreseasonReopen(seasonId: string, hours: number) {
+  assertReopenHours(hours);
+  const result = await database.query<{
+    locks_at: Date;
+    reopened_at: Date | null;
+    now: Date;
+    submissions: number;
+  }>(
+    `SELECT w.locks_at, w.reopened_at, clock_timestamp() AS now,
+       (SELECT count(*)::int FROM season_prediction_submissions s
+        WHERE s.season_id = w.season_id AND s.phase = w.phase) AS submissions
+     FROM season_prediction_windows w WHERE w.season_id = $1 AND w.phase = $2`,
+    [seasonId, PRESEASON]
+  );
+  const window = result.rows[0];
+  if (!window)
+    throw new PredictionError('not-open', 'Esta temporada no tiene ventana de pretemporada.');
+  return {
+    seasonId,
+    currentLocksAt: window.locks_at.toISOString(),
+    locked: window.now >= window.locks_at,
+    alreadyReopened: window.reopened_at !== null,
+    submissions: window.submissions,
+    newLocksAt: new Date(window.now.getTime() + hours * 3_600_000).toISOString(),
+  };
+}
+
+export async function reopenPreseasonWindow(seasonId: string, hours: number) {
+  assertReopenHours(hours);
+  const result = await database.query<{ locks_at: Date; reopened_at: Date }>(
+    `UPDATE season_prediction_windows
+     SET locks_at = clock_timestamp() + make_interval(hours => $3), reopened_at = clock_timestamp()
+     WHERE season_id = $1 AND phase = $2 AND reopened_at IS NULL AND locks_at <= clock_timestamp()
+     RETURNING locks_at, reopened_at`,
+    [seasonId, PRESEASON, hours]
+  );
+  const reopened = result.rows[0];
+  if (reopened)
+    return {
+      seasonId,
+      locksAt: reopened.locks_at.toISOString(),
+      reopenedAt: reopened.reopened_at.toISOString(),
+    };
+  const preview = await previewPreseasonReopen(seasonId, hours);
+  if (!preview.locked) throw new PredictionError('already-open', 'La ventana sigue abierta.');
+  throw new PredictionError('already-reopened', 'La ventana ya se reabrió una vez.');
+}
