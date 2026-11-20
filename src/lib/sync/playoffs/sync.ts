@@ -1,14 +1,11 @@
-import { db, pgClient } from '../../db';
 import { playoffPredictions, teams, playoffResults } from '../../db/schema';
 import { assertSyncSeasonWritable } from '../season-guard';
-import * as fs from 'fs';
-import * as path from 'path';
+import { loadPlayoffImport } from './input';
 
 async function syncPlayoffData() {
-  const { seasonId } = await assertSyncSeasonWritable(pgClient as any);
-  const dataPath = path.join(process.cwd(), 'src/lib/sync/playoffs/playoff-data.json');
-  const rawData = fs.readFileSync(dataPath, 'utf-8');
-  const { predictions, media, results } = JSON.parse(rawData);
+  const { seasonId, predictions, media, results } = loadPlayoffImport(process.argv.slice(2));
+  const { db, pgClient } = await import('../../db');
+  await assertSyncSeasonWritable(pgClient, seasonId);
 
   console.log(
     `🚀 Starting sync: ${predictions.length} predictions, ${media.length} media, ${results?.length || 0} results...`
@@ -22,10 +19,11 @@ async function syncPlayoffData() {
     let winnerId = pred.predictedWinnerId;
 
     if (pred.predictedWinnerName) {
+      const winnerName = pred.predictedWinnerName.toLowerCase();
       const team = allTeams.find(
         (t) =>
-          t.name?.toLowerCase().includes(pred.predictedWinnerName.toLowerCase()) ||
-          t.shortName?.toLowerCase().includes(pred.predictedWinnerName.toLowerCase())
+          t.name?.toLowerCase().includes(winnerName) ||
+          t.shortName?.toLowerCase().includes(winnerName)
       );
       if (team) {
         winnerId = team.id;
@@ -69,10 +67,11 @@ async function syncPlayoffData() {
     for (const res of results) {
       let winnerId = null;
       if (res.winnerName) {
+        const winnerName = res.winnerName.toLowerCase();
         const team = allTeams.find(
           (t) =>
-            t.name?.toLowerCase().includes(res.winnerName.toLowerCase()) ||
-            t.shortName?.toLowerCase().includes(res.winnerName.toLowerCase())
+            t.name?.toLowerCase().includes(winnerName) ||
+            t.shortName?.toLowerCase().includes(winnerName)
         );
         winnerId = team?.id;
       }
