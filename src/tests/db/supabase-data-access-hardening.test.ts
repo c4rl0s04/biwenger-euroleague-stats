@@ -159,7 +159,7 @@ describe('supabase data access hardening (0018_lock_down_supabase_data_access)',
             WHERE n.nspname = 'public' AND c.relkind = 'r'
             ORDER BY c.relname
           `);
-        expect(rlsRes.rows.length).toBe(39);
+        expect(rlsRes.rows.length).toBe(40);
         const tablesWithoutRls = rlsRes.rows.filter((r) => !r.rls_enabled);
         expect(tablesWithoutRls).toHaveLength(0);
 
