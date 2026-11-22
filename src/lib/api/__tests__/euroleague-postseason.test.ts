@@ -12,7 +12,7 @@ const readJson = (relative: string) =>
 const scheduleRows = readJson('../__fixtures__/advanced/schedule-postseason.json');
 const reportRows = readJson('../__fixtures__/advanced/report-postseason.json');
 const legacyResults: { matchId: string; winnerName: string }[] = readJson(
-  '../../sync/playoffs/playoff-data.json'
+  '../../sync/playoffs/playoff-data/2025-26.json'
 ).results;
 
 const LEGACY_TEAM_CODES: Record<string, string> = {
