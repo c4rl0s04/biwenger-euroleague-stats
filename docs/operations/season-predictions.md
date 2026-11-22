@@ -61,4 +61,21 @@ The new lock is database time plus the given hours (1 to 336). The command refus
 is still open or was already reopened, and records the reopening in `reopened_at`. Because league
 answers were visible while the window was locked, announce the reopening to the league.
 
+## Playoffs bracket window
+
+The playoffs window freezes the `euroleague-v1` bracket template and seeds 1-10 from the final
+regular-season standings (`official_team_standings` joined to `official_team_mappings`). Preview
+it first; the preview lists seeds, unmapped team codes, the first play-in tip-off and any problem:
+
+```bash
+npm run season-predictions:open -- --season 2027-28 --phase playoffs
+npm run season-predictions:open -- --season 2027-28 --phase playoffs --apply
+```
+
+`--apply` refuses unless every regular-season game in `official_schedule_games` is played, all ten
+seeds exist and are mapped, and the play-in is scheduled and has not started. The window locks at
+the first play-in tip-off; saves use the earlier of that lock and the current first play-in
+`scheduled_at`, so a rescheduled play-in still locks the bracket. Results and points are computed at
+read time from `official_schedule_games`; 2025-26 stays in the legacy playoff tables.
+
 For a disposable local end-to-end check, run `npm run season-predictions:test:local`.

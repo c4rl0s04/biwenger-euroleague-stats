@@ -5,20 +5,21 @@ import {
   type PredictionSection,
 } from './questions';
 import type { SeasonPredictionOptions } from './options';
+import type { BracketAnswers, BracketTemplate, PlayoffSeed } from './bracket';
 
 export type PredictionWindowStatus = 'not-open' | 'open' | 'locked';
 
-export interface PredictionSubmissionView {
-  answers: PredictionAnswers;
+export interface PredictionSubmissionView<Answers = PredictionAnswers> {
+  answers: Answers;
   revision: number;
   updatedAt: string;
 }
 
-export interface LeaguePredictionView {
+export interface LeaguePredictionView<Answers = PredictionAnswers> {
   userId: string;
   name: string;
   image: string | null;
-  answers: PredictionAnswers;
+  answers: Answers;
   updatedAt: string;
 }
 
@@ -37,6 +38,20 @@ export interface SeasonPredictionsPageData {
   league: LeaguePredictionView[] | null;
 }
 
+export interface PlayoffsPageData {
+  seasonId: string;
+  status: PredictionWindowStatus;
+  opensAt: string | null;
+  /** Effective lock: the earlier of the window lock and the first play-in tip-off. */
+  locksAt: string | null;
+  locksAtLabel: string | null;
+  serverNow: string;
+  template: BracketTemplate | null;
+  seeds: PlayoffSeed[];
+  submission: PredictionSubmissionView<BracketAnswers> | null;
+  league: LeaguePredictionView<BracketAnswers>[] | null;
+}
+
 export class PredictionError extends Error {
   constructor(
     public readonly code:
@@ -47,7 +62,8 @@ export class PredictionError extends Error {
       | 'conflict'
       | 'already-open'
       | 'empty-candidates'
-      | 'already-reopened',
+      | 'already-reopened'
+      | 'not-ready',
     message: string
   ) {
     super(message);

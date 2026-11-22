@@ -17,10 +17,12 @@ export async function PUT(request: Request) {
   if (!body || typeof body !== 'object' || Array.isArray(body))
     return privateJsonResponse({ message: 'Solicitud inválida' }, 400);
   const input = body as Record<string, unknown>;
+  const phase = input.phase === undefined ? 'preseason' : input.phase;
   if (
     typeof input.seasonId !== 'string' ||
     !input.seasonId.trim() ||
-    typeof input.revision !== 'number'
+    typeof input.revision !== 'number' ||
+    (phase !== 'preseason' && phase !== 'playoffs')
   )
     return privateJsonResponse({ message: 'Solicitud inválida' }, 400);
   try {
@@ -29,6 +31,7 @@ export async function PUT(request: Request) {
       userId: session.user.id,
       revision: input.revision,
       answers: input.answers,
+      phase,
     });
     return privateJsonResponse({ submission });
   } catch (error) {

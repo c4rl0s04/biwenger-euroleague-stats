@@ -1,7 +1,10 @@
 import 'server-only';
 export {
   readSeasonPredictions,
+  readPlayoffPredictions,
   saveSeasonPredictions,
+  previewPlayoffsWindow,
+  openPlayoffsWindow,
   previewSeasonPredictionWindow,
   openSeasonPredictionWindow,
   previewPreseasonReopen,
@@ -10,3 +13,6 @@ export {
 } from './server/repositories/predictions.repository';
 export { PredictionError } from './models/submission';
 export { getPreseasonOutcomes } from './server/queries/outcomes.query';
+export { getPostseasonGames, getPostseasonSeeds } from './server/queries/postseason.query';
+export { getLegacyPlayoffRows } from './server/queries/legacy-playoffs.query';
+export { mapLegacyPlayoffs } from './server/mappers/legacy-playoffs.mapper';

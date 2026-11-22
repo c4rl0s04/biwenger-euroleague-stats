@@ -12,3 +12,27 @@ export type {
 } from './models/preseason-scoring';
 export { combineLeaderboard } from './models/leaderboard';
 export type { LeaderboardMember, LeaderboardRow, PhasePoints } from './models/leaderboard';
+export {
+  EUROLEAGUE_BRACKET_V1,
+  deriveActualResults,
+  pruneInvalidPicks,
+  resolveParticipants,
+  scoreBracket,
+  validateBracketAnswers,
+} from './models/bracket';
+export type {
+  BracketAnswers,
+  BracketPick,
+  BracketResult,
+  BracketResults,
+  BracketScore,
+  BracketSeed,
+  BracketSlot,
+  BracketStage,
+  BracketTemplate,
+  PlayoffSeed,
+  PostseasonGame,
+  SlotParticipants,
+  SlotScore,
+} from './models/bracket';
+export type { PlayoffsPageData } from './models/submission';
