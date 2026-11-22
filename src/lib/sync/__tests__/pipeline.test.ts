@@ -22,6 +22,7 @@ describe('declarative sync pipeline', () => {
     expect(selectPipeline('routine').map((step) => step.id)).not.toContain('initial-squads');
     expect(selectPipeline('bootstrap').map((step) => step.id)).toContain('initial-squads');
     expect(selectPipeline('live').map((step) => step.id)).toEqual([
+      'euroleague-postseason',
       'euroleague-games',
       'biwenger-fantasy-points',
       'biwenger-lineups',

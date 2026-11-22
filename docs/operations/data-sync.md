@@ -74,17 +74,23 @@ The declarative pipeline is:
 |     1 | `biwenger-catalog`        | Biwenger            | `players`, `teams`, `player_seasons`                                   | routine, bootstrap |
 |     2 | `biwenger-price-history`  | Biwenger            | `market_values`, namespaced `sync_meta` checkpoints                    | routine, bootstrap |
 |     3 | `euroleague-master-data`  | EuroLeague          | `matches`, standings, team/player mappings                             | routine, bootstrap |
-|     4 | `match-linking`           | Biwenger + database | `matches` links and official sporting fields                           | routine, bootstrap |
-|     5 | `biwenger-users`          | Biwenger            | `users`, `user_seasons`                                                | routine, bootstrap |
-|     6 | `euroleague-games`        | EuroLeague          | game state, boxscores, events, shots, sporting round statistics        | all                |
-|     7 | `biwenger-fantasy-points` | Biwenger            | only `player_round_stats.fantasy_points`                               | all                |
-|     8 | `biwenger-lineups`        | Biwenger            | `lineups`, `user_rounds`                                               | all                |
-|     9 | `biwenger-board`          | Biwenger            | transfers, bids, finances, and prediction pools in one pagination pass | routine, bootstrap |
-|    10 | `biwenger-squads`         | Biwenger            | current `player_seasons.owner_id`                                      | routine, bootstrap |
-|    11 | `biwenger-market`         | Biwenger            | current-day `market_listings` snapshot                                 | routine, bootstrap |
-|    12 | `biwenger-tournaments`    | Biwenger            | tournaments, phases, fixtures, and standings                           | routine, bootstrap |
-|    13 | `initial-squads`          | Database            | `initial_squads`                                                       | bootstrap          |
-|    14 | `user-colors`             | Database            | `user_seasons.color_index`                                             | bootstrap          |
+|     4 | `euroleague-postseason`   | EuroLeague          | `official_schedule_games` phases and postseason scores                 | all                |
+|     5 | `match-linking`           | Biwenger + database | `matches` links and official sporting fields                           | routine, bootstrap |
+|     6 | `biwenger-users`          | Biwenger            | `users`, `user_seasons`                                                | routine, bootstrap |
+|     7 | `euroleague-games`        | EuroLeague          | game state, boxscores, events, shots, sporting round statistics        | all                |
+|     8 | `biwenger-fantasy-points` | Biwenger            | only `player_round_stats.fantasy_points`                               | all                |
+|     9 | `biwenger-lineups`        | Biwenger            | `lineups`, `user_rounds`                                               | all                |
+|    10 | `biwenger-board`          | Biwenger            | transfers, bids, finances, and prediction pools in one pagination pass | routine, bootstrap |
+|    11 | `biwenger-squads`         | Biwenger            | current `player_seasons.owner_id`                                      | routine, bootstrap |
+|    12 | `biwenger-market`         | Biwenger            | current-day `market_listings` snapshot                                 | routine, bootstrap |
+|    13 | `biwenger-tournaments`    | Biwenger            | tournaments, phases, fixtures, and standings                           | routine, bootstrap |
+|    14 | `initial-squads`          | Database            | `initial_squads`                                                       | bootstrap          |
+|    15 | `user-colors`             | Database            | `user_seasons.color_index`                                             | bootstrap          |
+
+`euroleague-postseason` stores every official game with its phase (`RS`, `PI`, `PO`, `FF`) and
+`round_code` set to the schedule group (for example `PLAYOFF A`), then fills final scores for played
+non-RS games from the game report. An unknown phase code fails the step. It reuses the schedule
+loaded by `euroleague-master-data` when both run, and fetches it otherwise (live mode).
 
 Running a single step is an explicit recovery operation and does not automatically run its declared
 dependencies. Check that prerequisite data is current first. Numeric `--step` values are rejected.
