@@ -83,6 +83,9 @@ export async function reconcilePlayerMappings(
   const fantasyPlayers = await mutations.getFantasyPlayers();
   const existing = await mutations.getPlayerMappings();
   const existingByCode = new Map(existing.map((row) => [row.provider_player_code, row] as const));
+  const linkedCodes = new Map(
+    existing.map((row) => [row.player_id, row.provider_player_code] as const)
+  );
   const issues: MappingIssue[] = [];
   let mapped = 0;
 
@@ -115,14 +118,23 @@ export async function reconcilePlayerMappings(
     const byLegacyCode = fantasyPlayers.filter(
       (player) => normalizeEuroleaguePlayerCode(player.euroleague_code) === providerCode
     );
+    const officialNames = [normalizeIdentity(official.playerName)];
+    const nameParts = official.playerName.split(',');
+    if (nameParts.length === 2) {
+      officialNames.push(normalizeIdentity(nameParts.reverse().join(' ')));
+    }
     const byExactTeamName = fantasyPlayers.filter(
       (player) =>
+        teamCode &&
         player.provider_team_code === teamCode &&
-        normalizeIdentity(player.name) === normalizeIdentity(official.playerName)
+        (!player.euroleague_code ||
+          normalizeEuroleaguePlayerCode(player.euroleague_code) === providerCode) &&
+        officialNames.includes(normalizeIdentity(player.name))
     );
     const candidates = byLegacyCode.length === 1 ? byLegacyCode : byExactTeamName;
+    const linkedCode = candidates.length === 1 ? linkedCodes.get(candidates[0].id) : null;
 
-    if (candidates.length === 1) {
+    if (candidates.length === 1 && (!linkedCode || linkedCode === providerCode)) {
       await mutations.upsertPlayerMapping({
         playerId: candidates[0].id,
         providerPlayerCode: providerCode,
@@ -135,6 +147,7 @@ export async function reconcilePlayerMappings(
         status: 'matched',
         raw,
       });
+      linkedCodes.set(candidates[0].id, providerCode);
       existingByCode.set(providerCode, {
         player_id: candidates[0].id,
         provider_player_code: providerCode,

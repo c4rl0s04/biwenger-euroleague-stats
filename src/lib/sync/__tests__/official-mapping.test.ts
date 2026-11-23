@@ -70,6 +70,36 @@ describe('season-scoped official mapping', () => {
     );
   });
 
+  it.each([
+    [['Eli Ndiaye'], 7],
+    [['Ndiaye'], null],
+    [['Eli Ndiaye', 'Ndiaye Eli'], null],
+  ])('rechecks pending profiles for candidates %j', async (names, playerId) => {
+    const store = mutations({
+      getFantasyPlayers: vi.fn(async () =>
+        names.map((name, index) => ({ id: 7 + index, name, provider_team_code: 'MAD' }))
+      ),
+      getPlayerMappings: vi.fn(async () => [
+        { provider_player_code: 'P009213', player_id: null, status: 'review_required' },
+      ]),
+    });
+    await reconcilePlayerMappings(store, [
+      {
+        playerCode: 'P009213',
+        playerName: 'NDIAYE, ELI',
+        teamCode: 'MAD',
+        teamName: null,
+        imageUrl: null,
+        teamImageUrl: null,
+        age: null,
+        raw: {},
+      },
+    ]);
+    expect(store.upsertPlayerMapping).toHaveBeenCalledWith(
+      expect.objectContaining({ playerId, status: playerId ? 'matched' : 'review_required' })
+    );
+  });
+
   it('refreshes official metadata without changing an existing manual player relation', async () => {
     const store = mutations({
       getPlayerMappings: vi.fn(async () => [

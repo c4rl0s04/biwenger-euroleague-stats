@@ -2,7 +2,7 @@
 export interface SearchPlayer {
   id: number;
   name: string;
-  img: string;
+  img: string | null;
   position: string | null;
   team: string | null;
   /** Legacy parseInt semantics: non-numeric values serialize as JSON null. */
