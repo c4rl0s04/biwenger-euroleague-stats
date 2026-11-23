@@ -20,10 +20,7 @@ export const MARKET_TRANSFER_READ_POLICY = Object.freeze({
   access: 'public-historical-fantasy-statistics',
   identity: 'explicit-filters-only',
   serverCache: 'none',
-  transfersHttpCache: 'private-no-store',
-  valueDetailsMaxAgeSeconds: 300,
-  duelDetailsMaxAgeSeconds: 60,
-  staleWhileRevalidateSeconds: 60,
+  httpCache: 'private-no-store',
 } as const);
 
 export async function getLiveMarketTransfers(

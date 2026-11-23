@@ -4,6 +4,7 @@ import { Swords, X, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
 import PlayerImage from '@/components/ui/PlayerImage';
+import { useSeason } from '@/contexts/SeasonContext';
 import { useApiData } from '@/lib/hooks/useApiData';
 import { getColorForUser } from '@/lib/competition/public';
 import type { MarketDuelSelection } from '../../models/market-duel-selection';
@@ -50,6 +51,7 @@ function buildPairKey(selectedDuel: MarketDuelSelection | null) {
 }
 
 export default function BiddingDuelDetailsCard({ selectedDuel, onClear }: BiddingDuelDetailsProps) {
+  const { currentSeasonId } = useSeason();
   const pairKey = buildPairKey(selectedDuel);
   const userId = selectedDuel?.user?.id;
   const opponentId = selectedDuel?.opponent?.id;
@@ -64,7 +66,7 @@ export default function BiddingDuelDetailsCard({ selectedDuel, onClear }: Biddin
     {
       dependencies: [userId, opponentId],
       skip: !selectedDuel,
-      cacheKey: pairKey ? `market-duel-${pairKey}` : null,
+      cacheKey: currentSeasonId && pairKey ? `market-duel:${currentSeasonId}:${pairKey}` : null,
     }
   );
 
