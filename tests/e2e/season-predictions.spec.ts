@@ -164,7 +164,7 @@ for (const theme of ['dark', 'light'] as const) {
     await expect(
       page.getByRole('button', { name: 'Guardar predicciones', exact: true })
     ).toHaveCount(0);
-    await page.locator('#league summary', { hasText: 'Fixture Rival' }).click();
+    await page.locator('#league summary', { hasText: 'Fixture Rival' }).last().click();
     await expect(page.getByText('Fixture Madrid').last()).toBeVisible();
     await expect(page.getByText('Sin respuesta').first()).toBeVisible();
   });
