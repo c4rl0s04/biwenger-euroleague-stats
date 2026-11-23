@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { getBestValueDetails, parseMarketReadId } from '@/features/market/server';
-import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
+import { privateJsonResponse, errorResponse } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     }
 
     const details = await getBestValueDetails(transferIdValidation.value);
-    return successResponse(details, CACHE_DURATIONS.MEDIUM);
+    return privateJsonResponse({ success: true, data: details });
   } catch (error) {
     console.error('Error fetching best value details:', error);
     return errorResponse('Failed to fetch details');

@@ -216,7 +216,7 @@ it('preserves detail JSON and cache policies through the real handlers', async (
   const valueResponse = await valueDetails(request('stats/value-details'));
   expect(valueResponse.status).toBe(200);
   expect(valueResponse.headers.get('cache-control')).toBe(
-    'public, max-age=300, stale-while-revalidate=60'
+    'private, no-store, max-age=0, must-revalidate'
   );
   expect(await valueResponse.json()).toEqual({
     success: true,
@@ -225,7 +225,7 @@ it('preserves detail JSON and cache policies through the real handlers', async (
   const duelResponse = await duelDetails(request('duels/details?opponentId=7'));
   expect(duelResponse.status).toBe(200);
   expect(duelResponse.headers.get('cache-control')).toBe(
-    'public, max-age=60, stale-while-revalidate=60'
+    'private, no-store, max-age=0, must-revalidate'
   );
   expect(await duelResponse.json()).toEqual({
     success: true,

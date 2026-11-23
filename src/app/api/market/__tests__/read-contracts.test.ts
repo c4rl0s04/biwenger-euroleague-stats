@@ -30,35 +30,31 @@ beforeEach(() => {
   for (const fn of Object.values(mocks)) fn.mockResolvedValue({ fixture_stat: null, count: '2' });
 });
 const cases = [
-  { route: market, suffix: '?limit=7abc', service: mocks.getMarketPageData, args: [], age: 300 },
-  { route: stats, suffix: '/stats', service: mocks.fetchMarketStats, args: [], age: 300 },
+  { route: market, suffix: '?limit=7abc', service: mocks.getMarketPageData, args: [] },
+  { route: stats, suffix: '/stats', service: mocks.fetchMarketStats, args: [] },
   {
     route: value,
     suffix: '/stats/value-details?transferId=7abc',
     service: mocks.fetchBestValueDetails,
     args: [7],
-    age: 300,
   },
   {
     route: trends,
     suffix: '/trends?days=30abc',
     service: mocks.fetchMarketTrendsAnalysis,
     args: [30],
-    age: 60,
   },
   {
     route: transfers,
     suffix: '/transfers?page=2abc&limit=3.9&buyer=%20Ana%20&seller=%20',
     service: mocks.fetchLiveMarketTransfers,
     args: [{ page: 2, limit: 3, buyer: 'Ana', seller: undefined }],
-    age: null,
   },
   {
     route: duels,
     suffix: '/duels/details?userId=7abc&opponentId=8.9',
     service: mocks.fetchBiddingDuelDetails,
     args: [7, 8],
-    age: 60,
   },
 ];
 for (const item of cases) {
@@ -70,9 +66,7 @@ for (const item of cases) {
       data: { fixture_stat: null, count: '2' },
     });
     expect(response.headers.get('cache-control')).toBe(
-      item.age === null
-        ? 'private, no-store, max-age=0, must-revalidate'
-        : `public, max-age=${item.age}, stale-while-revalidate=60`
+      'private, no-store, max-age=0, must-revalidate'
     );
     expect(item.service).toHaveBeenCalledExactlyOnceWith(...item.args);
   });

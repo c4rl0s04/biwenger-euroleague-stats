@@ -7,7 +7,7 @@ export const MARKET_TRENDS_POLICY = Object.freeze({
   access: 'public-fantasy-statistics',
   identity: 'none',
   serverCache: 'none',
-  httpMaxAgeSeconds: 60,
+  httpCache: 'private-no-store',
   httpStaleWhileRevalidateSeconds: 60,
 } as const);
 

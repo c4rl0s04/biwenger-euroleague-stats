@@ -1,3 +1,5 @@
+const season = vi.hoisted(() => ({ id: '2025-26' as string | undefined }));
+vi.mock('@/contexts/SeasonContext', () => ({ useSeason: () => ({ currentSeasonId: season.id }) }));
 import { beforeEach, expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { ReactNode } from 'react';
@@ -21,6 +23,7 @@ const data = {
   biggestDominance: null,
 };
 beforeEach(() => {
+  season.id = '2025-26';
   vi.resetAllMocks();
   fake.api.mockReturnValue({ data: [], loading: false, error: null });
 });
@@ -46,7 +49,7 @@ it.each([false, true])(
     expect(options).toEqual({
       dependencies: [selectedDuel.user.id, selectedDuel.opponent.id],
       skip: false,
-      cacheKey: 'market-duel-7-8',
+      cacheKey: 'market-duel:2025-26:7-8',
     });
   }
 );
@@ -116,4 +119,12 @@ it('does not silently change the existing null-name sorting failure', () => {
     )
   ).toThrow(TypeError);
   expect(renderToStaticMarkup(<BiddingDuelsMatrixCard data={{ ...data, users: [] }} />)).toBe('');
+});
+
+it.each(['2026-27', undefined])('scopes the duel cache key to season %s', (id) => {
+  season.id = id;
+  renderToStaticMarkup(<BiddingDuelDetailsCard selectedDuel={selection} onClear={() => {}} />);
+  const [endpoint, options] = fake.api.mock.calls[0];
+  expect(endpoint()).toBe('/api/market/duels/details?userId=7&opponentId=8');
+  expect(options.cacheKey).toBe(id ? 'market-duel:2026-27:7-8' : null);
 });

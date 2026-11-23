@@ -125,7 +125,7 @@ it('preserves the public route contract and the deliberately unused validated li
   const response = await GET(new NextRequest('https://fixture.invalid/api/market?limit=7abc'));
   expect(response.status).toBe(200);
   expect(response.headers.get('cache-control')).toBe(
-    'public, max-age=300, stale-while-revalidate=60'
+    'private, no-store, max-age=0, must-revalidate'
   );
   expect(await response.json()).toEqual({ success: true, data: overview });
   expect(dependencies.query.mock.calls[1][1]).toEqual([100, 0, 'fixture-season']);

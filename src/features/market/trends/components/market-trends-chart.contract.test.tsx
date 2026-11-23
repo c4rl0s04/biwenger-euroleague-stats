@@ -1,3 +1,5 @@
+const season = vi.hoisted(() => ({ id: '2025-26' as string | undefined }));
+vi.mock('@/contexts/SeasonContext', () => ({ useSeason: () => ({ currentSeasonId: season.id }) }));
 import { beforeEach, expect, it, vi } from 'vitest';
 import { cloneElement, type ReactElement, type ReactNode } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
@@ -49,6 +51,7 @@ vi.mock('recharts', () => ({
 import MarketTrendsChart from './MarketTrendsChart';
 const render = () => renderToStaticMarkup(<MarketTrendsChart />);
 beforeEach(() => {
+  season.id = '2025-26';
   vi.clearAllMocks();
   fake.data = [];
   fake.loading = false;
@@ -67,7 +70,7 @@ it.each([
   render();
   expect(fake.api).toHaveBeenCalledWith(
     `/api/market/trends?days=${days}`,
-    expect.objectContaining({ dependencies: [days], cacheKey: `market-trends-${days}` })
+    expect.objectContaining({ dependencies: [days], cacheKey: `market-trends:2025-26:${days}` })
   );
   const options = fake.api.mock.calls[0][1];
   expect(Object.keys(options)).toEqual(['dependencies', 'cacheKey', 'transform']);
@@ -120,4 +123,15 @@ it('preserves inactive and empty-transfer tooltip behavior', () => {
   expect(render()).toContain('Sin fichajes');
   fake.active = false;
   expect(render()).not.toContain('Synthetic day');
+});
+
+it.each(['2026-27', undefined])('scopes the monthly cache key to season %s', (id) => {
+  season.id = id;
+  render();
+  expect(fake.api).toHaveBeenCalledWith(
+    '/api/market/trends?days=30',
+    expect.objectContaining({
+      cacheKey: id ? 'market-trends:2026-27:30' : null,
+    })
+  );
 });
