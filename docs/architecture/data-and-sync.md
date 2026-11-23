@@ -86,6 +86,7 @@ flowchart LR
   EuroLeague --> Boxscore["Player boxscore"]
   Boxscore --> PlayerStats[(player_round_stats)]
   EuroLeague --> Standings[(official_team_standings)]
+  EuroLeague --> Schedule[(official_schedule_games)]
   EuroLeague --> PBP[(official_play_by_play)]
   EuroLeague --> Shots[(official_shots)]
   EuroLeague --> Mappings["official team/player mappings"]
