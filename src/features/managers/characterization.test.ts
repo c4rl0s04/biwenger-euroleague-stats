@@ -385,14 +385,14 @@ describe('Current main characterization: Managers remaining reads & HTTP contrac
   });
 
   describe('HTTP Route Contracts', () => {
-    it('GET /api/users returns public cache headers and force-dynamic', async () => {
+    it('GET /api/users returns private no-store headers and force-dynamic', async () => {
       const rows = [{ id: 'user-1', name: 'User One', icon: null, color_index: 0 }];
       dbMocks.query.mockResolvedValueOnce({ rows });
 
       const response = await usersRoute();
       expect(response.status).toBe(200);
       expect(response.headers.get('Cache-Control')).toBe(
-        'public, max-age=900, stale-while-revalidate=60'
+        'private, no-store, max-age=0, must-revalidate'
       );
       expect(await response.json()).toEqual({ success: true, data: rows });
       expect(usersDynamic).toBe('force-dynamic');

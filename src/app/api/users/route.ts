@@ -1,12 +1,12 @@
 import { getManagerDirectory } from '@/features/managers/server';
-import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
+import { privateJsonResponse, errorResponse } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
     const users = await getManagerDirectory();
-    return successResponse(users, CACHE_DURATIONS.LONG);
+    return privateJsonResponse({ success: true, data: users });
   } catch (error) {
     console.error('Error fetching users:', error);
     return errorResponse('Internal Server Error');

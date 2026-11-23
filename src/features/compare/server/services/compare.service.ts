@@ -18,7 +18,7 @@ import type {
 
 export const COMPARE_READ_POLICY = Object.freeze({
   access: 'public league-wide fantasy statistics; no session/cookie or request-ID dependency',
-  httpCache: 'public, max-age=300, stale-while-revalidate=60',
+  httpCache: 'private, no-store, max-age=0, must-revalidate',
   errorCache: 'private, no-store, max-age=0, must-revalidate',
   serverCache: 'none added; upstream season-keyed rivalry cache remains 900 seconds',
   pageAccess: 'existing parent authentication and mobile route guards',

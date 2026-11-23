@@ -68,21 +68,19 @@ beforeEach(() => {
 });
 describe('Rounds real HTTP -> service -> mapper contracts', () => {
   it.each([
-    ['list', () => list(), 900],
-    ['stats', () => stats(request('?roundId=2')), 300],
-    ['standings', () => standings(request('?roundId=2')), 60],
-    ['lineup', () => lineup(request('?roundId=2&userId=7')), 300],
-    ['history', () => history(request('?userId=7')), 0],
-    ['all-history', () => allHistory(), 300],
-    ['leaderboard', () => leaderboard(), 300],
+    ['list', () => list()],
+    ['stats', () => stats(request('?roundId=2'))],
+    ['standings', () => standings(request('?roundId=2'))],
+    ['lineup', () => lineup(request('?roundId=2&userId=7'))],
+    ['history', () => history(request('?userId=7'))],
+    ['all-history', () => allHistory()],
+    ['leaderboard', () => leaderboard()],
   ] as const)(
-    '%s preserves public URL-keyed envelope/cache and excludes extra fields',
-    async (_name, run, seconds) => {
+    '%s preserves envelope and private cache and excludes extra fields',
+    async (_name, run) => {
       const response = await run();
       expect(response.status).toBe(200);
-      expect(response.headers.get('Cache-Control')).toBe(
-        `public, max-age=${seconds}, stale-while-revalidate=60`
-      );
+      expect(response.headers.get('Cache-Control')).toBe(privateHeader);
       const text = await response.text();
       expect(JSON.parse(text)).toMatchObject({ success: true });
       expect(text).not.toContain('excluded-fixture');

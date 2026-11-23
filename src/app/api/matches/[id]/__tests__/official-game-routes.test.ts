@@ -18,7 +18,7 @@ import { GET as getShots } from '../shots/route';
 describe('official game detail routes', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('passes play filters and uses short live caching', async () => {
+  it('passes play filters and keeps live play-by-play out of HTTP caches', async () => {
     feature.getOfficialPlayByPlayData.mockResolvedValue({
       data: { match: { id: 42, status: 'live' }, finalizedAt: null, items: [] },
       cacheSeconds: 15,
@@ -33,10 +33,12 @@ describe('official game detail routes', () => {
       matchId: '42',
       filters: { period: '2', teamCode: 'mad', playerId: '7' },
     });
-    expect(response.headers.get('Cache-Control')).toContain('max-age=15');
+    expect(response.headers.get('Cache-Control')).toBe(
+      'private, no-store, max-age=0, must-revalidate'
+    );
   });
 
-  it('uses long caching for finalized shots and rejects invalid filters', async () => {
+  it('keeps finalized shots out of HTTP caches and rejects invalid filters', async () => {
     feature.getOfficialShotData.mockResolvedValueOnce({
       data: {
         match: { id: 42, status: 'finished' },
@@ -49,7 +51,9 @@ describe('official game detail routes', () => {
       new NextRequest('http://localhost/api/matches/42/shots?period=4'),
       { params: Promise.resolve({ id: '42' }) }
     );
-    expect(response.headers.get('Cache-Control')).toContain('max-age=3600');
+    expect(response.headers.get('Cache-Control')).toBe(
+      'private, no-store, max-age=0, must-revalidate'
+    );
 
     feature.getOfficialShotData.mockRejectedValueOnce(
       new feature.MatchesInputError('playerId must be a positive integer.')

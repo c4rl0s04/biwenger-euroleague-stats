@@ -27,7 +27,7 @@ describe('team route contracts', () => {
     expect(feature.toTeamProfileApiModel).toHaveBeenCalledWith(model);
     expect(response.status).toBe(200);
     expect(response.headers.get('cache-control')).toBe(
-      'public, max-age=300, stale-while-revalidate=60'
+      'private, no-store, max-age=0, must-revalidate'
     );
     expect(await response.json()).toEqual({ success: true, data: { team: apiModel } });
   });

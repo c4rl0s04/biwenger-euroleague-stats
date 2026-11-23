@@ -157,7 +157,7 @@ describe('Home compatibility edge cases', () => {
     });
     expect(HOME_READ_POLICY.activity.httpCache).toBe('private, no-store');
     expect(HOME_READ_POLICY.landing.httpCache).toBe(
-      'public, max-age=300, stale-while-revalidate=60'
+      'private, no-store, max-age=0, must-revalidate'
     );
   });
 });

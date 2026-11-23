@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { fetchAllUsersPerformanceHistory } from '@/features/rounds/server';
-import { successResponse, errorResponse } from '@/lib/utils/response';
+import { privateJsonResponse, errorResponse } from '@/lib/utils/response';
 
 /**
  * GET /api/rounds/all-history
@@ -10,7 +10,7 @@ export async function GET() {
   try {
     const allUsersHistory = await fetchAllUsersPerformanceHistory();
 
-    return successResponse({ allUsersHistory });
+    return privateJsonResponse({ success: true, data: { allUsersHistory } });
   } catch (error) {
     console.error('Error fetching all users history:', error);
     return errorResponse('Error fetching history data', 500);

@@ -25,7 +25,7 @@ test('News retains desktop ticker and phone disclosure', async ({ page, request 
     const response = await client.get('/api/news?userId=ignored&limit=invalid');
     expect(response.status()).toBe(200);
     expect(response.headers()['cache-control']).toBe(
-      'public, max-age=300, stale-while-revalidate=60'
+      'private, no-store, max-age=0, must-revalidate'
     );
     const payload = await response.json();
     expect(payload.success).toBe(true);

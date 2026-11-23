@@ -23,7 +23,7 @@ test('Home preserves its desktop landing and phone activity composition', async 
   expect(forbidden.status()).toBe(400);
   const landing = await request.get('/api/landing-stats');
   expect(landing.status()).toBe(200);
-  expect(landing.headers()['cache-control']).toBe('public, max-age=300, stale-while-revalidate=60');
+  expect(landing.headers()['cache-control']).toBe('private, no-store, max-age=0, must-revalidate');
   expect((await landing.json()).success).toBe(true);
   const phone =
     (await page.locator('[data-presentation]').getAttribute('data-presentation')) === 'phone';

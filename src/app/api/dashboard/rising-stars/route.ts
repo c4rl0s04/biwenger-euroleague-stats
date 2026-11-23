@@ -1,12 +1,12 @@
 import { fetchRisingStars } from '@/features/dashboard/server';
-import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
+import { privateJsonResponse, errorResponse } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
     const stars = await fetchRisingStars();
-    return successResponse(stars, CACHE_DURATIONS.MEDIUM);
+    return privateJsonResponse({ success: true, data: stars });
   } catch (error) {
     console.error('Error fetching rising stars:', error);
     return errorResponse('Failed to fetch rising stars');

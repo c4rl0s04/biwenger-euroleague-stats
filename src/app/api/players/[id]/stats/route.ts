@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { getPlayerProfileApiData } from '@/features/players/server';
-import { CACHE_DURATIONS, successResponse, errorResponse } from '@/lib/utils/response';
+import { privateJsonResponse, errorResponse } from '@/lib/utils/response';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     // Return the full player profile which includes matches, historical performance, and next matches
-    return successResponse(stats, CACHE_DURATIONS.MEDIUM);
+    return privateJsonResponse({ success: true, data: stats });
   } catch (error) {
     console.error(`Error fetching player stats for ${params}:`, error);
     return errorResponse('Internal Server Error', 500);

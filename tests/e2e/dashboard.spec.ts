@@ -130,7 +130,7 @@ test('Dashboard overview and phone sections retain their read experience', async
       expect(payload.data).toMatchObject({ user_points: 55, gap: 0, is_leader: true });
     if (endpoint === 'recent-activity') {
       expect(response.headers()['cache-control']).toBe(
-        'public, max-age=60, stale-while-revalidate=60'
+        'private, no-store, max-age=0, must-revalidate'
       );
       expect(payload.data.recentRecords[0]).toMatchObject({
         type: 'highest_round',

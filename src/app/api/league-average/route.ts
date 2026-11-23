@@ -1,5 +1,5 @@
 import { fetchLeagueAveragePoints } from '@/features/dashboard/server';
-import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
+import { privateJsonResponse, errorResponse } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
     const average = await fetchLeagueAveragePoints();
-    return successResponse({ average }, CACHE_DURATIONS.MEDIUM);
+    return privateJsonResponse({ success: true, data: { average } });
   } catch (error) {
     console.error('Error fetching league average:', error);
     return errorResponse('Internal Server Error');

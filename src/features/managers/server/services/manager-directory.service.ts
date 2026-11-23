@@ -5,7 +5,7 @@ import type { ManagerDirectoryViewModel } from '../../models/manager-directory';
 
 export const MANAGER_DIRECTORY_POLICY = Object.freeze({
   access: 'public fantasy directory; no session identity',
-  httpCache: 'public, max-age=900, stale-while-revalidate=60',
+  httpCache: 'private, no-store, max-age=0, must-revalidate',
   serverCache: 'none; resolve active read season on every call',
   mutations: 'none',
 } as const);

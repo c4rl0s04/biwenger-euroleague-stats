@@ -15,7 +15,7 @@ export const HOME_READ_POLICY = {
   landing: {
     access: 'public aggregate statistics; identity-independent',
     serverCache: 'none',
-    httpCache: 'public, max-age=300, stale-while-revalidate=60',
+    httpCache: 'private, no-store, max-age=0, must-revalidate',
     errorCache: 'private, no-store, max-age=0, must-revalidate',
   },
 } as const;

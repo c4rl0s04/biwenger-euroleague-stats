@@ -29,7 +29,6 @@ import { GET as ideal } from '../ideal-lineup/route';
 import { GET as activity } from '../recent-activity/route';
 
 const privateCache = 'private, no-store, max-age=0, must-revalidate';
-const publicCache = (seconds: number) => `public, max-age=${seconds}, stale-while-revalidate=60`;
 beforeEach(() => {
   Object.values(reads).forEach((read) => read.mockReset());
 });
@@ -39,7 +38,6 @@ describe.each([
     name: 'birthdays',
     get: birthdays,
     read: reads.fetchPlayerBirthdays,
-    seconds: 300,
     args: [],
     error: 'Failed to fetch birthdays',
   },
@@ -47,7 +45,6 @@ describe.each([
     name: 'rising-stars',
     get: rising,
     read: reads.fetchRisingStars,
-    seconds: 300,
     args: [],
     error: 'Failed to fetch rising stars',
   },
@@ -55,7 +52,6 @@ describe.each([
     name: 'top-players',
     get: top,
     read: reads.fetchTopPlayers,
-    seconds: 300,
     args: [],
     error: 'Failed to fetch top players',
   },
@@ -63,7 +59,6 @@ describe.each([
     name: 'top-form',
     get: form,
     read: reads.fetchTopPlayersByForm,
-    seconds: 60,
     args: [6, 3],
     error: 'Failed to fetch top form data',
   },
@@ -71,7 +66,6 @@ describe.each([
     name: 'market-opportunities',
     get: market,
     read: reads.fetchMarketOpportunities,
-    seconds: 60,
     args: [6],
     error: 'Failed to fetch market opportunities',
   },
@@ -79,11 +73,10 @@ describe.each([
     name: 'mvps',
     get: mvps,
     read: reads.fetchLastRoundMVPs,
-    seconds: 300,
     args: [],
     error: 'Failed to fetch MVPs',
   },
-])('$name contract', ({ get, read, seconds, args, error }) => {
+])('$name contract', ({ get, read, args, error }) => {
   it.each([{ data: [] }, { data: [{ player_id: 7, owner_name: null, points: 0 }] }])(
     'retains envelope, fields, cache and service arguments',
     async ({ data }) => {
@@ -91,7 +84,7 @@ describe.each([
       const response = await get();
       expect(response.status).toBe(200);
       expect(await response.json()).toEqual({ success: true, data });
-      expect(response.headers.get('cache-control')).toBe(publicCache(seconds));
+      expect(response.headers.get('cache-control')).toBe(privateCache);
       expect(read).toHaveBeenCalledWith(...args);
     }
   );
@@ -104,12 +97,12 @@ describe.each([
   });
 });
 it.each([null, { round_id: 1, start_date: null, matches: [] }])(
-  'keeps next-round nesting, nullable payload and short cache',
+  'keeps next-round nesting, nullable payload and private cache',
   async (data) => {
     reads.fetchNextRound.mockResolvedValue(data);
     const response = await next();
     expect(await response.json()).toEqual({ success: true, data: { nextRound: data } });
-    expect(response.headers.get('cache-control')).toBe(publicCache(60));
+    expect(response.headers.get('cache-control')).toBe(privateCache);
   }
 );
 it.each([null, 0, 73.2])(
@@ -118,17 +111,17 @@ it.each([null, 0, 73.2])(
     reads.fetchLeagueAveragePoints.mockResolvedValue(value);
     const response = await average();
     expect(await response.json()).toEqual({ success: true, data: { average: value } });
-    expect(response.headers.get('cache-control')).toBe(publicCache(300));
+    expect(response.headers.get('cache-control')).toBe(privateCache);
   }
 );
 it.each([60, 300])(
-  'uses the ideal-lineup service response and its %s-second policy',
+  'uses the ideal-lineup response with private caching for a %s-second service hint',
   async (cacheSeconds) => {
     const data = { lineup: [], total_points: 0, round_name: '-' };
     reads.getDashboardIdealLineup.mockResolvedValue({ data, cacheSeconds });
     const response = await ideal();
     expect(await response.json()).toEqual({ success: true, data });
-    expect(response.headers.get('cache-control')).toBe(publicCache(cacheSeconds));
+    expect(response.headers.get('cache-control')).toBe(privateCache);
   }
 );
 it.each([
@@ -170,9 +163,7 @@ describe('recent-activity URL identity (no session fallback)', () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ success: true, data });
     expect(reads.getRecentActivityData).toHaveBeenCalledWith(id);
-    expect(response.headers.get('cache-control')).toBe(
-      id === null ? publicCache(60) : privateCache
-    );
+    expect(response.headers.get('cache-control')).toBe(privateCache);
   });
   it.each(['0', '-1', '1000000000', 'null', 'undefined', 'abc', ' '])(
     'rejects %s without reading',

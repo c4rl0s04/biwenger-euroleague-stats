@@ -1,12 +1,12 @@
 import { fetchPlayerBirthdays } from '@/features/dashboard/server';
-import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
+import { privateJsonResponse, errorResponse } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
     const birthdays = await fetchPlayerBirthdays();
-    return successResponse(birthdays, CACHE_DURATIONS.MEDIUM);
+    return privateJsonResponse({ success: true, data: birthdays });
   } catch (error) {
     console.error('Error fetching birthdays:', error);
     return errorResponse('Failed to fetch birthdays');

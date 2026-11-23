@@ -78,9 +78,7 @@ describe.each([
       });
       const response = await request('42', '?period=2&teamCode=mad&playerId=7');
       expect(response.status).toBe(200);
-      expect(response.headers.get('Cache-Control')).toBe(
-        `public, max-age=${finalizedAt ? 3600 : 15}, stale-while-revalidate=60`
-      );
+      expect(response.headers.get('Cache-Control')).toBe(noStore);
       expect(await response.json()).toEqual({
         success: true,
         data: JSON.parse(JSON.stringify(legacy)),
