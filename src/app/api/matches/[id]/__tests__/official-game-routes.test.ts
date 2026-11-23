@@ -62,3 +62,15 @@ describe('official game detail routes', () => {
     expect(feature.getOfficialShotData).toHaveBeenCalledTimes(2);
   });
 });
+
+it.each([
+  [getPlays, feature.getOfficialPlayByPlayData],
+  [getShots, feature.getOfficialShotData],
+] as const)('hides unexpected errors in official game routes', async (get, read) => {
+  read.mockRejectedValueOnce(new Error('internal diagnostic'));
+  const response = await get(new NextRequest('http://localhost/api/matches/42'), {
+    params: Promise.resolve({ id: '42' }),
+  });
+  expect(response.status).toBe(500);
+  expect(await response.json()).toEqual({ success: false, error: 'Internal Server Error' });
+});

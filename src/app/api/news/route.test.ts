@@ -34,7 +34,7 @@ describe('News HTTP contract', () => {
       expect(response.status).toBe(500);
       expect(await response.json()).toEqual({
         success: false,
-        error: error instanceof Error ? error.message : 'Internal Server Error',
+        error: 'Internal Server Error',
       });
       expect(response.headers.get('Cache-Control')).toBe(
         'private, no-store, max-age=0, must-revalidate'

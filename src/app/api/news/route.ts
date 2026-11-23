@@ -10,7 +10,6 @@ export async function GET() {
     return successResponse(news);
   } catch (error) {
     console.error('News API Error:', error);
-    const message = error instanceof Error ? error.message : 'Internal Server Error';
-    return errorResponse(message, 500);
+    return errorResponse('Internal Server Error', 500);
   }
 }

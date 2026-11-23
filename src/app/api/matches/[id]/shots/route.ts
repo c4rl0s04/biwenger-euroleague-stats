@@ -15,7 +15,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     if (!result.data) return errorResponse('Match or official shots not found.', 404);
     return successResponse(result.data, result.cacheSeconds);
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Internal Server Error';
-    return errorResponse(message, error instanceof MatchesInputError ? 400 : 500);
+    if (error instanceof MatchesInputError) return errorResponse(error.message, 400);
+    return errorResponse('Internal Server Error', 500);
   }
 }

@@ -32,17 +32,11 @@ export async function POST(request: NextRequest) {
       playerId: result.playerId,
       mode: result.mode,
     });
-  } catch (error: any) {
+  } catch (error) {
     if (error instanceof MarketCommandValidationError) {
       return errorResponse(error.message, 400);
     }
     console.error('[API Market Sell] Mutation failed');
-    const message =
-      error instanceof Error &&
-      !error.message.includes('token') &&
-      !error.message.includes('Bearer')
-        ? error.message
-        : 'Error al poner el jugador en el mercado';
-    return errorResponse(message, 500);
+    return errorResponse('Error al poner el jugador en el mercado', 500);
   }
 }

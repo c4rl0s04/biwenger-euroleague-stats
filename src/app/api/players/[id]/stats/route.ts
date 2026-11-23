@@ -20,7 +20,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return successResponse(stats, CACHE_DURATIONS.MEDIUM);
   } catch (error) {
     console.error(`Error fetching player stats for ${params}:`, error);
-    const message = error instanceof Error ? error.message : 'Internal Server Error';
-    return errorResponse(message, 500);
+    return errorResponse('Internal Server Error', 500);
   }
 }

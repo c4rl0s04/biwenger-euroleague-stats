@@ -21,7 +21,7 @@ export async function GET() {
         database: {
           status: 'disconnected',
           latencyMs: dbHealth.latencyMs,
-          error: dbHealth.error,
+          error: 'Database check failed',
         },
       },
       {

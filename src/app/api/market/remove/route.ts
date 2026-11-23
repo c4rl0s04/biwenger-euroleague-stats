@@ -21,17 +21,11 @@ export async function DELETE(request: Request) {
     });
 
     return mutationSuccessResponse({ status: result.status, playerId: result.playerId });
-  } catch (error: any) {
+  } catch (error) {
     if (error instanceof MarketCommandValidationError) {
       return errorResponse(error.message, 400);
     }
     console.error('[API Market Remove] Mutation failed');
-    const message =
-      error instanceof Error &&
-      !error.message.includes('token') &&
-      !error.message.includes('Bearer')
-        ? error.message
-        : 'Error al retirar del mercado';
-    return errorResponse(message, 500);
+    return errorResponse('Error al retirar del mercado', 500);
   }
 }

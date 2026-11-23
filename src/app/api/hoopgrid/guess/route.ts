@@ -20,11 +20,11 @@ export async function POST(request: Request) {
 
     const result = await hoopgridCommandService.submitGuess(body, userId);
     return privateJsonResponse(result);
-  } catch (error: any) {
+  } catch (error) {
     if (error instanceof HoopgridValidationError) {
       return privateJsonResponse({ error: error.message, details: error.errors }, 400);
     }
     console.error('Hoopgrid Guess Error:', error);
-    return privateJsonResponse({ error: error.message || 'Internal Server Error' }, 500);
+    return privateJsonResponse({ error: 'Internal Server Error' }, 500);
   }
 }
