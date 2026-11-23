@@ -55,7 +55,7 @@ it('returns empty rankings unchanged and keeps every adapter force dynamic', asy
   );
   expect([fullDynamic, overviewDynamic, valuesDynamic]).toEqual(Array(3).fill('force-dynamic'));
 });
-it('preserves overview nulls/omitted nested records and 900-second cache', async () => {
+it('preserves overview nulls/omitted nested records and private no-store', async () => {
   query.queryLeagueOverview.mockResolvedValue({
     pointsStats: { total_points: null, total_rounds: 0, total_users: 0 },
     valueStats: { total_league_value: null, max_team_value: null, min_team_value: null },
@@ -66,7 +66,7 @@ it('preserves overview nulls/omitted nested records and 900-second cache', async
   });
   const response = await overview();
   expect(response.headers.get('Cache-Control')).toBe(
-    'public, max-age=900, stale-while-revalidate=60'
+    'private, no-store, max-age=0, must-revalidate'
   );
   expect(await response.json()).toEqual({
     success: true,
@@ -97,7 +97,7 @@ it('preserves ranking bigint strings and 900-second cache', async () => {
   query.queryValueRanking.mockResolvedValue([{ ...row, forbiddenField: 'excluded' }]);
   const response = await values();
   expect(response.headers.get('Cache-Control')).toBe(
-    'public, max-age=900, stale-while-revalidate=60'
+    'private, no-store, max-age=0, must-revalidate'
   );
   expect(await response.json()).toEqual({ success: true, data: [row] });
 });

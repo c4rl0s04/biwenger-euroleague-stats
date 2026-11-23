@@ -1,12 +1,12 @@
 import { fetchNoGloryStats } from '@/features/standings/server';
-import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
+import { privateJsonResponse, errorResponse } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
     const noGlory = await fetchNoGloryStats();
-    return successResponse(noGlory, CACHE_DURATIONS.LONG);
+    return privateJsonResponse({ success: true, data: noGlory });
   } catch (error) {
     console.error('Error fetching no glory stats:', error);
     return errorResponse('Internal Server Error');

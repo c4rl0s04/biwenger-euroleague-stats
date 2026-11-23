@@ -75,7 +75,7 @@ it.each([
         },
       ],
     });
-    expect(p.headers.get('Cache-Control')).toBe('public, max-age=60, stale-while-revalidate=60');
+    expect(p.headers.get('Cache-Control')).toBe('private, no-store, max-age=0, must-revalidate');
     const dialect = new PgDialect();
     expect(dialect.sqlToQuery(mocks.execute.mock.calls[0][0]).params).toContain(pLimit);
     mocks.execute.mockClear();
@@ -96,7 +96,7 @@ it.each([
         },
       ],
     });
-    expect(w.headers.get('Cache-Control')).toBe('public, max-age=900, stale-while-revalidate=60');
+    expect(w.headers.get('Cache-Control')).toBe('private, no-store, max-age=0, must-revalidate');
     expect(
       dialect
         .sqlToQuery(mocks.execute.mock.calls[0][0])
@@ -127,7 +127,7 @@ it.each(routes)(
       data: name === 'captains' ? { stats: [] } : [],
     });
     expect(response.headers.get('Cache-Control')).toBe(
-      `public, max-age=${name === 'captains' ? 0 : 900}, stale-while-revalidate=60`
+      'private, no-store, max-age=0, must-revalidate'
     );
     expect(mocks.query).toHaveBeenCalled();
   }

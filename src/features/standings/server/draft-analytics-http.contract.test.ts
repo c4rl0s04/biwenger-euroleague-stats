@@ -50,7 +50,7 @@ describe('GET /api/standings/analytics', () => {
 
     expect(data.data[0]).not.toHaveProperty('synthetic_secret');
     expect(response.headers.get('Cache-Control')).toBe(
-      'public, max-age=900, stale-while-revalidate=60'
+      'private, no-store, max-age=0, must-revalidate'
     );
   });
 

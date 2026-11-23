@@ -1,12 +1,12 @@
 import { fetchJinxStats } from '@/features/standings/server';
-import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
+import { privateJsonResponse, errorResponse } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
     const jinx = await fetchJinxStats();
-    return successResponse(jinx, CACHE_DURATIONS.LONG);
+    return privateJsonResponse({ success: true, data: jinx });
   } catch (error) {
     console.error('Error fetching jinx stats:', error);
     return errorResponse('Internal Server Error');

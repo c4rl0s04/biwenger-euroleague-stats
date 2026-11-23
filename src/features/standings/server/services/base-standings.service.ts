@@ -27,9 +27,7 @@ export const STANDINGS_ACCESS_POLICY = Object.freeze({
 } as const);
 export const STANDINGS_CACHE_POLICY = Object.freeze({
   server: 'uncached',
-  overviewHttpSeconds: 900,
-  valueHttpSeconds: 900,
-  staleSeconds: 60,
+  httpCache: 'private-no-store',
 } as const);
 
 export interface BaseStandingsDependencies {

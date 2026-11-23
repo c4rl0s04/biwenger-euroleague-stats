@@ -134,7 +134,7 @@ describe('GET /api/standings/initial-squad-stats', () => {
     const response = await GET();
     expect(response.status).toBe(200);
     expect(response.headers.get('Cache-Control')).toBe(
-      'public, max-age=300, stale-while-revalidate=60'
+      'private, no-store, max-age=0, must-revalidate'
     );
 
     const json = await response.json();
