@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { useApiData } from '@/lib/hooks/useApiData';
+import { useSeason } from '@/contexts/SeasonContext';
+import { buildTransferPageRequest } from '../lib/transfer-page-request';
 import { formatEuro } from '../../analytics/lib/currency';
 import {
   ArrowRight,
@@ -34,28 +36,18 @@ const POS_COLORS = {
 };
 
 export default function LiveMarketTable({ initialData }) {
+  const { currentSeasonId } = useSeason();
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState({ buyer: '', seller: '' });
   const [appliedFilters, setAppliedFilters] = useState({ buyer: '', seller: '' });
 
   const defaultData = initialData || { transfers: [], page: 1, totalPages: 1 };
 
-  const { data, loading, refetch } = useApiData(
-    () => {
-      const query = new URLSearchParams({
-        page: String(page),
-        limit: '8',
-        ...(appliedFilters.buyer && { buyer: appliedFilters.buyer }),
-        ...(appliedFilters.seller && { seller: appliedFilters.seller }),
-      });
-
-      return `/api/market/transfers?${query.toString()}`;
-    },
-    {
-      dependencies: [page, appliedFilters.buyer, appliedFilters.seller],
-      cacheKey: `market-transfers-${page}-${appliedFilters.buyer || 'all'}-${appliedFilters.seller || 'all'}`,
-    }
-  );
+  const { endpoint, cacheKey } = buildTransferPageRequest(currentSeasonId, page, appliedFilters);
+  const { data, loading, refetch } = useApiData(endpoint, {
+    dependencies: [currentSeasonId, page, appliedFilters.buyer, appliedFilters.seller],
+    cacheKey,
+  });
 
   const tableData = data || defaultData;
 
