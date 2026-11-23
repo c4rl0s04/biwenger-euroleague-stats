@@ -44,7 +44,7 @@ describe('Manager directory service and preserved HTTP contract', () => {
   });
 
   it.each([{ rows: [] }, { rows: [{ id: '007', name: null, icon: null, color_index: 0 }] }])(
-    'preserves public success envelope and exact cache directives: %j',
+    'preserves success envelope and sets private no-store: %j',
     async ({ rows }) => {
       mocks.read.mockResolvedValue(rows);
       const response = await GET();

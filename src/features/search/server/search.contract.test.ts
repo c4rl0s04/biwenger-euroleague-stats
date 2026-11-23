@@ -10,7 +10,7 @@ import { GET } from '@/app/api/search/route';
 import { performGlobalSearch } from '../server';
 
 const empty = { players: [], teams: [], users: [] };
-const publicCache = 'public, max-age=60, stale-while-revalidate=60';
+const privateCache = 'private, no-store, max-age=0, must-revalidate';
 
 describe('real Search HTTP/service/query contract', () => {
   beforeEach(() => {
@@ -24,7 +24,7 @@ describe('real Search HTTP/service/query contract', () => {
     async (suffix) => {
       const response = await GET(new NextRequest(`http://localhost/api/search${suffix}`));
       expect(response.status).toBe(200);
-      expect(response.headers.get('cache-control')).toBe(publicCache);
+      expect(response.headers.get('cache-control')).toBe(privateCache);
       expect(await response.json()).toEqual({ success: true, data: empty });
       expect(mocks.season).not.toHaveBeenCalled();
       expect(mocks.query).not.toHaveBeenCalled();
@@ -61,7 +61,7 @@ describe('real Search HTTP/service/query contract', () => {
         })
       );
       expect(response.status).toBe(200);
-      expect(response.headers.get('cache-control')).toBe(publicCache);
+      expect(response.headers.get('cache-control')).toBe(privateCache);
       expect(await response.json()).toEqual({
         success: true,
         data: {

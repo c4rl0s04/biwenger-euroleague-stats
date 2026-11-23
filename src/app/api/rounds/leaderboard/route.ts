@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { fetchRoundLeaderboard } from '@/features/rounds/server';
-import { successResponse, errorResponse } from '@/lib/utils/response';
+import { privateJsonResponse, errorResponse } from '@/lib/utils/response';
 
 /**
  * GET /api/rounds/leaderboard
@@ -13,7 +13,7 @@ export async function GET() {
 
     // Sort by efficiency by default
 
-    return successResponse({ leaderboard: leaderboardData });
+    return privateJsonResponse({ success: true, data: { leaderboard: leaderboardData } });
   } catch (error) {
     console.error('Error fetching leaderboard:', error);
     return errorResponse('Error fetching leaderboard data', 500);

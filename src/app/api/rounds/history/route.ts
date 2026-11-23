@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { readRoundHttpInput } from '@/features/rounds/server';
 import { getUserPerformanceHistoryService } from '@/features/rounds/server';
-import { successResponse, errorResponse } from '@/lib/utils/response';
+import { privateJsonResponse, errorResponse } from '@/lib/utils/response';
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     }
 
     const history = await getUserPerformanceHistoryService(userId);
-    return successResponse({ history }, 0);
+    return privateJsonResponse({ success: true, data: { history } });
   } catch (error) {
     console.error('Error fetching performance history:', error);
     return errorResponse('Failed to fetch history');

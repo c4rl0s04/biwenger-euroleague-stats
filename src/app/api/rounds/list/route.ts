@@ -1,5 +1,5 @@
 import { fetchRoundsList } from '@/features/rounds/server';
-import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
+import { privateJsonResponse, errorResponse } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';
 
@@ -7,7 +7,7 @@ export async function GET() {
   try {
     const data = await fetchRoundsList();
 
-    return successResponse(data, CACHE_DURATIONS.LONG);
+    return privateJsonResponse({ success: true, data });
   } catch (error) {
     console.error('Error fetching rounds list:', error);
     return errorResponse('Failed to fetch rounds list');

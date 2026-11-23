@@ -83,7 +83,7 @@ describe('Compare orchestration', () => {
     await service.getCompareDataLite();
     await service.getCompareDataLite();
     expect(deps.squad.mock.calls).toEqual([['1'], ['2'], ['1'], ['2']]);
-    expect(COMPARE_READ_POLICY.httpCache).toBe('public, max-age=300, stale-while-revalidate=60');
+    expect(COMPARE_READ_POLICY.httpCache).toBe('private, no-store, max-age=0, must-revalidate');
   });
   it('preserves empty-directory output without per-manager reads', async () => {
     const deps = dependencies();

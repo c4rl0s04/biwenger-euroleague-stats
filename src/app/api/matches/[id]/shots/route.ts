@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { getOfficialShotData, MatchesInputError } from '@/features/matches/server';
-import { errorResponse, successResponse } from '@/lib/utils/response';
+import { errorResponse, privateJsonResponse } from '@/lib/utils/response';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       },
     });
     if (!result.data) return errorResponse('Match or official shots not found.', 404);
-    return successResponse(result.data, result.cacheSeconds);
+    return privateJsonResponse({ success: true, data: result.data });
   } catch (error) {
     if (error instanceof MatchesInputError) return errorResponse(error.message, 400);
     return errorResponse('Internal Server Error', 500);

@@ -19,11 +19,10 @@ describe('Manager read ownership', () => {
       expect(file).toContain('privateJsonResponse(');
     }
   );
-  it('routes GET /api/users to Managers with public caching', () => {
+  it('routes GET /api/users to Managers with private no-store', () => {
     const file = source('../../app/api/users/route.ts');
     expect(file).toContain('@/features/managers/server');
-    expect(file).toContain('successResponse(');
-    expect(file).toContain('CACHE_DURATIONS.LONG');
+    expect(file).toContain('privateJsonResponse(');
   });
   it.each(['captain-stats', 'home-away', 'captain-suggest'])(
     'routes dashboard %s HTTP calls to Managers preserving identity and private caching',

@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { readRoundHttpInput } from '@/features/rounds/server';
 import { fetchRoundCompleteData, fetchUserRoundDetails } from '@/features/rounds/server';
-import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
+import { privateJsonResponse, errorResponse } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
       if (!userId) return errorResponse('Missing userId for quick mode');
       try {
         const quickData = await fetchRoundCompleteData(roundId, userId);
-        return successResponse(quickData, CACHE_DURATIONS.MEDIUM);
+        return privateJsonResponse({ success: true, data: quickData });
       } catch (quickError) {
         console.error('Error in quick mode:', quickError);
         throw quickError;
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     if (mode === 'full') {
       try {
         const fullData = await fetchRoundCompleteData(roundId);
-        return successResponse(fullData, CACHE_DURATIONS.MEDIUM);
+        return privateJsonResponse({ success: true, data: fullData });
       } catch (fullError) {
         console.error('Error in full mode:', fullError);
         throw fullError;
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
 
     // Default mode: Fetch user-specific details (legacy)
     const data = await fetchUserRoundDetails(roundId, userId);
-    return successResponse(data, CACHE_DURATIONS.MEDIUM);
+    return privateJsonResponse({ success: true, data });
   } catch (error) {
     console.error('Error fetching round stats:', error);
     return errorResponse('Failed to fetch round stats');

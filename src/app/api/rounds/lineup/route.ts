@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { readRoundHttpInput } from '@/features/rounds/server';
 import { fetchUserLineup } from '@/features/rounds/server';
-import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
+import { privateJsonResponse, errorResponse } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     }
 
     const lineup = await fetchUserLineup(userId, roundId);
-    return successResponse(lineup, CACHE_DURATIONS.MEDIUM);
+    return privateJsonResponse({ success: true, data: lineup });
   } catch (error) {
     console.error('Error fetching user lineup:', error);
     return errorResponse('Failed to fetch user lineup');

@@ -1,12 +1,12 @@
 import { fetchTopPlayersByForm } from '@/features/dashboard/server';
-import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
+import { privateJsonResponse, errorResponse } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
     const data = await fetchTopPlayersByForm(6, 3);
-    return successResponse(data, CACHE_DURATIONS.SHORT);
+    return privateJsonResponse({ success: true, data });
   } catch (error) {
     console.error('Error fetching top form data:', error);
     return errorResponse('Failed to fetch top form data');
