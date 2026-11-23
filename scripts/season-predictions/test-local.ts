@@ -15,6 +15,9 @@ try {
     openSeasonPredictionWindow,
     previewPreseasonReopen,
     reopenPreseasonWindow,
+    readPlayoffPredictions,
+    previewPlayoffsWindow,
+    openPlayoffsWindow,
   } = await import('../../src/features/season-predictions/server');
   const { PredictionError } =
     await import('../../src/features/season-predictions/models/submission');
@@ -228,6 +231,107 @@ try {
       WHERE season_id = '2026-27'`),
     /season_prediction_window_phase/
   );
+
+  // Playoffs window: refused until the regular season is complete, then frozen and locked at the
+  // first play-in tip-off.
+  const codes = ['OLY', 'PAM', 'MAD', 'ULK', 'ZAL', 'HTA', 'PAN', 'MCO', 'BAR', 'RED', 'ASV'];
+  const codeRows = `unnest(ARRAY[${codes.map((code) => `'${code}'`).join(',')}]) WITH ORDINALITY AS c(code, n)`;
+  await disposable.pool.query(
+    `INSERT INTO teams (id, name) SELECT 100 + n, 'Team ' || code
+       FROM ${codeRows};
+     INSERT INTO official_team_mappings
+       (season_id, team_id, provider_team_code, provider_name, match_method)
+     SELECT '2026-27', 100 + n, code, code, 'test' FROM ${codeRows};
+     INSERT INTO official_team_standings (season_id, round_number, team_code, position)
+     SELECT '2026-27', 38, code, n FROM ${codeRows};
+     INSERT INTO official_schedule_games
+       (season_id, game_code, phase_code, home_team_code, away_team_code, scheduled_at, is_played)
+     VALUES ('2026-27', 380, 'RS', 'ZAL', 'ASV', clock_timestamp() - interval '1 day', FALSE)`
+  );
+  const notReady = await previewPlayoffsWindow('2026-27');
+  assert.equal(notReady.ready, false);
+  assert.equal(notReady.seeds.length, 10);
+  assert.match(notReady.problems.join(' '), /fase regular no ha terminado/);
+  assert.match(notReady.problems.join(' '), /play-in/);
+  await assert.rejects(openPlayoffsWindow('2026-27'), expectCode('not-ready'));
+  await disposable.pool.query(`UPDATE official_schedule_games SET is_played = TRUE
+      WHERE season_id = '2026-27' AND game_code = 380;
+    INSERT INTO official_schedule_games
+      (season_id, game_code, phase_code, home_team_code, away_team_code, scheduled_at, is_played)
+    VALUES ('2026-27', 381, 'PI', 'PAN', 'MCO', clock_timestamp() + interval '3 days', FALSE),
+      ('2026-27', 382, 'PI', 'BAR', 'RED', clock_timestamp() + interval '2 days', FALSE)`);
+  const ready = await previewPlayoffsWindow('2026-27');
+  assert.deepEqual(ready.problems, []);
+  assert.equal(ready.alreadyOpen, false);
+  const playoffsOpened = await openPlayoffsWindow('2026-27');
+  assert.equal(playoffsOpened.locksAt, ready.firstPlayInTipOff);
+  await assert.rejects(openPlayoffsWindow('2026-27'), expectCode('already-open'));
+  const bracket = await readPlayoffPredictions('2026-27', 'u1');
+  assert.equal(bracket.status, 'open');
+  assert.equal(bracket.template?.version, 'euroleague-v1');
+  assert.deepEqual(
+    bracket.seeds.map((entry) => entry.teamCode),
+    codes.slice(0, 10)
+  );
+  const pan = bracket.seeds[6].teamId;
+  const mad = bracket.seeds[2].teamId;
+
+  const bracketSaved = await saveSeasonPredictions({
+    seasonId: '2026-27',
+    userId: 'u1',
+    revision: 0,
+    phase: 'playoffs',
+    answers: { 'PI-1': { winner: pan }, 'QF-3': { winner: mad, score: '3-1' } },
+  });
+  assert.equal(bracketSaved.revision, 1);
+  assert.equal((await readSeasonPredictions('2026-27', 'u1')).submission?.revision, 4);
+  await assert.rejects(
+    saveSeasonPredictions({
+      seasonId: '2026-27',
+      userId: 'u1',
+      revision: 1,
+      phase: 'playoffs',
+      answers: { 'QF-2': { winner: pan } },
+    }),
+    expectCode('invalid')
+  );
+  await assert.rejects(
+    saveSeasonPredictions({
+      seasonId: '2026-27',
+      userId: 'u1',
+      revision: 0,
+      phase: 'playoffs',
+      answers: {},
+    }),
+    expectCode('conflict')
+  );
+  await assert.rejects(
+    saveSeasonPredictions({
+      seasonId: '2026-27',
+      userId: 'u1',
+      revision: 1,
+      phase: 'regular' as never,
+      answers: {},
+    }),
+    expectCode('invalid')
+  );
+  // A play-in rescheduled before the window lock still locks the bracket at tip-off.
+  await disposable.pool.query(`UPDATE official_schedule_games SET scheduled_at = clock_timestamp()
+    WHERE season_id = '2026-27' AND game_code = 382`);
+  await assert.rejects(
+    saveSeasonPredictions({
+      seasonId: '2026-27',
+      userId: 'u1',
+      revision: 1,
+      phase: 'playoffs',
+      answers: {},
+    }),
+    expectCode('locked')
+  );
+  const lockedBracket = await readPlayoffPredictions('2026-27', 'u2');
+  assert.equal(lockedBracket.status, 'locked');
+  assert.deepEqual(lockedBracket.league?.[0].answers['QF-3'], { winner: mad, score: '3-1' });
+  assert.equal((await previewPlayoffsWindow('2026-27')).alreadyOpen, true);
 
   const tables = await disposable.pool.query(`SELECT relname, relrowsecurity FROM pg_class
     WHERE relname IN ('season_prediction_windows', 'season_prediction_submissions',
