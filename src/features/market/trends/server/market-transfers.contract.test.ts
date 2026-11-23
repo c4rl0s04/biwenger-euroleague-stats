@@ -185,14 +185,14 @@ it.each([
   expect(parseMarketTransferParams(new URLSearchParams(input))).toEqual({ valid: false, error });
 });
 
-it('serves the real transfer handler from mapped records with the original cache and envelope', async () => {
+it('serves the real transfer handler from mapped records with private no-store and the original envelope', async () => {
   dependencies.query
     .mockResolvedValueOnce({ rows: [{ ...transfer, internal_field: 'not exposed' }] })
     .mockResolvedValueOnce({ rows: [{ total: '5' }] });
   const response = await transfers(request('transfers?page=2abc&limit=3.9&buyer=%20A%25%20'));
   expect(response.status).toBe(200);
   expect(response.headers.get('cache-control')).toBe(
-    'public, max-age=60, stale-while-revalidate=60'
+    'private, no-store, max-age=0, must-revalidate'
   );
   expect(await response.json()).toEqual({
     success: true,

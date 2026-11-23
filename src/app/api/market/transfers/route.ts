@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { getLiveMarketTransfers, parseMarketTransferParams } from '@/features/market/server';
-import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
+import { privateJsonResponse, errorResponse } from '@/lib/utils/response';
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     if (!input.valid) return errorResponse(input.error, 400);
     const data = await getLiveMarketTransfers(input.value);
 
-    return successResponse(data, CACHE_DURATIONS.SHORT);
+    return privateJsonResponse({ success: true, data });
   } catch (error) {
     console.error('Error fetching market transfers:', error);
     return errorResponse('Failed to fetch transfers');

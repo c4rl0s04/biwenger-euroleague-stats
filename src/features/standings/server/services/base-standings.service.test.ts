@@ -24,7 +24,6 @@ it('keeps public identity-free reads and uncached service freshness explicit', a
   });
   expect(STANDINGS_CACHE_POLICY).toEqual({
     server: 'uncached',
-    fullHttpSeconds: 60,
     overviewHttpSeconds: 900,
     valueHttpSeconds: 900,
     staleSeconds: 60,

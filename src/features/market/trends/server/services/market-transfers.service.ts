@@ -20,7 +20,7 @@ export const MARKET_TRANSFER_READ_POLICY = Object.freeze({
   access: 'public-historical-fantasy-statistics',
   identity: 'explicit-filters-only',
   serverCache: 'none',
-  transfersMaxAgeSeconds: 60,
+  transfersHttpCache: 'private-no-store',
   valueDetailsMaxAgeSeconds: 300,
   duelDetailsMaxAgeSeconds: 60,
   staleWhileRevalidateSeconds: 60,

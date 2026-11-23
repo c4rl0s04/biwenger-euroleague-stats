@@ -16,8 +16,8 @@ import {
 import { GET as values, dynamic as valuesDynamic } from '@/app/api/standings/value-ranking/route';
 beforeEach(() => vi.resetAllMocks());
 
-it.each([undefined, 'authjs.session-token=synthetic-session'])(
-  'full handler uses URL only, unchanged envelope, allowlist and public cache (cookie %s)',
+it.each([undefined, 'NEXT_SEASON_ID=2025-26', 'NEXT_SEASON_ID=2026-27'])(
+  'full handler preserves envelope, allowlist and private no-store (cookie %s)',
   async (cookie) => {
     const row = {
       user_id: '1',
@@ -43,7 +43,7 @@ it.each([undefined, 'authjs.session-token=synthetic-session'])(
     expect(query.queryFullStandings).toHaveBeenCalledWith({ sortBy: 'unknown', direction: 'asc' });
     expect(response.status).toBe(200);
     expect(response.headers.get('Cache-Control')).toBe(
-      'public, max-age=60, stale-while-revalidate=60'
+      'private, no-store, max-age=0, must-revalidate'
     );
     expect(await response.json()).toEqual({ success: true, data: [row] });
   }
