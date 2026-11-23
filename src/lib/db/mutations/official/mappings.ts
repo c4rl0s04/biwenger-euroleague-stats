@@ -38,7 +38,7 @@ export function prepareOfficialMappingMutations(db: DbClient, seasonId: string) 
            THEN official_team_mappings.crest_url
            ELSE COALESCE(EXCLUDED.crest_url,official_team_mappings.crest_url) END,
          match_method=EXCLUDED.match_method, confidence=EXCLUDED.confidence,
-         raw_payload=COALESCE(EXCLUDED.raw_payload,'{}'::jsonb) ||
+         raw_payload=COALESCE(NULLIF(EXCLUDED.raw_payload,'null'::jsonb),'{}'::jsonb) ||
            CASE WHEN official_team_mappings.raw_payload ? 'website_image'
              THEN jsonb_build_object('website_image',official_team_mappings.raw_payload->'website_image')
              ELSE '{}'::jsonb END, updated_at=NOW()`,
@@ -68,9 +68,10 @@ export function prepareOfficialMappingMutations(db: DbClient, seasonId: string) 
              THEN official_player_mappings.player_id ELSE EXCLUDED.player_id END,
          provider_name=EXCLUDED.provider_name,
          provider_team_code=EXCLUDED.provider_team_code,
-         image_url=CASE WHEN official_player_mappings.raw_payload ? 'website_image'
+         image_url=CASE WHEN NULLIF(btrim(official_player_mappings.image_url), '') IS NOT NULL
+                          AND jsonb_typeof(official_player_mappings.raw_payload->'website_image') = 'object'
            THEN official_player_mappings.image_url
-           ELSE COALESCE(EXCLUDED.image_url,official_player_mappings.image_url) END,
+           ELSE COALESCE(NULLIF(btrim(EXCLUDED.image_url), ''),official_player_mappings.image_url) END,
          age=COALESCE(EXCLUDED.age,official_player_mappings.age),
          match_method=CASE
            WHEN official_player_mappings.status IN ('matched','ignored')
@@ -81,8 +82,9 @@ export function prepareOfficialMappingMutations(db: DbClient, seasonId: string) 
          status=CASE
            WHEN official_player_mappings.status IN ('matched','ignored')
              THEN official_player_mappings.status ELSE EXCLUDED.status END,
-         raw_payload=COALESCE(EXCLUDED.raw_payload,'{}'::jsonb) ||
-           CASE WHEN official_player_mappings.raw_payload ? 'website_image'
+         raw_payload=COALESCE(NULLIF(EXCLUDED.raw_payload,'null'::jsonb),'{}'::jsonb) ||
+           CASE WHEN NULLIF(btrim(official_player_mappings.image_url), '') IS NOT NULL
+                     AND jsonb_typeof(official_player_mappings.raw_payload->'website_image') = 'object'
              THEN jsonb_build_object('website_image',official_player_mappings.raw_payload->'website_image')
              ELSE '{}'::jsonb END, updated_at=NOW()`,
       [
@@ -99,6 +101,23 @@ export function prepareOfficialMappingMutations(db: DbClient, seasonId: string) 
         jsonPayload(mapping.raw),
       ]
     );
+  };
+
+  const updateWebsitePlayerPortrait = async (
+    code: string,
+    imageUrl: string,
+    provenance: { source: string; page: string; collected_at: string; manifest: string }
+  ) => {
+    const result = await db.query(
+      `UPDATE official_player_mappings
+       SET image_url = $1,
+           raw_payload = COALESCE(NULLIF(raw_payload, 'null'::jsonb), '{}'::jsonb) ||
+             jsonb_build_object('website_image', $2::jsonb),
+           updated_at = NOW()
+       WHERE season_id = $3 AND provider = 'euroleague_advanced' AND provider_player_code = $4`,
+      [imageUrl, JSON.stringify(provenance), seasonId, code]
+    );
+    if (result.rowCount !== 1) throw new Error(`Official player missing: ${code}`);
   };
 
   const getFantasyTeams = async () =>
@@ -180,6 +199,7 @@ export function prepareOfficialMappingMutations(db: DbClient, seasonId: string) 
   return {
     upsertTeamMapping,
     upsertPlayerMapping,
+    updateWebsitePlayerPortrait,
     getFantasyTeams,
     getFantasyPlayers,
     getTeamMappings,
