@@ -9,6 +9,8 @@ import {
 } from '../../constants/assistant-instructions';
 import type { ProviderConfig } from '../../models/assistant.models';
 
+const MAX_OUTPUT_TOKENS = 2048;
+
 export class AssistantProviderError extends Error {
   constructor(
     message: string,
@@ -75,6 +77,8 @@ export class AssistantProviderService {
 
       const response = await client.responses.create({
         model: providerConfig.model,
+        max_output_tokens: MAX_OUTPUT_TOKENS,
+
         instructions: buildInstructions(dataContext),
         input: messages,
       });
