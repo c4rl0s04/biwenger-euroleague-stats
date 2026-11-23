@@ -105,13 +105,13 @@
     "eslint": "^10.15.0",
     "eslint-config-next": "^16.4.6",
     "husky": "^9.1.7",
-    "lint-staged": "^17.6.0",
+    "lint-staged": "^17.6.1",
     "playwright": "1.65.1",
     "prettier": "^3.10.1",
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
     "typescript": "5.9.3",
-    "vitest": "^5.1.0"
+    "vitest": "^5.1.1"
   },
   "overrides": {
     "vite": "7.3.6",
