@@ -10,6 +10,7 @@ import { run as syncBiwengerTournaments } from './steps/biwenger-tournaments';
 import { run as syncBiwengerUsers } from './steps/biwenger-users';
 import { run as syncEuroleagueGames } from './steps/euroleague-games';
 import { run as syncEuroleagueMasterData } from './steps/euroleague-master-data';
+import { run as syncEuroleaguePostseason } from './steps/euroleague-postseason';
 import { run as syncInitialSquads } from './steps/initial-squads';
 import { run as syncMatches } from './steps/match-linking';
 import { run as syncUserColors } from './steps/user-colors';
@@ -18,6 +19,7 @@ export const SYNC_STEP_IDS = [
   'biwenger-catalog',
   'biwenger-price-history',
   'euroleague-master-data',
+  'euroleague-postseason',
   'match-linking',
   'biwenger-users',
   'euroleague-games',
@@ -60,6 +62,15 @@ export const PIPELINE: readonly SyncStepDefinition[] = [
     modes: ['routine', 'bootstrap'],
     dependencies: ['biwenger-catalog'],
     run: syncEuroleagueMasterData,
+  },
+  {
+    id: 'euroleague-postseason',
+    title: 'Official game phases and postseason scores',
+    source: 'euroleague',
+    writes: ['official_schedule_games'],
+    modes: ['routine', 'bootstrap', 'live'],
+    dependencies: ['euroleague-master-data'],
+    run: syncEuroleaguePostseason,
   },
   {
     id: 'match-linking',
