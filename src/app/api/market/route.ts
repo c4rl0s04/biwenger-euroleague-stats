@@ -6,7 +6,7 @@
 import { NextRequest } from 'next/server';
 import { getMarketPageData } from '@/features/market/server';
 import { validateNumber } from '@/lib/utils/validation';
-import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
+import { privateJsonResponse, errorResponse } from '@/lib/utils/response';
 
 export async function GET(request: NextRequest) {
   try {
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await getMarketPageData();
-    return successResponse(data, CACHE_DURATIONS.MEDIUM);
+    return privateJsonResponse({ success: true, data: data });
   } catch (error) {
     console.error('API Error:', error);
     return errorResponse('Failed to fetch market data');

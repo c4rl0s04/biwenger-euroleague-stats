@@ -11,7 +11,7 @@ it('types aggregate and chart reads without adding server imports or cache chang
   expect(parent).toContain('useState<MarketDrawerState>');
   const chart = feature('trends/components/MarketTrendsChart.tsx');
   expect(chart).toContain("from '../models/market-trends'");
-  expect(chart).toContain('cacheKey: `market-trends-${period.days}`');
+  expect(chart).toContain('market-trends:${currentSeasonId}:${period.days}');
   expect(parent + chart).not.toContain('/server');
 });
 

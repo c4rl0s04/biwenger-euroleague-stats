@@ -40,7 +40,7 @@ it('runs the real aggregate with allowlisted directory, exact cache/envelope and
   const body = await response.json();
   expect(response.status).toBe(200);
   expect(response.headers.get('Cache-Control')).toBe(
-    'public, max-age=300, stale-while-revalidate=60'
+    'private, no-store, max-age=0, must-revalidate'
   );
   expect(dynamic).toBe('force-dynamic');
   expect(MARKET_ANALYTICS_POLICY.identity).toBe('none');
