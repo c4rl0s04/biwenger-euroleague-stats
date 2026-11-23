@@ -46,7 +46,7 @@ const cases = [
     get: stats,
     read: reads.fetchUserSeasonStats,
     nested: true,
-    error: 'synthetic read failure',
+    error: 'Internal Server Error',
   },
   {
     path: 'player/squad',

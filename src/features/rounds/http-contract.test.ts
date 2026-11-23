@@ -158,7 +158,7 @@ describe('Rounds real HTTP -> service -> mapper contracts', () => {
       'stats',
       () => stats(request('?roundId=2&mode=full')),
       'getRoundGlobalStats',
-      'Failed to fetch round stats: fixture failure',
+      'Failed to fetch round stats',
       privateHeader,
     ],
     [
@@ -199,11 +199,11 @@ describe('Rounds real HTTP -> service -> mapper contracts', () => {
       expect(await response.json()).toEqual({ success: false, error: message });
     }
   );
-  it('retains Unknown error for non-Error stats rejection', async () => {
+  it('returns the generic message for a non-Error stats rejection', async () => {
     reads.getRoundGlobalStats.mockRejectedValue('fixture');
     expect(await (await stats(request('?roundId=2'))).json()).toEqual({
       success: false,
-      error: 'Failed to fetch round stats: Unknown error',
+      error: 'Failed to fetch round stats',
     });
   });
   it.each([
