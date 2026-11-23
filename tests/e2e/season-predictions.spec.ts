@@ -32,9 +32,7 @@ for (const theme of ['dark', 'light'] as const) {
     await expect(page.locator('[data-presentation]')).toHaveCount(1);
     const phone = (await page.locator('[data-presentation="phone"]').count()) > 0;
     const touch = Boolean(testInfo.project.use.hasTouch);
-    await expect(
-      page.getByRole('heading', { name: phone ? 'Predicciones' : 'Predicciones de temporada' })
-    ).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Predicciones', exact: true })).toBeVisible();
     await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
     await expect(page.getByText('Las respuestas solo se guardan')).toBeVisible();
     await expect(
@@ -166,7 +164,7 @@ for (const theme of ['dark', 'light'] as const) {
     await expect(
       page.getByRole('button', { name: 'Guardar predicciones', exact: true })
     ).toHaveCount(0);
-    await page.getByText('Fixture Rival').last().click();
+    await page.locator('#league summary', { hasText: 'Fixture Rival' }).click();
     await expect(page.getByText('Fixture Madrid').last()).toBeVisible();
     await expect(page.getByText('Sin respuesta').first()).toBeVisible();
   });

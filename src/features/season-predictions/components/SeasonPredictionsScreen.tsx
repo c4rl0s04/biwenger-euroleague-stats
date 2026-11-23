@@ -4,7 +4,7 @@ import EventTime from '@/components/ui/EventTime';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Clock3 } from 'lucide-react';
-import { MobileScreen, MobileScreenHeader } from '@/components/mobile/MobileScreen';
+import { MobileBackHeader, MobileScreen } from '@/components/mobile/MobileScreen';
 import {
   Button,
   Card,
@@ -12,7 +12,6 @@ import {
   CardDescription,
   CardTitle,
   PageCanvas,
-  PageHeader,
   PageSection,
   SectionHeader,
 } from '@/components/ui/foundation';
@@ -23,6 +22,9 @@ import {
   type PredictionQuestion,
 } from '../models/questions';
 import type { SeasonPredictionsPageData } from '../models/submission';
+import type { PreseasonResultsView } from '../models/hub';
+import { HubSectionAnchor } from './HubSectionAnchor';
+import { PreseasonResults } from './PreseasonResults';
 import { PredictionQuestionCard } from './PredictionQuestionCard';
 import { RankingPredictionCard } from './RankingPredictionCard';
 
@@ -55,11 +57,17 @@ function answerText(
 export function SeasonPredictionsScreen({
   seasonName,
   data,
+  results = null,
   phone = false,
+  phoneBackHref,
 }: {
   seasonName: string;
   data: SeasonPredictionsPageData;
+  /** The viewer's scored answers once the window is locked. */
+  results?: PreseasonResultsView | null;
   phone?: boolean;
+  /** Phone section route: render the full screen with a back header to the hub. */
+  phoneBackHref?: string;
 }) {
   const router = useRouter();
   const [answers, setAnswers] = useState<PredictionAnswers>(data.submission?.answers ?? {});
@@ -406,15 +414,17 @@ export function SeasonPredictionsScreen({
       </PageSection>
     ) : null;
 
-  if (phone)
-    return (
-      <MobileScreen
-        labelledBy="mobile-screen-title"
+  const resultsPanel = results ? (
+    <PreseasonResults questions={data.questions} answers={savedAnswers} results={results} />
+  ) : null;
+
+  if (phone) {
+    const content = (
+      <div
         className={
-          dirty ? 'pb-[calc(var(--mobile-nav-height)+env(safe-area-inset-bottom,0px)+10rem)]!' : ''
+          dirty ? 'pb-[calc(var(--mobile-nav-height)+env(safe-area-inset-bottom,0px)+10rem)]' : ''
         }
       >
-        <MobileScreenHeader eyebrow={seasonName} title="Predicciones" />
         <div className="py-8">
           {data.status === 'not-open'
             ? closedPanel
@@ -422,18 +432,30 @@ export function SeasonPredictionsScreen({
               ? phoneOpenPanel
               : statusPanel}
         </div>
+        {resultsPanel}
         {sections}
         {league}
         {phoneSavePanel}
+      </div>
+    );
+    // The hub embeds the active phase inside its own screen; the section route owns its chrome.
+    if (!phoneBackHref) return content;
+    return (
+      <MobileScreen labelledBy="mobile-screen-title">
+        <MobileBackHeader title="Pretemporada" backHref={phoneBackHref} context={seasonName} />
+        {content}
       </MobileScreen>
     );
+  }
 
   return (
     <>
       <PageCanvas className="pb-8 lg:pb-10">
-        <div className="space-y-10">
-          <PageHeader
-            title="Predicciones de temporada"
+        <HubSectionAnchor id="preseason" title="Pretemporada" />
+        <div id="preseason" className="scroll-mt-24 space-y-6">
+          <SectionHeader
+            headingId="preseason-heading"
+            title="Pretemporada"
             description="Anticipa los protagonistas, las sorpresas y las clasificaciones finales."
           />
           {data.status === 'not-open' ? (
@@ -441,6 +463,7 @@ export function SeasonPredictionsScreen({
           ) : (
             statusPanel
           )}
+          {resultsPanel}
         </div>
       </PageCanvas>
       {sections}

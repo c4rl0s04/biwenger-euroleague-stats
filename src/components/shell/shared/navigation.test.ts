@@ -26,7 +26,7 @@ describe('shell navigation model', () => {
 
   it('places season predictions in the desktop and mobile competition navigation', () => {
     expect(NAV_ITEMS.find((item) => item.href === '/season-predictions')?.name).toBe(
-      'Predicciones de temporada'
+      'Predicciones'
     );
     expect(
       MOBILE_NAV_CATEGORIES.find((category) => category.name === 'Competición')?.hrefs
