@@ -44,12 +44,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { name: 'Jornadas', href: '/rounds', icon: Clock },
   { name: 'Torneos', href: '/tournaments', icon: Medal },
   { name: 'Porras', href: '/predictions', icon: Target },
-  {
-    name: 'Predicciones de temporada',
-    shortName: 'Predicciones',
-    href: '/season-predictions',
-    icon: Target,
-  },
+  { name: 'Predicciones', href: '/season-predictions', icon: Target },
   { name: 'Playoffs', href: '/playoffs', icon: Swords },
   { name: 'Hoopgrid', href: '/hoopgrid', icon: LayoutGrid },
   { name: 'Comparativa', href: '/compare', icon: Scale },

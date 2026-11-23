@@ -36,12 +36,26 @@ it('renders the 12 questions in section order and a single page-level save', () 
   expect(html).not.toContain('Hay cambios sin guardar');
 });
 
-it('renders the same prompts with the shared phone header', () => {
+it('renders the same prompts with a back header on the phone section route', () => {
+  const html = renderToStaticMarkup(
+    <SeasonPredictionsScreen
+      seasonName="2026/27"
+      data={data}
+      phone
+      phoneBackHref="/season-predictions"
+    />
+  );
+  expect(html).toContain('class="mobile-native-back-header"');
+  expect(html).toContain('href="/season-predictions"');
+  expect(html).toContain('id="mobile-screen-title"');
+  for (const question of PREDICTION_QUESTIONS) expect(html).toContain(question.prompt);
+});
+
+it('embeds the phone editor without its own screen chrome inside the hub', () => {
   const html = renderToStaticMarkup(
     <SeasonPredictionsScreen seasonName="2026/27" data={data} phone />
   );
-  expect(html).toContain('class="mobile-native-header"');
-  expect(html).toContain('id="mobile-screen-title"');
+  expect(html).not.toContain('id="mobile-screen-title"');
   for (const question of PREDICTION_QUESTIONS) expect(html).toContain(question.prompt);
 });
 

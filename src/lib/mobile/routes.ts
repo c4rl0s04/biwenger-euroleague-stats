@@ -171,6 +171,28 @@ export const MOBILE_ROUTE_DEFINITIONS: readonly MobileRouteDefinition[] = [
   section('/predictions/ranking', '/predictions', 'ranking', 'Ranking', 'Competición'),
   section('/predictions/teams', '/predictions', 'teams', 'Equipos', 'Competición'),
   section('/predictions/history', '/predictions', 'history', 'Historial', 'Competición'),
+  main('/season-predictions', 'Predicciones', 'Competición'),
+  section(
+    '/season-predictions/preseason',
+    '/season-predictions',
+    'preseason',
+    'Pretemporada',
+    'Competición'
+  ),
+  section(
+    '/season-predictions/playoffs',
+    '/season-predictions',
+    'playoffs',
+    'Playoffs',
+    'Competición'
+  ),
+  section(
+    '/season-predictions/leaderboard',
+    '/season-predictions',
+    'leaderboard',
+    'Clasificación de la porra',
+    'Competición'
+  ),
   main('/playoffs', 'Playoffs', 'Competición'),
   section(
     '/playoffs/predictions/[userId]',
