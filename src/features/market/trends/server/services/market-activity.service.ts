@@ -20,7 +20,7 @@ export const MARKET_ACTIVITY_POLICY = Object.freeze({
   access: 'public-historical-fantasy-statistics',
   identity: 'none',
   serverCache: 'none',
-  httpMaxAgeSeconds: 300,
+  httpCache: 'private-no-store',
   httpStaleWhileRevalidateSeconds: 60,
 } as const);
 

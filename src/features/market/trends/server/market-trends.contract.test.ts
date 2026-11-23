@@ -64,7 +64,7 @@ it('uses one season-scoped query per call, preserves defaults and supports inter
   expect(MARKET_TRENDS_POLICY).toMatchObject({
     identity: 'none',
     serverCache: 'none',
-    httpMaxAgeSeconds: 60,
+    httpCache: 'private-no-store',
   });
 });
 
@@ -108,7 +108,7 @@ it.each([undefined, 'fixture-session'])(
     );
     expect(response.status).toBe(200);
     expect(response.headers.get('cache-control')).toBe(
-      'public, max-age=60, stale-while-revalidate=60'
+      'private, no-store, max-age=0, must-revalidate'
     );
     expect(await response.json()).toEqual({ success: true, data: [expected] });
     expect(dependencies.query).toHaveBeenCalledExactlyOnceWith(

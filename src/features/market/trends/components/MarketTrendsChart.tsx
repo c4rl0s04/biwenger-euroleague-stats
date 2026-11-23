@@ -12,6 +12,7 @@ import {
 import { TrendingUp } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import ElegantCard from '@/components/ui/card-variants/ElegantCard';
+import { useSeason } from '@/contexts/SeasonContext';
 import { useApiData } from '@/lib/hooks/useApiData';
 import type { ReactNode } from 'react';
 import type { MarketTrendDay } from '../models/market-trends';
@@ -21,7 +22,7 @@ type UseMarketTrends = (
   endpoint: () => string,
   options: {
     dependencies: number[];
-    cacheKey: string;
+    cacheKey: string | null;
     transform: (result: unknown) => MarketTrendDay[];
   }
 ) => { data?: MarketTrendDay[]; loading: boolean };
@@ -81,12 +82,13 @@ function CustomTooltip({
 }
 
 export default function MarketTrendsChart() {
+  const { currentSeasonId } = useSeason();
   const [period, setPeriod] = useState(TIME_PERIODS[1]); // Default 1M
   const { data = [], loading } = (useApiData as unknown as UseMarketTrends)(
     () => `/api/market/trends?days=${period.days}`,
     {
       dependencies: [period.days],
-      cacheKey: `market-trends-${period.days}`,
+      cacheKey: currentSeasonId ? `market-trends:${currentSeasonId}:${period.days}` : null,
       transform: (result) => (Array.isArray(result) ? result : []),
     }
   );
