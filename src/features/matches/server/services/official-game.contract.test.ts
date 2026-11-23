@@ -127,6 +127,6 @@ describe.each([
     const response = await request();
     expect(response.status).toBe(500);
     expect(response.headers.get('Cache-Control')).toBe(noStore);
-    expect(await response.json()).toEqual({ success: false, error: 'synthetic read failure' });
+    expect(await response.json()).toEqual({ success: false, error: 'Internal Server Error' });
   });
 });
