@@ -51,7 +51,7 @@ const cases = [
     suffix: '/transfers?page=2abc&limit=3.9&buyer=%20Ana%20&seller=%20',
     service: mocks.fetchLiveMarketTransfers,
     args: [{ page: 2, limit: 3, buyer: 'Ana', seller: undefined }],
-    age: 60,
+    age: null,
   },
   {
     route: duels,
@@ -70,7 +70,9 @@ for (const item of cases) {
       data: { fixture_stat: null, count: '2' },
     });
     expect(response.headers.get('cache-control')).toBe(
-      `public, max-age=${item.age}, stale-while-revalidate=60`
+      item.age === null
+        ? 'private, no-store, max-age=0, must-revalidate'
+        : `public, max-age=${item.age}, stale-while-revalidate=60`
     );
     expect(item.service).toHaveBeenCalledExactlyOnceWith(...item.args);
   });
