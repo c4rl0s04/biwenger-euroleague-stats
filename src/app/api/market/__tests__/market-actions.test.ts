@@ -51,6 +51,7 @@ describe('market mutation route contracts', () => {
       status: 'completed',
       offerId: 10,
       playerId: 1,
+      ownership: 'pending',
       message: 'Oferta aceptada correctamente',
       ...providerCanary,
     } as any);
@@ -70,6 +71,12 @@ describe('market mutation route contracts', () => {
     const acceptBody = await acceptResponse.json();
     expect(acceptResponse.status).toBe(200);
     expect(acceptBody.success).toBe(true);
+    expect(acceptBody.data).toEqual({
+      status: 'completed',
+      offerId: 10,
+      playerId: 1,
+      ownership: 'pending',
+    });
     expectSafeMutationResponse(acceptResponse, acceptBody);
     expect(marketCommandService.acceptOffer).toHaveBeenCalledWith('42', {
       offerId: 10,
