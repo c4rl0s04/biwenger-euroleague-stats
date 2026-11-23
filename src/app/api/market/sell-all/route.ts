@@ -30,17 +30,11 @@ export async function POST(request: NextRequest) {
       message: result.message,
       status: result.status,
     });
-  } catch (error: any) {
+  } catch (error) {
     if (error instanceof MarketCommandValidationError) {
       return errorResponse(error.message, 400);
     }
     console.error('[API Market Sell-All] Mutation failed');
-    const message =
-      error instanceof Error &&
-      !error.message.includes('token') &&
-      !error.message.includes('Bearer')
-        ? error.message
-        : 'Error masivo al poner en el mercado';
-    return errorResponse(message, 500);
+    return errorResponse('Error masivo al poner en el mercado', 500);
   }
 }

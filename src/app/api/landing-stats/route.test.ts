@@ -48,7 +48,7 @@ it.each([new Error('synthetic failure'), null])(
       );
       expect(await response.json()).toEqual({
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch landing stats',
+        error: 'Failed to fetch landing stats',
       });
     } finally {
       logger.mockRestore();

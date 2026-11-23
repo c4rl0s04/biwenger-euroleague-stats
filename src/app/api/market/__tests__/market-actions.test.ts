@@ -175,4 +175,34 @@ describe('market mutation route contracts', () => {
     expect(response.headers.get('cache-control')).toContain('private');
     expect(response.headers.get('cache-control')).toContain('no-store');
   });
+
+  it.each([
+    ['acceptOffer', () => import('../offers/accept/route'), 'Error al aceptar la oferta'],
+    ['rejectOffer', () => import('../offers/reject/route'), 'Error al rechazar la oferta'],
+    ['sellPlayer', () => import('../sell/route'), 'Error al poner el jugador en el mercado'],
+    ['sellAllSquad', () => import('../sell-all/route'), 'Error masivo al poner en el mercado'],
+  ] as const)('returns a generic 500 when %s throws', async (command, loadRoute, message) => {
+    vi.mocked(marketCommandService[command]).mockRejectedValueOnce(
+      new Error('internal diagnostic')
+    );
+    const { POST } = await loadRoute();
+    const response = await POST(jsonRequest('http://localhost/api/market', {}));
+    expect(response.status).toBe(500);
+    expect(await response.json()).toEqual({ success: false, error: message });
+  });
+
+  it('returns a generic 500 when withdrawing a player fails', async () => {
+    vi.mocked(marketCommandService.withdrawPlayer).mockRejectedValueOnce(
+      new Error('internal diagnostic')
+    );
+    const { DELETE } = await import('../remove/route');
+    const response = await DELETE(
+      new NextRequest('http://localhost/api/market/remove?playerId=42', { method: 'DELETE' })
+    );
+    expect(response.status).toBe(500);
+    expect(await response.json()).toEqual({
+      success: false,
+      error: 'Error al retirar del mercado',
+    });
+  });
 });

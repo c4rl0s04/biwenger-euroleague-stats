@@ -41,8 +41,6 @@ export async function GET(request: NextRequest) {
     return successResponse(data, CACHE_DURATIONS.MEDIUM);
   } catch (error) {
     console.error('Error fetching round stats:', error);
-    return errorResponse(
-      `Failed to fetch round stats: ${error instanceof Error ? error.message : 'Unknown error'}`
-    );
+    return errorResponse('Failed to fetch round stats');
   }
 }

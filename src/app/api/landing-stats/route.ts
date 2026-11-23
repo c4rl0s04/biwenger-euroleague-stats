@@ -8,8 +8,7 @@ export async function GET() {
     const stats = await fetchLandingStats();
     return successResponse(stats);
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to fetch landing stats';
     console.error('Error fetching landing stats:', error);
-    return errorResponse(message, 500);
+    return errorResponse('Failed to fetch landing stats', 500);
   }
 }

@@ -19,17 +19,11 @@ export async function POST(request: Request) {
     const result = await marketCommandService.rejectOffer(session.user.id as string, body);
 
     return mutationSuccessResponse({ status: result.status, offerId: result.offerId });
-  } catch (error: any) {
+  } catch (error) {
     if (error instanceof MarketCommandValidationError) {
       return errorResponse(error.message, 400);
     }
     console.error('[API Market Offer Reject] Mutation failed');
-    const message =
-      error instanceof Error &&
-      !error.message.includes('token') &&
-      !error.message.includes('Bearer')
-        ? error.message
-        : 'Error al rechazar la oferta';
-    return errorResponse(message, 500);
+    return errorResponse('Error al rechazar la oferta', 500);
   }
 }

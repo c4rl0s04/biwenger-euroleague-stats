@@ -104,6 +104,7 @@ describe('GET /api/player/stats', () => {
     const response = await GET(request);
 
     expect(response.status).toBe(500);
+    expect(await response.json()).toEqual({ success: false, error: 'Internal Server Error' });
   });
 });
 

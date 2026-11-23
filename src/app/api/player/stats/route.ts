@@ -15,7 +15,6 @@ export async function GET(request: NextRequest) {
     return privateJsonResponse({ success: true, data: { stats } });
   } catch (error) {
     console.error('Error fetching player season stats:', error);
-    const message = error instanceof Error ? error.message : 'Internal Server Error';
-    return errorResponse(message, 500);
+    return errorResponse('Internal Server Error', 500);
   }
 }

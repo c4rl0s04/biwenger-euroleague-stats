@@ -23,17 +23,11 @@ export async function POST(request: Request) {
       offerId: result.offerId,
       ...(result.playerId ? { playerId: result.playerId } : {}),
     });
-  } catch (error: any) {
+  } catch (error) {
     if (error instanceof MarketCommandValidationError) {
       return errorResponse(error.message, 400);
     }
     console.error('[API Market Offer Accept] Mutation failed');
-    const message =
-      error instanceof Error &&
-      !error.message.includes('token') &&
-      !error.message.includes('Bearer')
-        ? error.message
-        : 'Error al aceptar la oferta';
-    return errorResponse(message, 500);
+    return errorResponse('Error al aceptar la oferta', 500);
   }
 }

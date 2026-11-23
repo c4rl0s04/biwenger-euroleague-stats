@@ -169,3 +169,15 @@ describe('rounds route contract coverage', () => {
     expect((await lineup.GET(makeRequest('http://localhost/api/rounds/lineup'))).status).toBe(400);
   });
 });
+
+it('keeps internal round stats failures out of the 500 response', async () => {
+  vi.mocked(services.fetchRoundCompleteData).mockRejectedValueOnce(
+    new Error('internal diagnostic')
+  );
+  const { GET } = await import('@/app/api/rounds/stats/route');
+  const response = await GET(
+    makeRequest('http://localhost/api/rounds/stats', { roundId: '1', mode: 'full' })
+  );
+  expect(response.status).toBe(500);
+  expect(await response.json()).toEqual({ success: false, error: 'Failed to fetch round stats' });
+});

@@ -116,7 +116,7 @@ describe('hoopgrid route contracts', () => {
     const response = await GET(request('http://localhost/api/hoopgrid/today'));
 
     expect(response.status).toBe(500);
-    expect(await response.json()).toEqual({ error: 'Challenge failed' });
+    expect(await response.json()).toEqual({ error: 'Internal Server Error' });
     expect(response.headers.get('Cache-Control')).toMatch(/\bprivate\b/);
     expect(response.headers.get('Cache-Control')).toMatch(/\bno-store\b/);
   });

@@ -1,5 +1,5 @@
 import { privateJsonResponse } from '@/lib/utils/response';
-import { hoopgridReadService } from '@/features/hoopgrid/server';
+import { HoopgridValidationError, hoopgridReadService } from '@/features/hoopgrid/server';
 import { auth } from '@/auth';
 
 export async function GET(request: Request) {
@@ -13,8 +13,10 @@ export async function GET(request: Request) {
     const data = await hoopgridReadService.getTodayChallenge(dateParam, userId);
 
     return privateJsonResponse(data);
-  } catch (error: any) {
+  } catch (error) {
     console.error('Hoopgrid Today Error:', error);
-    return privateJsonResponse({ error: error.message || 'Internal Server Error' }, 500);
+    const message =
+      error instanceof HoopgridValidationError ? error.message : 'Internal Server Error';
+    return privateJsonResponse({ error: message }, 500);
   }
 }

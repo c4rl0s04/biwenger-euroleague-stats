@@ -44,7 +44,7 @@ describe('GET /api/health', () => {
     expect(data.database).toEqual({
       status: 'disconnected',
       latencyMs: 45,
-      error: 'Connection timeout',
+      error: 'Database check failed',
     });
   });
 });
