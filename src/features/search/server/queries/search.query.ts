@@ -34,7 +34,6 @@ export async function findSearchRecords(query: string, limit: number): Promise<S
       WHERE p.name ILIKE $1
         AND ps.season_id = $2
         AND p.name IS NOT NULL
-        AND COALESCE(opm.image_url,p.img) IS NOT NULL
         AND ps.team_id IS NOT NULL
       ORDER BY ps.puntos DESC NULLS LAST
       LIMIT $3

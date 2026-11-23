@@ -1,7 +1,7 @@
 export interface SearchPlayerRecord {
   id: number;
   name: string;
-  img: string;
+  img: string | null;
   position: string | null;
   team: string | null;
   price: string | number | null;
