@@ -84,7 +84,16 @@ describe('season-scoped official mapping', () => {
       ]),
     });
     await reconcilePlayerMappings(store, [
-      { gameCode: 1, playerCode: 'P009213', playerName: 'NDIAYE, ELI', teamCode: 'MAD', raw: {} },
+      {
+        playerCode: 'P009213',
+        playerName: 'NDIAYE, ELI',
+        teamCode: 'MAD',
+        teamName: null,
+        imageUrl: null,
+        teamImageUrl: null,
+        age: null,
+        raw: {},
+      },
     ]);
     expect(store.upsertPlayerMapping).toHaveBeenCalledWith(
       expect.objectContaining({ playerId, status: playerId ? 'matched' : 'review_required' })
