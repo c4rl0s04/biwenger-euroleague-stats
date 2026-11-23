@@ -1,12 +1,12 @@
 import { fetchPlacementStats } from '@/features/standings/server';
-import { successResponse, errorResponse, CACHE_DURATIONS } from '@/lib/utils/response';
+import { privateJsonResponse, errorResponse } from '@/lib/utils/response';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
     const placements = await fetchPlacementStats();
-    return successResponse(placements, CACHE_DURATIONS.LONG);
+    return privateJsonResponse({ success: true, data: placements });
   } catch (error) {
     console.error('Error fetching placements:', error);
     return errorResponse('Internal Server Error');

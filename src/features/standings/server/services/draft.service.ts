@@ -23,7 +23,7 @@ import type { DraftStatsBundleViewModel } from '../../models/draft';
 
 /**
  * Access: Public league statistics.
- * Freshness: Cached HTTP max-age=900, stale-while-revalidate=60
+ * Freshness: Private HTTP response with no-store
  */
 export const fetchInitialSquadAnalytics = async () => {
   const data = await getInitialSquadActualPerformance();
@@ -32,7 +32,7 @@ export const fetchInitialSquadAnalytics = async () => {
 
 /**
  * Access: Public league statistics.
- * Freshness: Cached HTTP max-age=300, stale-while-revalidate=60
+ * Freshness: Private HTTP response with no-store
  */
 export const fetchInitialSquadStats = async (): Promise<DraftStatsBundleViewModel> => {
   const [
