@@ -21,6 +21,7 @@ export async function POST(request: Request) {
     return mutationSuccessResponse({
       status: result.status,
       offerId: result.offerId,
+      ownership: result.ownership,
       ...(result.playerId ? { playerId: result.playerId } : {}),
     });
   } catch (error) {

@@ -38,7 +38,11 @@ const listing = {
 
 describe('placeMarketBid command', () => {
   const command = vi.fn();
-  const service = createMarketCommandService({ clearLocalPlayerOwner: vi.fn() });
+  const service = createMarketCommandService({
+    clearLocalPlayerOwner: vi.fn(),
+    capturePlayerOwnership: vi.fn(),
+    clearConfirmedPlayerOwner: vi.fn(),
+  });
 
   beforeEach(() => {
     vi.clearAllMocks();

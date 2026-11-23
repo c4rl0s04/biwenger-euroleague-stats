@@ -103,7 +103,7 @@ export default function LineupClient({ userId }) {
         : await apiClient.rejectOffer(offer.id);
 
       if (res.success) {
-        if (isAccept) {
+        if (isAccept && res.data?.ownership === 'departed') {
           setSquad((prev) => prev.filter((p) => p.id !== player.id));
         } else {
           setSquad((prev) =>
@@ -113,6 +113,9 @@ export default function LineupClient({ userId }) {
                 : p
             )
           );
+          if (isAccept) {
+            setError('Oferta aceptada. Biwenger aún no ha confirmado la salida del jugador.');
+          }
         }
       } else {
         throw new Error(res.message || `Error al ${isAccept ? 'aceptar' : 'rechazar'} la oferta`);

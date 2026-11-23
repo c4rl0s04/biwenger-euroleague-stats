@@ -29,6 +29,8 @@ describe('Market Command Service', () => {
     vi.clearAllMocks();
     repository = {
       clearLocalPlayerOwner: vi.fn().mockResolvedValue(undefined),
+      capturePlayerOwnership: vi.fn().mockResolvedValue({ seasonId: '2026-27', version: '12' }),
+      clearConfirmedPlayerOwner: vi.fn().mockResolvedValue(true),
     };
     service = createMarketCommandService(repository);
   });
@@ -200,70 +202,77 @@ describe('Market Command Service', () => {
   });
 
   describe('acceptOffer', () => {
-    it('accepts offer without playerId and does not call DB repository', async () => {
-      mockExecuteUserProviderCommand.mockImplementation(
-        async (_userId: string, operation: string, callback: any) => {
-          expect(operation).toBe('offer.accept');
-          const client = { command: vi.fn().mockResolvedValue({ status: 200 }) };
-          const context: BiwengerRequestContext = {
-            userId: 'user-1',
-          };
-          return callback(client, context);
-        }
-      );
-
-      const result = await service.acceptOffer('user-1', { offerId: 555 });
-      expect(result).toEqual({
-        status: 'completed',
-        offerId: 555,
-        message: 'Oferta aceptada correctamente',
+    const query = vi.fn();
+    const command = vi.fn();
+    beforeEach(() => {
+      query.mockReset().mockResolvedValueOnce({
+        data: {
+          players: [{ id: 888 }],
+          offers: [{ id: 555, requestedPlayers: [888], status: 'waiting' }],
+        },
       });
-      expect(repository.clearLocalPlayerOwner).not.toHaveBeenCalled();
+      command.mockReset().mockResolvedValue({ status: 200 });
+      mockExecuteUserProviderCommand.mockImplementation(async (actor, operation, run) => {
+        expect(actor).toBe('user-1');
+        expect(operation).toBe('offer.accept');
+        return run({ query, command }, { userId: actor });
+      });
     });
 
-    it('accepts offer with playerId and clears local player owner', async () => {
-      mockExecuteUserProviderCommand.mockImplementation(
-        async (_userId: string, _operation: string, callback: any) => {
-          const client = { command: vi.fn().mockResolvedValue({ status: 200 }) };
-          const context: BiwengerRequestContext = {
-            userId: 'user-1',
-          };
-          return callback(client, context);
-        }
-      );
-
-      const result = await service.acceptOffer('user-1', { offerId: 555, playerId: 888 });
-      expect(result).toEqual({
+    it('derives the player from the live offer and clears only confirmed seller ownership', async () => {
+      query.mockResolvedValueOnce({ data: { players: [] } });
+      await expect(service.acceptOffer('user-1', { offerId: 555 })).resolves.toMatchObject({
         status: 'completed',
         offerId: 555,
         playerId: 888,
-        message: 'Oferta aceptada correctamente',
+        ownership: 'departed',
       });
-      expect(repository.clearLocalPlayerOwner).toHaveBeenCalledWith(888, 'user-1');
+      expect(command).toHaveBeenCalledExactlyOnceWith('/offers/555', {
+        method: 'PUT',
+        body: { status: 'accepted' },
+        context: { userId: 'user-1' },
+      });
+      expect(query).toHaveBeenLastCalledWith('/user?fields=players(id)', {
+        cache: 'no-store',
+        context: { userId: 'user-1' },
+      });
+      expect(repository.clearConfirmedPlayerOwner).toHaveBeenCalledExactlyOnceWith(888, 'user-1', {
+        seasonId: '2026-27',
+        version: '12',
+      });
     });
 
-    it('catches and logs DB failure on acceptOffer without failing the operation', async () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-      vi.mocked(repository.clearLocalPlayerOwner).mockRejectedValueOnce(new Error('DB Timeout'));
+    it('rejects a browser player ID that does not match the current offer', async () => {
+      await expect(
+        service.acceptOffer('user-1', { offerId: 555, playerId: 999 })
+      ).rejects.toBeInstanceOf(MarketCommandValidationError);
+      expect(command).not.toHaveBeenCalled();
+      expect(repository.clearConfirmedPlayerOwner).not.toHaveBeenCalled();
+    });
 
-      mockExecuteUserProviderCommand.mockImplementation(
-        async (_userId: string, _operation: string, callback: any) => {
-          const client = { command: vi.fn().mockResolvedValue({ status: 200 }) };
-          const context: BiwengerRequestContext = {
-            userId: 'user-1',
-          };
-          return callback(client, context);
+    it.each(['still-owned', 'failed-read', 'incomplete-read'])(
+      'preserves the last known owner on %s and does not send the command again',
+      async (scenario) => {
+        if (scenario === 'failed-read') query.mockRejectedValueOnce(new Error('read timeout'));
+        else
+          query.mockResolvedValueOnce({
+            data: scenario === 'still-owned' ? { players: [{ id: 888 }] } : {},
+          });
+        const log = vi.spyOn(console, 'error').mockImplementation(() => {});
+        try {
+          await expect(
+            service.acceptOffer('user-1', { offerId: 555, playerId: 888 })
+          ).resolves.toMatchObject({
+            status: 'completed',
+            ownership: 'pending',
+          });
+          expect(command).toHaveBeenCalledOnce();
+          expect(repository.clearConfirmedPlayerOwner).not.toHaveBeenCalled();
+        } finally {
+          log.mockRestore();
         }
-      );
-
-      const result = await service.acceptOffer('user-1', { offerId: 777, playerId: 999 });
-      expect(result.status).toBe('completed');
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to update player owner in DB after offer acceptance'),
-        expect.any(Error)
-      );
-      consoleErrorSpy.mockRestore();
-    });
+      }
+    );
   });
 
   describe('rejectOffer', () => {

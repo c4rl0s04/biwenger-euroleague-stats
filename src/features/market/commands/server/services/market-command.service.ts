@@ -29,6 +29,7 @@ import {
   marketCommandRepository,
   type MarketCommandRepository,
 } from '../repositories/market-command.repository';
+import { hasPlayerLeftSquad, resolveOfferedPlayer } from './offer-acceptance.provider';
 
 function sanitizeErrorMessage(error: unknown, fallback: string): string {
   if (
@@ -285,7 +286,7 @@ export function createMarketCommandService(
 
     /**
      * Accepts an incoming transfer offer on Biwenger.
-     * If playerId is provided, updates local player ownership to null.
+     * Reconciles the seller projection only after Biwenger confirms departure.
      */
     async acceptOffer(userId: string, input: unknown): Promise<AcceptOfferResult> {
       if (!userId) {
@@ -295,28 +296,38 @@ export function createMarketCommandService(
       const validated = validateAcceptOfferInput(input);
 
       try {
+        let playerId: number | undefined;
+        let ownership: AcceptOfferResult['ownership'] = 'pending';
         await executeUserProviderCommand(userId, 'offer.accept', async (client, context) => {
-          return client.command(`/offers/${validated.offerId}`, {
+          playerId = await resolveOfferedPlayer(
+            client,
+            context,
+            validated.offerId,
+            validated.playerId
+          );
+          const snapshot = await repository.capturePlayerOwnership(playerId, userId);
+          const result = await client.command(`/offers/${validated.offerId}`, {
             method: 'PUT',
-            body: {
-              status: 'accepted',
-            },
+            body: { status: 'accepted' },
             context,
           });
-        });
 
-        if (validated.playerId) {
           try {
-            await repository.clearLocalPlayerOwner(validated.playerId, userId);
-          } catch (dbErr) {
-            console.error('Failed to update player owner in DB after offer acceptance:', dbErr);
+            if (await hasPlayerLeftSquad(client, context, playerId)) {
+              ownership = 'departed';
+              if (snapshot) await repository.clearConfirmedPlayerOwner(playerId, userId, snapshot);
+            }
+          } catch {
+            console.error('[Market Offer Accept] Ownership reconciliation unavailable');
           }
-        }
+          return result;
+        });
 
         return {
           status: 'completed',
           offerId: validated.offerId,
-          ...(validated.playerId ? { playerId: validated.playerId } : {}),
+          ...(playerId ? { playerId } : {}),
+          ownership,
           message: 'Oferta aceptada correctamente',
         };
       } catch (error: unknown) {
