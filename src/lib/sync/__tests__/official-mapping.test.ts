@@ -104,3 +104,132 @@ describe('season-scoped official mapping', () => {
     );
   });
 });
+
+const profile = (playerName: string, playerCode = 'P015244', teamCode: string | null = 'MAD') => ({
+  playerCode,
+  playerName,
+  teamCode,
+  teamName: null,
+  imageUrl: null,
+  teamImageUrl: null,
+  age: null,
+  raw: {},
+});
+const candidate = (
+  name: string,
+  id = 42134,
+  provider_team_code: string | null = 'MAD',
+  euroleague_code: string | null = null
+) => ({ id, name, team_id: 579, provider_team_code, euroleague_code });
+
+describe('official roster aliases', () => {
+  it.each([
+    ['SMITH JR.', 'SMITH JR, NICK', 'exact_surname_team'],
+    ['De la Cruz III', 'DÉ LA CRUZ III, LUIS', 'exact_surname_team'],
+    ['Nick Smith Jr.', 'SMITH JR, NICK', 'exact_name_team'],
+  ])('uses the same decision in preview and apply for %s', async (name, officialName, method) => {
+    const store = mutations({
+      getFantasyPlayers: vi.fn(async () => [candidate(name)]),
+      getPlayerMappings: vi.fn(async () => [
+        { player_id: null, provider_player_code: 'P015244', status: 'review_required' },
+      ]),
+    });
+    const official = [profile(officialName)];
+    const preview = await reconcilePlayerMappings(store, official, {
+      allowSurname: true,
+      preview: true,
+    });
+    expect(store.upsertPlayerMapping).not.toHaveBeenCalled();
+    expect(preview.decisions).toEqual([
+      expect.objectContaining({ playerId: 42134, providerCode: 'P015244', method }),
+    ]);
+    expect(await reconcilePlayerMappings(store, official, { allowSurname: true })).toEqual(preview);
+    expect(store.upsertPlayerMapping).toHaveBeenCalledWith(
+      expect.objectContaining({ playerId: 42134, status: 'matched', matchMethod: method })
+    );
+  });
+
+  it.each([
+    ['different suffix', [candidate('SMITH III')], [profile('SMITH JR, NICK')], []],
+    [
+      'duplicate fantasy surname',
+      [candidate('SMITH JR'), candidate('SMITH JR.', 2)],
+      [profile('SMITH JR, NICK')],
+      [],
+    ],
+    [
+      'duplicate official surname',
+      [candidate('SMITH JR')],
+      [profile('SMITH JR, NICK'), profile('SMITH JR, ADAM', 'P015245')],
+      [],
+    ],
+    [
+      'missing team',
+      [candidate('SMITH JR', 42134, null)],
+      [profile('SMITH JR, NICK', 'P015244', null)],
+      [],
+    ],
+    [
+      'conflicting code',
+      [candidate('SMITH JR', 42134, 'MAD', 'P015245')],
+      [profile('SMITH JR, NICK')],
+      [],
+    ],
+    [
+      'existing link',
+      [candidate('SMITH JR')],
+      [profile('SMITH JR, NICK')],
+      [{ player_id: 42134, provider_player_code: 'P015245', status: 'matched' }],
+    ],
+  ])('leaves %s in review', async (_reason, players, official, existing) => {
+    const store = mutations({
+      getFantasyPlayers: vi.fn(async () => players),
+      getPlayerMappings: vi.fn(async () => existing),
+    });
+    const result = await reconcilePlayerMappings(store, official, { allowSurname: true });
+    expect(result.mapped).toBe(0);
+    expect(result.issues).toHaveLength(official.length);
+  });
+
+  it('leaves competing claims pending regardless of profile order', async () => {
+    const store = mutations({ getFantasyPlayers: vi.fn(async () => [candidate('Smith Jr')]) });
+    const officials = [profile('SMITH JR, NICK'), profile('SMITH JR', 'P015245')];
+    for (const order of [officials, [...officials].reverse()]) {
+      const result = await reconcilePlayerMappings(store, order, { allowSurname: true });
+      expect(result.mapped).toBe(0);
+      expect(result.issues.map((issue) => issue.reason)).toEqual([
+        'Multiple official codes claim this player',
+        'Multiple official codes claim this player',
+      ]);
+    }
+  });
+
+  it('retries out-of-order arrivals, preserves links, and leaves aliases unresolved in a boxscore', async () => {
+    const getFantasyPlayers = vi
+      .fn<() => Promise<ReturnType<typeof candidate>[]>>()
+      .mockResolvedValueOnce([])
+      .mockResolvedValue([candidate('SMITH JR.')]);
+    const getPlayerMappings = vi
+      .fn()
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([
+        { player_id: null, provider_player_code: 'P015244', status: 'review_required' },
+      ])
+      .mockResolvedValueOnce([
+        { player_id: 42134, provider_player_code: 'P015244', status: 'matched' },
+      ])
+      .mockResolvedValue([]);
+    const store = mutations({ getFantasyPlayers, getPlayerMappings });
+    const officials = [profile('SMITH JR, NICK')];
+    expect((await reconcilePlayerMappings(store, officials, { allowSurname: true })).mapped).toBe(
+      0
+    );
+    expect((await reconcilePlayerMappings(store, officials, { allowSurname: true })).mapped).toBe(
+      1
+    );
+    expect(
+      (await reconcilePlayerMappings(store, officials, { allowSurname: true })).decisions
+    ).toEqual([]);
+    expect((await reconcilePlayerMappings(store, officials)).mapped).toBe(0);
+  });
+});

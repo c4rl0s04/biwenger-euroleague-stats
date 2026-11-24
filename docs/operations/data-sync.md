@@ -95,6 +95,13 @@ loaded by `euroleague-master-data` when both run, and fetches it otherwise (live
 Running a single step is an explicit recovery operation and does not automatically run its declared
 dependencies. Check that prerequisite data is current first. Numeric `--step` values are rejected.
 
+To preview player links against the refreshed Biwenger catalogue, run
+`npm run sync -- --step=euroleague-master-data --preview-player-mappings`.
+The preview reads the active season and the official catalogue, reports new and unresolved
+links, and performs no database writes. Surname-only matching requires a unique alias in both
+team catalogues. Use the existing `--force-game` command to repair affected finalized games
+after the links are confirmed.
+
 Before first activation, run `npm run db:production:check`, apply the additive readiness repair
 through the [database safety](database-safety.md) runbook, and fingerprint `2025-26` with
 `npm run db:season:fingerprint -- --season=2025-26`. Then create/activate `2026-27` and run

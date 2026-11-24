@@ -4,6 +4,7 @@ import { runMigrations } from '../db/migrate';
 import { applyManifest, preview, snapshot } from './sync';
 import { hash, manifestSchema, SEASON, type Asset } from './types';
 import { prepareOfficialMappingMutations } from '../../src/lib/db/mutations/official/mappings';
+import { reconcilePlayerMappings } from '../../src/lib/sync/services/euroleague/mappings';
 
 it.runIf(process.env.RUN_IMAGE_DB_TESTS === 'true')(
   'imports portraits by official code and preserves the source preference across API syncs',
@@ -147,6 +148,42 @@ it.runIf(process.env.RUN_IMAGE_DB_TESTS === 'true')(
         raw_payload: { api: 'latest' },
       });
       expect(synced.mappings[2].raw_payload).not.toHaveProperty('website_image');
+
+      await db.query("INSERT INTO players (id, name) VALUES (903, 'SMITH JR.')");
+      await db.query(
+        'INSERT INTO player_seasons (season_id, player_id, team_id) VALUES ($1, 903, 901)',
+        [SEASON]
+      );
+      const officialRoster = [
+        {
+          playerCode: 'P000901',
+          playerName: 'SMITH JR, NICK',
+          teamCode: 'TEST',
+          teamName: 'Test Club',
+          imageUrl: 'api-photo',
+          teamImageUrl: null,
+          age: null,
+          raw: {},
+        },
+      ];
+      await db.query('BEGIN READ ONLY');
+      const previewed = await reconcilePlayerMappings(api, officialRoster, {
+        allowSurname: true,
+        preview: true,
+      });
+      await db.query('COMMIT');
+      expect(previewed.decisions).toEqual([
+        expect.objectContaining({ playerId: 903, method: 'exact_surname_team' }),
+      ]);
+      expect(await reconcilePlayerMappings(api, officialRoster, { allowSurname: true })).toEqual(
+        previewed
+      );
+      expect((await snapshot(db)).mappings[0]).toMatchObject({
+        player_id: 903,
+        status: 'matched',
+        match_method: 'exact_surname_team',
+        image_url: assets[0].url,
+      });
     } finally {
       db.release();
       await fixture.cleanup();

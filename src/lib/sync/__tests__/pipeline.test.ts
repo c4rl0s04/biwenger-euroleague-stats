@@ -51,6 +51,16 @@ describe('declarative sync pipeline', () => {
     });
   });
 
+  it('restricts player mapping previews to master data', () => {
+    expect(() => parseSyncArgs(['--preview-player-mappings'])).toThrow(/requires --step=/);
+    expect(() =>
+      parseSyncArgs(['--mode=live', '--step=euroleague-master-data', '--preview-player-mappings'])
+    ).toThrow(/routine or bootstrap/);
+    expect(
+      parseSyncArgs(['--step=euroleague-master-data', '--preview-player-mappings'])
+    ).toMatchObject({ previewPlayerMappings: true });
+  });
+
   it('rejects numeric steps and unsafe force-game combinations', () => {
     expect(() => selectPipeline('routine', '5')).toThrow(/Unknown sync step/);
     expect(() => parseSyncArgs(['--force-game=10'])).toThrow(/requires --step=euroleague-games/);

@@ -46,6 +46,7 @@ export class SyncManager {
   readonly lockKey: number;
   readonly forceGame?: number;
   readonly forceRound?: number;
+  readonly previewPlayerMappings: boolean;
   readonly targetSeasonId?: string;
   readonly reporter: SyncReporter;
   hasErrors = false;
@@ -61,6 +62,7 @@ export class SyncManager {
       lockKey?: number;
       forceGame?: number;
       forceRound?: number;
+      previewPlayerMappings?: boolean;
       seasonId?: string;
       reporter?: SyncReporter;
       writer?: ReporterWriter;
@@ -71,6 +73,7 @@ export class SyncManager {
     this.lockKey = options.lockKey ?? 823744;
     this.forceGame = options.forceGame;
     this.forceRound = options.forceRound;
+    this.previewPlayerMappings = options.previewPlayerMappings ?? false;
     this.targetSeasonId = options.seasonId;
     this.context = { db: null, euroleague: getEuroleagueClient() };
     this.reporter = options.reporter ?? new SyncReporter({ writer: options.writer });
@@ -269,7 +272,7 @@ export class SyncManager {
       this.error('Synchronization preconditions failed.', error, { stepId: 'preconditions' });
       this.reporter.preconditionsFailed({ error });
     } finally {
-      if (!this.hasErrors && !this.lockUnavailable) clearCache();
+      if (!this.hasErrors && !this.lockUnavailable && !this.previewPlayerMappings) clearCache();
       if (advisoryLock?.acquired) await advisoryLock.release();
       if (this.context.db && typeof this.context.db.end === 'function') {
         await this.context.db.end();
