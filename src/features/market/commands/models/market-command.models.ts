@@ -38,6 +38,7 @@ export interface AcceptOfferInput {
 export interface AcceptOfferResult {
   status: 'completed';
   ownership: 'departed' | 'pending';
+  history: 'confirmed' | 'pending';
   offerId: number;
   playerId?: number;
   message?: string;

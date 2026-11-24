@@ -35,6 +35,7 @@ export default function LineupClient({ userId }) {
     lineupConfig,
     setLineupConfig,
   } = workspace;
+  const [offerHistoryPending, setOfferHistoryPending] = useState(false);
   const [isTacticsOpen, setIsTacticsOpen] = useState(false);
 
   // ── Swap State ──────────────────────────────────────────────────────────
@@ -103,6 +104,7 @@ export default function LineupClient({ userId }) {
         : await apiClient.rejectOffer(offer.id);
 
       if (res.success) {
+        if (isAccept) setOfferHistoryPending(res.data?.history === 'pending');
         if (isAccept && res.data?.ownership === 'departed') {
           setSquad((prev) => prev.filter((p) => p.id !== player.id));
         } else {
@@ -306,6 +308,11 @@ export default function LineupClient({ userId }) {
         </Section>
 
         <Section title="Centro de Fichajes" delay={150} background="section-base">
+          {offerHistoryPending && (
+            <p role="status" className="mb-3 text-sm">
+              Oferta aceptada. El historial se actualizará al sincronizar con Biwenger.
+            </p>
+          )}
           <LineupOffersSection
             squad={squad}
             onAccept={handleAcceptOffer}

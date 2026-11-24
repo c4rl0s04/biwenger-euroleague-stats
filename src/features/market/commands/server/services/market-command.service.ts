@@ -328,6 +328,8 @@ export function createMarketCommandService(
           offerId: validated.offerId,
           ...(playerId ? { playerId } : {}),
           ownership,
+          // shortcut: scheduled sync owns history until the offer-to-board link is verified.
+          history: 'pending',
           message: 'Oferta aceptada correctamente',
         };
       } catch (error: unknown) {

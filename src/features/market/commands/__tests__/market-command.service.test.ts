@@ -226,6 +226,7 @@ describe('Market Command Service', () => {
         offerId: 555,
         playerId: 888,
         ownership: 'departed',
+        history: 'pending',
       });
       expect(command).toHaveBeenCalledExactlyOnceWith('/offers/555', {
         method: 'PUT',
@@ -265,6 +266,7 @@ describe('Market Command Service', () => {
           ).resolves.toMatchObject({
             status: 'completed',
             ownership: 'pending',
+            history: 'pending',
           });
           expect(command).toHaveBeenCalledOnce();
           expect(repository.clearConfirmedPlayerOwner).not.toHaveBeenCalled();

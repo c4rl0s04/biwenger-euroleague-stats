@@ -46,12 +46,16 @@ describe('market mutation route contracts', () => {
     vi.mocked(auth).mockResolvedValue({ user: { id: '42' } } as any);
   });
 
-  it('covers offer accept and reject contracts', async () => {
+  it.each([
+    ['pending', 'departed'],
+    ['confirmed', 'pending'],
+  ] as const)('keeps %s history independent of %s ownership', async (history, ownership) => {
     vi.mocked(marketCommandService.acceptOffer).mockResolvedValue({
       status: 'completed',
       offerId: 10,
       playerId: 1,
-      ownership: 'pending',
+      ownership,
+      history,
       message: 'Oferta aceptada correctamente',
       ...providerCanary,
     } as any);
@@ -75,7 +79,8 @@ describe('market mutation route contracts', () => {
       status: 'completed',
       offerId: 10,
       playerId: 1,
-      ownership: 'pending',
+      ownership,
+      history,
     });
     expectSafeMutationResponse(acceptResponse, acceptBody);
     expect(marketCommandService.acceptOffer).toHaveBeenCalledWith('42', {
