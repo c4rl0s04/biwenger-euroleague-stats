@@ -1,3 +1,6 @@
+import { readBiwengerBoardPage } from '../../../api/biwenger-board';
+import { interpretBoardTransfer } from '../../../api/biwenger-board-transfer';
+import { saveBoardTransfer } from '../../../db/mutations/board-transfer';
 import { biwengerFetch } from '../../../api/biwenger-client';
 import { CONFIG } from '../../../config';
 import { prepareMarketMutations, type MarketMutations } from '../../../db/mutations/market';
@@ -155,75 +158,6 @@ async function processBettingPool(
   return pools;
 }
 
-async function processTransfers(
-  contentList: any[],
-  timestamp: number,
-  date: string,
-  ctx: TransferProcessingContext
-): Promise<number> {
-  let transfers = 0;
-
-  for (const content of contentList) {
-    const playerId = content.player;
-    const hasResolvedPlayer = Boolean(ctx.playersList[playerId]);
-
-    let fromName = 'Mercado';
-    let toName = 'Mercado';
-    if (content.from) fromName = content.from.name;
-    if (content.to) toName = content.to.name;
-
-    // FILTER 1: Skip Mercado -> Mercado
-    if (fromName === 'Mercado' && toName === 'Mercado') continue;
-
-    // FILTER 2: Skip Real Teams
-    if (ctx.teamNames.has(fromName) || ctx.teamNames.has(toName)) continue;
-
-    // FILTER 3: Keep only user/market interactions
-    const fromIsAllowed = fromName === 'Mercado' || ctx.validUserNames.has(fromName);
-    const toIsAllowed = toName === 'Mercado' || ctx.validUserNames.has(toName);
-    if (!fromIsAllowed || !toIsAllowed) {
-      ctx.onSkippedActor();
-      continue;
-    }
-
-    if (!hasResolvedPlayer) {
-      ctx.onMissingPlayer();
-    }
-
-    const result = await ctx.mutations.insertTransfer({
-      timestamp,
-      fecha: date,
-      player_id: playerId,
-      precio: content.amount || 0,
-      vendedor: fromName,
-      comprador: toName,
-    });
-
-    if (result.created && result.id && content.bids && Array.isArray(content.bids)) {
-      const transferId = result.id;
-      for (const bid of content.bids) {
-        try {
-          const bidderId = bid.user ? bid.user.id || bid.user : null;
-          const bidderName = bid.user ? bid.user.name || 'Unknown' : 'Unknown';
-
-          await ctx.mutations.insertBid({
-            transfer_id: transferId,
-            bidder_id: bidderId ? bidderId.toString() : null,
-            bidder_name: bidderName,
-            amount: bid.amount || 0,
-          });
-        } catch {
-          // Ignore bid errors
-        }
-      }
-    }
-
-    transfers++;
-  }
-
-  return transfers;
-}
-
 export async function syncBiwengerBoard(
   manager: SyncManager,
   dependencies: BoardDependencies = defaultBoardDependencies
@@ -280,11 +214,13 @@ export async function syncBiwengerBoard(
 
   while (moreTransfers) {
     manager.log(`Fetching batch (offset: ${offset})`);
-    const response = await dependencies.fetch(
-      CONFIG.ENDPOINTS.BIWENGER.LEAGUE_BOARD(leagueId, offset, limit),
+    const { data: items } = await readBiwengerBoardPage(
+      dependencies.fetch,
+      leagueId,
+      offset,
+      limit,
       { skipVersionCheck: true }
     );
-    const items = response.data;
 
     if (!items || items.length === 0) {
       moreTransfers = false;
@@ -341,7 +277,14 @@ export async function syncBiwengerBoard(
       if (Array.isArray(t.content)) {
         const timestamp = t.date;
         const date = new Date(timestamp * 1000).toISOString();
-        totalTransfers += await processTransfers(t.content, timestamp, date, transferCtx);
+        for (const content of t.content) {
+          const entry = interpretBoardTransfer(content, timestamp, date, transferCtx);
+          if (entry.kind === 'invalid-actor') transferCtx.onSkippedActor();
+          if (entry.kind !== 'transfer') continue;
+          if (entry.missingPlayer) transferCtx.onMissingPlayer();
+          await saveBoardTransfer(entry, transferCtx.mutations);
+          totalTransfers++;
+        }
       }
     }
 

@@ -1,3 +1,4 @@
+import { readBiwengerBoardPage } from './biwenger-board';
 /**
  * Biwenger API Client (Unofficial) - Compatibility Layer
  * Delegates to the typed, secure provider boundary in src/features/provider/server
@@ -67,7 +68,7 @@ export async function biwengerFetch(endpoint, options = {}) {
 // --- Specific method exports ---
 
 export async function fetchMarket() {
-  return biwengerFetch(CONFIG.ENDPOINTS.BIWENGER.LEAGUE_BOARD(CONFIG.API.LEAGUE_ID, 0, 100));
+  return readBiwengerBoardPage(biwengerFetch, CONFIG.API.LEAGUE_ID, 0, 100);
 }
 
 export async function fetchLeague() {
@@ -75,7 +76,7 @@ export async function fetchLeague() {
 }
 
 export async function fetchTransfers(offset = 0, limit = 20) {
-  return biwengerFetch(CONFIG.ENDPOINTS.BIWENGER.LEAGUE_BOARD(CONFIG.API.LEAGUE_ID, offset, limit));
+  return readBiwengerBoardPage(biwengerFetch, CONFIG.API.LEAGUE_ID, offset, limit);
 }
 
 export async function fetchCompetition() {

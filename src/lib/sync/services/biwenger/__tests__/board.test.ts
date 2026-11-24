@@ -98,9 +98,18 @@ describe('Biwenger Board Service', () => {
               },
             ],
           },
+          ...Array.from({ length: 46 }, () => ({ type: 'ignored', date: 1759685765 })),
         ],
       })
-      .mockResolvedValueOnce({ data: [] });
+      .mockResolvedValueOnce({
+        data: [
+          {
+            type: 'transfer',
+            date: 1700000000,
+            content: [{ player: 101, from: { name: 'June' } }],
+          },
+        ],
+      });
 
     const result = await syncBiwengerBoard(manager, {
       fetch: mockFetch,
@@ -111,6 +120,10 @@ describe('Biwenger Board Service', () => {
     expect(result.counts.finances).toBe(2); // 1 round bonus + 1 admin bonus
     expect(result.counts.pools).toBe(1);
     expect(result.counts.transfers).toBe(1);
+    expect(mockFetch.mock.calls).toEqual([
+      ['/league/test-league-1/board?offset=0&limit=50', { skipVersionCheck: true }],
+      ['/league/test-league-1/board?offset=50&limit=50', { skipVersionCheck: true }],
+    ]);
   });
 
   it('records a loan fee for both managers and ignores the player return', async () => {

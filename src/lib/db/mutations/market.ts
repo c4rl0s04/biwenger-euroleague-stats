@@ -23,7 +23,7 @@ export interface InsertTransferParams {
 
 export interface InsertBidParams {
   transfer_id: number;
-  bidder_id: string; // text in schema
+  bidder_id: string | null; // text in schema
   bidder_name: string;
   amount: number;
 }
