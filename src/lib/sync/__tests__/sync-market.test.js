@@ -25,6 +25,9 @@ describe('syncBoard', () => {
     fetchBoard = vi.fn();
 
     db = {
+      async connect() {
+        return { query: this.query, release: vi.fn() };
+      },
       query: vi.fn(async (sql) => {
         const queryText = typeof sql === 'string' ? sql : sql?.text || '';
         if (queryText.toLowerCase().includes('from "seasons"')) {

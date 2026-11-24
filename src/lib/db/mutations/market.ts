@@ -1,12 +1,11 @@
-import { Pool } from 'pg';
 import { CONFIG } from '../../config';
 
-// Using a loose type for the db client to support both pg.Pool and the mock object
-export type DbClient =
-  | Pool
-  | {
-      query: (sql: string, params?: any[]) => Promise<{ rows: any[]; rowCount: number }>;
-    };
+export interface DbClient {
+  query: (
+    sql: string,
+    params?: unknown[]
+  ) => Promise<{ rows: { id?: number }[]; rowCount: number | null }>;
+}
 
 // ==========================================
 // INTERFACES
@@ -106,7 +105,7 @@ export function prepareMarketMutations(
 
       // Mimic info object behavior: if row created, return ID.
       if (res.rowCount != null && res.rowCount > 0) {
-        return { id: res.rows[0].id, created: true };
+        return { id: res.rows[0].id ?? null, created: true };
       }
       return { id: null, created: false };
     },
