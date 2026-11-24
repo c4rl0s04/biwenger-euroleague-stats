@@ -40,7 +40,7 @@ describe('real Search HTTP/service/query contract', () => {
             {
               id: 7,
               name: 'Player',
-              img: 'p.png',
+              img: null,
               position: null,
               team: null,
               price: null,
@@ -69,7 +69,7 @@ describe('real Search HTTP/service/query contract', () => {
             {
               id: 7,
               name: 'Player',
-              img: 'p.png',
+              img: null,
               position: null,
               team: null,
               price: null,
@@ -95,7 +95,7 @@ describe('real Search HTTP/service/query contract', () => {
     expect(calls[0][0]).toContain('p.name ILIKE $1');
     expect(calls[0][0]).toContain('AND ps.season_id = $2');
     expect(calls[0][0]).toContain("opm.provider='euroleague_advanced' AND opm.status='matched'");
-    expect(calls[0][0]).toContain('AND COALESCE(opm.image_url,p.img) IS NOT NULL');
+    expect(calls[0][0]).not.toContain('AND COALESCE(opm.image_url,p.img) IS NOT NULL');
     expect(calls[0][0]).toContain('AND ps.team_id IS NOT NULL');
     expect(calls[0][0]).toContain('ORDER BY ps.puntos DESC NULLS LAST');
     expect(calls[1][0]).toContain(
