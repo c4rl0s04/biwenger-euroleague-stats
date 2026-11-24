@@ -22,6 +22,7 @@ export async function POST(request: Request) {
       status: result.status,
       offerId: result.offerId,
       ownership: result.ownership,
+      history: result.history,
       ...(result.playerId ? { playerId: result.playerId } : {}),
     });
   } catch (error) {
