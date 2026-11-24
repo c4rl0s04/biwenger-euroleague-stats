@@ -36,6 +36,26 @@ function fixture(players = [player(7), player(8)]) {
 }
 
 describe('price history orchestration', () => {
+  it('reuses the scheduled price response to fill an existing player biography', async () => {
+    const f = fixture([player(7)]);
+    const query = vi.fn().mockResolvedValue({ rows: [], rowCount: 1 });
+    Object.assign(f.manager.context.db!, { query });
+    const response = {
+      data: { id: 7, prices: [], country: 'US', birthday: 20040418, height: 189, weight: 84 },
+    };
+    f.fetchHistory.mockResolvedValue(response);
+    await syncBiwengerPriceHistory(f.manager, f);
+    expect(f.fetchHistory).toHaveBeenCalledExactlyOnceWith(7);
+    expect(query).toHaveBeenCalledWith(expect.stringContaining('UPDATE players'), [
+      '2004-04-18',
+      189,
+      84,
+      7,
+      'United States',
+    ]);
+    expect(f.repository.reconcile).toHaveBeenCalledOnce();
+  });
+
   it('fetches every due season player independently of catalogue presence or global identity', async () => {
     const f = fixture();
     const result = await syncBiwengerPriceHistory(f.manager, f);

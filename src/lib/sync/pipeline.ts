@@ -49,7 +49,7 @@ export const PIPELINE: readonly SyncStepDefinition[] = [
     id: 'biwenger-price-history',
     title: 'Authoritative daily player prices',
     source: 'biwenger',
-    writes: ['market_values', 'sync_meta:biwenger-price-history'],
+    writes: ['market_values', 'sync_meta:biwenger-price-history', 'players:biography'],
     modes: ['routine', 'bootstrap'],
     dependencies: ['biwenger-catalog'],
     run: syncBiwengerPriceHistory,

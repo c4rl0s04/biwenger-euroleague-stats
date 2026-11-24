@@ -206,7 +206,7 @@ export const CONFIG = {
       ROUND_GAMES: (roundId) => `/rounds/euroleague/${roundId}?score=1`,
       ROUND_LEAGUE: (roundId) => (roundId ? `/rounds/league/${roundId}` : `/rounds/league`),
       PLAYER_DETAILS: (id) =>
-        `/players/euroleague/${id}?lang=es&fields=id,name,position,prices,birthday,height,weight,img`,
+        `/players/euroleague/${id}?lang=es&fields=id,name,position,prices,birthday,height,weight,img,country`,
       USER_PLAYERS: (id) => `/user/${id}?fields=players`,
       MARKET: (leagueId) => `/market`,
     },
