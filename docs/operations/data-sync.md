@@ -116,6 +116,9 @@ The earlier two-pass live-provider test command has been retired.
 
 ## Daily player price history
 
+When a player is due for price history refresh, the same Biwenger detail response fills any missing
+country, birth date, height and weight. Existing biography values are preserved.
+
 The catalogue updates the latest `player_seasons.price` cache, but does not invent dated history
 from its undated current-price snapshot. `biwenger-price-history` imports explicit Biwenger date/price
 pairs for every player in the configured season, including existing identities and players no longer

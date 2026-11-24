@@ -6,6 +6,7 @@ import {
 import { runMigrations } from '../../../../scripts/db/migrate';
 import { createPriceHistoryRepository } from './price-history';
 import { priceHistoryCheckpointKey } from '../price-history';
+import { preparePlayerMutations } from '../../db/mutations/players';
 
 // Always starts its own disposable loopback database; never consumes DATABASE_URL or .env.
 describe.skipIf(process.env.RUN_PRICE_HISTORY_DB_TESTS !== 'true')(
@@ -70,6 +71,31 @@ describe.skipIf(process.env.RUN_PRICE_HISTORY_DB_TESTS !== 'true')(
       expect(state.players.find((p) => p.playerId === 900001)?.checkedAt).toBe(checkedAt);
       expect(state.players.find((p) => p.playerId === 900002)?.checkedAt).toBeNull();
       expect((await repo.load('2025-26')).players[0].checkedAt).toBeNull();
+    });
+
+    it('fills only missing biography fields for an existing player', async () => {
+      await local.pool.query("UPDATE players SET birth_date = '', height = 201 WHERE id = 900001");
+      const mutations = preparePlayerMutations(local.pool, { seasonId: '2026-27' });
+      await mutations.updatePlayerDetails({
+        id: 900001,
+        country: 'United States',
+        birth_date: '2004-04-18',
+        height: 189,
+        weight: 84,
+      });
+      await mutations.updatePlayerDetails({
+        id: 900001,
+        country: 'Spain',
+        birth_date: '2004-04-19',
+        height: 190,
+        weight: 85,
+      });
+      const data = await local.pool.query(
+        'SELECT country, birth_date, height, weight FROM players WHERE id = 900001'
+      );
+      expect(data.rows).toEqual([
+        { country: 'United States', birth_date: '2004-04-18', height: 201, weight: 84 },
+      ]);
     });
 
     it('rolls back price writes when checkpoint persistence fails', async () => {

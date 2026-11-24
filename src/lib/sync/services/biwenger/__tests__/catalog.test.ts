@@ -1,6 +1,7 @@
 import { parseBiwengerRoundGames } from '@/features/provider/server';
 import { describe, expect, it, vi } from 'vitest';
-import { normalizeBiwengerPlayer, parseBiwengerDate, syncBiwengerCatalog } from '../catalog';
+import { normalizeBiwengerPlayer, syncBiwengerCatalog } from '../catalog';
+import { parseBiwengerDate, parseBiwengerPlayerBiography } from '../player-biography';
 
 describe('Biwenger Catalog Service', () => {
   describe('date helpers', () => {
@@ -9,6 +10,21 @@ describe('Biwenger Catalog Service', () => {
       expect(parseBiwengerDate('20010930')).toBe('2001-09-30');
       expect(parseBiwengerDate(null)).toBeNull();
       expect(parseBiwengerDate(12345)).toBeNull();
+      expect(parseBiwengerDate(20260230)).toBeNull();
+    });
+
+    it('validates identity and imports only valid biography fields', () => {
+      const response = {
+        data: { id: 42134, country: 'US', birthday: 20260230, height: '189', weight: 84 },
+      };
+      expect(parseBiwengerPlayerBiography(response, 42134)).toEqual({
+        id: 42134,
+        country: 'United States',
+        birth_date: null,
+        height: 189,
+        weight: 84,
+      });
+      expect(parseBiwengerPlayerBiography(response, 7)).toBeNull();
     });
   });
 
@@ -81,6 +97,7 @@ describe('Biwenger Catalog Service', () => {
         ),
         fetchPlayerDetails: vi.fn().mockResolvedValue({
           data: {
+            id: 101,
             birthday: 19910323,
             height: 181,
             weight: 88,

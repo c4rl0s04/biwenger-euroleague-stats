@@ -31,9 +31,10 @@ export interface UpsertPlayerParams {
 }
 
 export interface UpdatePlayerDetailsParams {
-  birth_date: string;
-  height: number;
-  weight: number;
+  country: string | null;
+  birth_date: string | null;
+  height: number | null;
+  weight: number | null;
   id: number; // biwenger_id
 }
 
@@ -128,10 +129,23 @@ export function preparePlayerMutations(
     updatePlayerDetails: async (params: UpdatePlayerDetailsParams) => {
       const sql = `
         UPDATE players
-        SET birth_date = $1, height = $2, weight = $3
-        WHERE id = $4
+        SET birth_date = CASE WHEN NULLIF(btrim(birth_date), '') IS NULL THEN COALESCE($1::text, birth_date) ELSE birth_date END,
+            height = COALESCE(height, $2::int),
+            weight = COALESCE(weight, $3::int),
+            country = CASE WHEN NULLIF(btrim(country), '') IS NULL THEN COALESCE($5::text, country) ELSE country END
+        WHERE id = $4::int
+          AND ((NULLIF(btrim(birth_date), '') IS NULL AND $1::text IS NOT NULL)
+            OR (height IS NULL AND $2::int IS NOT NULL)
+            OR (weight IS NULL AND $3::int IS NOT NULL)
+            OR (NULLIF(btrim(country), '') IS NULL AND $5::text IS NOT NULL))
       `;
-      await db.query(sql, [params.birth_date, params.height, params.weight, params.id]);
+      await db.query(sql, [
+        params.birth_date,
+        params.height,
+        params.weight,
+        params.id,
+        params.country,
+      ]);
     },
 
     // Get Last Market Value Date (for incremental sync)

@@ -1,4 +1,5 @@
 import { fetchPlayerDetails } from '../../../api/biwenger-client';
+import { preparePlayerMutations } from '../../../db/mutations/players';
 import type { SyncManager, SyncStepResult } from '../../manager';
 import {
   parsePlayerPriceHistory,
@@ -9,6 +10,7 @@ import {
   createPriceHistoryRepository,
   type PriceHistoryRepository,
 } from '../../repositories/price-history';
+import { parseBiwengerPlayerBiography } from './player-biography';
 
 export interface PriceHistoryDependencies {
   fetchHistory: (playerId: number) => Promise<unknown>;
@@ -29,6 +31,7 @@ export async function syncBiwengerPriceHistory(
     now: () => new Date(),
     ...overrides,
   };
+  const playerMutations = preparePlayerMutations(db, { seasonId });
   const now = deps.now();
   const today = now.toISOString().slice(0, 10);
   const { bounds, players } = await deps.repository.load(seasonId);
@@ -67,6 +70,8 @@ export async function syncBiwengerPriceHistory(
         try {
           const response = await deps.fetchHistory(player.playerId);
           const prices = parsePlayerPriceHistory(response, player.playerId, bounds, today);
+          const biography = parseBiwengerPlayerBiography(response, player.playerId);
+          if (biography) await playerMutations.updatePlayerDetails(biography);
           const result = await deps.repository.reconcile(
             seasonId,
             player.playerId,

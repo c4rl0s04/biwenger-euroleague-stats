@@ -10,6 +10,7 @@ import {
   getExistingPlayerSeasonMap,
 } from '../../repositories/sync-queries';
 import { relevantRounds } from '../../rounds';
+import { parseBiwengerPlayerBiography } from './player-biography';
 
 const DEFAULT_SLEEP_MS = 600;
 
@@ -25,16 +26,6 @@ const defaultDependencies: BiwengerCatalogDependencies = {
   fetchRoundGames: readBiwengerRoundGames,
   fetchPlayerDetails,
   sleep: (ms: number) => new Promise((resolve) => setTimeout(resolve, ms)),
-};
-
-export const parseBiwengerDate = (dateInt: number | string | null | undefined): string | null => {
-  if (!dateInt) return null;
-  const str = dateInt.toString();
-  if (str.length !== 8) return null;
-  const year = str.substring(0, 4);
-  const month = str.substring(4, 6);
-  const day = str.substring(6, 8);
-  return `${year}-${month}-${day}`;
 };
 
 export interface CanonicalBiwengerPlayerSnapshot {
@@ -225,16 +216,8 @@ export async function syncBiwengerCatalog(
         const lookupId = player.slug || player.id || playerId;
         const details = await deps.fetchPlayerDetails(lookupId);
 
-        if (details.data) {
-          const d = details.data;
-
-          await mutations.updatePlayerDetails({
-            id: playerId,
-            birth_date: parseBiwengerDate(d.birthday || undefined) || '',
-            height: d.height || null,
-            weight: d.weight || null,
-          });
-        }
+        const biography = parseBiwengerPlayerBiography(details, playerId);
+        if (biography) await mutations.updatePlayerDetails(biography);
       } catch (e: any) {
         const lookupId = player.slug || playerId;
         warnings.push(
