@@ -42,6 +42,23 @@ describe('sync workflow season configuration', () => {
     expect(live).toContain('npm run sync:live');
   });
 
+  it('collects and applies fresh official website data on schedule', () => {
+    const workflow = fs.readFileSync(
+      path.join(process.cwd(), '.github', 'workflows', 'sync-euroleague.yml'),
+      'utf8'
+    );
+    expect(workflow).toContain('schedule:');
+    expect(workflow).toContain(
+      'sync:euroleague:collect -- --output "$RUNNER_TEMP/euroleague-rosters.json"'
+    );
+    expect(workflow).toContain(
+      'sync:euroleague:apply -- --input "$RUNNER_TEMP/euroleague-rosters.json"'
+    );
+    expect(workflow).toMatch(
+      /Commit updated roster collection[^\n]*\n\s+if: inputs.mode == 'collect-and-apply'/
+    );
+  });
+
   it('bootstrap workflow is manual-only and runs the bootstrap pipeline after preflight', () => {
     const bootstrap = fs.readFileSync(
       path.join(process.cwd(), '.github', 'workflows', 'sync-bootstrap.yml'),

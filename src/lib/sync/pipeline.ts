@@ -58,7 +58,12 @@ export const PIPELINE: readonly SyncStepDefinition[] = [
     id: 'euroleague-master-data',
     title: 'Official calendar, standings and season mappings',
     source: 'euroleague',
-    writes: ['official_team_standings', 'official_team_mappings', 'official_player_mappings'],
+    writes: [
+      'official_team_standings',
+      'official_team_mappings',
+      'official_player_mappings',
+      'players:biography',
+    ],
     modes: ['routine', 'bootstrap'],
     dependencies: ['biwenger-catalog'],
     run: syncEuroleagueMasterData,

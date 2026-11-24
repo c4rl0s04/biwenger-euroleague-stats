@@ -4,6 +4,7 @@ import { runMigrations } from '../db/migrate';
 import { applyManifest, preview, snapshot } from './sync';
 import { hash, manifestSchema, SEASON, type Asset } from './types';
 import { prepareOfficialMappingMutations } from '../../src/lib/db/mutations/official/mappings';
+import { fillMissingOfficialPlayerBiographies } from '../../src/lib/db/mutations/official/player-biographies';
 import { reconcilePlayerMappings } from '../../src/lib/sync/services/euroleague/mappings';
 
 it.runIf(process.env.RUN_IMAGE_DB_TESTS === 'true')(
@@ -22,6 +23,13 @@ it.runIf(process.env.RUN_IMAGE_DB_TESTS === 'true')(
         "INSERT INTO players (id, name, img) VALUES (902, 'Fantasy Name', 'old-photo')"
       );
       await db.query("INSERT INTO teams (id, name, img) VALUES (901, 'Test Club', 'old-crest')");
+      await db.query(
+        "UPDATE players SET country='Existing', birth_date='', height=201 WHERE id=902"
+      );
+      await db.query(
+        'INSERT INTO player_seasons (season_id, player_id, team_id) VALUES ($1, 902, 901)',
+        [SEASON]
+      );
 
       const api = prepareOfficialMappingMutations(db, SEASON);
       const team = {
@@ -62,6 +70,9 @@ it.runIf(process.env.RUN_IMAGE_DB_TESTS === 'true')(
         teamName: null,
         page: `https://www.euroleaguebasketball.net/es/euroleague/players/test/${code.slice(1)}/`,
         url: `https://media-cdn.cortextech.io/${code}.png`,
+        country: 'United States of America',
+        birthDate: code === 'P000903' ? '2026-02-30' : '2004-04-18',
+        height: 189,
       }));
       const crest: Asset = {
         kind: 'team',
@@ -92,6 +103,7 @@ it.runIf(process.env.RUN_IMAGE_DB_TESTS === 'true')(
       expect(await applyManifest(db, manifest, digest)).toEqual({
         updatedPortraits: 2,
         updatedCrests: 1,
+        storedBiographies: 3,
       });
       await applyManifest(db, manifest, digest);
 
@@ -113,7 +125,12 @@ it.runIf(process.env.RUN_IMAGE_DB_TESTS === 'true')(
             website_image: { manifest: digest, source: 'euroleague_website' },
           });
         } else {
-          expect(row).toEqual(old);
+          expect(row.image_url).toBe(old.image_url);
+          expect(row.raw_payload).toMatchObject({
+            website_image: null,
+            website_profile: { country: 'United States of America', height: 189 },
+          });
+          expect(row.raw_payload).not.toHaveProperty('website_profile.birth_date');
         }
       }
       expect(
@@ -141,13 +158,22 @@ it.runIf(process.env.RUN_IMAGE_DB_TESTS === 'true')(
       });
       expect(synced.mappings[0]).toMatchObject({
         image_url: assets[0].url,
-        raw_payload: { api: 'latest', website_image: { manifest: digest } },
+        raw_payload: {
+          api: 'latest',
+          website_image: { manifest: digest },
+          website_profile: { country: 'United States of America', height: 189 },
+        },
       });
       expect(synced.mappings[2]).toMatchObject({
         image_url: 'api-fallback',
         raw_payload: { api: 'latest' },
       });
       expect(synced.mappings[2].raw_payload).not.toHaveProperty('website_image');
+      expect(await fillMissingOfficialPlayerBiographies(db, SEASON)).toBe(1);
+      expect(
+        (await db.query('SELECT country, birth_date, height, weight FROM players WHERE id=902'))
+          .rows[0]
+      ).toEqual({ country: 'Existing', birth_date: '2004-04-18', height: 201, weight: null });
 
       await db.query("INSERT INTO players (id, name) VALUES (903, 'SMITH JR.')");
       await db.query(
@@ -184,6 +210,17 @@ it.runIf(process.env.RUN_IMAGE_DB_TESTS === 'true')(
         match_method: 'exact_surname_team',
         image_url: assets[0].url,
       });
+      expect(await fillMissingOfficialPlayerBiographies(db, SEASON)).toBe(1);
+      expect(
+        (await db.query('SELECT country, birth_date, height, weight FROM players WHERE id=903'))
+          .rows[0]
+      ).toEqual({
+        country: 'United States of America',
+        birth_date: '2004-04-18',
+        height: 189,
+        weight: null,
+      });
+      expect(await fillMissingOfficialPlayerBiographies(db, SEASON)).toBe(0);
     } finally {
       db.release();
       await fixture.cleanup();
