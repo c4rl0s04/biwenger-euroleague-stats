@@ -32,6 +32,9 @@ describe('Biwenger Board Service', () => {
 
   it('processes board batches including bonuses, porras, and transfers', async () => {
     const mockDb = {
+      async connect() {
+        return { query: this.query, release: vi.fn() };
+      },
       select: vi.fn().mockReturnValue({
         from: vi.fn().mockReturnValue({
           where: vi
@@ -129,6 +132,9 @@ describe('Biwenger Board Service', () => {
   it('records a loan fee for both managers and ignores the player return', async () => {
     const insertedFinances = new Set<string>();
     const mockDb = {
+      async connect() {
+        return { query: this.query, release: vi.fn() };
+      },
       select: vi.fn().mockReturnValue({
         from: vi.fn().mockReturnValue({
           where: vi.fn().mockResolvedValue([

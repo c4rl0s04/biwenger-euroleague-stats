@@ -30,7 +30,6 @@ interface TransferProcessingContext {
   playersList: Record<string, any>;
   teamNames: Set<string>;
   validUserNames: Set<string>;
-  mutations: MarketMutations;
   onMissingPlayer: () => void;
   onSkippedActor: () => void;
 }
@@ -164,6 +163,7 @@ export async function syncBiwengerBoard(
 ): Promise<BiwengerBoardSyncResult> {
   const db = manager.context.db;
   const seasonId = manager.context.seasonId;
+  if (!db) throw new Error('Board ingestion requires a database connection.');
   if (!seasonId) throw new Error('Canonical sync season was not resolved before board ingestion.');
   const startsAt = await getSeasonStartDate(seasonId, db);
   const seasonStart = startsAt ? Date.parse(`${startsAt}T00:00:00Z`) : NaN;
@@ -203,7 +203,6 @@ export async function syncBiwengerBoard(
     playersList,
     teamNames,
     validUserNames,
-    mutations,
     onMissingPlayer: () => {
       transfersWithMissingPlayer++;
     },
@@ -282,7 +281,7 @@ export async function syncBiwengerBoard(
           if (entry.kind === 'invalid-actor') transferCtx.onSkippedActor();
           if (entry.kind !== 'transfer') continue;
           if (entry.missingPlayer) transferCtx.onMissingPlayer();
-          await saveBoardTransfer(entry, transferCtx.mutations);
+          await saveBoardTransfer(entry, db, seasonId);
           totalTransfers++;
         }
       }

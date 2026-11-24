@@ -25,27 +25,43 @@ it('classifies ignored and unrecognized participants', () => {
   expect(classify({ name: 'Unknown' })).toEqual({ kind: 'invalid-actor' });
 });
 
-it('writes the canonical movement once and keeps later bids after an individual failure', async () => {
+it('rolls back a failed bid, retries the movement and skips bids on a duplicate', async () => {
   const entry = interpretBoardTransfer(movement, timestamp, date, context);
   if (entry.kind !== 'transfer') throw new Error('Fixture must produce a transfer');
   expect(entry.missingPlayer).toBe(true);
-  const insertTransfer = vi
-    .fn()
-    .mockResolvedValueOnce({ created: true, id: 12 })
-    .mockResolvedValueOnce({ created: false, id: null });
-  const insertBid = vi.fn().mockRejectedValueOnce(new Error('fixture write failure'));
-  await saveBoardTransfer(entry, { insertTransfer, insertBid });
-  await saveBoardTransfer(entry, { insertTransfer, insertBid });
-  expect(insertTransfer).toHaveBeenCalledWith({
-    timestamp,
-    fecha: date,
-    player_id: 42,
-    precio: 200,
-    vendedor: 'Seller',
-    comprador: 'Buyer',
+  let failBid = true;
+  let duplicate = false;
+  const query = vi.fn(async (sql: string, _params?: unknown[]) => {
+    if (sql.includes('INSERT INTO fichajes')) {
+      return duplicate ? { rows: [], rowCount: 0 } : { rows: [{ id: 12 }], rowCount: 1 };
+    }
+    if (failBid && sql.includes('INSERT INTO transfer_bids'))
+      throw new Error('fixture write failure');
+    return { rows: [], rowCount: 0 };
   });
-  expect(insertBid.mock.calls).toEqual([
-    [{ transfer_id: 12, bidder_id: '7', bidder_name: 'Buyer', amount: 200 }],
-    [{ transfer_id: 12, bidder_id: '8', bidder_name: 'Unknown', amount: 150 }],
+  const release = vi.fn();
+  const connect = vi.fn().mockResolvedValue({ query, release });
+  await expect(saveBoardTransfer(entry, { connect }, '2025-26')).rejects.toThrow(
+    'fixture write failure'
+  );
+  expect(query.mock.calls.map(([sql]) => sql.trim().split(/\s+/).slice(0, 3).join(' '))).toEqual([
+    'BEGIN',
+    'INSERT INTO fichajes',
+    'INSERT INTO transfer_bids',
+    'ROLLBACK',
   ]);
+  failBid = false;
+  await saveBoardTransfer(entry, { connect }, '2025-26');
+  duplicate = true;
+  await saveBoardTransfer(entry, { connect }, '2025-26');
+  expect(
+    query.mock.calls
+      .filter(([sql]) => sql.includes('INSERT INTO transfer_bids'))
+      .map(([, params]) => params)
+  ).toEqual([
+    ['2025-26', 12, '7', 'Buyer', 200],
+    ['2025-26', 12, '7', 'Buyer', 200],
+    ['2025-26', 12, '8', 'Unknown', 150],
+  ]);
+  expect(release).toHaveBeenCalledTimes(3);
 });
