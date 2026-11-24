@@ -1,6 +1,8 @@
 name: EuroLeague Website Sync
 
 on:
+  schedule:
+    - cron: '17 2 * * *'
   workflow_dispatch:
     inputs:
       mode:
@@ -22,7 +24,7 @@ concurrency:
 
 jobs:
   euroleague-sync:
-    name: EuroLeague Website Sync (${{ inputs.mode }})
+    name: EuroLeague Website Sync (${{ inputs.mode || github.event_name }})
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -40,15 +42,16 @@ jobs:
         run: npm ci
 
       - name: Install Playwright browsers (if collecting)
-        if: inputs.mode == 'collect-and-apply'
+        if: github.event_name == 'schedule' || inputs.mode == 'collect-and-apply'
         run: npx playwright install --with-deps chromium
 
       - name: Scrape latest EuroLeague rosters (if collecting)
-        if: inputs.mode == 'collect-and-apply'
-        run: npm run sync:euroleague:collect
+        if: github.event_name == 'schedule' || inputs.mode == 'collect-and-apply'
+        run: npm run sync:euroleague:collect -- --output "$RUNNER_TEMP/euroleague-rosters.json"
 
       - name: Run EuroLeague synchronizer
         env:
+          SYNC_MODE: ${{ github.event_name == 'schedule' && 'collect-and-apply' || inputs.mode }}
           POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
@@ -58,8 +61,10 @@ jobs:
           SEASON_NAME: ${{ vars.SEASON_NAME }}
           EUROLEAGUE_SEASON_CODE: ${{ vars.EUROLEAGUE_SEASON_CODE }}
         run: |
-          if [ "${{ inputs.mode }}" = "dry-run" ]; then
+          if [ "$SYNC_MODE" = "dry-run" ]; then
             npm run sync:euroleague
+          elif [ "$SYNC_MODE" = "collect-and-apply" ]; then
+            npm run sync:euroleague:apply -- --input "$RUNNER_TEMP/euroleague-rosters.json"
           else
             npm run sync:euroleague:apply
           fi
@@ -67,6 +72,7 @@ jobs:
       - name: Commit updated roster collection (if collecting)
         if: inputs.mode == 'collect-and-apply'
         run: |
+          cp "$RUNNER_TEMP/euroleague-rosters.json" scripts/euroleague/data/euroleague-rosters-2026.json
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add scripts/euroleague/data/euroleague-rosters-2026.json
