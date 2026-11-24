@@ -3,7 +3,6 @@ import { parseArgs } from 'node:util';
 import dotenv from 'dotenv';
 import type { PoolClient } from 'pg';
 import { prepareOfficialMappingMutations } from '../../src/lib/db/mutations/official/mappings';
-import { readWebsiteBiography } from '../../src/lib/db/mutations/official/player-biographies';
 import { createCliPool } from '../../src/lib/db/cli';
 import {
   hash,
@@ -123,9 +122,8 @@ export async function applyManifest(db: PoolClient, manifest: Manifest, digest: 
     const mutations = prepareOfficialMappingMutations(db, manifest.season);
     let updatedPortraits = 0;
     let updatedCrests = 0;
-    let storedBiographies = 0;
     for (const entry of manifest.entries) {
-      const imageUrl = entry.validation ? entry.url : null;
+      if (!entry.url || !entry.validation) continue;
       const provenance = {
         source: 'euroleague_website',
         page: entry.page,
@@ -133,18 +131,9 @@ export async function applyManifest(db: PoolClient, manifest: Manifest, digest: 
         manifest: digest,
       };
       if (entry.kind === 'player') {
-        const biography = readWebsiteBiography({
-          country: entry.country,
-          birth_date: entry.birthDate,
-          height: entry.height,
-          weight: entry.weight,
-        });
-        const hasBiography = Object.keys(biography).length > 0;
-        if (!imageUrl && !hasBiography) continue;
-        await mutations.updateWebsitePlayer(entry.code, imageUrl, provenance, biography);
-        if (imageUrl) updatedPortraits++;
-        if (hasBiography) storedBiographies++;
-      } else if (imageUrl) {
+        await mutations.updateWebsitePlayerPortrait(entry.code, entry.url, provenance);
+        updatedPortraits++;
+      } else {
         const result = await db.query(
           `UPDATE official_team_mappings
            SET crest_url = $1,
@@ -152,7 +141,7 @@ export async function applyManifest(db: PoolClient, manifest: Manifest, digest: 
                  jsonb_build_object('website_image', $2::jsonb),
                updated_at = NOW()
            WHERE season_id = $3 AND provider = 'euroleague_advanced' AND provider_team_code = $4`,
-          [imageUrl, JSON.stringify(provenance), manifest.season, entry.code]
+          [entry.url, JSON.stringify(provenance), manifest.season, entry.code]
         );
         if (result.rowCount !== 1) throw new Error(`Official team missing: ${entry.code}`);
         updatedCrests++;
@@ -160,7 +149,7 @@ export async function applyManifest(db: PoolClient, manifest: Manifest, digest: 
     }
 
     await db.query('COMMIT');
-    return { updatedPortraits, updatedCrests, storedBiographies };
+    return { updatedPortraits, updatedCrests };
   } catch (error) {
     await db.query('ROLLBACK');
     throw error;
@@ -253,7 +242,6 @@ async function main() {
       const result = await applyManifest(db, manifest, digest);
       console.log('\n✅ TRANSACTION COMMITTED SUCCESSFULLY!');
       console.log(`   Updated official portraits: ${result.updatedPortraits}`);
-      console.log(`   Stored official biographies: ${result.storedBiographies}`);
       console.log(`   Updated official crests:    ${result.updatedCrests}\n`);
     }
   } finally {

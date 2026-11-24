@@ -57,7 +57,6 @@ interface ScrapedProfile {
   dorsal: string | null;
   position: string | null;
   height: number | null;
-  weight: number | null;
   country: string | null;
   birthDate: string | null;
   portraitCandidates: { alt: string; source: string }[];
@@ -94,9 +93,6 @@ async function scrapeProfile(page: Page): Promise<ScrapedProfile> {
       const m = ps[alturaIdx + 1].match(/(\d+)\s*cm/i);
       if (m) height = parseInt(m[1], 10);
     }
-    const weightIdx = ps.findIndex((text) => text.toLowerCase() === 'peso');
-    const weightMatch = weightIdx === -1 ? null : ps[weightIdx + 1]?.match(/^(\d+)\s*kg$/i);
-    const weight = weightMatch ? Number(weightMatch[1]) : null;
 
     let country: string | null = athlete?.nationality || null;
     if (!country) {
@@ -125,7 +121,6 @@ async function scrapeProfile(page: Page): Promise<ScrapedProfile> {
       dorsal,
       position,
       height,
-      weight,
       country,
       birthDate,
       portraitCandidates,
@@ -223,7 +218,6 @@ export async function collect(page: Page, rosterOnly = true) {
       dorsal: null,
       position: null,
       height: null,
-      weight: null,
       country: null,
       birthDate: null,
       portraitCandidates: [],
@@ -263,7 +257,6 @@ export async function collect(page: Page, rosterOnly = true) {
       country,
       birthDate,
       height: profile.height,
-      weight: profile.weight,
       dorsal: profile.dorsal,
       position: profile.position,
     });

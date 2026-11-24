@@ -3,7 +3,6 @@ import { euroleagueSeasonYear } from '../../../api/euroleague/normalization';
 import type { EuroleagueScheduleGame } from '../../../api/euroleague/types';
 import { prepareOfficialCalendarMutations } from '../../../db/mutations/official/calendar';
 import { prepareOfficialMappingMutations } from '../../../db/mutations/official/mappings';
-import { fillMissingOfficialPlayerBiographies } from '../../../db/mutations/official/player-biographies';
 import type { SyncManager } from '../../manager';
 import { validateAdvancedProviderSnapshot } from '../../preflight';
 import { reconcilePlayerMappings, reconcileTeamMappings } from './mappings';
@@ -99,9 +98,6 @@ export async function syncOfficialMasterData(manager: SyncManager) {
     preview,
     teams,
   });
-  const completedBiographies = preview
-    ? 0
-    : await fillMissingOfficialPlayerBiographies(manager.context.db as any, seasonId);
   if (preview) {
     for (const {
       providerCode,
@@ -150,7 +146,6 @@ export async function syncOfficialMasterData(manager: SyncManager) {
     profiles: profiles.length,
     mappedTeams: teamResult.mapped,
     mappedPlayers: playerResult.mapped,
-    completedBiographies,
     pendingPlayers,
     issues: teamResult.issues.length + pendingPlayers,
   };

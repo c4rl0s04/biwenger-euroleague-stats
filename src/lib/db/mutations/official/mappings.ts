@@ -86,9 +86,6 @@ export function prepareOfficialMappingMutations(db: DbClient, seasonId: string) 
            CASE WHEN NULLIF(btrim(official_player_mappings.image_url), '') IS NOT NULL
                      AND jsonb_typeof(official_player_mappings.raw_payload->'website_image') = 'object'
              THEN jsonb_build_object('website_image',official_player_mappings.raw_payload->'website_image')
-             ELSE '{}'::jsonb END ||
-           CASE WHEN jsonb_typeof(official_player_mappings.raw_payload->'website_profile') = 'object'
-             THEN jsonb_build_object('website_profile',official_player_mappings.raw_payload->'website_profile')
              ELSE '{}'::jsonb END, updated_at=NOW()`,
       [
         seasonId,
@@ -106,31 +103,19 @@ export function prepareOfficialMappingMutations(db: DbClient, seasonId: string) 
     );
   };
 
-  const updateWebsitePlayer = async (
+  const updateWebsitePlayerPortrait = async (
     code: string,
-    imageUrl: string | null,
-    provenance: { source: string; page: string; collected_at: string; manifest: string },
-    biography: { country?: string; birth_date?: string; height?: number; weight?: number }
+    imageUrl: string,
+    provenance: { source: string; page: string; collected_at: string; manifest: string }
   ) => {
     const result = await db.query(
       `UPDATE official_player_mappings
-       SET image_url = COALESCE($1, image_url),
+       SET image_url = $1,
            raw_payload = COALESCE(NULLIF(raw_payload, 'null'::jsonb), '{}'::jsonb) ||
-             CASE WHEN $1::text IS NOT NULL THEN jsonb_build_object('website_image', $2::jsonb)
-               ELSE '{}'::jsonb END ||
-             CASE WHEN $5::jsonb IS NOT NULL THEN jsonb_build_object('website_profile',
-               CASE WHEN jsonb_typeof(raw_payload->'website_profile') = 'object'
-                 THEN raw_payload->'website_profile' ELSE '{}'::jsonb END || $5::jsonb)
-               ELSE '{}'::jsonb END,
+             jsonb_build_object('website_image', $2::jsonb),
            updated_at = NOW()
        WHERE season_id = $3 AND provider = 'euroleague_advanced' AND provider_player_code = $4`,
-      [
-        imageUrl,
-        JSON.stringify(provenance),
-        seasonId,
-        code,
-        Object.keys(biography).length ? JSON.stringify({ ...biography, ...provenance }) : null,
-      ]
+      [imageUrl, JSON.stringify(provenance), seasonId, code]
     );
     if (result.rowCount !== 1) throw new Error(`Official player missing: ${code}`);
   };
@@ -214,7 +199,7 @@ export function prepareOfficialMappingMutations(db: DbClient, seasonId: string) 
   return {
     upsertTeamMapping,
     upsertPlayerMapping,
-    updateWebsitePlayer,
+    updateWebsitePlayerPortrait,
     getFantasyTeams,
     getFantasyPlayers,
     getTeamMappings,

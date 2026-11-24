@@ -1,6 +1,6 @@
 ---
 title: EuroLeague Official Website Sync
-description: Collect official player portraits, biographies and team crests into PostgreSQL.
+description: Collect official player portraits and team crests and synchronize them into PostgreSQL.
 audience:
   - operator
   - maintainer
@@ -18,9 +18,6 @@ records by season, provider and code. The routine API sync owns the links to the
 
 - Player portraits can be applied to confirmed and pending official profiles. Unknown codes appear
   in the report and can be retried after the official API catalogue is refreshed.
-- Biographies are stored by official code even when no valid portrait is available. The next routine
-  `euroleague-master-data` step fills missing country, birth date, height and weight for linked
-  players, preserving previously populated values.
 - Shared player silhouettes and images that fail validation leave the stored URL and provenance intact.
 - A validated website portrait takes precedence over the API image. A JSON null in legacy
   `website_image` metadata allows the API to supply a portrait.
@@ -39,7 +36,6 @@ To use a collection outside the repository, pass `-- --output <path>` to collect
 
 ## Run on GitHub Actions
 
-**EuroLeague Website Sync** collects fresh profiles daily at 02:17 UTC and applies the temporary
-collection. For manual runs, **dry-run** validates the committed collection, **apply**
+Run **EuroLeague Website Sync** manually. **dry-run** validates the committed collection, **apply**
 validates and applies it, and **collect-and-apply** scrapes the latest rosters, applies the images,
 and commits the updated collection.

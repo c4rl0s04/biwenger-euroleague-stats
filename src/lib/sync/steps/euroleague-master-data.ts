@@ -1,7 +1,7 @@
 import { SyncManager } from '../manager';
 import { syncOfficialMasterData } from '../services/euroleague/master-data';
 
-/** Imports official season master data and fills missing player biographies. */
+/** Imports official season master data without mutating historical global identities. */
 export async function run(manager: SyncManager) {
   manager.log('Syncing official EuroLeague master data');
   const result = await syncOfficialMasterData(manager);
@@ -15,7 +15,6 @@ export async function run(manager: SyncManager) {
       profiles: result.profiles,
       mappedTeams: result.mappedTeams,
       mappedPlayers: result.mappedPlayers,
-      completedBiographies: result.completedBiographies,
       pendingPlayers: result.pendingPlayers,
     },
   };
