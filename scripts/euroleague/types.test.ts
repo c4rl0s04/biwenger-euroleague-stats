@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import {
   normalizeEuroleaguePlayerCode,
   normalizeCountry,
-  stripSuffix,
   parseSpanishDate,
   assetSchema,
   portraitUrl,
@@ -36,13 +35,6 @@ describe('EuroLeague Types & Normalizers', () => {
     expect(normalizeCountry('Spain')).toBe('Spain');
     expect(normalizeCountry(null)).toBeNull();
     expect(normalizeCountry('')).toBeNull();
-  });
-
-  it('strips generational suffixes cleanly', () => {
-    expect(stripSuffix('Baldwin Jr.')).toBe('Baldwin');
-    expect(stripSuffix('Bingham Jr')).toBe('Bingham');
-    expect(stripSuffix('Derrick Alston Jr. ')).toBe('Derrick Alston');
-    expect(stripSuffix('John Smith III')).toBe('John Smith');
   });
 
   it('parses localized Spanish birth dates accurately', () => {

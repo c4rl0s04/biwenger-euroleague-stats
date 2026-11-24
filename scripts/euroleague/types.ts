@@ -56,13 +56,6 @@ export function normalizeCountry(country: string | null | undefined): string | n
   return COUNTRY_MAP[trimmed] || trimmed;
 }
 
-export function stripSuffix(name: string): string {
-  return name
-    .replace(/\b(JR|SR|II|III|IV)\b\.?/gi, '')
-    .trim()
-    .replace(/\s+/g, ' ');
-}
-
 const SPANISH_MONTHS: Record<string, string> = {
   ene: '01',
   feb: '02',
@@ -195,41 +188,9 @@ export const collectionSchema = z
 
 export type Collection = z.infer<typeof collectionSchema>;
 
-export interface Candidate {
-  id: number;
-  name: string;
-  teamCode: string | null;
-  euroleagueCode?: string | null;
-  country?: string | null;
-  birthDate?: string | null;
-  height?: number | null;
-  weight?: number | null;
-  profileUrl?: string | null;
-}
-
-export interface Mapping {
-  player_id: number | null;
-  provider_player_code: string;
-  status: string;
-}
-
-export const manualOverrideSchema = z.object({
-  playerCode: z.string().min(1),
-  teamCode: z.string().min(1),
-  siteName: z.string().min(1),
-  targetId: z.number().int().positive(),
-  targetName: z.string().min(1),
-  resolvedBy: z.string(),
-});
-
-export type ManualOverride = z.infer<typeof manualOverrideSchema>;
-
 export const entrySchema = assetSchema
   .extend({
-    targetId: z.number().int().positive(),
-    teamCode: z.string().min(1),
-    method: z.string(),
-    before: z.record(z.string(), z.unknown()).nullable(),
+    before: z.record(z.string(), z.unknown()),
     validation: z.object({ width: z.number(), height: z.number() }).nullable(),
   })
   .strict();
