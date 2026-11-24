@@ -36,6 +36,9 @@ To use a collection outside the repository, pass `-- --output <path>` to collect
 
 ## Run on GitHub Actions
 
-Run **EuroLeague Website Sync** manually. **dry-run** validates the committed collection, **apply**
-validates and applies it, and **collect-and-apply** scrapes the latest rosters, applies the images,
-and commits the updated collection.
+**EuroLeague Website Sync** collects fresh rosters daily at 02:17 UTC and applies the temporary
+collection. Scheduled runs do not commit the collection.
+
+For manual runs, **dry-run** validates the committed collection, **apply** validates and applies it,
+and **collect-and-apply** scrapes the latest rosters, applies the images, and commits the updated
+collection.
