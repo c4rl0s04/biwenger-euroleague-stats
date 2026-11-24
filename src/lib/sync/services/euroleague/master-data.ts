@@ -42,10 +42,13 @@ export async function syncOfficialMasterData(manager: SyncManager) {
     standings,
   });
 
-  for (const game of schedule) {
-    await calendar.upsertScheduleGame(game);
+  const preview = manager.previewPlayerMappings;
+  if (!preview) {
+    for (const game of schedule) {
+      await calendar.upsertScheduleGame(game);
+    }
+    for (const standing of standings) await calendar.upsertStanding(standing);
   }
-  for (const standing of standings) await calendar.upsertStanding(standing);
 
   const teamSource = new Map<
     string,
@@ -76,16 +79,56 @@ export async function syncOfficialMasterData(manager: SyncManager) {
     }
   }
 
-  const teamResult = await reconcileTeamMappings(mappings, Array.from(teamSource.values()));
-  const playerResult = await reconcilePlayerMappings(mappings, profiles);
+  const teamResult = await reconcileTeamMappings(
+    mappings,
+    Array.from(teamSource.values()),
+    preview
+  );
+  let teams: Map<number, string> | undefined;
+  if (preview) {
+    const projected = new Map(
+      (await mappings.getTeamMappings()).map((row) => [row.provider_team_code, row.team_id])
+    );
+    teamResult.assignments.forEach((id, code) => projected.set(code, id));
+    teams = new Map(Array.from(projected, ([code, id]) => [id, code]));
+    if (teams.size !== projected.size) throw new Error('Conflicting official team mappings');
+  }
+  const playerResult = await reconcilePlayerMappings(mappings, profiles, {
+    allowSurname: true,
+    preview,
+    teams,
+  });
+  if (preview) {
+    for (const {
+      providerCode,
+      playerId,
+      teamCode,
+      name,
+      method,
+      reason,
+    } of playerResult.decisions) {
+      manager.log(
+        `${providerCode} ${name} [${teamCode ?? 'no team'}]: ${playerId ?? 'pending'} (${playerId === null ? reason : method})`
+      );
+    }
+  }
   const persistedPlayerMappings = await mappings.getPlayerMappings();
-  const pendingPlayers = persistedPlayerMappings.filter(
-    (mapping) => mapping.status === 'review_required'
-  ).length;
+  const pendingCodes = new Set(
+    persistedPlayerMappings
+      .filter((mapping) => mapping.status === 'review_required')
+      .map((mapping) => mapping.provider_player_code)
+  );
+  if (preview) {
+    for (const { providerCode, playerId } of playerResult.decisions) {
+      if (playerId === null) pendingCodes.add(providerCode);
+      else pendingCodes.delete(providerCode);
+    }
+  }
+  const pendingPlayers = pendingCodes.size;
   const mappingIssues = [...teamResult.issues, ...playerResult.issues];
 
   manager.log(
-    `Official master data: ${schedule.length} games, ${teamResult.mapped}/${teamSource.size} teams, ${playerResult.mapped}/${profiles.length} player profiles mapped, ${pendingPlayers} persisted player reviews`
+    `Official master data: ${schedule.length} games, ${teamResult.mapped}/${teamSource.size} teams, ${playerResult.mapped}/${profiles.length} player profiles mapped, ${pendingPlayers} player reviews ${preview ? 'projected' : 'persisted'}`
   );
   for (const issue of mappingIssues) {
     const suggestion = issue.suggestion
@@ -93,7 +136,7 @@ export async function syncOfficialMasterData(manager: SyncManager) {
       : '';
     (manager.warn || manager.log).call(
       manager,
-      `${issue.kind} review required: ${issue.providerName} (${issue.providerCode})${suggestion}`
+      `${issue.kind} review required: ${issue.providerName} (${issue.providerCode})${issue.reason ? `: ${issue.reason}` : ''}${suggestion}`
     );
   }
 

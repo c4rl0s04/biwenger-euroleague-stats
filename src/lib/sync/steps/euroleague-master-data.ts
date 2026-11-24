@@ -6,7 +6,9 @@ export async function run(manager: SyncManager) {
   manager.log('Syncing official EuroLeague master data');
   const result = await syncOfficialMasterData(manager);
   return {
-    summary: `Imported official master data; ${result.issues} mappings need review.`,
+    summary: manager.previewPlayerMappings
+      ? `Previewed official player mappings without writes; ${result.issues} candidates need review.`
+      : `Imported official master data; ${result.issues} mappings need review.`,
     counts: {
       games: result.schedule,
       standings: result.standings,

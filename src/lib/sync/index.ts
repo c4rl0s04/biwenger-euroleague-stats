@@ -10,6 +10,7 @@ interface SyncCliOptions {
   forceGame?: number;
   forceRound?: number;
   season?: string;
+  previewPlayerMappings?: true;
 }
 
 export function parseSyncArgs(args: string[]): SyncCliOptions {
@@ -18,8 +19,13 @@ export function parseSyncArgs(args: string[]): SyncCliOptions {
   let forceGame: number | undefined;
   let forceRound: number | undefined;
   let season: string | undefined;
+  let previewPlayerMappings: true | undefined;
 
   for (const argument of args) {
+    if (argument === '--preview-player-mappings') {
+      previewPlayerMappings = true;
+      continue;
+    }
     if (argument.startsWith('--mode=')) {
       const value = argument.slice('--mode='.length);
       if (!['routine', 'bootstrap', 'live'].includes(value)) {
@@ -59,7 +65,19 @@ export function parseSyncArgs(args: string[]): SyncCliOptions {
   }
   if (forceRound !== undefined && step !== 'biwenger-lineups')
     throw new Error('--force-round requires --step=biwenger-lineups.');
-  return { mode, step, forceGame, season, ...(forceRound !== undefined ? { forceRound } : {}) };
+  if (previewPlayerMappings && (step !== 'euroleague-master-data' || mode === 'live')) {
+    throw new Error(
+      '--preview-player-mappings requires --step=euroleague-master-data in routine or bootstrap mode.'
+    );
+  }
+  return {
+    mode,
+    step,
+    forceGame,
+    season,
+    ...(forceRound !== undefined ? { forceRound } : {}),
+    ...(previewPlayerMappings ? { previewPlayerMappings } : {}),
+  };
 }
 
 export async function syncData(args = process.argv.slice(2)): Promise<number> {
@@ -70,7 +88,7 @@ export async function syncData(args = process.argv.slice(2)): Promise<number> {
     import('./pipeline'),
   ]);
 
-  if (!process.env.BIWENGER_TOKEN && !CONFIG.API.TOKEN) {
+  if (!options.previewPlayerMappings && !process.env.BIWENGER_TOKEN && !CONFIG.API.TOKEN) {
     throw new Error('BIWENGER_TOKEN is required.');
   }
 
@@ -79,10 +97,11 @@ export async function syncData(args = process.argv.slice(2)): Promise<number> {
     forceGame: options.forceGame,
     forceRound: options.forceRound,
     seasonId: options.season,
+    previewPlayerMappings: options.previewPlayerMappings,
   });
   for (const step of selectPipeline(options.mode, options.step)) manager.addStep(step);
   await manager.run();
-  return manager.hasErrors ? 1 : 0;
+  return manager.hasErrors || (options.previewPlayerMappings && manager.lockUnavailable) ? 1 : 0;
 }
 
 if (process.env.NODE_ENV !== 'test') {
